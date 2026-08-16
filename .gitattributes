@@ -1,0 +1,10 @@
+# I file del Deluge sono materiale di riferimento BYTE-ESATTO: l'intero
+# progetto poggia sul fatto che riscrivendoli escano identici. Git non deve
+# toccarli mai — nessuna conversione di fine riga, in nessuna direzione.
+*.XML -text
+*.xml -text
+*.WAV -text
+*.bin -text
+
+# e nemmeno il resto
+* -text

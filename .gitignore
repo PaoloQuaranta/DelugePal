@@ -1,0 +1,53 @@
+# ---------------------------------------------------------------- environment
+.venv/
+__pycache__/
+*.pyc
+*.bak
+*.bak-*
+.superpowers/
+
+# --------------------------------------------------- READING MATERIAL, PRIVATE
+# Books, papers and MIDI libraries collected for reference: 112 000 files and
+# 4.8 GB of third-party work. None of it is ours to redistribute, and walking
+# it makes every git command crawl.
+to-read/
+
+# ------------------------------------------------------ THE CORPUS IS PRIVATE
+#
+# refs/ and corpus_versions/ hold songs and presets written by a real Deluge.
+# They are NOT published, for two independent reasons:
+#
+#   1. they are somebody's music;
+#   2. a Deluge song embeds the complete parameter set of every instrument it
+#      uses, so a song made with a paid preset redistributes that preset.
+#
+# The rules below are deliberately deny-by-default: everything under refs/ is
+# ignored, and only the single file that is firmware defaults is let back in.
+# Populate these folders from your own SD card — see README, "Bring your own
+# corpus". Nothing you drop there will be committed by accident.
+refs/*
+!refs/synths/
+refs/synths/*
+!refs/synths/TEMPL.XML
+
+corpus_versions/
+
+# Generated schema inventories. They are built FROM the corpus, and their
+# "observed values" columns quote song names, preset names and sample paths
+# taken straight out of it. Regenerate them against your own corpus with
+# tools/extract_schema.py.
+docs/SCHEMA_song_*.md
+docs/SCHEMA_kit_*.md
+
+# ------------------------------------------------------------ generated files
+# Songs produced by the tools. They reproduce by running the tools again, and
+# some of them are failed experiments kept only while they were useful.
+out/*
+# ...except the format table, which is learned from a corpus and is what makes
+# rewriting byte-exact. Without it every file comes out different. It contains
+# format information only — no musical content.
+!out/format_table.json
+
+# Text extracted from the official Synthstrom guidebook: third-party material,
+# and reproducible from the PDF with tools/extract_guidebook.py
+out/guidebook.txt
