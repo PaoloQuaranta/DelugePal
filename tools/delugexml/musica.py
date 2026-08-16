@@ -321,6 +321,387 @@ def accordi(spec: str, *, durata: str | int = '1/4', da: int = 0,
     return out
 
 
+# -------------------------------------------------- sigle di accordo e voicing
+#
+# PERCHE' ESISTE
+# --------------
+# `accordi()` vuole le altezze GIA' SCELTE: 'do3 mi3 sol3'. Per il reggae non
+# si notava, perche' li' l'armonia sono due accordi e il mestiere sta nel
+# ritmo. Per il jazz e' il contrario -- il SIMBOLO e' l'oggetto centrale, e
+# scegliere le note e' una decisione con un nome (shell, senza fondamentale,
+# drop 2). Senza un posto dove metterla, quella decisione la prenderei a mano
+# ogni volta, diversa ogni volta, e non resterebbe scritta da nessuna parte.
+#
+# DA DOVE VENGONO I NUMERI
+# ------------------------
+# Dalla skill `music-composition`, non da me:
+#   - le sigle e le ambiguita' da `assets/chord-symbol-ambiguity-and-parsing.md`
+#   - i voicing da `assets/jazz-voicings.md`
+# I test portano i valori attesi di quei documenti (drop 2 di domaj7, i
+# voicing senza fondamentale di re-7 e domaj7), non quelli che produce questo
+# codice: e' la stessa disciplina della coppia controllata.
+#
+# COSA NON FA, E VA DETTO
+# -----------------------
+# **Non fa condotta delle parti fra un accordo e il successivo.** Il documento
+# mostra che nel ii-V-I le voci senza fondamentale si ALTERNANO fra due forme
+# (A e B) proprio per muovere una voce sola per cambio; qui ogni accordo e'
+# costruito per conto suo. Le note sono giuste, il collegamento no. E' un
+# passo successivo, non un difetto nascosto.
+
+from typing import NamedTuple                              # noqa: E402
+
+#: Le sigle, come mappa GRADO -> semitoni sopra la fondamentale.
+#:
+#: Non una lista piatta di intervalli: serve sapere QUALE grado e' quale, se
+#: no shell (3 e 7) e senza-fondamentale (3-5-7-9) diventano indovinelli.
+#: Il caso che lo dimostra: `6` e `dim7` hanno tutti e due un intervallo di 9
+#: semitoni, ma in uno e' la sesta e nell'altro la settima diminuita.
+SIGLE: dict[str, dict[int, int]] = {
+    '':         {1: 0, 3: 4, 5: 7},
+    'm':        {1: 0, 3: 3, 5: 7},
+    '-':        {1: 0, 3: 3, 5: 7},
+    'min':      {1: 0, 3: 3, 5: 7},
+    'dim':      {1: 0, 3: 3, 5: 6},
+    'aug':      {1: 0, 3: 4, 5: 8},
+    'sus':      {1: 0, 4: 5, 5: 7},
+    'sus4':     {1: 0, 4: 5, 5: 7},
+    'sus2':     {1: 0, 2: 2, 5: 7},
+    '5':        {1: 0, 5: 7},
+    '6':        {1: 0, 3: 4, 5: 7, 6: 9},
+    'm6':       {1: 0, 3: 3, 5: 7, 6: 9},
+    '-6':       {1: 0, 3: 3, 5: 7, 6: 9},
+    '69':       {1: 0, 3: 4, 5: 7, 6: 9, 9: 14},
+    '7':        {1: 0, 3: 4, 5: 7, 7: 10},
+    'maj7':     {1: 0, 3: 4, 5: 7, 7: 11},
+    'ma7':      {1: 0, 3: 4, 5: 7, 7: 11},
+    'm7':       {1: 0, 3: 3, 5: 7, 7: 10},
+    '-7':       {1: 0, 3: 3, 5: 7, 7: 10},
+    'min7':     {1: 0, 3: 3, 5: 7, 7: 10},
+    'm7b5':     {1: 0, 3: 3, 5: 6, 7: 10},
+    'm7-5':     {1: 0, 3: 3, 5: 6, 7: 10},
+    'dim7':     {1: 0, 3: 3, 5: 6, 7: 9},
+    'mmaj7':    {1: 0, 3: 3, 5: 7, 7: 11},
+    '-maj7':    {1: 0, 3: 3, 5: 7, 7: 11},
+    'add9':     {1: 0, 3: 4, 5: 7, 9: 14},
+    '9':        {1: 0, 3: 4, 5: 7, 7: 10, 9: 14},
+    'maj9':     {1: 0, 3: 4, 5: 7, 7: 11, 9: 14},
+    'm9':       {1: 0, 3: 3, 5: 7, 7: 10, 9: 14},
+    '-9':       {1: 0, 3: 3, 5: 7, 7: 10, 9: 14},
+    '13':       {1: 0, 3: 4, 5: 7, 7: 10, 9: 14, 13: 21},
+    'maj7#11':  {1: 0, 3: 4, 5: 7, 7: 11, 11: 18},
+    '7b9':      {1: 0, 3: 4, 5: 7, 7: 10, 9: 13},
+    '7#9':      {1: 0, 3: 4, 5: 7, 7: 10, 9: 15},
+    '7b5':      {1: 0, 3: 4, 5: 6, 7: 10},
+    '7#5':      {1: 0, 3: 4, 5: 8, 7: 10},
+    '7#11':     {1: 0, 3: 4, 5: 7, 7: 10, 11: 18},
+    '7b13':     {1: 0, 3: 4, 5: 7, 7: 10, 13: 20},
+    '7sus':     {1: 0, 4: 5, 5: 7, 7: 10},
+    '7sus4':    {1: 0, 4: 5, 5: 7, 7: 10},
+    #: Il documento dice che un 'alt' usa un SOTTOINSIEME delle alterazioni,
+    #: "usually 2-3", non tutte insieme. Questo e' il sottoinsieme che lui
+    #: stesso scrive come esempio (3, b7, b9, b13).
+    '7alt':     {1: 0, 3: 4, 7: 10, 9: 13, 13: 20},
+}
+
+#: Le sigle ambigue: si legge in un modo, e si DICE quale e cosa si e'
+#: scartato. Il difetto da evitare non e' scegliere -- e' scegliere in
+#: silenzio, che e' la famiglia di errori piu' costosa di questo progetto.
+AMBIGUE: dict[str, tuple[str, str]] = {
+    '2':   ('sus2', "letta come sus2 (uso di chart pop e chitarristici); "
+                    "l'altra lettura era add9, che TIENE la terza"),
+    'maj': ('',     "letta come triade maggiore; in certe notazioni informali "
+                    "'maj' sta per maj7"),
+    'alt': ('7alt', "letta come 7alt: la sigla presuppone la settima di "
+                    "dominante, che pero' non e' scritta"),
+    '+':   ('aug',  "letta come triade aumentata; in certe tabelle il '+' e' "
+                    "invece la quinta alzata di un accordo di settima"),
+    '7+5': ('7#5',  "'+5' letto come quinta alzata"),
+    '7-5': ('7b5',  "'-5' letto come quinta abbassata, uso dei chart vecchi"),
+}
+
+#: I voicing, e cosa vuole ciascuno. Da `assets/jazz-voicings.md`.
+VOICING = {
+    'chiuso': 'tutte le note dell accordo, dalla fondamentale in su',
+    'shell': 'solo terza e settima: le due note che portano l identita',
+    'senza-fondamentale': '3-5-7-9, il basso suona la fondamentale altrove',
+    'drop2': 'posizione chiusa con la seconda voce dall alto giu di un ottava',
+}
+
+#: Le lettere di nota, dalle piu' lunghe alle piu' corte: l'alternanza di una
+#: regex prende il PRIMO ramo che combacia, non il piu' lungo, quindi
+#: l'ordine qui e' semantico e non estetico ('sol' prima di 's', 'fa' prima
+#: di 'f'). Le inglesi stanno in coda perche' 'la' deve vincere su 'a'.
+_BASI = ('sol', 'do', 're', 'mi', 'fa', 'la', 'si')
+_RADICE = re.compile(r'^(' + '|'.join(_BASI) + r'|[a-g])([#b])?', re.I)
+
+#: Da simboli tipografici a ascii. `o7`/`o` non ci sono di proposito: 'o' e'
+#: una lettera comunissima e confonderla con il pallino del diminuito
+#: farebbe leggere sigle a caso.
+_SIMBOLI = (('♭', 'b'), ('♯', '#'), ('Δ9', 'maj9'),
+            ('Δ', 'maj7'), ('ø7', 'm7b5'), ('ø', 'm7b5'),
+            ('°', 'dim'), ('–', '-'), ('—', '-'))
+
+
+class Sigla(NamedTuple):
+    """Un simbolo di accordo, sciolto ma non ancora messo in un registro."""
+
+    testo: str
+    #: La classe di altezza della fondamentale, 0-11 (do = 0).
+    fondamentale: int
+    #: Grado -> semitoni sopra la fondamentale. La chiave e' il grado, cosi'
+    #: 'la terza' e 'la settima' restano interrogabili per nome.
+    gradi: dict[int, int]
+    #: La classe di altezza del basso di uno slash, o None.
+    basso: int | None
+    #: Come e' stata sciolta un'ambiguita', o None se non ce n'erano.
+    letto_come: str | None
+
+    @property
+    def intervalli(self) -> tuple[int, ...]:
+        """I semitoni sopra la fondamentale, in ordine."""
+        return tuple(sorted(self.gradi.values()))
+
+
+def _classe(testo: str) -> int | None:
+    """La classe di altezza di un nome di nota SENZA ottava, o None."""
+    m = _RADICE.fullmatch(testo.strip())
+    if not m:
+        return None
+    lettere, alterazione = m.group(1).lower(), m.group(2)
+    grado, bemolle = _grado_e_bemolle(lettere)
+    if grado is None:
+        return None
+    if alterazione == '#':
+        grado += 1
+    elif alterazione == 'b' or bemolle:
+        grado -= 1
+    return grado % 12
+
+
+def _normalizza_coda(coda: str) -> str:
+    """La coda di una sigla in forma canonica, minuscola.
+
+    La maiuscola va guardata PRIMA di abbassare tutto: in 'CM7' la M grande
+    e' maggiore e in 'Cm7' la m piccola e' minore, cioe' due accordi diversi
+    che differiscono per il solo caso di una lettera. Abbassare e basta
+    trasformerebbe silenziosamente un maj7 in un m7 -- lo stesso genere di
+    difetto muto che 'Ab' -> A# aveva gia' prodotto in `set_scale`.
+    """
+    testo = coda.replace('(', '').replace(')', '').replace(' ', '')
+    for prima, dopo in (('Maj', 'maj'), ('MAJ', 'maj'), ('Min', 'min'),
+                        ('MIN', 'min')):
+        testo = testo.replace(prima, dopo)
+    if testo.startswith('M') and (len(testo) == 1 or testo[1].isdigit()):
+        testo = 'maj' + testo[1:]
+    return testo.lower()
+
+
+def sigla(testo: str) -> Sigla:
+    """Da `'Cmaj7'`, `'re-7'`, `'F#7b9'`, `'C/E'` a una `Sigla`.
+
+    La fondamentale passa dallo STESSO vocabolario di `altezza()` -- italiano
+    e inglese, diesis e bemolli -- perche' un secondo parser di altezze e'
+    una seconda occasione di sbagliare, e in questo progetto quell'errore e'
+    gia' stato pagato una volta.
+
+    Una sigla che non e' in tabella viene RIFIUTATA e l'errore dice cosa
+    esiste. Tirare a indovinare su un simbolo sconosciuto vorrebbe dire
+    scrivere note che nessuno ha chiesto.
+    """
+    if not isinstance(testo, str):
+        raise ValueError(f'sigla() vuole una stringa come "Cmaj7", non '
+                         f'{type(testo).__name__} ({testo!r})')
+    grezzo = testo.strip()
+    if not grezzo:
+        raise ValueError('sigla(): la sigla e vuota')
+    for prima, dopo in _SIMBOLI:
+        grezzo = grezzo.replace(prima, dopo)
+
+    # Lo slash: e' un basso solo se cio' che segue e' davvero una nota, se no
+    # e' parte della sigla -- '6/9' non ha nessun basso di nome '9'.
+    basso = None
+    if '/' in grezzo:
+        capo, _, coda_slash = grezzo.rpartition('/')
+        classe_basso = _classe(coda_slash)
+        if classe_basso is not None:
+            basso, grezzo = classe_basso, capo
+    #: Uno slash che resta NON e' un basso: e' interno alla sigla, come in
+    #: '6/9'. Vanno tolti tutti e due i casi, e in quest'ordine: 'C6/9/E' ha
+    #: sia il basso sia lo slash interno, e trattarne uno solo lasciava la
+    #: sigla illeggibile. [difetto trovato provando a mano, 17 agosto 2026]
+    grezzo = grezzo.replace('/', '')
+
+    m = _RADICE.match(grezzo)
+    if not m:
+        raise ValueError(f'{testo!r}: non riconosco la fondamentale '
+                         f'(es. C, do, Bb, sib, F#, fa#)')
+    fondamentale = _classe(m.group(0))
+    if fondamentale is None:
+        raise ValueError(f'{testo!r}: {m.group(0)!r} non e una nota')
+
+    coda = _normalizza_coda(grezzo[m.end():])
+    letto_come = None
+    if coda in AMBIGUE:
+        canonica, spiegazione = AMBIGUE[coda]
+        letto_come = f'{testo}: {spiegazione}'
+        coda = canonica
+    if coda not in SIGLE:
+        raise ValueError(
+            f'{testo!r}: sigla {coda!r} sconosciuta. Quelle riconosciute '
+            f'sono {sorted(k for k in SIGLE if k)} (piu maj7, m7, 7 e la '
+            f'triade a coda vuota). Aggiungerne una vuol dire aggiungerla a '
+            f'SIGLE con i suoi gradi, non indovinarla qui')
+    return Sigla(testo=testo, fondamentale=fondamentale,
+                 gradi=dict(SIGLE[coda]), basso=basso, letto_come=letto_come)
+
+
+def _pretende(s: Sigla, gradi: tuple[int, ...], voicing: str) -> None:
+    """Un voicing che nomina un grado non puo' girare senza quel grado."""
+    nomi = {3: 'terza', 5: 'quinta', 7: 'settima'}
+    mancanti = [g for g in gradi if g not in s.gradi]
+    if mancanti:
+        quali = ', '.join(nomi.get(g, str(g)) for g in mancanti)
+        raise ValueError(
+            f"voicing {voicing!r} su {s.testo!r}: manca {quali}. "
+            f"{VOICING[voicing]}, e un accordo che non ce l ha non puo' "
+            f"averne uno -- costruirlo lo stesso vorrebbe dire inventare "
+            f"una nota che la sigla non dichiara")
+
+
+def voci(simbolo, *, voicing: str = 'chiuso',
+         registro: str = 'do3') -> list[int]:
+    """Le altezze MIDI di un accordo, in un registro, con un voicing.
+
+    `registro` e' l'ancora in basso: la fondamentale va sulla prima altezza
+    della sua classe che sta a `registro` o sopra. Cosi' `do4` mette un
+    domaj7 su 60 e un re-7 su 62, che e' come si legge una griglia.
+
+    Il basso di uno slash va SOTTO tutto il resto, all'ottava piu' vicina.
+    """
+    s = simbolo if isinstance(simbolo, Sigla) else sigla(simbolo)
+    if voicing not in VOICING:
+        raise ValueError(f'voicing {voicing!r} sconosciuto, usare '
+                         f'{sorted(VOICING)}')
+    ancora = altezza(registro)
+    radice = ancora + (s.fondamentale - ancora) % 12
+
+    if voicing == 'chiuso':
+        note = [radice + i for i in s.intervalli]
+    elif voicing == 'shell':
+        _pretende(s, (3, 7), voicing)
+        note = [radice + s.gradi[3], radice + s.gradi[7]]
+    elif voicing == 'senza-fondamentale':
+        _pretende(s, (3, 7), voicing)
+        # La nona si AGGIUNGE se la sigla non ce l'ha: e' il punto del
+        # voicing di Bill Evans, non un'aggiunta arbitraria -- il documento
+        # lo scrive come "3-7-9, add 9 on top".
+        #
+        # Le estensioni DICHIARATE (11, 13, e la nona alterata) restano
+        # invece tutte: una sigla che si scomoda a scrivere 'alt' o '13' sta
+        # nominando proprio quelle note, e scartarle darebbe un accordo
+        # plausibile e sbagliato. Il documento le voicizza cosi': 3-5-7-13
+        # per un tredicesima, 3-b7-b9-b13 per un alterato.
+        scelti = [s.gradi[g] for g in (3, 5, 7) if g in s.gradi]
+        scelti.append(s.gradi.get(9, 14))
+        scelti.extend(s.gradi[g] for g in (11, 13) if g in s.gradi)
+        # Con un'undicesima dichiarata la quinta se ne va: le due cadono a un
+        # semitono e quello che si sente e' l'urto. Il documento lo dice due
+        # volte -- "5 often omitted", e il suo C7#11 e' E-Bb-D-F#, senza G.
+        if 11 in s.gradi:
+            scelti = [i for i in scelti if i != s.gradi.get(5)]
+        note = [radice + i for i in sorted(scelti)]
+    else:                                                   # drop2
+        chiuse = [radice + i for i in s.intervalli]
+        if len(chiuse) < 4:
+            raise ValueError(
+                f"voicing 'drop2' su {s.testo!r}: servono almeno quattro "
+                f"note e ce ne sono {len(chiuse)}. Il documento descrive il "
+                f"drop 2 su voicing di quattro note; su una triade non e' "
+                f"definito e non lo invento")
+        caduta = chiuse[-2] - 12
+        note = sorted(chiuse[:-2] + [chiuse[-1]] + [caduta])
+
+    if s.basso is not None:
+        piu_bassa = min(note)
+        nota_basso = piu_bassa - ((piu_bassa - s.basso) % 12 or 12)
+        note = [nota_basso] + note
+    fuori = [y for y in note if not 0 <= y <= 127]
+    if fuori:
+        raise ValueError(f'{s.testo!r} in registro {registro!r} con voicing '
+                         f'{voicing!r} esce dall estensione MIDI: {fuori}')
+    return note
+
+
+def armonia(spec: str, *, voicing: str = 'chiuso', registro: str = 'do3',
+            durata: str | int = '1/4', da: int = 0, velocity: int = 80,
+            articolazione: str = 'normale',
+            stacco: int | None = None) -> dict[int, list[Note]]:
+    """Da `'Dm7 | G7 | Cmaj7'` alle note, raggruppate per altezza.
+
+    E' `accordi()` che parte dai SIMBOLI invece che dalle altezze. Tutto il
+    resto e' identico di proposito -- stesso separatore `|`, stesso punto per
+    la pausa, stessa forma di ritorno -- perche' cosi' entra in `scrivi()`
+    senza che nulla a valle debba sapere da dove viene.
+
+    Per sapere cosa ha deciso, e soprattutto quali ambiguita' ha sciolto,
+    `racconta_armonia()` con gli stessi argomenti.
+    """
+    if not isinstance(spec, str):
+        raise ValueError(f'armonia() vuole una stringa di sigle (es. '
+                         f'"Dm7 | G7"), non {type(spec).__name__} ({spec!r})')
+    if articolazione not in ARTICOLAZIONI:
+        raise ValueError(f'articolazione {articolazione!r} sconosciuta, usare '
+                         f'{sorted(ARTICOLAZIONI)}')
+    if not spec.strip():
+        raise ValueError('armonia(): la sequenza e vuota')
+    passo = durata_in_tick(durata)
+    if stacco is not None:
+        lung = max(1, passo - stacco)
+    else:
+        lung = max(1, round(passo * ARTICOLAZIONI[articolazione]))
+
+    out: dict[int, list[Note]] = {}
+    for i, gruppo in enumerate(spec.split(SEPARATORE_ACCORDI)):
+        testo = gruppo.strip()
+        if not testo or testo == PAUSA:
+            continue
+        pos = da + i * passo
+        for y in voci(testo, voicing=voicing, registro=registro):
+            out.setdefault(y, []).append(
+                Note(pos=pos, length=lung, velocity=velocity))
+    return out
+
+
+def racconta_armonia(spec: str, *, voicing: str = 'chiuso',
+                     registro: str = 'do3') -> str:
+    """Cosa e' diventata ogni sigla, e quali ambiguita' sono state sciolte.
+
+    Regola 4: un'operazione silenziosa non e' correggibile. Qui il rischio
+    non e' sbagliare le note -- e' sceglierne di plausibili senza che nessuno
+    possa accorgersi che erano un'altra cosa.
+    """
+    righe = [f'voicing {voicing!r} ({VOICING[voicing]}), registro {registro}']
+    avvisi = []
+    for gruppo in spec.split(SEPARATORE_ACCORDI):
+        testo = gruppo.strip()
+        if not testo or testo == PAUSA:
+            righe.append('  .           pausa')
+            continue
+        s = sigla(testo)
+        note = voci(s, voicing=voicing, registro=registro)
+        nomi = ' '.join(nome_altezza(y) for y in note)
+        righe.append(f'  {testo:<12}{nomi}')
+        if s.letto_come:
+            avvisi.append(s.letto_come)
+    if avvisi:
+        righe.append('letture ambigue sciolte cosi:')
+        righe.extend(f'  - {a}' for a in avvisi)
+    righe.append('nota: ogni accordo e costruito per conto suo, senza '
+                 'condotta delle parti fra uno e il successivo')
+    return '\n'.join(righe)
+
+
 # ------------------------------------------------------------------ il cancello
 
 def verifica(doc) -> list[str]:

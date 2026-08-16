@@ -4799,6 +4799,262 @@ def test_patch_cable_su_drum():
               for c in SND.patch_cables(drum)))
 
 
+# ------------------------------------------------ sigle di accordo e voicing
+
+def test_sigla_fondamentale_due_lingue():
+    """La fondamentale usa lo STESSO vocabolario di `altezza()`.
+
+    Non e' un vezzo: duplicare il parser delle altezze e' gia' costato un
+    difetto silenzioso a questo progetto (`set_scale` faceva
+    `upper().replace('B','#')`, e 'Ab' diventava A# invece di G#). Qui la
+    fondamentale passa dalla stessa strada, quindi non puo' divergere.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    coppie = [('C', 0), ('do', 0), ('Bb', 10), ('sib', 10),
+              ('F#', 6), ('fa#', 6), ('Eb', 3), ('mib', 3)]
+    for testo, atteso in coppie:
+        check(f'sigla({testo!r}) ha fondamentale {atteso}',
+              MU.sigla(testo).fondamentale == atteso,
+              str(MU.sigla(testo).fondamentale))
+
+
+def test_sigla_tabella_di_riferimento():
+    """I valori attesi vengono dal documento, non dal mio codice.
+
+    Sono la «quick parser table from C» di
+    `music-composition/assets/chord-symbol-ambiguity-and-parsing.md`,
+    trascritta come intervalli in semitoni sopra la fondamentale. E' la
+    stessa disciplina della coppia controllata: il valore atteso deve venire
+    da fuori, altrimenti il test conferma soltanto l'idea che avevo in testa.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    attesi = {
+        'C':        (0, 4, 7),          # C E G
+        'Cm':       (0, 3, 7),          # C Eb G
+        'C-':       (0, 3, 7),
+        'Cdim':     (0, 3, 6),          # C Eb Gb
+        'Caug':     (0, 4, 8),          # C E G#
+        'Csus4':    (0, 5, 7),          # C F G
+        'Csus2':    (0, 2, 7),          # C D G
+        'C5':       (0, 7),             # C G
+        'C7':       (0, 4, 7, 10),      # C E G Bb
+        'Cmaj7':    (0, 4, 7, 11),      # C E G B
+        'Cm7':      (0, 3, 7, 10),      # C Eb G Bb
+        'Cm7b5':    (0, 3, 6, 10),      # C Eb Gb Bb
+        'Cdim7':    (0, 3, 6, 9),       # C Eb Gb Bbb(=A)
+        'Cm(maj7)': (0, 3, 7, 11),      # C Eb G B
+        'Cmaj7#11': (0, 4, 7, 11, 18),  # C E G B F#
+        'C7b9':     (0, 4, 7, 10, 13),  # C E G Bb Db
+        'C7#9':     (0, 4, 7, 10, 15),  # C E G Bb D#
+        'C7b13':    (0, 4, 7, 10, 20),  # C E G Bb Ab
+        'C13':      (0, 4, 7, 10, 14, 21),   # C E G Bb D A
+        'Cadd9':    (0, 4, 7, 14),      # C E G D
+        'C6/9':     (0, 4, 7, 9, 14),   # C E G A D
+    }
+    for testo, atteso in attesi.items():
+        got = MU.sigla(testo).intervalli
+        check(f'{testo} = {atteso}', got == atteso, str(got))
+
+
+def test_sigla_ambiguita_dichiarata():
+    """Le sigle ambigue si leggono in UN modo e si DICE quale.
+
+    Il documento elenca le letture possibili e la scelta di default. Il
+    difetto da evitare non e' scegliere: e' scegliere in silenzio.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    s = MU.sigla('C2')
+    check('C2 si legge come sus2', s.intervalli == (0, 2, 7), str(s.intervalli))
+    check('e la lettura viene dichiarata', bool(s.letto_come), str(s.letto_come))
+    check('nominando anche l alternativa scartata',
+          'add9' in (s.letto_come or ''), str(s.letto_come))
+
+    check('Calt si legge come C7alt',
+          bool(MU.sigla('Calt').letto_come), str(MU.sigla('Calt').letto_come))
+    check('una sigla NON ambigua non inventa avvertenze',
+          MU.sigla('Cm7').letto_come is None)
+
+
+def test_sigla_basso_e_sigla_ignota():
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    s = MU.sigla('C/E')
+    check('lo slash da un basso', s.basso == 4, str(s.basso))
+    check('e non tocca l accordo sopra', s.intervalli == (0, 4, 7))
+
+    try:
+        MU.sigla('Cfrullato')
+        check('una sigla ignota viene rifiutata', False, 'nessun errore')
+    except ValueError as e:
+        check('una sigla ignota viene rifiutata', True)
+        check('e l errore elenca cosa esiste', 'maj7' in str(e), str(e)[:90])
+
+
+def test_voicing_chiuso_e_drop2():
+    """Drop 2 col valore preso dal documento.
+
+    `jazz-voicings.md`: Cmaj7 in posizione chiusa e' C-E-G-B; la seconda
+    voce dall'alto e' G; il drop 2 risultante e' **G - C - E - B**.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    chiuso = MU.voci('Cmaj7', voicing='chiuso', registro='do4')
+    check('chiuso = do mi sol si a partire da do4',
+          chiuso == [60, 64, 67, 71], str(chiuso))
+
+    drop = MU.voci('Cmaj7', voicing='drop2', registro='do4')
+    check('drop2 abbassa la seconda voce dall alto di un ottava',
+          drop == [55, 60, 64, 71], str(drop))
+    check('e il documento la scrive sol-do-mi-si',
+          [MU.nome_altezza(y) for y in drop] == ['sol3', 'do4', 'mi4', 'si4'],
+          str([MU.nome_altezza(y) for y in drop]))
+
+
+def test_voicing_shell_e_senza_fondamentale():
+    """Shell = 3 e 7. Senza fondamentale = 3-5-7-9.
+
+    I due valori attesi vengono dalle tabelle di `jazz-voicings.md`:
+    Dm7 senza fondamentale e' F-A-C-E, Cmaj7 e' E-G-B-D.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    shell = MU.voci('C7', voicing='shell', registro='do4')
+    check('lo shell di do7 sono mi e sib, due note sole',
+          [MU.nome_altezza(y) for y in shell] == ['mi4', 'la#4'], str(shell))
+
+    dm7 = MU.voci('Dm7', voicing='senza-fondamentale', registro='do4')
+    check('re-7 senza fondamentale: fa la do mi',
+          [MU.nome_altezza(y) for y in dm7] == ['fa4', 'la4', 'do5', 'mi5'],
+          str([MU.nome_altezza(y) for y in dm7]))
+
+    cmaj7 = MU.voci('Cmaj7', voicing='senza-fondamentale', registro='do4')
+    check('domaj7 senza fondamentale: mi sol si re',
+          [MU.nome_altezza(y) for y in cmaj7] == ['mi4', 'sol4', 'si4', 're5'],
+          str([MU.nome_altezza(y) for y in cmaj7]))
+
+    check('e nessuna delle due porta la fondamentale',
+          all(y % 12 != 2 for y in dm7) and all(y % 12 != 0 for y in cmaj7))
+
+
+def test_sigla_due_slash():
+    """`C6/9/E` ha DUE slash e vogliono dire cose diverse.
+
+    Difetto vero, trovato provando a mano dopo che i test erano gia' verdi:
+    l'ultimo slash e' il basso, quello dentro `6/9` fa parte della sigla.
+    Trattandone uno solo la sigla restava illeggibile.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    s = MU.sigla('C6/9/E')
+    check('il basso e il mi', s.basso == 4, str(s.basso))
+    check('e la sigla resta un 6/9',
+          s.intervalli == (0, 4, 7, 9, 14), str(s.intervalli))
+    check('e senza basso funziona lo stesso',
+          MU.sigla('C6/9').basso is None
+          and MU.sigla('C6/9').intervalli == (0, 4, 7, 9, 14))
+
+
+def test_voicing_senza_fondamentale_estensioni():
+    """Le estensioni DICHIARATE non si buttano.
+
+    Valori attesi dalle tabelle di `jazz-voicings.md`:
+      C13   3-5-7-9-13  -> E - G - Bb - D - A
+      C7#11 senza la 5  -> E - Bb - D - F#
+      C7alt (esempio su E, trasposto)  -> 3, b7, b9, b13
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    c13 = MU.voci('C13', voicing='senza-fondamentale', registro='do4')
+    check('do13: mi sol sib re la',
+          [MU.nome_altezza(y) for y in c13]
+          == ['mi4', 'sol4', 'la#4', 're5', 'la5'],
+          str([MU.nome_altezza(y) for y in c13]))
+
+    c7s11 = MU.voci('C7#11', voicing='senza-fondamentale', registro='do4')
+    check('do7#11 perde la quinta: mi sib re fa#',
+          [MU.nome_altezza(y) for y in c7s11]
+          == ['mi4', 'la#4', 're5', 'fa#5'],
+          str([MU.nome_altezza(y) for y in c7s11]))
+
+    alt = MU.voci('C7alt', voicing='senza-fondamentale', registro='do4')
+    check('do7alt tiene b9 e b13: mi sib do# sol#',
+          [MU.nome_altezza(y) for y in alt]
+          == ['mi4', 'la#4', 'do#5', 'sol#5'],
+          str([MU.nome_altezza(y) for y in alt]))
+
+
+def test_voicing_senza_settima_e_rifiutato():
+    """Shell e rootless su una triade non esistono: si rifiuta, non si tira a
+    indovinare. Una triade non ha settima, e un voicing 3-7 senza 7 sarebbe
+    un'invenzione silenziosa."""
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    for v in ('shell', 'senza-fondamentale'):
+        try:
+            MU.voci('C', voicing=v)
+            check(f'{v} su una triade viene rifiutato', False, 'nessun errore')
+        except ValueError as e:
+            check(f'{v} su una triade viene rifiutato', True)
+            check(f'e {v} spiega perche', 'settima' in str(e), str(e)[:80])
+
+
+def test_armonia_stessa_forma_di_accordi():
+    """`armonia()` deve poter entrare in `scrivi()` come `accordi()`.
+
+    Stessa forma di ritorno (`altezza -> note`), stessa posizione per le note
+    di uno stesso accordo: e' il vincolo che la fa atterrare nella macchina
+    che esiste gia', invece di chiederne una nuova.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    a = MU.armonia('Dm7 | G7 | Cmaj7', voicing='chiuso', durata='1/4')
+    check('il ritorno e un dizionario altezza -> note', isinstance(a, dict))
+    check('le note sono Note', all(isinstance(n, Note)
+                                   for ns in a.values() for n in ns))
+
+    passo = MU.durata_in_tick('1/4')
+    posizioni = sorted({n.pos for ns in a.values() for n in ns})
+    check('tre accordi danno tre posizioni',
+          posizioni == [0, passo, 2 * passo], str(posizioni))
+
+    primo = sorted(y for y, ns in a.items() if any(n.pos == 0 for n in ns))
+    check('e le note del primo accordo stanno tutte a zero',
+          len(primo) == 4, str(primo))
+
+
+def test_armonia_pausa_registro_e_basso():
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    passo = MU.durata_in_tick('1/4')
+    a = MU.armonia('C | . | C', voicing='chiuso', durata='1/4')
+    posizioni = sorted({n.pos for ns in a.values() for n in ns})
+    check('un punto e una pausa: occupa il passo e non suona',
+          posizioni == [0, 2 * passo], str(posizioni))
+
+    basso = MU.armonia('C/E', voicing='chiuso', registro='do4')
+    check('il basso dello slash sta SOTTO il voicing',
+          min(basso) == MU.altezza('mi3'),
+          MU.nome_altezza(min(basso)))
+
+    alto = MU.voci('Cmaj7', voicing='chiuso', registro='do5')
+    check('il registro sposta tutto di un ottava',
+          alto == [72, 76, 79, 83], str(alto))
+
+
+def test_racconta_armonia():
+    """Regola 4: un'operazione silenziosa non e' correggibile."""
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    testo = MU.racconta_armonia('C2 | Dm7', voicing='chiuso')
+    check('il racconto nomina il voicing', 'chiuso' in testo, testo[:70])
+    check('il racconto nomina le note vere', 'sol' in testo, testo[:120])
+    check('e dichiara la lettura ambigua di C2',
+          'sus2' in testo and 'add9' in testo, testo[:200])
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

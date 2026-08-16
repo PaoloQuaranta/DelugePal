@@ -17,7 +17,7 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > generato il suo primo pezzo vero — un dub in sol minore, tre versioni,
 > ciascuna corretta dall'ascolto dell'utente. Verdetto sull'ultima: *«va
 > meglio, ma musicalmente ci sarebbe ancora moltissimo da dire»*.
-> **714 test.** Il progetto è **pubblicato su GitHub** senza il corpus.
+> **779 test.** Il progetto è **pubblicato su GitHub** senza il corpus.
 >
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
@@ -45,10 +45,57 @@ ascoltato il terzo tentativo di dub:
 | `tools/delugexml/midi.py` | il ponte per far entrare il materiale: legge Standard MIDI File **senza dipendenze**, validato nota per nota contro `mido` |
 | `to-read/` | 112 000 file e 4,8 GB di libri, paper e librerie MIDI già raccolti dall'utente. **Fuori dal versionamento** |
 
-⚠️ **Da sapere prima di ripartire da lì:** `music-composer` **non ha reggae né
-dub** in `genres.md`, e i suoi due difetti sono stati riparati a mano il 16
-agosto in una skill *globale* dell'utente, fuori da questo repo — se viene
-reinstallata spariscono. Dettagli e righe esatte in `SKILL.md`.
+### Il perimetro vero, detto dall'utente il 17 agosto 2026
+
+**Il dub era solo un banco di prova, non l'obiettivo.** Va scritto perché
+tutta la documentazione precedente — questo file compreso — è tarata su di
+esso, e chi la leggesse ne dedurrebbe uno scopo sbagliato:
+
+> «Ho usato il dub solo come esempio per testare. Ho gusti musicali eclettici
+> e mi piacerebbe coprire uno spettro compositivo più ampio possibile, dalla
+> musica antica ai generi contemporanei, passando per classica e jazz.»
+
+E l'ordine di priorità, dato subito dopo:
+
+| | |
+|---|---|
+| **1** | **jazz** — «mi interessa moltissimo» |
+| **2** | classica, barocca, antica (in quest'ordine) |
+| **3** | i generi contemporanei: elettronica, IDM, techno, hip hop, trip hop, dub, DnB, jungle |
+| — | **folk: lasciar perdere**, non interessa |
+
+Il folk fuori dal perimetro ha un effetto collaterale utile: **spariscono i
+due problemi di licenza** che bloccavano il materiale simbolico. TheSession
+(40 000 melodie in ABC) vieta esplicitamente l'uso con LLM, e la Essen
+Folksong Collection è distribuita a licenza. Erano entrambi folk.
+
+### La decisione sui formati simbolici — 17 agosto 2026
+
+La domanda era se valesse la pena aggiungere ABC, `**kern` o MusicXML.
+**Per suonare sul Deluge nessuno serve**: MIDI porta già altezza, attacco,
+durata e velocity, che è esattamente il modello dati del dispositivo. Servono
+per *imparare*, e portano tre cose che MIDI non può portare: la **grafia**
+(fa♯ contro sol♭), la **separazione delle voci**, e l'**analisi già fatta da
+umani**.
+
+| formato | esito | perché |
+|---|---|---|
+| **`wjazzd.db`** | **primo** | non è un formato di partitura ma è dove sta il jazz: 456 assoli con accordi e battiti allineati, **già su disco** in `to-read/MIDI/`, e si legge con `sqlite3` della stdlib |
+| **MusicXML** | **sì** | costo ≈ zero (`xml.etree` + `zipfile`, stdlib: è XML *ben formato*, al contrario di quello del Deluge) ed è l'ingresso universale. Il suo `<harmony>` porta i simboli di accordo, quindi serve **anche** il jazz |
+| **`**kern`** | **sì, dopo** | l'unico con l'analisi: `BachChoralesAnalyzed` ha lo spine `**harm` allineato movimento per movimento, e il Josquin Research Project è la musica antica, che non esiste altrove |
+| **ABC** | **no** | licenza bloccata sul corpus grosso, ed è un formato folk: non ha antica, classica, jazz né contemporanea |
+
+⚠️ **I generi contemporanei non esistono come repertorio notato**, e non è una
+lacuna da colmare: il loro materiale sono i groove (MIDI, già in `to-read/`),
+l'arrangiamento (`arranger.py`) e il suono (`sound.py`). Per jungle e DnB il
+materiale compositivo è il **break tagliato**, che vive in `audio.py` e nelle
+righe di kit, non in nessuna notazione.
+
+⚠️ **Da sapere prima di ripartire:** le due skill di composizione sono ora
+**due**, e nessuna delle due sa il reggae — vedi `SKILL.md` e la testa di
+`docs/MUSICA.md`. I due difetti di `music-composer` sono stati riparati a mano
+il 16 agosto in una skill *globale* dell'utente, fuori da questo repo: se
+viene reinstallata spariscono.
 
 E una lezione di metodo che vale per tutto il lavoro futuro sui generi:
 
@@ -285,12 +332,26 @@ La tabella qui sopra si è fermata all'11 agosto. Da allora sono arrivate le
 fasi 6 e 7 — arranger, MIDI/CV, audio, e lo strato in linguaggio naturale —
 tutte verificate sul dispositivo: vedi §6-ter e `docs/FINDINGS.md`.
 
-**714 test** in `tests/test_all.py`, tutti verdi.
+**779 test** in `tests/test_all.py`, tutti verdi.
 
-⚠️ **Con il corpus sul disco sono 714; senza, 284 passano e 73 SALTANO** con
-un messaggio. Non è un guasto: `refs/` e `corpus_versions/` non sono più
-versionati (§9), e `salta()` distingue "manca materiale che non è del repo" da
-"il codice è rotto".
+⚠️ **Con il corpus sul disco sono 779 su 779; senza, sono 329 su 331 con 71
+SALTATI.** I salti non sono un guasto: `refs/` e `corpus_versions/` non sono
+più versionati (§9), e `salta()` distingue "manca materiale che non è del
+repo" da "il codice è rotto".
+
+**I due che FALLISCONO senza corpus, invece, sono un difetto piccolo e reale**
+— misurato il 17 agosto 2026, e la cifra scritta qui prima ("284 passano e 73
+saltano", cioè zero fallimenti) era già superata:
+
+| test | perché fallisce invece di saltare |
+|---|---|
+| `corpus di riferimento presente` | asserisce che `refs/` esista: senza, è un FAIL per costruzione |
+| `COPPIE_OSSERVATE coincide con quella ri-derivata dal corpus` | ri-deriva dal corpus e ne trova 86 contro le 141 in tabella |
+
+Nessuno dei due indica codice rotto: dicono solo che il materiale non c'è.
+Andrebbero passati a `salta()` come gli altri 71 — è il motivo per cui
+`salta()` esiste. Non è stato fatto per non toccare la semantica dei test in
+una sessione che stava lavorando ad altro.
 
 > **Euristica guadagnata sul campo, quattro volte.** Se un contenuto scritto
 > correttamente non compare sul dispositivo, **cercare lo stato di vista prima
@@ -459,7 +520,7 @@ D:\DelugePal\
   out\                   tabella di formato, inventari, file generati. L'unico
                          versionato e' `format_table.json`: e' un artefatto
                          DERIVATO e non contiene musica
-  tests\test_all.py      714 test (284 + 73 salti senza corpus)
+  tests\test_all.py      779 test (329/331 + 71 salti senza corpus)
   .venv\                 mido + python-rtmidi, per il SysEx
 ```
 
@@ -745,6 +806,64 @@ quello che esplode è il livello percepito, non il timbro.
 > partendo dalla song **riscaricata dal dispositivo**, non dalla copia locale —
 > e infatti portava il volume a 29 invece dei 17 che avevo messo io. La regola 1
 > non è formale: senza, quella correzione sarebbe stata cancellata.
+
+---
+
+## 6-octies. Le sigle di accordo — 17 agosto 2026
+
+Primo passo del perimetro nuovo, e non è un lettore di file: è **il posto dove
+i lettori atterreranno**. `wjazzd.db`, MusicXML e kern producono tutti e tre
+armonia; costruirli prima avrebbe voluto dire tre rappresentazioni diverse da
+riconciliare dopo.
+
+**La lacuna era un concetto, non un formato.** `MU.accordi()` vuole le altezze
+già scelte (`'do3 mi3 sol3'`): in tutta la libreria non esisteva la nozione di
+*simbolo*. Per il reggae non si notava — lì l'armonia sono due accordi e il
+mestiere sta nel ritmo. Per il jazz è l'opposto.
+
+| per | funzione |
+|---|---|
+| una progressione per sigla | `MU.armonia('Dm7 \| G7alt \| Cmaj7', voicing=…, registro=…)` |
+| le altezze di un accordo solo | `MU.voci('Cmaj7', voicing='drop2', registro='do4')` |
+| sciogliere una sigla senza suonarla | `MU.sigla('C6/9/E')` |
+| **raccontare cosa ha deciso** | `MU.racconta_armonia(…)` |
+
+`armonia()` ha **la stessa forma di ritorno di `accordi()`** — `altezza →
+note` — quindi entra in `MU.scrivi()` senza che nulla a valle sappia da dove
+viene. Era il vincolo di progetto principale: atterrare nella macchina che
+esiste, non chiederne una nuova.
+
+**Da dove vengono i numeri, e perché conta.** Le sigle e le ambiguità da
+`assets/chord-symbol-ambiguity-and-parsing.md`, i voicing da
+`assets/jazz-voicings.md` — cioè dalla skill, non da me. E **i test portano i
+valori attesi di quei documenti**: il drop 2 di domaj7 (`sol-do-mi-si`), il
+senza-fondamentale di re-7 (`fa-la-do-mi`) e di domaj7 (`mi-sol-si-re`), il
+`C7#11` senza la quinta (`mi-sib-re-fa#`). È la coppia controllata applicata a
+un dominio non misurabile sul dispositivo: **il valore atteso deve venire da
+fuori**, o il test conferma solo il modello che avevo in testa — che è
+esattamente come sono nati i quattro modelli sbagliati del 16 agosto.
+
+Tre cose che il progetto ha già pagato altrove, e qui sono state prevenute:
+
+- **il maiuscolo conta**: `CM7` è maj7, `Cm7` è minore. La coda si normalizza
+  guardando il caso *prima* di abbassarlo — è lo stesso difetto muto di
+  `'Ab'` → A# in `set_scale`, dove un semitono sbagliato non dava errore.
+- **la fondamentale riusa `altezza()`**, quindi italiano e inglese non possono
+  divergere. Un secondo parser di altezze è una seconda occasione di sbagliare.
+- **una sigla sconosciuta viene rifiutata** e l'errore elenca quelle che
+  esistono, invece di indovinare note che nessuno ha chiesto.
+
+⚠️ **Il limite, dichiarato e non nascosto: non c'è condotta delle parti.** Ogni
+accordo è costruito per conto suo. Il documento mostra che nel ii-V-I i
+voicing senza fondamentale si **alternano** fra due forme (A e B) proprio per
+muovere una voce sola per cambio: le note qui sono giuste, il *collegamento*
+no. `racconta_armonia()` lo dichiara a ogni chiamata.
+
+**E un difetto trovato provando a mano dopo che i test erano verdi**, che vale
+come promemoria: `C6/9/E` ha due slash con due significati diversi — l'ultimo
+è il basso, quello dentro `6/9` è parte della sigla. I dieci test erano tutti
+verdi e non lo vedevano. È la quinta volta in questo progetto che il difetto
+sta in un caso che nessun test aveva pensato di scrivere.
 
 ---
 

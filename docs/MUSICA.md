@@ -1,8 +1,29 @@
 # Conoscenza musicale — cosa funziona sul materiale di questo utente
 
-Questo file **non** è una teoria generale della musica: per quella si invoca
-la skill `music-composer`. Qui sta solo ciò che è stato imparato correggendo
+Questo file **non** è una teoria generale della musica: per quella si invocano
+le skill (vedi sotto). Qui sta solo ciò che è stato imparato correggendo
 il lavoro, e che nessuna skill generica sa.
+
+### Le due skill, e chi comanda su cosa — 17 agosto 2026
+
+| skill | dimensione | a cosa serve **qui** |
+|---|---|---|
+| `music-composition` | 1,3 MB in 106 file di riferimento | il **mestiere**: forma, sviluppo motivico, densità, transizioni, protocollo di revisione. Si carica 1-3 file per domanda, seguendo `references/00-navigation.md` |
+| `music-composer` | 62 KB in tutto | i suoi `scripts/*.py` **producono MIDI**, che `midi.py` sa rileggere. Come prosa è troppo corta per insegnare qualcosa: `genres.md` sono 7,5 KB per ~35 generi |
+
+⚠️ **Su reggae e dub comanda questo file, non le skill.** Misurato il 17 agosto
+2026: `music-composition` ha **tre righe** sul reggae in
+`rhythm-groove/groove-and-feel.md` e una in `rhythmic-devices.md`;
+`music-composer` non ha né l'uno né l'altro. E su un punto la skill grande
+**indurrebbe in errore**: dice «skank guitar precisely on 2 and 4», che è la
+conta in *half-time*. Presa alla lettera su una griglia a 16 passi mette lo
+skank sui passi 4 e 12, mentre il posto giusto sono **tutti i levare** —
+2, 6, 10, 14. Non è l'errore di `DUBPAL01` (lì lo skank mancava del tutto), ma
+è la stessa famiglia: **lo skank finisce dove non va**, stavolta partendo da
+una fonte che sembra autorevole perché è grande.
+
+Il posto dove la skill grande vale davvero è **quello che questo file non
+copriva affatto**: vedi «Quello che una griglia di una battuta non dice».
 
 Stessa disciplina del resto del progetto: si scrive ciò che è stato
 verificato, e si segna `[OSS]` ciò che è supposto.
@@ -118,10 +139,13 @@ Due cose da sapere prima di usarlo:
 
 ### Reggae e dub — istruzioni compositive
 
-> ⚠️ **`music-composer` non serve per questo genere: non ha né reggae né dub.**
-> Il suo `references/genres.md` copre Dubstep, Reggaeton, Bossa Nova e altro,
-> ma di reggae e dub non c'è nessuna voce. Verificato il 16 agosto 2026 —
-> controllare prima di appoggiarcisi.
+> ⚠️ **Nessuna delle due skill serve per questo genere.** `music-composer` non
+> ha né reggae né dub: il suo `references/genres.md` copre Dubstep, Reggaeton,
+> Bossa Nova e altro, ma di reggae e dub non c'è nessuna voce (verificato il 16
+> agosto 2026). `music-composition`, che è venti volte più grande, ne ha
+> **quattro righe in tutto** e sullo skank dice una cosa che qui sarebbe
+> sbagliata (verificato il 17 agosto 2026, dettaglio in testa al file).
+> Controllare prima di appoggiarcisi, sempre.
 >
 > Tutto quanto segue viene da ricerca web ([WEB], fonti in fondo alla
 > sezione). Non è ancora stato validato dall'ascolto dell'utente: `DUBPAL01`,
@@ -287,9 +311,9 @@ Il one drop è **laid-back**: gli ottavi di charleston sono **swingati**, e i
 levare arrivano leggermente in ritardo — «leaning into the space rather than
 cutting through it». [WEB]
 
-Sul Deluge questo **non** si fa spostando le note: c'è lo swing di song, e la
-sua scala è documentata (FINDINGS §6): il display va **0-100 con 50 = dritto**,
-e nel file è un valore con segno centrato sullo zero.
+Lo **swing** si fa con lo swing di song, e la sua scala è documentata
+(FINDINGS §6): il display va **0-100 con 50 = dritto**, e nel file è un valore
+con segno centrato sullo zero.
 
 ```python
 S.set_swing(doc, 57)      # unita' del display: sopra 50 = swingato
@@ -297,6 +321,39 @@ S.set_swing(doc, 57)      # unita' del display: sopra 50 = swingato
 
 ⚠️ In `DUBPAL01` avevo scritto `set_swing(doc, 50)`, cioè **dritto**. Per un
 one drop è sbagliato in partenza.
+
+##### Ma swing e laid-back non sono la stessa cosa — correzione del 17 agosto 2026
+
+La versione precedente di questa pagina diceva che sul Deluge il laid-back
+«non si fa spostando le note: c'è lo swing di song». **Sono due cose diverse,
+e la seconda non copre la prima.**
+
+- lo **swing** cambia il *rapporto* fra i due ottavi di ogni movimento, ed è
+  un'impostazione **della song**: vale per tutte le tracce insieme;
+- il **laid-back** è una parte intera che arriva costantemente *dopo* la
+  griglia, indipendentemente dalle altre. `music-composition`
+  (`rhythm-groove/groove-and-feel.md`) lo chiama pocket **a strati**: cassa sul
+  tempo, rullante appena dietro, charleston appena avanti — e dice che è così
+  che funzionano quasi tutti i groove di soul e reggae. Lo swing di song, che
+  muove tutti insieme, non lo può produrre.
+
+**E il Deluge ha la grana per farlo.** Con la RESOLUTION di default sono
+**96 tick per movimento**; a 70 BPM un movimento dura 857 ms, quindi
+**1 tick ≈ 8,9 ms**. La finestra di microtiming che si sente è 20-40 ms, cioè
+**2-5 tick**: abbondantemente rappresentabile. Lo strumento esiste già ed è
+`MU.sposta(doc, clip, tick=…)` (§6-quinquies).
+
+⚠️ **Ma `sposta()` oggi non serve a questo, e va sistemata prima di usarla
+così.** Trasla e basta: le note che finiscono oltre la fine della clip
+**restano fuori** — il dispositivo le conserva e non le suona, e lo dice
+`avvertenze()`. Su una clip in loop di una battuta un ritardo di 3 tick fa
+uscire l'ultimo colpo invece di riportarlo in testa. Serve uno spostamento
+**modulo la lunghezza della clip**, che non c'è: candidato a `MU.laid_back()`.
+
+[IPO] Tutto questo paragrafo è **ragionato, non ascoltato.** Il numero di tick
+è aritmetica sulla RESOLUTION documentata, ma che 3 tick di ritardo sul basso
+si *sentano* come pocket e non come errore lo può dire solo l'ascolto. E qui
+ascoltare è la verifica giusta: l'affermazione riguarda ciò che si sente.
 
 ### Pattern tipici per genere
 
@@ -331,6 +388,158 @@ E le due parti armoniche, che sono la cosa che mancava del tutto:
 ```python
 skank  = '..x...x...x...x.'   # accordi staccatissimi, TUTTI i levare
 bubble = '.oo..oo..oo..oo.'   # organo, i sedicesimi attorno al levare
+```
+
+## Quello che una griglia di una battuta non dice — 17 agosto 2026
+
+Rileggendo questa pagina alla luce di `music-composition` è venuta fuori una
+cosa che non è un dettaglio mancante ma **un piano intero mancante**:
+
+> Tutto ciò che c'è scritto sopra descrive **una battuta**. Un pezzo ne dura
+> centoventi.
+
+Le griglie a 16 passi, le velocity, lo swing, il turnaround ogni 4: sono la
+grana fine, ed erano giuste da correggere. Ma il giudizio dell'utente su
+`DUBPAL03` — *«va meglio, ma musicalmente ci sarebbe ancora moltissimo da
+dire»* — arriva **dopo** che la grana fine era stata sistemata. Quello che
+resta da dire vive su una scala più lunga, e di quella scala qui non c'era
+niente.
+
+### 1. L'arco di densità — il buco più grosso
+
+`music-composition` (`orchestration/arrangement-density.md`) misura ogni
+sezione su una scala di **densità 1-9**, e la regola che ne ricava è secca:
+
+> «Density should always be moving, even if subtly. **Static density across a
+> long section feels "stuck"**.»
+
+E dà i tempi di tolleranza dell'ascoltatore: **30 secondi** a densità massima
+sono comodi, **60** cominciano a pesare, **90 e oltre** e l'ascoltatore si
+stacca. Un pezzo dub a 70 BPM fa una battuta ogni 3,4 secondi: novanta secondi
+sono **26 battute**. Un arrangiamento che tiene tutte le parti accese per 32
+battute è già oltre, e nessun controllo del progetto se ne accorge.
+
+I tre errori catalogati che un generatore commette per costruzione, perché
+scrive tutte le parti e poi le lascia accese:
+
+| errore | cosa succede |
+|---|---|
+| **too much, too soon** | l'intro è già alla densità del ritornello, e da lì non si sale più |
+| **static density** | nessun contrasto: «listeners track music partly through density variation» |
+| **no silence** | mai un respiro. E il dub *è* il genere del respiro |
+
+**Qui è dove il dub e la scala di densità coincidono.** «Si compone
+togliendo» era già scritto in questa pagina, ma come attitudine. La scala lo
+rende una decisione scrivibile: si sceglie il numero per ogni tratto, e
+`arranger.py` lo esegue con i buchi fra le istanze — `place_unique()` e la
+distanza fra le terne `(pos, length, clipCode)`. **La tecnica c'era già da
+tre giorni; mancava la decisione da prendere.**
+
+Un arco dub di partenza, da provare e correggere all'ascolto:
+
+```
+intro       2   batteria ed eco, niente altro
+riddim      6   tutte le parti dentro, e' il pieno del pezzo
+dub 1       3   via basso e armonia, restano batteria e sirena
+riddim      6   rientra tutto, ma con una variante
+dub 2       1   SOLO eco. Il vuoto: "and then nothing"
+riddim      7   il rientro piu' forte perche' ha qualcosa contro cui spingere
+outro       2   si toglie a strati
+```
+
+⚠️ [WEB/skill] L'arco qui sopra non è misurato su niente: è la forma standard
+applicata al dub. Vale come punto di partenza da far correggere all'ascolto,
+non come regola — esattamente lo stato in cui erano le griglie a 16 passi
+prima del 16 agosto.
+
+### 2. Il turnaround corregge un caso su quattro
+
+`DUBPAL01` fu giudicato con «4 battute di batteria identiche», e la
+correzione registrata è il **turnaround sull'ultima**. Giusto, e insufficiente:
+corregge la battuta 4 e lascia identiche la 1, la 2 e la 3.
+
+> «A 1-bar repeating loop sounds robotic. A 2- or 4-bar loop with subtle
+> variations — an extra ghost note here, a missed hat there — feels alive.»
+
+Cioè: la variazione non è un evento di confine, è un **tessuto**. Nel
+vocabolario che questa pagina già usa, i **fantasmi** (`o`, 42 su 127) sono lo
+strumento giusto perché costano poco: spostarne uno, toglierne uno, aggiungerne
+uno cambia la battuta senza cambiare il pattern.
+
+E il contrappeso, che vale quanto la regola, perché la correzione istintiva a
+«suona piatto» è randomizzare tutto:
+
+> «**Do not overhumanize by randomizing everything. Groove has intentional
+> consistency.**»
+
+Le variazioni sono **scelte e poche**, non rumore aggiunto ovunque. Un
+generatore che randomizza le velocity ottiene un pattern che non è più piatto
+e non è ancora un groove.
+
+### 3. Cassa e basso sono una coppia, e qui non era dichiarato
+
+`instrument-idiom/bass.md` è netto: «**Do not ignore the kick drum.** Bass
+rhythm without kick context is incomplete», e dà quattro rapporti possibili —
+unisono con la cassa, basso che riempie i buchi della cassa, basso lungo sotto
+cassa fitta, cassa sui movimenti e basso sincopato.
+
+Nella griglia delle quattro parti, più sopra, cassa e basso sono descritti in
+due righe separate e il rapporto non è mai detto. Guardandolo adesso:
+
+```
+cassa           . . . . . . . . x . . . . . . .   solo il 3
+basso           x . . . . . x . x . . . . x . .   l'UNO c'e'
+```
+
+Il basso **suona l'uno che la batteria lascia vuoto**, e sul 3 va all'unisono
+con la cassa. È una scelta legittima e tipica — il basso copre il vuoto del one
+drop — ma nel file sembrava un caso. **Scritta, diventa una cosa da tenere o da
+cambiare di proposito**; non scritta, è una cosa che si rompe senza accorgersene
+appena si tocca una delle due righe.
+
+### 4. La playability è una decisione, non una regola
+
+`instrument-idiom/drums-percussion.md` ha un controllo che sembra fatto apposta
+per questo progetto: «MIDI can create patterns that no drummer would choose» —
+quattro arti, tempo di spostarsi fra charleston, tom e piatto, fantasmi
+realizzabili a quel tempo.
+
+Vale, ma **non sempre, e la differenza va decisa ogni volta**:
+
+| | la playability vincola? |
+|---|---|
+| roots one drop, kit suonato | **sì** — il genere nasce da una batteria vera, e un pattern impossibile suona finto |
+| dub da banco del mixer, kit sintetizzato | **no** — `DUBPAL01` ha un kit costruito dal synth vuoto, nessun campione, nessun batterista implicito |
+
+Il difetto è dichiararlo per caso invece che scegliere. Un kit sintetizzato che
+suona un pattern a sei arti è una decisione; lo stesso pattern su un kit roots
+è un errore.
+
+### 5. Il ciclo di revisione ha un protocollo, e qui non lo si usava
+
+Il ciclo di questo progetto — *«l'utente ascolta e dice cosa cambiare»* — è
+esattamente ciò per cui esiste
+`creative-workflows/revision-and-feedback-loops.md`. La sua regola centrale:
+
+> Ogni richiesta di modifica contiene tre strati: **Keep** (cosa è piaciuto),
+> **Change** (cosa no), **Direction** (l'asse su cui muoversi). «Preserve the
+> liked material and change the smallest musical variable that could solve the
+> problem.»
+
+`applica_verbo()` fa già una cosa del genere per i **suoni**, e riferisce cosa
+ha mosso. Per la **composizione** non esiste l'equivalente, e si vede nella
+storia: `DUBPAL02` è stato corretto dichiarando cosa si cambiava (risonanza,
+volume, feedback, riverbero) e **mai cosa si teneva**. Con la regola 1 —
+riscaricare dal dispositivo — il danno è stato evitato per un pelo, e per un
+motivo indipendente.
+
+Da adottare nel rapporto di ogni revisione, prima di toccare il file:
+
+```
+Tengo:    …
+Cambio:   …
+Direzione: …
+Resta regolabile: …
 ```
 
 ## Correzioni ricevute

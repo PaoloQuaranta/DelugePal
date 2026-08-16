@@ -109,6 +109,23 @@ from delugexml.writer import FormatTable
 | pattern di batteria | `MU.passi('x...x...x...x...', lunghezza=…)` — `x` colpo, `X` accento, `.` silenzio. `lunghezza` è **già in tick grezzi**, la durata della singola nota: non passa da `durata_in_tick()`. Non è lo stesso concetto di `durata` qui sotto, anche se i nomi si somigliano — non scambiarli |
 | melodie | `MU.melodia('re2 fa#2 la2', durata='1/8', articolazione='staccato')` — `durata` qui è il **passo fra una nota e la successiva** e passa da `MU.durata_in_tick()` (accetta '1/8', non un intero a caso), `articolazione` sceglie in `MU.ARTICOLAZIONI` (staccato/normale/legato) |
 | accordi e progressioni | `MU.accordi('re3 fa3 la3 \| sib3 re4 fa4', durata='1/4')` — le altezze di un gruppo suonano **insieme**, i gruppi separati da `\|` sono la progressione nel tempo (`durata` fra un accordo e il successivo, come in `melodia()`). Con `melodia()` le stesse note uscirebbero in fila, non insieme |
+| **progressioni per SIGLA** | `MU.armonia('Dm7 \| G7alt \| Cmaj7', voicing='senza-fondamentale', registro='do4')` — stesso separatore, stessa pausa e **stessa forma di ritorno** di `accordi()`, quindi entra in `scrivi()` allo stesso modo. Usare questa quando l'armonia si pensa per simboli (jazz e quasi tutta la musica popolare); `accordi()` quando si vogliono scegliere le altezze a mano |
+| quali note ha prodotto una sigla | `MU.voci('Cmaj7', voicing='drop2', registro='do4')` → `[55, 60, 64, 71]`. Voicing in `MU.VOICING`: `chiuso`, `shell` (3 e 7), `senza-fondamentale` (3-5-7-9), `drop2` |
+| sciogliere una sigla senza suonarla | `MU.sigla('C6/9/E')` → `fondamentale`, `gradi` (grado → semitoni), `basso`, **`letto_come`** |
+| **raccontare l'armonia** (regola 4) | `MU.racconta_armonia(spec, voicing=…, registro=…)` — dice le note vere di ogni sigla **e le ambiguità sciolte** |
+
+⚠️ **Tre cose da sapere su `armonia()`, tutte e tre già costate o quasi.**
+
+- **il maiuscolo conta**: `CM7` è maj7 e `Cm7` è minore. La coda viene
+  normalizzata *guardando il caso prima* di abbassarlo — è lo stesso genere di
+  difetto muto di `'Ab'` → A# in `set_scale`.
+- **una sigla sconosciuta viene RIFIUTATA**, e l'errore elenca quelle che
+  esistono. Aggiungerne una vuol dire scriverla in `MU.SIGLE` **coi suoi
+  gradi**, presi da una fonte: mai indovinarla al volo.
+- **non c'è condotta delle parti**: ogni accordo è costruito per conto suo. Le
+  note sono giuste, il *collegamento* fra un accordo e il successivo no —
+  i voicing alternati A/B del ii-V-I sono un passo successivo, non
+  implementato. `racconta_armonia()` lo dichiara ogni volta.
 | nuova traccia da preset | `C.add_track(doc, preset, name=…, folder=…)` |
 | **scrivere note** | `MU.scrivi(doc, clip, note, dove=…)` — **una sola chiamata per kit e synth.** Non dichiarare il tipo di clip: lo deduce, e la forma delle note fa il resto. Un **dict** (da `MU.melodia()` o `MU.accordi()`) diventa una riga per altezza, solo su synth. Una **lista** (da `MU.passi()`) va su una riga sola e vuole `dove=`: il **nome del drum** su un kit, l'**altezza** su un synth. Su synth chiama da sé `fit_clip_scroll_to_notes()`, quindi le note non restano invisibili |
 | **togliere qualcosa** | `MU.togli(doc, bersaglio, quando=…)` — riconosce da sé il bersaglio: **strumento** (via lui e le sue clip), **clip** (via lei, e rinumera i `clipCode`), **noteRow di kit** (la svuota, perché una riga per drum deve esserci sempre), **noteRow di synth** (la toglie). `quando=(da, a)` in tick su uno strumento toglie **solo le istanze d'arranger in quel tratto** e lascia stare tutto il resto: è la differenza fra *«togli il basso»* e *«leva il basso nella seconda metà»* |
@@ -170,9 +187,17 @@ la SD — prima di poterci scrivere: non c'è modo di farlo al volo via SysEx.
 
 | per | skill |
 |---|---|
-| convenzioni di genere, teoria, progressioni | `music-composer` — **verificare prima che il genere ci sia**: reggae e dub NON ci sono |
+| **forma, densità, sviluppo, transizioni, revisione** — tutto ciò che dura più di una battuta | `music-composition` (installata il 17 agosto 2026, 1,3 MB in 106 file). Si parte **sempre** da `references/00-navigation.md` e si caricano **1-3 file**, non di più |
+| progressioni, teoria, e MIDI da rileggere con `midi.py` | `music-composer` — piccola (62 KB): utile per i suoi `scripts/*.py`, non come prosa |
 | sintesi, filtri, timbro | `dsp-recipes` |
-| **come si compone davvero in un genere** | `docs/MUSICA.md` — pattern per genere, velocity groove, e le correzioni ricevute |
+| **come si compone davvero in un genere** | `docs/MUSICA.md` — pattern per genere, velocity groove, arco di densità, e le correzioni ricevute |
+
+⚠️ **Su reggae e dub comanda `docs/MUSICA.md`, non le skill.** Misurato il 17
+agosto 2026: `music-composer` non li ha affatto, `music-composition` ha quattro
+righe in tutto e sullo skank dice «precisely on 2 and 4», che è la conta in
+half-time e su una griglia a 16 passi **mette lo skank nel posto sbagliato**.
+Una fonte grande non è una fonte autorevole su tutto: vale qui la stessa regola
+del corpus.
 
 ### `music-composer`: due difetti trovati e RIPARATI il 16 agosto 2026
 
