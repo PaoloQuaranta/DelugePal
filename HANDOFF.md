@@ -1,7 +1,8 @@
 ﻿# HANDOFF — Deluge Pal
 
-**Data:** 16 agosto 2026
+**Data:** 17 agosto 2026
 **Progetto:** `D:\DelugePal` (fino al 14 agosto si chiamava `deluge-xml-workflow`)
+**Pubblico su:** <https://github.com/PaoloQuaranta/DelugePal>, GPL-3.0 — vedi §9
 **SD card:** `E:` quando è nel lettore del PC (spesso è nel Deluge, quindi assente)
 **Firmware:** community **1.3.0-beta build 2d7cdf8** (2026-08-12), flashata il
 12 agosto. La precedente era build 0856ff9 (2026-08-06), su cui la scrittura
@@ -11,13 +12,12 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 
 > ## Lo stato in tre righe
 >
-> **Deluge Pal funziona, e ora sa anche togliere e trasformare.** Il ciclo ha
-> girato più volte sul dispositivo: song generate da descrizioni a parole,
-> correzioni chieste a voce e applicate alle song riscaricate dal Deluge.
-> Il 15 e 16 agosto sono state chiuse **tutte e quattro** le lacune trovate
-> dalla revisione finale — rimozione, `scrivi()`, trasformazioni musicali, e la
-> finestra di clip view.
-> **650 test**, tutte e sette le fasi del piano chiuse, tutto fuso su `master`.
+> **Il sistema tecnico è finito e il ciclo gira davvero: il collo di
+> bottiglia adesso è musicale, non software.** Il 16 agosto Deluge Pal ha
+> generato il suo primo pezzo vero — un dub in sol minore, tre versioni,
+> ciascuna corretta dall'ascolto dell'utente. Verdetto sull'ultima: *«va
+> meglio, ma musicalmente ci sarebbe ancora moltissimo da dire»*.
+> **714 test.** Il progetto è **pubblicato su GitHub** senza il corpus.
 >
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
@@ -29,44 +29,52 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 
 ## Il prossimo lavoro
 
-Il piano delle sette fasi è finito, e **tutte e quattro le lacune** trovate
-dalla revisione del 15 agosto sono chiuse e verificate sul dispositivo:
+**Le competenze compositive.** L'utente lo ha detto in chiaro dopo aver
+ascoltato il terzo tentativo di dub:
 
-| lacuna | chiusa | dove |
-|---|---|---|
-| la rimozione | 15 ago | §6-quater, FINDINGS §6-sexies, `docs/PIANO_rimozione.md` |
-| una chiamata sola per scrivere note | 15 ago | §6-quater |
-| le trasformazioni musicali | 16 ago | §6-quinquies, FINDINGS §6-septies, `docs/PIANO_trasformazioni.md` |
-| `notes_hidden_by_scroll` in modalità a scala | 16 ago | §6-sexies, FINDINGS §6-octies |
+> «Serve sicuramente che Pal acquisisca serie competenze compositive, che al
+> momento sono limitatissime. Ce ne occuperemo prossimamente: sto raccogliendo
+> moltissimo materiale e in una prossima chat ci occuperemo di costruire un
+> database serio.»
 
-L'ultima è andata ben oltre quello che chiedeva: cercando la formula della
-modalità a scala è venuta fuori **una geometria sola per tutte le clip**, e con
-lei quattro modelli sbagliati che il progetto aveva in pancia — di cui uno
-generava song che si aprivano con lo schermo vuoto. Vedi §6-sexies.
+È il lavoro nominato, e tutto il resto è secondario. Cosa c'è già in mano:
 
-### Da qui si può ripartire da tre punti
+| | |
+|---|---|
+| `docs/MUSICA.md` | non è più vuoto: convenzioni reggae/dub con le griglie a 16 passi, velocity groove con i numeri, catalogo di pattern per genere, e **sei correzioni ricevute** con la data |
+| `tools/delugexml/midi.py` | il ponte per far entrare il materiale: legge Standard MIDI File **senza dipendenze**, validato nota per nota contro `mido` |
+| `to-read/` | 112 000 file e 4,8 GB di libri, paper e librerie MIDI già raccolti dall'utente. **Fuori dal versionamento** |
 
-Sono in ordine di valore, e nessuno è urgente: il sistema fa quello che
-promette.
+⚠️ **Da sapere prima di ripartire da lì:** `music-composer` **non ha reggae né
+dub** in `genres.md`, e i suoi due difetti sono stati riparati a mano il 16
+agosto in una skill *globale* dell'utente, fuori da questo repo — se viene
+reinstallata spariscono. Dettagli e righe esatte in `SKILL.md`.
 
-**1. Usarlo, e vedere cosa manca davvero.** Le quattro lacune precedenti sono
-uscite da una revisione fatta a tavolino, ma le tre correzioni più importanti
-del 16 agosto sono uscite dall'**uso**: una riga MIDI salvata a mano, e due
-occhiate allo schermo. Generare qualche pezzo vero è probabilmente il modo più
-efficiente di trovare il prossimo buco.
+E una lezione di metodo che vale per tutto il lavoro futuro sui generi:
 
-**2. Le due misure rimaste aperte**, entrambe piccole e con il metodo ormai
+> **Una ricerca sola su un genere dà le etichette, non il mestiere.** Il primo
+> dub è stato scritto dopo *una* ricerca web, da cui erano usciti i nomi (one
+> drop, rockers, steppers) e nient'altro. Bastavano a produrre qualcosa di
+> formalmente corretto e musicalmente morto — mancavano lo skank, il bubble,
+> il turnaround, i colpi fantasma e lo swing, cioè tutto.
+
+### Gli altri punti, in ordine di valore
+
+**1. Le due misure rimaste aperte**, entrambe piccole e con il metodo ormai
 collaudato (una coppia controllata, un passo di differenza):
 
 - **cosa governano `inKeyScrollOffset` e `drumsScrollOffset`.** Si sa solo che
   *non* governano la clip view: non si muovono scrollandola. Finché non si sa,
   non si scrivono.
 - **se riordinare le righe di un kit rinumeri i `drumIndex`.** Vedi la nota in
-  fondo a FINDINGS §6-octies: da questo dipende se il corpus possa dire
-  qualcosa sulla frequenza del riordino, oggi no.
+  fondo a FINDINGS §6-octies.
 
-**3. I punti aperti sul formato** in §7, che sono lì da prima e non bloccano
+**2. I punti aperti sul formato** in §7, che sono lì da prima e non bloccano
 niente.
+
+**3. Due code della pubblicazione**, piccole: `SKILL.md` dice «Il progetto sta
+in `D:\DelugePal`», che per un clone è falso; e l'hook di pre-push non è
+versionato, quindi vale solo su questa macchina (§9).
 
 ### Cosa NON rifare
 
@@ -75,6 +83,14 @@ niente.
   controllata, il controllo resta fuori e lo dice.
 - **non scrivere in un attributo che non si è capito.** Due dei quattro difetti
   nascono da lì.
+- **non usare il corpus come cancello.** Regola data dall'utente il 16 agosto e
+  già costata una volta: il corpus dice cosa ha suonato *lui*, non cosa il
+  firmware accetta. Il numero che lo dimostra: il firmware espone **56**
+  destinazioni di patch cable, il corpus ne usa **37**. Per sapere cosa il
+  firmware accetta si guarda `param_ids.py` (dall'enum di `param.h`) e il
+  guidebook, mai il corpus.
+- **non dire «verificato sul dispositivo» avendo ascoltato**, se
+  l'affermazione riguarda ciò che si vede. E viceversa.
 
 ---
 
@@ -100,12 +116,14 @@ propria. Il 15 agosto è servita una pulizia di 34 file di prova finiti in mezzo
 alle 135 song dell'utente.
 
 **La SD è stata ripulita il 16 agosto**, con la scheda nel lettore del PC. In
-`/SONGS/DelugePal/` sono rimaste **due song**, e servono a due cose diverse:
+`/SONGS/DelugePal/` c'erano rimaste due song, e il 16-17 agosto se ne sono
+aggiunte tre del pezzo dub (§6-septies):
 
 | | |
 |---|---|
 | `TEMPL0.XML` | la **base pulita** da cui partire: uno strumento, una clip **senza righe né note**, arrangiamento vuoto, 158 BPM in re maggiore. È lo stesso file da cui nasce `create.CLIP_BASE`, copia verificata di `refs/songs/TEMPL0.XML` |
 | `TRASF205.XML` | l'unica song generata **dopo** tutte le correzioni della finestra di clip view: si rilegge, passa il cancello senza avvertenze, entrambe le clip ancorate |
+| `DUBPAL01/02/03.XML` | il primo pezzo vero, in tre versioni. **`DUBPAL02` e `DUBPAL03` sono state risalvate dall'utente sul dispositivo**, quindi la copia in `out/` NON è più la verità: riscaricare prima di toccarle (regola 1) |
 
 Tolti 32 file fra rotti, versioni superate e artefatti delle sessioni
 precedenti — comprese `USBGEN.XML` e `AUTOFULL.XML`, che stavano alla radice
@@ -212,9 +230,13 @@ Ordine di lettura consigliato:
 
 1. `docs/ARCHITETTURA.md` — il modello concettuale, dal manuale
 2. `docs/FINDINGS.md` — lo schema derivato dai file, con prove e numeri
-3. `docs/SYSEX.md` — il canale USB MIDI
-4. `docs/FONTI.md` — cosa è stato letto e quanto vale
-5. `README.md` — uso pratico degli strumenti
+3. `docs/MUSICA.md` — **come si compone davvero**: pattern per genere, velocity
+   groove, e le correzioni ricevute dall'utente. È il documento su cui verte il
+   prossimo lavoro
+4. `docs/SYSEX.md` — il canale USB MIDI
+5. `docs/FONTI.md` — l'ordine di ricerca e quello di autorità, che sono opposti
+6. `README.md` — ora è **in inglese**: è la porta d'ingresso del repo pubblico,
+   non più la guida pratica. Per quella valgono `SKILL.md` e questo documento
 
 ---
 
@@ -255,11 +277,20 @@ sul dispositivo, si caricano.
 | **La finestra di clip view** | tre coppie controllate — `SCALA0/1`, `SCALB0/1`, `KITSCR0/1` — che danno **una geometria sola**, `riga = valore − yScroll` su otto righe, con l'unità che cambia: semitono, grado, posizione della riga. Vedi §6-sexies |
 | **La riga MIDI di un kit** | `TRASF401MIDI`, fatta salvare dal dispositivo: è un `<midiOutput>` **fratello** dei `<sound>` dentro `<soundSources>`, altezza in `note`. Ha **smentito** l'ipotesi che il progetto aveva implementato. FINDINGS §6-septies |
 
+| **Suoni progettati da zero** | `DUBPAL01`: kit **sintetizzato** (nessun campione), basso wobble, pad, sirena — tutti costruiti dal synth vuoto. Si sente. Vedi §6-septies |
+| **Patch cable** | `lfo1 → lpfFrequency` (wobble), `lfo1 → pitch` (sirena), `envelope2 → oscAPitch` (pitch drop del kick): si sentono sul dispositivo |
+| **Sintesi FM da un preset subtractive** | `structure.set_synth_mode(inst, 'fm')` crea i `<modulator1/2>` che il synth vuoto non ha e toglie il `type` dagli oscillatori, come fa il dispositivo |
+
 La tabella qui sopra si è fermata all'11 agosto. Da allora sono arrivate le
 fasi 6 e 7 — arranger, MIDI/CV, audio, e lo strato in linguaggio naturale —
 tutte verificate sul dispositivo: vedi §6-ter e `docs/FINDINGS.md`.
 
-**650 test** in `tests/test_all.py`, tutti verdi.
+**714 test** in `tests/test_all.py`, tutti verdi.
+
+⚠️ **Con il corpus sul disco sono 714; senza, 284 passano e 73 SALTANO** con
+un messaggio. Non è un guasto: `refs/` e `corpus_versions/` non sono più
+versionati (§9), e `salta()` distingue "manca materiale che non è del repo" da
+"il codice è rotto".
 
 > **Euristica guadagnata sul campo, quattro volte.** Se un contenuto scritto
 > correttamente non compare sul dispositivo, **cercare lo stato di vista prima
@@ -392,10 +423,19 @@ D:\DelugePal\
     HANDOFF_originale.md l'handoff di partenza, per storia
   tools\
     delugexml\           la libreria (parser, writer, notes, song)
+      sound.py           parametri E patch cable (`set_patch_cable`)
+      structure.py       forme d'onda, modi di sintesi, modulatori FM
+      midi.py            lettore Standard MIDI File, SENZA dipendenze
+      musica.py          lo strato in lingua musicale
     dsong.py             CLI: info, notes, tempo, note-add, clip-dup, row-add
     dsysex.py            client SysEx: ping, dir, get, put — tutto funzionante
     …                    una ventina di strumenti di analisi, vedi README
-  refs\                  59 file c1.3.0 — corpus di riferimento
+  to-read\               112 000 file, 4,8 GB di libri e librerie MIDI raccolti
+                         dall'utente. NON versionato: e' opera di terzi, e
+                         percorrerlo faceva andare `git add` in timeout
+  refs\                  59 file c1.3.0 — corpus di riferimento. **NON PIU'
+    VERSIONATO** (§9): sta sul disco, git lo ignora. L'unico file pubblicato
+    e' `synths/TEMPL.XML`, il synth vuoto del firmware.
     songs\ 43, kits\ 3, synths\ 2, settings\ 3, sd_salvati\ 8. Tutti scritti
     dal dispositivo.
     Dentro ci sono QUATTRO gruppi controllati, ognuno una misura: non
@@ -414,9 +454,12 @@ D:\DelugePal\
   corpus_versions\       103 song di 16 versioni firmware (3.0.0 → 4.1.4-alpha,
                          c1.1.0, c1.2.0), divise per versione. FUORI da refs\
                          di proposito: la tabella di formato si apprende solo
-                         da c1.3.0 e queste la inquinerebbero
-  out\                   tabella di formato, inventari, file generati
-  tests\test_all.py      650 test
+                         da c1.3.0 e queste la inquinerebbero.
+                         Anch'esse NON piu' versionate (§9)
+  out\                   tabella di formato, inventari, file generati. L'unico
+                         versionato e' `format_table.json`: e' un artefatto
+                         DERIVATO e non contiene musica
+  tests\test_all.py      714 test (284 + 73 salti senza corpus)
   .venv\                 mido + python-rtmidi, per il SysEx
 ```
 
@@ -637,6 +680,74 @@ dipende dallo scroll, quindi suonavano giusti. Il racconto per esteso è in
 
 ---
 
+## 6-septies. Il primo pezzo vero — 16 agosto, e cosa ha insegnato
+
+Il consiglio dell'handoff precedente era «usarlo, e vedere cosa manca
+davvero». Ha funzionato: **un solo pezzo ha trovato più buchi di una revisione
+a tavolino**, e li ha trovati in due strati diversi.
+
+Il brief: dub elettronico lento, strumenti costruiti da zero, kit
+**sintetizzato** e non a campioni, basso wobble, pad, sirena, uso creativo di
+delay e filtri con automazioni.
+
+### Strato 1: cosa mancava alla libreria
+
+Tre lacune, tutte bloccanti per quel brief, tutte chiuse:
+
+| mancava | perché bloccava | ora |
+|---|---|---|
+| **i patch cable** | senza, niente wobble (`lfo1 → lpfFrequency`) e niente sirena (`lfo1 → pitch`): sono patch cable e nient'altro | `sound.set_patch_cable / patch_cables / remove_patch_cable` |
+| **i modulatori FM** | il synth vuoto è subtractive e non ha `<modulator1/2>`, presenti in **80 suoni FM su 80** del corpus | `structure.set_synth_mode(inst, 'fm')` li crea |
+| **`defaultParams` fra i contenitori** | `sound.container()` su un drum tornava `None`: impossibile progettare il suono di una percussione | aggiunto in fondo a `CONTENITORI` |
+
+Più una quarta trovata dopo, dall'ascolto: **`passi()` aveva due soli livelli
+di velocity**, e con due livelli un colpo fantasma è inesprimibile. Ora `o` è
+il fantasma (42 su 127).
+
+⚠️ **Trappola del modulo `sound.py`**: definisce di proposito una funzione
+`set()` che **oscura il builtin**. Usare `set()` lì dentro dà un `TypeError`
+che sembra venire da tutt'altra parte. Deduplicare con un dict.
+
+### Strato 2: cosa mancava a me
+
+Il giudizio dell'utente sul primo tentativo: *«molto elementare e non
+assomiglia per niente a un pezzo dub»*, e poi *«anche il ritmo di batteria è
+penoso»*. Aveva ragione, e la causa era una sola: **avevo fatto una ricerca web
+sola**, e ne erano uscite le etichette invece del mestiere.
+
+Gli errori concreti, tutti dallo stesso buco:
+
+| errore | cos'era giusto |
+|---|---|
+| charleston sui levare, **skank assente** | il charleston fa una timeline regolare; il levare è dello *skank*, che è **armonia** |
+| niente *bubble* d'organo | riempie i sedicesimi attorno al levare |
+| basso di 4 battute che si sviluppa | frase di **1-2 battute ripetuta**, centrata sul 3, con la quinta **sotto** la tonica |
+| 4 battute di batteria identiche | **turnaround** sull'ultima di ogni 4 o 8 |
+| `set_swing(50)`, dritto | il one drop è **swingato e laid-back** |
+| pad a note lunghe come parte armonica | in reggae l'armonia è **ritmica**, staccata, in levare |
+
+Tutto questo è ora in `docs/MUSICA.md` con le griglie a 16 passi, i numeri
+delle velocity e le fonti.
+
+### E una correzione di sound design che vale in generale
+
+La sirena di `DUBPAL01` *«bucava le orecchie»* **pur rispettando** la soglia
+che avevo scritto io (risonanza sotto 24). La soglia era sbagliata come
+concetto: le ladder del Deluge **autooscillano**, e quanto sia "alto" dipende
+dal registro e da cosa c'è intorno — lì il delay feedback che saliva a 33 e il
+riverbero a 34 **ripetevano e accumulavano** il picco risonante.
+
+Il rimedio, detto dall'utente: **se vuoi una risonanza estrema, la paghi
+abbassando il volume della patch.** La risonanza gonfia una banda stretta, e
+quello che esplode è il livello percepito, non il timbro.
+
+> Nota di metodo, ripetuta due volte in un giorno: `DUBPAL02` è stata corretta
+> partendo dalla song **riscaricata dal dispositivo**, non dalla copia locale —
+> e infatti portava il volume a 29 invece dei 17 che avevo messo io. La regola 1
+> non è formale: senza, quella correzione sarebbe stata cancellata.
+
+---
+
 ## 7. Punti aperti
 
 > Le **lacune funzionali** — cosa il sistema non sa ancora fare — stanno in
@@ -779,3 +890,65 @@ E tre regole guadagnate sul campo, ognuna pagata:
   ricavabile dai file — la prima è nel manuale, le altre due no. **Quando dice
   che qualcosa non torna, di solito ha ragione lui**: è successo quattro volte
   su quattro, e ogni volta stavo per chiudere dichiarando fatto.
+
+---
+
+## 9. La pubblicazione — 17 agosto 2026
+
+Il repo è su <https://github.com/PaoloQuaranta/DelugePal>, **GPL-3.0**, con una
+storia nuova di un commit solo. I 54 commit precedenti **non erano
+pubblicabili**: ognuno porta con sé song scritte dal dispositivo.
+
+### Cosa NON è pubblicato, e perché
+
+| | |
+|---|---|
+| 130 song (27 in `refs/songs`, 103 in `corpus_versions`) | sono musica di qualcuno |
+| preset di kit e synth | vengono da sample pack **a pagamento** |
+| **le 16 fixture delle prove controllate** | vedi sotto |
+| `docs/SCHEMA_*.md` | inventari generati: le colonne «valori osservati» citano nomi di song, di preset e 43 percorsi `SAMPLES/` |
+| `refs/settings/` | la configurazione del dispositivo |
+| `to-read/` | 4,8 GB di libri e librerie MIDI di terzi |
+
+⚠️ **Il caso che non era ovvio: le fixture.** Erano state esplicitamente tenute
+nel piano, poi la verifica ha mostrato che **una song del Deluge incorpora i
+778 parametri di OGNI strumento che usa** — e tutte e 16, più tutti gli 8
+`sd_salvati`, contengono la patch a pagamento `SYNTHS/BOD new/BOD2-01-RIGHT-PLACE`.
+26 occorrenze.
+
+Neutralizzarle sostituendo la patch è stato **valutato e scartato**:
+distruggerebbe proprio ciò che le rende prove, cioè l'essere state scritte dal
+dispositivo byte per byte. Un file riscritto da noi non dimostra più niente.
+
+L'unico XML pubblicato è `refs/synths/TEMPL.XML`: è il synth **vuoto**, cioè i
+default del firmware, non il lavoro di nessuno.
+
+### Come è protetto
+
+- **`.gitignore` deny-by-default**: tutto sotto `refs/` è escluso e rientra
+  solo `TEMPL.XML`. Ripopolare le cartelle dalla SD non può far sfuggire nulla.
+- **hook `pre-push`** in `.git/hooks/`: rifiuta il push se un commit contiene un
+  `.XML` non previsto, un `.wav`, o roba sotto `corpus_versions/` o `to-read/`.
+  Controlla **ogni commit del tratto**, non solo la punta — un file aggiunto e
+  poi rimosso resterebbe pubblicato lo stesso. Provato in entrambe le
+  direzioni. **Limite: gli hook non sono versionati**, vale su questa macchina.
+
+### La storia vecchia
+
+`D:\DelugePal-storia.bundle` (1,8 MB) contiene **tutti e 54 i commit e i 4
+branch**. Verificato clonandolo prima di cancellare l'originale: 54 commit, i
+messaggi giusti, le 162 song dentro. Si riapre con:
+
+```
+git clone D:\DelugePal-storia.bundle una-cartella
+```
+
+### Cosa resta da sistemare
+
+- `.claude/skills/deluge-pal/SKILL.md` dice «Il progetto sta in `D:\DelugePal`»,
+  che per chi clona è falso
+- l'hook non è versionato: per condividerlo servirebbe una cartella `hooks/`
+  tracciata più `core.hooksPath`
+- il README dichiara i limiti noti, ma `docs/` resta **tutto in italiano** — la
+  traduzione è stata valutata e rimandata: ~50 000 parole di prosa più le
+  docstring, che sono saggi e non descrizioni di argomenti
