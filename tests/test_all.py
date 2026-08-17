@@ -5421,6 +5421,52 @@ def test_nessuna_clip_in_play():
           S.no_playing_clip(vuota) == [], str(S.no_playing_clip(vuota)))
 
 
+# ------------------------------------------------- docs: lo schema neutro
+
+REPERTORI = ROOT / 'docs' / 'repertori'
+
+#: Le undici caselle dello schema neutro, nell'ordine fisso. Il testo del
+#: titolo e' il numero, un punto, uno spazio e questa stringa. Vedi
+#: docs/superpowers/specs/2026-08-17-musica-schema-neutro-design.md
+CASELLE = [
+    "Cos'è, e cosa non è",
+    'Metro e griglia',
+    'Tempo',
+    'Feel',
+    'Ruoli e spartizione',
+    'Dinamica',
+    'Armonia',
+    'Melodia e ornamentazione',
+    'Forma e densità',
+    'Sul Deluge',
+    'Trappole del generatore',
+]
+
+
+def _caselle_di(path):
+    """I titoli di casella di una scheda, nell'ordine in cui compaiono.
+
+    Una casella e' un titolo di livello 2 esatto: '### ' non conta, cosi'
+    una scheda puo' articolarsi dentro una casella senza confondere il test.
+    """
+    righe = path.read_text(encoding='utf-8').splitlines()
+    return [r.rstrip() for r in righe if r.startswith('## ')]
+
+
+def test_schede_repertorio_hanno_le_undici_caselle():
+    attesi = [f'## {i}. {c}' for i, c in enumerate(CASELLE, 1)]
+    schede = sorted(REPERTORI.glob('*.md')) if REPERTORI.is_dir() else []
+    check('esistono le schede di repertorio', len(schede) >= 1,
+          f'{len(schede)} in {REPERTORI}')
+    for s in schede:
+        trovati = _caselle_di(s)
+        check(f'{s.name}: le undici caselle, tutte e in ordine',
+              trovati == attesi,
+              f'{len(trovati)} titoli, primo scarto: '
+              + next((f'atteso {a!r} trovato {t!r}'
+                      for a, t in zip(attesi, trovati) if a != t), 'nessuno'))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
