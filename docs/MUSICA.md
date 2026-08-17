@@ -1,8 +1,9 @@
 # Conoscenza musicale — cosa funziona sul materiale di questo utente
 
 Questo file **non** è una teoria generale della musica: per quella si invocano
-le skill (vedi sotto). Qui sta solo ciò che è stato imparato correggendo
-il lavoro, e che nessuna skill generica sa.
+le skill (vedi «Le due skill, e chi comanda su cosa», nel comune). Qui sta solo
+ciò che è stato imparato correggendo il lavoro, e che nessuna skill generica
+sa.
 
 Il perimetro è largo — jazz, poi classica, barocca e antica, poi i
 contemporanei: elettronica, IDM, techno, hip hop, trip hop, dub, DnB, jungle —
@@ -120,9 +121,13 @@ percorsa e una frase.
 
 ### 9. Forma e densità
 
-La scala lunga, l'arco. Questa casella esiste perché tutto il resto
-descrive **una battuta**, e un pezzo ne dura centoventi. **Vuota** vuol dire un
-arrangiamento che accende tutte le parti all'inizio e le lascia accese.
+La scala lunga, l'arco. Questa casella esiste perché tutto il resto di una
+scheda descrive **una battuta**:
+
+> Un pezzo ne dura centoventi.
+
+**Vuota** vuol dire un arrangiamento che accende tutte le parti all'inizio e
+le lascia accese.
 
 ### 10. Sul Deluge
 
@@ -404,8 +409,11 @@ rhythm without kick context is incomplete», e dà quattro rapporti possibili �
 unisono con la cassa, basso che riempie i buchi della cassa, basso lungo sotto
 cassa fitta, cassa sui movimenti e basso sincopato.
 
-Quale dei quattro rapporti valga è di repertorio, e sta nella casella 5
-della scheda.
+Quale dei quattro rapporti valga è di repertorio, e sta nella casella 5 della
+scheda. Comune è che il rapporto vada **dichiarato**, e non lasciato al caso:
+**Scritta, diventa una cosa da tenere o da cambiare di proposito**; non
+scritta, è una cosa che si rompe senza accorgersene appena si tocca una delle
+due righe.
 
 #### La playability è una decisione, non una regola
 
@@ -539,6 +547,10 @@ cioè le **semicrome**. Su un groove di crome quel default non muove niente.
 S.set_swing(doc, 62, figura='1/8')     # il jazz misurato, SULLE CROME
 ```
 
+L'esempio è **illustrativo**: mostra come si nomina la figura, non quale
+valore scegliere. I valori per repertorio — quale display per quale BUR —
+vivono nella casella 4 della scheda di quel repertorio, e solo lì.
+
 | `swingInterval` | schermo del Deluge | figura swingata |
 |---|---|---|
 | 4 | 2nd | 1/2 |
@@ -557,13 +569,12 @@ poteva sentirsi, e non perché il valore fosse basso.
 Che l'etichetta nomini la **figura** e non il blocco l'ha stabilito
 l'ascolto dell'utente — *«con 8th sento il primo ottavo dritto e il secondo
 swingato»*, una frase che descrive la coppia, e la coppia è fatta della figura
-nominata. Come ci si era arrivati sbagliando, e cosa resta ignoto del sorgente
-(`song.SWING_SCARTO_SORGENTE`), sta in [`FINDINGS.md`](FINDINGS.md) §6,
-«`swingInterval`: quale figura viene swingata»: qui c'è come si usa, lì come si
-è stabilito.
-
-I **valori** — quale display per quale repertorio — non stanno qui: sono di
-repertorio e stanno nella casella 4 della scheda.
+nominata. Come si è stabilito tutto questo sta in
+[`FINDINGS.md`](FINDINGS.md) §6, in due sottosezioni: «Lo swing: il file usa
+una scala, il display un'altra», da cui viene la formula qui sopra, e
+«`swingInterval`: quale figura viene swingata», dove stanno anche come ci si
+era arrivati sbagliando e cosa resta ignoto del sorgente
+(`song.SWING_SCARTO_SORGENTE`). Qui c'è come si usa, lì come si è stabilito.
 
 #### Quattro inviluppi e quattro LFO, non due — correzione del 16 agosto 2026
 
