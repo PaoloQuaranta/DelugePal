@@ -5467,6 +5467,60 @@ def test_schede_repertorio_hanno_le_undici_caselle():
                       for a, t in zip(attesi, trovati) if a != t), 'nessuno'))
 
 
+#: L'indice di MUSICA.md usa simboli; i test stampano su console Windows,
+#: dove un carattere non-ASCII in una stringa stampata solleva
+#: UnicodeEncodeError. Si traduce prima di stampare, mai dopo.
+SIMBOLI = {'●': 'pieno', '◐': 'parziale', '○': 'vuoto'}
+
+
+def _stato_di(path):
+    """Lo stato delle undici caselle, letto dalla prima riga non vuota di ognuna.
+
+    Convenzione: '**Vuota' -> vuoto, '**Parziale.**' -> parziale, altro ->
+    pieno. Il prefisso di 'Vuota' e' senza punto perche' una casella puo'
+    dire '**Vuota, ed e' la piu' vicina a chiudersi.**'
+    """
+    stato, attesa = [], False
+    for riga in path.read_text(encoding='utf-8').splitlines():
+        if riga.startswith('## '):
+            attesa = True
+            stato.append(None)
+        elif attesa and riga.strip():
+            attesa = False
+            t = riga.strip()
+            stato[-1] = ('vuoto' if t.startswith('**Vuota')
+                         else 'parziale' if t.startswith('**Parziale.**')
+                         else 'pieno')
+    return stato
+
+
+def _righe_indice():
+    """Le righe della matrice di MUSICA.md, come {nome file: [stati]}."""
+    fuori = {}
+    for riga in (ROOT / 'docs' / 'MUSICA.md').read_text(encoding='utf-8').splitlines():
+        if not riga.startswith('|') or '](repertori/' not in riga:
+            continue
+        celle = [c.strip() for c in riga.strip('|').split('|')]
+        nome = celle[0].split('](repertori/')[1].rstrip(')')
+        fuori[nome] = [SIMBOLI.get(c.strip('* '), c) for c in celle[1:]]
+    return fuori
+
+
+def test_indice_repertori_coerente_con_le_schede():
+    indice = _righe_indice()
+    schede = sorted(REPERTORI.glob('*.md')) if REPERTORI.is_dir() else []
+    check('l indice nomina tutte le schede',
+          set(indice) == {s.name for s in schede},
+          f'indice {sorted(indice)} vs schede {[s.name for s in schede]}')
+    for s in schede:
+        vero = _stato_di(s)
+        check(f'{s.name}: nessuna casella senza stato leggibile',
+              None not in vero and len(vero) == 11, str(vero))
+        check(f'{s.name}: l indice coincide con la scheda',
+              indice.get(s.name) == vero,
+              f'indice {indice.get(s.name)} vs scheda {vero}')
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

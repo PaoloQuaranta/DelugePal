@@ -592,16 +592,26 @@ sapendo quale versione descrive.
 ## L'indice dei repertori
 
 Una matrice repertorio × casella, che dice **senza aprire niente cosa manca
-a quale repertorio**. Non è ancora compilata: la scrive il Task 6 del piano di
-rifondazione, quando le schede avranno il loro contenuto vero e lo stato di ogni
-casella si potrà leggere invece che prevedere.
+a quale repertorio**. Ogni riga viene dalla prima riga non vuota di ogni
+casella della scheda corrispondente: la scheda è la fonte, questa matrice ne
+è la vista.
 
-Le schede che esistono oggi:
+| repertorio | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| [reggae / dub](repertori/reggae-dub.md) | ◐ | ● | ● | ◐ | ● | ● | ◐ | ○ | ◐ | ◐ | ● |
+| [jazz](repertori/jazz.md) | ○ | ○ | ◐ | ● | ○ | ○ | ◐ | ○ | ○ | ◐ | ○ |
+| classica · barocca · antica | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| elettronica · IDM · techno · hip hop · trip hop · DnB · jungle | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 
-- [`repertori/reggae-dub.md`](repertori/reggae-dub.md)
-- [`repertori/jazz.md`](repertori/jazz.md)
+`●` compilata · `◐` parziale, e la scheda dice di cosa · `○` vuota.
+
+Il **grado di prova** non sta qui: `[MIS]`, `[WEB]`, `[OSS]`, `[IPO]`, `[MAN]`
+stanno dentro la scheda, accanto all'affermazione che qualificano. La matrice
+dice solo dove c'è qualcosa.
 
 Gli altri repertori del perimetro — classica, barocca, antica; elettronica,
 IDM, techno, hip hop, trip hop, DnB, jungle — non hanno un file, e non è una
 dimenticanza: un file che dicesse soltanto «vuota» undici volte è rumore da
-aprire, mentre una riga d'indice è la stessa informazione a costo zero.
+aprire, mentre una riga d'indice è la stessa informazione a costo zero. Le due
+righe aggregate qui sopra, senza link, sono quella informazione: undici
+caselle vuote, ripetuto per i due gruppi.
