@@ -3,13 +3,13 @@
 > Una scheda dello schema neutro. Lo schema, il materiale comune a tutti i
 > repertori e l'indice stanno in [`../MUSICA.md`](../MUSICA.md).
 
-Le istruzioni compositive di questa scheda vengono da ricerca web, e questo
-va saputo prima di leggerle. La nota è del 16 agosto 2026, cioè **prima** di
-`DUBPAL02` e `DUBPAL03`: da allora l'ascolto dell'utente ha corretto la grana
-fine (casella 11) e ha detto cosa resta (casella 9).
+Da leggere prima del resto, e da datare: la cautela qui sotto è del 16
+agosto 2026, cioè **prima** di `DUBPAL02` e `DUBPAL03`. Da allora l'ascolto
+dell'utente ha corretto la grana fine (casella 11) e ha detto cosa resta
+(casella 9).
 
 > Tutto quanto segue viene da ricerca web ([WEB], fonti in fondo alla
-> sezione). Non è ancora stato validato dall'ascolto dell'utente: `DUBPAL01`,
+> scheda). Non è ancora stato validato dall'ascolto dell'utente: `DUBPAL01`,
 > scritto **prima** di questa ricerca, è stato giudicato «molto elementare e
 > per niente somigliante a un pezzo dub».
 
@@ -54,8 +54,9 @@ bubble (organo) . x x . . x x . . x x . . x x .   i sedicesimi attorno al levare
 basso           x . . . . . x . x . . . . x . .   frase di 1-2 battute, ripetuta
 ```
 
-Le sei righe sono le parti, e chi occupa cosa — e cosa lascia libero — è la
-casella 5.
+Le sei righe sono le parti. Chi occupa cosa — e cosa lascia libero — è la
+casella 5 per batteria e basso; lo skank è armonia e sta nella casella 7, e del
+bubble non c'è altro che questa riga e il pattern della casella 6.
 
 ## 3. Tempo
 
@@ -66,12 +67,11 @@ Tempo: **50-100 BPM**, con 70-78 al centro del roots. Quindi 70 BPM non è
 
 **Parziale.** C'è la direzione — il one drop è swingato e laid-back — e c'è
 l'errore già fatto, `set_swing(50)`, cioè dritto. Manca **il numero**: qui non
-c'è nessuna misura, solo `[WEB]`, mentre la casella 4 del jazz ha il suo `[MIS]`.
-E manca lo strumento per il laid-back: `MU.laid_back()` non esiste, e
-`MU.sposta()` trasla e basta — le note che finiscono oltre la fine della clip
-restano fuori, e il comune lo spiega in «Ma swing e laid-back non sono la stessa
-cosa». La chiuderebbero un corpus di dub misurato come si è misurato il jazz, e
-poi l'ascolto.
+c'è nessuna misura, solo `[WEB]`. E manca lo strumento per il laid-back:
+`MU.laid_back()` non esiste, e `MU.sposta()` trasla e basta — le note che
+finiscono oltre la fine della clip restano fuori, e il comune lo spiega in «Ma
+swing e laid-back non sono la stessa cosa». La chiuderebbero un corpus di dub
+misurato come si è misurato il jazz, e poi l'ascolto.
 
 Il one drop è **laid-back**: gli ottavi di charleston sono **swingati**, e i
 levare arrivano leggermente in ritardo — «leaning into the space rather than
@@ -225,12 +225,11 @@ librerie MIDI per genere già in `to-read/MIDI/`, compresa
 
 ## 9. Forma e densità
 
-**Parziale.** C'è l'arco dub a sette tratti, ed è tutto quello che c'è. È
-`[WEB/skill]` e **non è misurato su niente** — lo dice la riga in fondo, che va
-letta prima dell'arco e non dopo. La chiuderebbe l'ascolto: un pezzo costruito
-su quest'arco, e il giudizio dell'utente su dove è lungo e dove è corto. La
-scala di densità 1-9 con cui si sceglierebbero i numeri sta nel comune,
-«L'arco di densità».
+**Parziale.** C'è l'arco dub a sette tratti, ed è tutto quello che c'è: è
+`[WEB/skill]` e **non è misurato su niente**, come dice la riga che lo precede.
+La chiuderebbe l'ascolto: un pezzo costruito su quest'arco, e il giudizio
+dell'utente su dove è lungo e dove è corto. La scala di densità 1-9 con cui si
+sceglierebbero i numeri sta nel comune, «L'arco di densità».
 
 Le griglie a 16 passi, le velocity, lo swing, il turnaround ogni 4: sono la
 grana fine, ed erano giuste da correggere. Ma il giudizio dell'utente su
@@ -238,6 +237,11 @@ grana fine, ed erano giuste da correggere. Ma il giudizio dell'utente su
 dire»* — arriva **dopo** che la grana fine era stata sistemata. Quello che
 resta da dire vive su una scala più lunga, e di quella scala qui non c'era
 niente.
+
+⚠️ [WEB/skill] L'arco qui sotto non è misurato su niente: è la forma standard
+applicata al dub. Vale come punto di partenza da far correggere all'ascolto,
+non come regola — esattamente lo stato in cui erano le griglie a 16 passi
+prima del 16 agosto.
 
 Un arco dub di partenza, da provare e correggere all'ascolto:
 
@@ -251,12 +255,20 @@ riddim      7   il rientro piu' forte perche' ha qualcosa contro cui spingere
 outro       2   si toglie a strati
 ```
 
-⚠️ [WEB/skill] L'arco qui sopra non è misurato su niente: è la forma standard
-applicata al dub. Vale come punto di partenza da far correggere all'ascolto,
-non come regola — esattamente lo stato in cui erano le griglie a 16 passi
-prima del 16 agosto.
-
 ## 10. Sul Deluge
+
+**Parziale.** C'è cosa il dub chiede alla macchina, e manca **come la
+macchina lo dà**. Dei tre punti qui sotto due — delay e riverbero come strumenti
+compositivi, l'eco sui colpi singoli — sono veri in qualunque studio: sono
+estetica, non Deluge. Ed è il terzo a mostrare il buco: **sul Deluge gli FX
+stanno sul suono e sulla clip, non sono mandate per nota**, quindi «l'eco
+classico si manda su colpi singoli» qui è un **requisito**, non un'istruzione.
+Come si ottenga un eco su un colpo solo e non su tutta la parte **non è stato
+verificato**: il comune dice che un drum di kit è un `<sound>` completo, e
+quindi ha i suoi FX, ma se basti — e cosa costi in righe di kit e in clip — non
+lo sa nessuno, perché non è stato provato sul dispositivo. È la prima cosa in
+cui inciampa chi costruisce un dub su questa macchina, e questa casella la pone
+senza rispondere.
 
 Il telaio è comune e non si ripete qui: kit e drum costruiti dal synth vuoto
 `TEMPL.XML`, le norme di sound design, il compenso fra risonanza e volume
@@ -318,7 +330,7 @@ una fonte che sembra autorevole perché è grande.
 > Bossa Nova e altro, ma di reggae e dub non c'è nessuna voce (verificato il 16
 > agosto 2026). `music-composition`, che è venti volte più grande, ne ha
 > **quattro righe in tutto** e sullo skank dice una cosa che qui sarebbe
-> sbagliata (verificato il 17 agosto 2026, dettaglio in testa al file).
+> sbagliata (verificato il 17 agosto 2026, dettaglio qui sopra).
 > Controllare prima di appoggiarcisi, sempre.
 
 ---
