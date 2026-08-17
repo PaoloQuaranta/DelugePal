@@ -4,11 +4,12 @@
 > repertori e l'indice stanno in [`../MUSICA.md`](../MUSICA.md).
 
 Da leggere prima del resto: **nessun pezzo jazz è mai stato generato.**
-Quello che c'è in questa scheda o è misurato su un corpus (la casella 4) o è
-già in libreria (la 7); niente è passato dall'ascolto dell'utente, perché non
-c'è ancora niente da ascoltare. È la ragione per cui sette caselle su undici
-sono vuote, e per cui la 11 è vuota **per costruzione** e non per
-trascuratezza: una trappola del generatore si osserva, non si prevede.
+Quello che c'è in questa scheda o è misurato su un corpus (la casella 4), o è
+già in libreria (la 7), o è materiale contato sul disco e non ancora letto
+(la 6); niente è passato dall'ascolto dell'utente, perché non c'è ancora niente
+da ascoltare. È la ragione per cui sette caselle su undici sono vuote, e per
+cui la 11 è vuota **per costruzione** e non per trascuratezza: una trappola del
+generatore si osserva, non si prevede.
 
 ## 1. Cos'è, e cosa non è
 
@@ -24,11 +25,12 @@ swing.
 
 ## 3. Tempo
 
-**Parziale.** Non c'è un range dichiarato del repertorio: quello che c'è sono
-le quattro fasce su cui è stato misurato lo swing — ≤ 120, 120-180,
-180-240, > 240 BPM — che dicono dove il materiale vive davvero (333 assoli, il
-grosso fra 120 e 240). Manca il tempo *tipico* per stile, che `wjazzd.db` ha e
-che non è stato ancora estratto.
+**Parziale.** **Il grosso del repertorio misurato sta fra 120 e 240 BPM.**
+È quello che dicono le quattro fasce su cui è stato misurato lo swing (≤ 120,
+120-180, 180-240, oltre 240 BPM) distribuendo 333 assoli: una distribuzione
+empirica dei tempi, letta da dati raccolti per un'altra ragione. Non è però un
+range *dichiarato* del repertorio, e manca il tempo *tipico* per stile, che
+`wjazzd.db` ha e che non è stato ancora estratto.
 
 ## 4. Feel
 
@@ -139,9 +141,12 @@ di partitura. Qui non manca il corpus, manca il codice che lo apre.
 che la Weimar ha fatto per lo swing: velocity e microtiming di esecuzioni umane
 misurati per genere. Non è più in attesa di niente — sta decompresso in
 `to-read/MIDI/groove-v1.0.0-midionly/`, e `groove/info.csv` etichetta ogni file
-con stile e BPM: **101 esecuzioni `jazz`** su 1150. Manca solo leggerle, e il
-lettore c'è già: `MI.batteria()` dà le percussioni per nome GM, e il suo
-rapporto PPQ dice quanto microtiming l'arrotondamento si porta via.
+con stile e BPM: **101 esecuzioni `jazz`** su 1150, contate il 17 agosto 2026
+`[OSS]`. `to-read/` è in `.gitignore`, quindi chi clona non trova né i file né
+il conteggio da rifare: quel numero è lo stato del disco di quel giorno. Manca
+solo leggerle, e il lettore c'è già: `MI.batteria()` dà le percussioni per nome
+GM, e il suo rapporto PPQ dice quanto microtiming l'arrotondamento si porta
+via.
 
 ## 7. Armonia
 
@@ -153,7 +158,10 @@ condotta delle parti**: ogni accordo è costruito per conto suo, e i voicing
 alternati A/B del ii-V-I non sono implementati — cioè manca esattamente quello
 che fa suonare un comping invece di una fila di accordi. Come ci si è arrivati,
 e che cosa copre la grammatica delle sigle, sta in
-[`../../HANDOFF.md`](../../HANDOFF.md) §6-octies.
+[`../../HANDOFF.md`](../../HANDOFF.md) §6-octies. **La chiuderebbe
+`assets/jazz-voicings.md` di `music-composition`**, che è già la fonte da cui i
+voicing vengono e che l'alternanza A/B la specifica: qui manca implementarla,
+non trovarla.
 
 ## 8. Melodia e ornamentazione
 
@@ -165,7 +173,8 @@ guardarlo per lo sviluppo motivico invece che per lo swing.
 ## 9. Forma e densità
 
 **Vuota.** AABA, il blues di dodici battute, il rhythm changes: niente di
-tutto questo è scritto. La chiuderebbe MusicXML, o le lead sheet.
+tutto questo è scritto. La chiuderebbe MusicXML, o le lead sheet — con la
+stessa avvertenza della casella 5: il lettore va scritto, non procurato.
 
 ## 10. Sul Deluge
 
