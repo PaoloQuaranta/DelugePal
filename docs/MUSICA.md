@@ -246,6 +246,10 @@ Direzione: …
 Resta regolabile: …
 ```
 
+*(ogni volta che una proposta viene corretta, la lezione va nella casella che
+le compete — la 11 della scheda se è una trappola di quel repertorio, il comune
+se vale per tutti — con la data)*
+
 #### Si parte dal primo livello della gerarchia — correzione del 16 agosto 2026
 
 **16 agosto 2026 — «leggi anche documentazione», «leggi anche docs
