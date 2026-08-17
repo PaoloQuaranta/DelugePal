@@ -844,7 +844,7 @@ def avvertenze(doc) -> list[str]:
     from . import song as S                               # import locale: ciclo
 
     return (S.same_section_conflicts(doc) + S.notes_beyond_clip_end(doc)
-            + S.notes_hidden_by_scroll(doc))
+            + S.notes_hidden_by_scroll(doc) + S.no_playing_clip(doc))
 
 
 # ------------------------------------------------------------------ il racconto

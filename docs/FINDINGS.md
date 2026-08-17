@@ -728,6 +728,87 @@ così le due scale non si scambiano per sbaglio.
 > patch cable: **il numero nel file non è quasi mai il numero sullo schermo.**
 > Vale come regola di sospetto per ogni parametro nuovo.
 
+#### Cosa vuol dire davvero quel numero — dal sorgente, 17 agosto 2026
+
+`playback_handler.cpp` dilata la prima metà del blocco di swing di
+`(50 + swingAmount)/50` e comprime la seconda di `(50 − swingAmount)/50`. La
+somma non cambia, quindi il blocco dura sempre uguale e a muoversi è solo il
+punto di mezzo, che cade a `(50 + swingAmount)/100`. Cioè:
+
+```
+il display E' la posizione percentuale del levare nel blocco
+BUR = display / (100 − display)          50 -> dritto, 67 -> terzina
+```
+
+Sotto 50 il valore è negativo e il levare arriva **in anticipo** — confermato
+all'ascolto sul dispositivo.
+
+### `swingInterval`: quale figura viene swingata — misurato, 17 agosto 2026
+
+Cinque salvataggi fatti dal dispositivo, uno per posizione del menu
+(`TAP TEMPO` + encoder `TEMPO`), più l'ascolto:
+
+| `swingInterval` | schermo | figura swingata |
+|---|---|---|
+| 4 | 2nd | 1/2 |
+| 5 | 4th | 1/4 |
+| **6** | **8th** | **1/8** |
+| 7 | 16th | 1/16 — **default del firmware** |
+| 8 | 32nd | 1/32 |
+
+**L'etichetta nomina la figura che viene swingata**, senza traduzioni. Le note
+si muovono a coppie di quella figura, e a spostarsi è la seconda della coppia.
+
+Nel corpus il valore è `7` in **146 song su 146**: mai cambiato. Quindi lo
+swing di song è sempre stato applicato alle semicrome, e su una linea di
+crome non poteva produrre alcun effetto.
+
+⚠️ **Il sorgente non torna con la misura, di un fattore esatto 2.**
+`playback_handler.cpp` calcola `doubleSwingInterval = 3 << (10 − swingInterval)`
+— per l'intervallo 6 fa 48 tick, una croma — mentre l'orecchio dice che la
+coppia swingata è croma+croma, cioè un blocco da 96 tick. I "swung tick" di
+quel codice **non sono** i tick delle posizioni di nota, e il punto in cui i
+due si convertono non è stato trovato. Dichiarato in
+`song.SWING_SCARTO_SORGENTE` invece di essere aggiustato a posteriori.
+
+> **Come è stato sbagliato, la prima volta.** La tabella era uscita spostata
+> di un posto (intervallo 5 per le crome), perché all'osservazione a cinque
+> punti — che era giusta — era stata sovrapposta quell'aritmetica. Ne usciva
+> «l'etichetta nomina il blocco», controintuitivo e falso.
+>
+> **Avevo misurato la cosa giusta e dedotto quella sbagliata**: la misura
+> copriva solo «etichetta ↔ numero nel file», il significato musicale era
+> inferito, e l'inferenza è stata trattata come se pesasse quanto la misura.
+> L'ha smontata l'utente ascoltando.
+
+### `isPlaying`: una song che si carica e non parte — 17 agosto 2026
+
+`create.add_track()` ha `playing=False` di **default**. Una song generata
+senza passare `playing=True` esce con la clip a `isPlaying="0"`; se è l'unica
+clip, sul dispositivo **premere play non fa partire niente**.
+
+Il file passa tutto: `verifica()`, `avvertenze()`, `check_clip_types()`, il
+round-trip byte-esatto, la decodifica delle note. Formalmente perfetto e
+inservibile.
+
+È la famiglia di `yScrollSongView` — contenuto presente e inerte — con una
+variante nuova: lì lo stato sbagliato era di **vista**, qui è di **lancio**.
+La regola va allargata: *se un contenuto scritto correttamente non si
+manifesta, cercare lo stato prima di sospettare del contenuto — vista o
+lancio.*
+
+Ora lo segnala `song.no_playing_clip()`, agganciato ad `avvertenze()`.
+**Informa e non blocca**, e la soglia è misurata: **10 song su 146** del
+corpus non hanno nessuna clip con `isPlaying="1"`, e sono song vere salvate da
+ferme. Un controllo bloccante accuserebbe dieci file sani.
+
+⚠️ **E la bisezione che l'ha trovato era viziata.** La variante di controllo
+«tengo il vecchio strumento» avrebbe funzionato — ma non per il fattore che
+testava: il vecchio strumento si porta dietro una clip con `isPlaying="1"`.
+Cambiava due cose insieme. A trovare il difetto vero è stato il confronto
+sistematico con un file che **suona sul dispositivo** (`BASSO.XML`), cioè la
+regola: bisezionare da un file che va.
+
 ### `preview` è una miniatura in cache, e i file generati la portano sbagliata
 
 Osservato sul dispositivo il 12 agosto: nel browser dei file, **tutte** le song

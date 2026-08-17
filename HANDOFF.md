@@ -17,7 +17,7 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > generato il suo primo pezzo vero — un dub in sol minore, tre versioni,
 > ciascuna corretta dall'ascolto dell'utente. Verdetto sull'ultima: *«va
 > meglio, ma musicalmente ci sarebbe ancora moltissimo da dire»*.
-> **834 test.** Il progetto è **pubblicato su GitHub** senza il corpus.
+> **850 test.** Il progetto è **pubblicato su GitHub** senza il corpus.
 >
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
@@ -332,9 +332,9 @@ La tabella qui sopra si è fermata all'11 agosto. Da allora sono arrivate le
 fasi 6 e 7 — arranger, MIDI/CV, audio, e lo strato in linguaggio naturale —
 tutte verificate sul dispositivo: vedi §6-ter e `docs/FINDINGS.md`.
 
-**834 test** in `tests/test_all.py`, tutti verdi.
+**850 test** in `tests/test_all.py`, tutti verdi.
 
-⚠️ **Con il corpus sul disco sono 834 su 834; senza `refs/`, sono 384 su 386
+⚠️ **Con il corpus sul disco sono 850 su 850; senza `refs/`, sono 390 su 392
 con 71 SALTATI.** I salti non sono un guasto: `refs/` e `corpus_versions/`
 non sono più versionati (§9), e `salta()` distingue "manca materiale che non è
 del repo" da "il codice è rotto". Un clone che non abbia nemmeno `to-read/`
@@ -522,7 +522,7 @@ D:\DelugePal\
   out\                   tabella di formato, inventari, file generati. L'unico
                          versionato e' `format_table.json`: e' un artefatto
                          DERIVATO e non contiene musica
-  tests\test_all.py      834 test (384/386 + 71 salti senza corpus)
+  tests\test_all.py      850 test (390/392 + 73 salti senza corpus)
   .venv\                 mido + python-rtmidi, per il SysEx
 ```
 
@@ -986,13 +986,91 @@ a essere posta male.
   di quel lavoro è dietro un paywall, quindi la differenza resta non spiegata
   e i valori assoluti sono provvisori. Le *differenze* fra sottoinsiemi sono
   invece nella direzione pubblicata.
-- **La mappatura su `set_swing()` è ignota.** Il display va 0-100 con 50 =
-  dritto, ma che quella scala sia la percentuale di posizione del levare **non
-  è verificato**. Serve una **coppia controllata**: mettere lo swing a due
-  valori noti, far salvare al Deluge, leggere il file. Finché non è fatta, i
-  numeri dicono come suona il jazz, non cosa scrivere nella song.
+- ~~La mappatura su `set_swing()` è ignota~~ — **chiusa il 17 agosto 2026,
+  sul dispositivo. Vedi §6-undecies.** Il display *è* la percentuale di
+  posizione del levare, e serviva anche una seconda cosa che non avevo
+  previsto: `swingInterval`, cioè **su quale figura** lo swing agisce.
 - **Sotto i 120 BPM la misura guarda probabilmente il livello metrico
   sbagliato**: nelle ballad lo swing si sposta sulle semicrome. `[OSS]`
+
+---
+
+## 6-undecies. Lo swing sul dispositivo, e due errori — 17 agosto 2026
+
+Sessione col Deluge collegato, per chiudere la mappatura di `set_swing()`.
+Chiusa, ma è costata due errori miei — uno dei quali ha bloccato la macchina.
+
+### Cosa si scrive, adesso
+
+```python
+S.set_swing(doc, 62, figura='1/8')     # il jazz misurato, sulle CROME
+```
+
+Servono **due** cose, e ignorarne una rende inutile l'altra:
+
+1. **Quanto** — il display *è* la percentuale di posizione del levare.
+   Derivato dal sorgente: `BUR = display / (100 − display)`, quindi 50 dritto,
+   67 terzina, e sotto 50 il levare arriva in anticipo.
+2. **Su quale figura** — `swingInterval`, misurato con cinque salvataggi:
+   `4`=1/2, `5`=1/4, **`6`=1/8**, `7`=1/16, `8`=1/32. L'etichetta sullo
+   schermo nomina la figura swingata, senza traduzioni.
+
+⚠️ **Il default del firmware è `7`, le semicrome — e vale in 146 song su 146
+del corpus.** Lo swing di song è sempre stato applicato alle semicrome: su
+una linea di crome non poteva sentirsi, e non perché il valore fosse basso.
+Per il jazz serve `figura='1/8'`.
+
+### Errore 1: `isPlaying`, e un Deluge bloccato
+
+Una song generata senza `playing=True` esce con la clip a `isPlaying="0"`. Se
+è l'unica clip, il dispositivo **si blocca premendo play**. Il file passava
+`verifica()`, `avvertenze()`, `check_clip_types()`, il round-trip e la
+decodifica delle note: formalmente perfetto e inservibile.
+
+Famiglia di `yScrollSongView`, con variante nuova: lì lo stato sbagliato era
+di **vista**, qui di **lancio**. Ora lo segnala `song.no_playing_clip()` in
+`avvertenze()` — informa e non blocca, perché **10 song su 146** del corpus
+sono legittimamente in quello stato (salvate da ferme).
+
+⚠️ **E la mia bisezione era viziata.** La variante «tengo il vecchio
+strumento» avrebbe funzionato, ma non per il fattore che testava: quel
+vecchio strumento si porta dietro una clip con `isPlaying="1"`. Cambiava due
+cose insieme, e mi avrebbe fatto concludere «contano i due strumenti». A
+trovare il difetto vero è stato il confronto con un file che **suona**
+(`BASSO.XML`).
+
+### Errore 2: misurato giusto, dedotto sbagliato
+
+La tabella di `swingInterval` era uscita **spostata di un posto** (intervallo
+5 per le crome). L'osservazione a cinque punti — etichetta ↔ numero nel file —
+era giusta; sopra ci avevo sovrapposto l'aritmetica del sorgente
+`3 << (10 − swingInterval)`, che dà un blocco lungo **la metà** di quello
+vero. Ne era uscita la conclusione controintuitiva «l'etichetta nomina il
+blocco, non la figura», e l'avevo pure difesa.
+
+L'ha smontata l'utente ascoltando: *«con 8th sento il primo ottavo dritto e il
+secondo swingato»* — una frase che descrive la **coppia**, e la coppia è fatta
+della figura nominata.
+
+> **Avevo misurato la cosa giusta e dedotto quella sbagliata.** La misura
+> copriva solo «etichetta ↔ numero»; il significato musicale era **inferito**,
+> e l'ho trattato come se pesasse quanto la misura. È una variante nuova
+> dell'errore di sempre: non «dedurre dal file invece che dal dispositivo», ma
+> **appoggiare una deduzione su una misura vera e spacciare il tutto per
+> misurato**.
+
+Lo scarto col sorgente resta **ignoto** ed è dichiarato in
+`song.SWING_SCARTO_SORGENTE`: i "swung tick" di quel codice non sono i tick
+delle posizioni di nota, e dove si convertano non è stato trovato. Dichiararlo
+è meglio che aggiustarlo a posteriori.
+
+### File lasciati sulla SD
+
+In `/SONGS/DelugePal/`: `SWTEST01`-`SWTEST05` (la bisezione di `isPlaying`),
+`SWDIV01`-`SWDIV04` (le quattro posizioni dell'intervallo, **salvate dal
+dispositivo**: sono la prova, non ripulirle), `SWJAZZ01` (sbagliata,
+intervallo 5) e `SWJAZZ02` (giusta). Le prime e `SWJAZZ01` si possono
+togliere; le `SWDIV` no.
 
 ---
 
@@ -1136,8 +1214,16 @@ E tre regole guadagnate sul campo, ognuna pagata:
   i drum MIDI mancano dal corpus solo perché non li ha mai usati, e che
   l'ordine delle righe di un kit lo decide chi suona. Nessuna delle tre era
   ricavabile dai file — la prima è nel manuale, le altre due no. **Quando dice
-  che qualcosa non torna, di solito ha ragione lui**: è successo quattro volte
-  su quattro, e ogni volta stavo per chiudere dichiarando fatto.
+  che qualcosa non torna, ha ragione lui**: è successo **cinque volte su
+  cinque**, e ogni volta stavo per chiudere dichiarando fatto.
+
+  La quinta, il 17 agosto, è la più istruttiva perché non l'ho corretta
+  subito: avevo appena difeso la mia tabella dell'intervallo di swing con
+  un'aritmetica presa dal sorgente. La sua obiezione era una frase sola —
+  *«la divisione non dovrebbe essere 8th?»* — senza numeri e senza fonti, e
+  aveva ragione. **La sua incredulità vale più della mia derivazione**, e la
+  regola operativa che ne discende è: quando dice che non torna, si smette di
+  argomentare e si progetta l'esperimento che decide.
 
 ---
 

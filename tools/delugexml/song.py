@@ -272,20 +272,86 @@ def set_scale(doc: Document, root: int | str, mode: str | tuple[int, ...]) -> No
 SWING_CENTRO = 50
 
 
+#: `swingInterval` -> la figura che viene SWINGATA, cioe' esattamente
+#: l'etichetta che il Deluge mostra a schermo.
+#:
+#: **Misurato sul dispositivo il 17 agosto 2026**, cinque salvataggi (uno per
+#: posizione del menu) piu' l'ascolto. Le note si muovono a COPPIE della
+#: figura nominata: con "8th" la prima croma resta ferma e la seconda si
+#: sposta; con "4th" e' il secondo quarto a spostarsi. Sotto 50 il secondo
+#: arriva in anticipo invece che in ritardo.
+SWING_FIGURA_PER_INTERVALLO = {4: '1/2', 5: '1/4', 6: '1/8', 7: '1/16',
+                               8: '1/32'}
+SWING_INTERVALLO_PER_FIGURA = {v: k for k, v in
+                               SWING_FIGURA_PER_INTERVALLO.items()}
+
+#: Il default del firmware e' **7**, cioe' le semicrome, ed e' il valore di
+#: tutte e 146 le song del corpus. Per swingare le CROME -- il jazz, e
+#: qualunque groove di crome -- serve **6**.
+SWING_INTERVALLO_DEFAULT = 7
+
+#: ⚠️ **Il sorgente NON torna con la misura, e la misura vince.**
+#: `playback_handler.cpp` calcola `3 << (10 - swingInterval)` e lo chiama
+#: `doubleSwingInterval`: per l'intervallo 6 fa 48 tick, cioe' una croma. Ma
+#: l'orecchio dice che con l'intervallo 6 la coppia swingata e' croma+croma,
+#: quindi il blocco vale una semiminima, 96 tick -- il doppio.
+#:
+#: Lo scarto e' esattamente un fattore 2, quindi i "swung tick" di quel codice
+#: non sono i tick delle posizioni di nota. Cosa siano di preciso resta
+#: **ignoto**: non si e' trovato il punto in cui i due si convertono.
+#:
+#: E' scritto qui perche' una derivazione che non torna va dichiarata, non
+#: nascosta: questa e' gia' costata una tabella sbagliata, corretta solo
+#: perche' l'utente ha detto che non tornava.
+SWING_SCARTO_SORGENTE = 2
+
+
+def swing_intervallo_per(figura: str) -> int:
+    """L'intervallo che swinga la figura richiesta: `'1/8'` -> 6.
+
+    La figura e' quella che si vuole SWINGARE, ed e' anche l'etichetta che
+    compare sul Deluge: non c'e' traduzione da fare. Passare da qui evita
+    comunque di scrivere il numero nudo, che non dice niente a chi legge.
+    """
+    if figura not in SWING_INTERVALLO_PER_FIGURA:
+        raise ValueError(
+            f'figura {figura!r} sconosciuta, usare '
+            f'{sorted(SWING_INTERVALLO_PER_FIGURA)}: sono le stesse che il '
+            f'menu del Deluge mostra')
+    return SWING_INTERVALLO_PER_FIGURA[figura]
+
+
 def get_swing(doc: Document) -> tuple[int, int]:
     """(swing come lo mostra il display 0-100, intervallo)."""
     grezzo = int(doc.root.get('swingAmount', '0') or 0)
     return grezzo + SWING_CENTRO, int(doc.root.get('swingInterval', '0') or 0)
 
 
-def set_swing(doc: Document, display: int, interval: int | None = None) -> int:
+def set_swing(doc: Document, display: int, interval: int | None = None, *,
+              figura: str | None = None) -> int:
     """Swing nelle unita' del display: 0-100, con **50 = dritto**.
+
+    Il display **e' la posizione percentuale del levare dentro il blocco** --
+    derivato dal sorgente del firmware, non supposto: la prima meta' del
+    blocco viene dilatata di `(50 + swingAmount)/50` e la seconda compressa di
+    `(50 - swingAmount)/50`, quindi il punto di mezzo cade a
+    `(50 + swingAmount)/100`. Percio' 50 e' dritto, **66-67 e' la terzina**, e
+    il rapporto fra le due meta' vale `display / (100 - display)`.
+
+    `figura` dice quale figura si vuole swingare (`'1/8'` per le crome) e
+    sceglie l'intervallo da se'. Usare quella invece di `interval`: il menu
+    del Deluge nomina il BLOCCO, che e' il doppio della figura spostata, e
+    scrivere `interval=5` per swingare le crome non lo dice a nessuno.
 
     Ritorna il valore grezzo scritto nel file. Chi volesse scrivere il grezzo
     direttamente puo' usare `doc.root.set('swingAmount', ...)`, ma passare per
     qui evita l'errore di scambiare le due scale — che e' gia' costato una
     prova sul dispositivo.
     """
+    if figura is not None:
+        if interval is not None:
+            raise ValueError('serve figura= OPPURE interval=, non entrambi')
+        interval = swing_intervallo_per(figura)
     display = int(display)
     if not 0 <= display <= 100:
         raise ValueError(f'swing {display} fuori da 0-100 (50 = dritto)')
@@ -340,6 +406,39 @@ def clips_in_section(doc: Document, section_id: int | str) -> list[Node]:
     sid = str(section_id)
     from . import arranger as A                           # import locale: ciclo
     return [c for c in A.clip_list(doc, False) if c.get('section') == sid]
+
+
+def no_playing_clip(doc: Document) -> list[str]:
+    """Nessuna clip di sessione ha `isPlaying='1'`: premendo play non parte nulla.
+
+    Trovato sul dispositivo il 17 agosto 2026, e costato quattro prove e un
+    blocco del Deluge. Una song generata con `create.add_track()` senza
+    `playing=True` -- che e' il DEFAULT -- esce con la clip a `isPlaying='0'`.
+    Se e' l'unica clip della song, il file si carica, passa `verifica()`,
+    `check_clip_types()` e ogni altro controllo, e poi non suona.
+
+    E' la famiglia di `yScrollSongView`: contenuto presente e inerte. Con una
+    variante nuova pero' -- li' era uno stato di VISTA, qui e' uno stato di
+    LANCIO.
+
+    ⚠️ **Informa, non blocca**, e la soglia e' misurata: nel corpus **10 song
+    su 146** (il 6,8%) sono in questo stato, e sono song vere scritte dal
+    dispositivo -- salvate da ferme, con le clip da lanciare a mano. Un
+    controllo bloccante accuserebbe dieci file sani, che e' la trappola dei
+    falsi positivi gia' pagata due volte in questo progetto.
+
+    Non si accusa una song **senza** clip di sessione: li' non c'e' niente da
+    lanciare e non e' un difetto, e' una song vuota.
+    """
+    nodo = doc.root.find('sessionClips')
+    if nodo is None or not nodo.children:
+        return []
+    if any(c.get('isPlaying') == '1' for c in nodo.children):
+        return []
+    quante = len(nodo.children)
+    return [f'nessuna delle {quante} clip di sessione ha isPlaying=1: '
+            f'premendo play non partira niente, le clip vanno lanciate a mano '
+            f'(create.add_track(..., playing=True) le fa partire)']
 
 
 def same_section_conflicts(doc: Document) -> list[str]:

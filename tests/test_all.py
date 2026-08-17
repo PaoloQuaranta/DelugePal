@@ -5295,6 +5295,132 @@ def test_wjazz_swing_misurato():
           WJ.swing(db, rhythmfeel='NON-ESISTE').assoli == 0)
 
 
+def test_swing_intervallo_misurato():
+    """L'intervallo di swing, ancorato sul dispositivo il 17 agosto 2026.
+
+    Cinque salvataggi, uno per posizione del menu, piu' l'ascolto:
+
+        schermo   swingInterval   figura swingata
+        2nd            4            1/2
+        4th            5            1/4
+        8th            6            1/8      <- il jazz
+        16th           7            1/16     <- default del firmware
+        32nd           8            1/32
+
+    L'etichetta nomina **la figura che viene swingata**: le note si muovono a
+    coppie di quella figura, e a spostarsi e' la seconda della coppia (in
+    ritardo sopra 50, in anticipo sotto).
+
+    ⚠️ La prima versione di questo test asseriva l'intervallo 5, derivandolo
+    dall'aritmetica del sorgente (`3 << (10 - swingInterval)`). Era sbagliata
+    di un fattore 2, e l'ha scoperto l'utente ascoltando: quinta volta su
+    cinque che ha ragione lui quando dice che qualcosa non torna. Lo scarto
+    col sorgente e' dichiarato in `song.SWING_SCARTO_SORGENTE`.
+    """
+    misurato = {4: '1/2', 5: '1/4', 6: '1/8', 7: '1/16', 8: '1/32'}
+    check('la tabella e quella misurata sul dispositivo',
+          S.SWING_FIGURA_PER_INTERVALLO == misurato,
+          str(S.SWING_FIGURA_PER_INTERVALLO))
+    check('per swingare le CROME serve l intervallo 6',
+          S.swing_intervallo_per('1/8') == 6)
+    check('il default del firmware, 7, swinga le semicrome',
+          S.SWING_INTERVALLO_DEFAULT == 7
+          and S.SWING_FIGURA_PER_INTERVALLO[7] == '1/16')
+    check('la tabella e biiettiva',
+          all(S.swing_intervallo_per(f) == v
+              for v, f in S.SWING_FIGURA_PER_INTERVALLO.items()))
+
+    try:
+        S.swing_intervallo_per('1/3')
+        check('una figura ignota viene rifiutata', False, 'nessun errore')
+    except ValueError as e:
+        check('una figura ignota viene rifiutata', True)
+        check('e l errore elenca quelle del menu',
+              '1/8' in str(e), str(e)[:80])
+
+
+def test_swing_display_e_posizione_del_levare():
+    """Il display E' la percentuale di posizione del levare.
+
+    Derivato dal sorgente (`playback_handler.cpp`): la prima meta' del blocco
+    va per `(50 + swingAmount)/50`, la seconda per `(50 - swingAmount)/50`,
+    quindi il punto di mezzo cade a `(50 + swingAmount)/100 = display/100`.
+
+    Controprova nota: la terzina e' BUR 2, cioe' display 66,7.
+    """
+    base = REFS / 'songs' / 'TEMPL0.XML'
+    if not base.exists():
+        raise FileNotFoundError(str(base))
+    doc = parse_file(base)
+
+    S.set_swing(doc, 50)
+    check('50 e dritto: swingAmount 0', S.get_swing(doc)[0] == 50
+          and doc.root.get('swingAmount') == '0')
+
+    S.set_swing(doc, 67, figura='1/8')
+    display, intervallo = S.get_swing(doc)
+    bur = display / (100 - display)
+    check('67 da la terzina (BUR 2)', abs(bur - 2.0) < 0.05, f'{bur:.2f}')
+    check('e figura=1/8 ha scelto l intervallo 6', intervallo == 6)
+
+    # lo swing del jazz misurato sulla Weimar: levare al 61,7%
+    S.set_swing(doc, 62, figura='1/8')
+    d = S.get_swing(doc)[0]
+    check('il jazz misurato sta a 62, cioe BUR 1,6',
+          abs(d / (100 - d) - 1.63) < 0.05, f'{d / (100 - d):.2f}')
+
+    try:
+        S.set_swing(doc, 62, 5, figura='1/8')
+        check('interval= e figura= insieme sono rifiutati', False, 'nessuno')
+    except ValueError:
+        check('interval= e figura= insieme sono rifiutati', True)
+
+
+def test_nessuna_clip_in_play():
+    """Una song la cui unica clip ha isPlaying=0 si carica e non suona.
+
+    Difetto vero, trovato sul dispositivo il 17 agosto 2026: il Deluge si
+    bloccava premendo play. `create.add_track()` ha `playing=False` di
+    DEFAULT, e nessun controllo del progetto se ne accorgeva -- `verifica()`,
+    `check_clip_types()` e il round-trip erano tutti puliti.
+
+    Informa e non blocca: nel corpus 10 song su 146 sono in questo stato, e
+    sono song vere salvate da ferme.
+    """
+    from delugexml import create as C                       # noqa: PLC0415
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    base = REFS / 'songs' / 'TEMPL0.XML'
+    if not base.exists():
+        raise FileNotFoundError(str(base))
+    preset = REFS / 'synths' / 'TEMPL.XML'
+
+    doc = parse_file(base)
+    vecchio = doc.root.find('instruments').children[0]
+    _, clip = C.add_track(doc, preset, name='MUTA', folder='SYNTHS')
+    MU.togli(doc, vecchio)
+    check('senza playing=True nessuna clip parte',
+          any('isPlaying' in a for a in S.no_playing_clip(doc)),
+          str(S.no_playing_clip(doc)))
+    check('e l avvertenza arriva fino a avvertenze()',
+          any('isPlaying' in a for a in MU.avvertenze(doc)))
+    check('ma NON blocca: verifica() resta vuota',
+          MU.verifica(doc) == [], str(MU.verifica(doc)))
+
+    doc2 = parse_file(base)
+    vecchio2 = doc2.root.find('instruments').children[0]
+    C.add_track(doc2, preset, name='VIVA', folder='SYNTHS', playing=True)
+    MU.togli(doc2, vecchio2)
+    check('con playing=True l avvertenza sparisce',
+          S.no_playing_clip(doc2) == [], str(S.no_playing_clip(doc2)))
+
+    vuota = parse_file(base)
+    for c in list(vuota.root.find('sessionClips').children):
+        vuota.root.find('sessionClips').remove(c)
+    check('una song senza clip di sessione non viene accusata',
+          S.no_playing_clip(vuota) == [], str(S.no_playing_clip(vuota)))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

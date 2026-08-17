@@ -126,7 +126,7 @@ from delugexml.writer import FormatTable
   note sono giuste, il *collegamento* fra un accordo e il successivo no —
   i voicing alternati A/B del ii-V-I sono un passo successivo, non
   implementato. `racconta_armonia()` lo dichiara ogni volta.
-| nuova traccia da preset | `C.add_track(doc, preset, name=…, folder=…)` |
+| nuova traccia da preset | `C.add_track(doc, preset, name=…, folder=…, playing=True)` — ⚠️ **`playing` vale `False` di default**: senza, la clip esce con `isPlaying="0"` e sul dispositivo **premere play non fa partire niente**. Il file passa ogni controllo ed è inservibile: è costato un blocco del Deluge il 17 agosto 2026. Ora lo segnala `avvertenze()` |
 | **scrivere note** | `MU.scrivi(doc, clip, note, dove=…)` — **una sola chiamata per kit e synth.** Non dichiarare il tipo di clip: lo deduce, e la forma delle note fa il resto. Un **dict** (da `MU.melodia()` o `MU.accordi()`) diventa una riga per altezza, solo su synth. Una **lista** (da `MU.passi()`) va su una riga sola e vuole `dove=`: il **nome del drum** su un kit, l'**altezza** su un synth. Su synth chiama da sé `fit_clip_scroll_to_notes()`, quindi le note non restano invisibili |
 | **togliere qualcosa** | `MU.togli(doc, bersaglio, quando=…)` — riconosce da sé il bersaglio: **strumento** (via lui e le sue clip), **clip** (via lei, e rinumera i `clipCode`), **noteRow di kit** (la svuota, perché una riga per drum deve esserci sempre), **noteRow di synth** (la toglie). `quando=(da, a)` in tick su uno strumento toglie **solo le istanze d'arranger in quel tratto** e lascia stare tutto il resto: è la differenza fra *«togli il basso»* e *«leva il basso nella seconda metà»* |
 | un drum dal kit | `K.remove_drum(doc, kit, nome)` — diverso da `MU.togli(riga)`: toglie il drum dallo **strumento**, quindi cambia **tutte** le clip di quel kit, e rinumera i `drumIndex`. `MU.togli` su una riga fa tacere quel drum **in quella clip sola** |
@@ -299,6 +299,7 @@ che lo usano saltano se non c'è, come quelli del corpus.
 | la griglia armonica | `WJ.armonia(db, melid)` → lista di `Accordo(tick, bar, beat, testo, sigla)`, con la `MU.Sigla` **già sciolta** |
 | una sigla del dialetto | `WJ.sigla_weimar('Ebj7911#')` |
 | **quanto è swingato** | `WJ.swing(db, style='BEBOP')` → levare al 63,6% del movimento, BUR 1,75. Filtri: `style`, `rhythmfeel`, `instrument`, `tempo_min/max`, `melid` |
+| **scrivere quello swing** | `S.set_swing(doc, 62, figura='1/8')` — il display **è** la percentuale di posizione del levare, e `figura` dice **quale figura swingare**. Il default del firmware (`7`) swinga le semicrome: su un groove di crome non muove niente |
 | le posizioni grezze | `WJ.levare(db, melid)` |
 
 ⚠️ **Gli accordi sono in un dialetto**, e le differenze sono sistematiche:

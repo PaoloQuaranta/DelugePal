@@ -478,18 +478,76 @@ spiegata** e i valori assoluti sono provvisori. Le *differenze* fra
 sottoinsiemi — swing contro fusion, medio contro velocissimo — sono invece
 nella direzione che la letteratura descrive.
 
-#### E come si porta sul Deluge — NON ancora verificato
+#### E come si porta sul Deluge — VERIFICATO il 17 agosto 2026
 
-`set_swing()` mostra 0-100 con 50 = dritto (FINDINGS §6). Se quella scala
-fosse la percentuale di posizione del levare, un bebop a 63,6% si scriverebbe
-`set_swing(doc, 64)`. **Ma che il display del Deluge sia quella percentuale
-non è verificato**: è la parte di questa pagina che vale meno finché non si
-fa la misura.
+Servono **due** cose, e ignorarne una rende inutile l'altra.
 
-La misura è quella solita e sta al dispositivo: **una coppia controllata** —
-mettere lo swing a due valori noti, far salvare al Deluge, e leggere cosa
-scrive nel file. Finché non è fatta, i numeri qui sopra dicono come suona il
-jazz, non cosa scrivere nella song.
+**1. Quanto.** Il display di `set_swing()` **è** la percentuale di posizione
+del levare — derivato dal sorgente (`playback_handler.cpp`: la prima metà del
+blocco va per `(50+A)/50`, la seconda per `(50−A)/50`, quindi il punto di
+mezzo cade a `(50+A)/100`). Quindi:
+
+```
+display = 100 × BUR / (BUR + 1)          BUR = display / (100 − display)
+```
+
+50 è dritto, **67 è la terzina**, e sotto 50 il levare arriva *in anticipo*.
+
+**2. Su quale figura.** Ed è qui che stava la trappola: `swingInterval`
+sceglie **quale figura viene swingata**, e il default del firmware è `7`,
+cioè le **semicrome**. Su un groove di crome quel default non muove niente.
+
+```python
+S.set_swing(doc, 62, figura='1/8')     # il jazz misurato, SULLE CROME
+```
+
+| `swingInterval` | schermo del Deluge | figura swingata |
+|---|---|---|
+| 4 | 2nd | 1/2 |
+| 5 | 4th | 1/4 |
+| **6** | **8th** | **1/8 ← il jazz** |
+| 7 | 16th | 1/16 ← default del firmware |
+| 8 | 32nd | 1/32 |
+
+Le note si muovono a **coppie** della figura nominata, e a spostarsi è la
+seconda della coppia.
+
+⚠️ **Tutte e 146 le song del corpus hanno `swingInterval="7"`.** Cioè lo
+swing è sempre stato impostato sulle semicrome: su una linea di crome non
+poteva sentirsi, e non perché il valore fosse basso.
+
+Quindi la tabella qui sopra diventa scrivibile:
+
+| repertorio | BUR | `set_swing(doc, …, figura='1/8')` |
+|---|---|---|
+| dritto | 1,00 | 50 |
+| **jazz complessivo** | 1,61 | **62** |
+| HARDBOP | 1,80 | 64 |
+| BEBOP | 1,75 | 64 |
+| POSTBOP | 1,49 | 60 |
+| FUSION | 1,26 | 56 |
+| terzina esatta | 2,00 | 67 |
+
+##### E come ho sbagliato la tabella la prima volta
+
+⚠️ La prima versione diceva **intervallo 5, «4th notes»** — spostata di un
+posto. L'osservazione a cinque punti (etichetta ↔ numero nel file) era
+giusta; sopra ci avevo appiccicato l'aritmetica del sorgente
+`3 << (10 − swingInterval)`, che dà un blocco lungo **la metà** di quello
+vero, e ne era uscita la conclusione controintuitiva «l'etichetta nomina il
+blocco, non la figura». L'ho pure difesa.
+
+L'ha smontata l'utente ascoltando: *«con 8th sento il primo ottavo dritto e
+il secondo swingato»* — una frase che descrive la **coppia**, e la coppia è
+fatta della figura nominata. Nessuna aritmetica poteva sostituirla.
+
+> **La lezione:** avevo misurato la cosa giusta e dedotto quella sbagliata.
+> La misura diceva solo «etichetta ↔ numero»; il significato musicale non era
+> misurato, era **inferito** — e l'ho trattato come se avesse lo stesso peso.
+
+Lo scarto col sorgente resta ignoto ed è dichiarato in
+`song.SWING_SCARTO_SORGENTE`: i "swung tick" di quel codice non sono i tick
+delle posizioni di nota, e dove si convertano non è stato trovato.
 
 ## Quello che una griglia di una battuta non dice — 17 agosto 2026
 
