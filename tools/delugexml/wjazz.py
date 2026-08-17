@@ -422,6 +422,200 @@ def armonia(path: Path | str, melid: int, *,
     return fuori
 
 
+# ------------------------------------------------------------------ lo swing
+#
+# COSA SI MISURA
+# --------------
+# Dove cade il **levare** dentro il movimento, in frazione: 0,5 e' dritto,
+# 0,667 e' la terzina. Il rapporto fra le due meta' e' la BUR (beat-upbeat
+# ratio) della letteratura: BUR = p / (1 - p), quindi 1 dritto e 2 terzina.
+#
+# I due estremi del movimento sono i battiti VERI, presi da `beats.onset`, e
+# il levare e' l'onset vero della nota. Nessuno dei tre viene dalla griglia.
+#
+# ⚠️ L'ERRORE CHE HA BRUCIATO TRE TENTATIVI, E VALE PIU' DEL RISULTATO
+# --------------------------------------------------------------------
+# La posizione **annotata** (`tatum`/`division`) **contiene gia' lo swing**: i
+# trascrittori scrivono una coppia di crome swingate come `tatum 1 e 3 di
+# division 3`, cioe' mettono la terzina nella griglia metrica. Quindi
+# selezionare le coppie con `division == 2` -- che sembra la cosa ovvia da
+# fare, "prendi le crome" -- seleziona in realta' le sole coppie che il
+# trascrittore ha giudicato DRITTE.
+#
+# Tre metodi diversi hanno dato 1,10, 1,19 e 1,10, e sembravano confermarsi a
+# vicenda. Erano lo stesso errore tre volte: una distorsione di SELEZIONE, non
+# di calcolo. A trovarla non e' stato un test -- e' stato guardare le righe
+# grezze di un assolo lento e vedere `tatum=1/3` e `tatum=3/3`.
+#
+# Il controllo che l'ha smascherata viene da fuori: la letteratura dice che lo
+# swing CALA al salire del tempo e che i generi a crome dritte stanno sotto.
+# Nessuna delle due compariva. Ora compaiono entrambe.
+#
+# ⚠️ QUANTO VALE, E QUANTO NO
+# ---------------------------
+# I numeri sono misurati e riproducibili, ma **non sono stati riconciliati con
+# la letteratura in valore assoluto**: «Playing It Straight» riporta ~1,3 di
+# mediana sullo stesso database, questa misura da' ~1,6. Il metodo di quel
+# lavoro non e' leggibile (articolo a pagamento), quindi la differenza resta
+# non spiegata e i valori assoluti vanno presi come provvisori. Le
+# DIFFERENZE fra sottoinsiemi -- swing contro funk, lento contro veloce --
+# sono invece coerenti con quanto e' pubblicato.
+
+#: Fuori da questa finestra non e' una coppia di crome: e' un'altra figura,
+#: o un errore di allineamento. Dichiarata perche' e' una scelta, non una
+#: legge di natura.
+FINESTRA_LEVARE = (0.3, 0.8)
+
+
+class Swing(NamedTuple):
+    """Dove cade il levare, su un insieme di assoli."""
+
+    assoli: int
+    coppie: int
+    #: Posizione mediana del levare nel movimento, 0-1. 0,5 e' dritto.
+    levare: float
+    q1: float
+    q3: float
+
+    @property
+    def bur(self) -> float:
+        """Il rapporto fra le due meta' del movimento. 1 dritto, 2 terzina."""
+        return in_bur(self.levare)
+
+    @property
+    def percento(self) -> float:
+        return self.levare * 100
+
+    def __str__(self) -> str:
+        if not self.coppie:
+            return 'nessuna coppia di crome misurabile'
+        return (f'{self.assoli} assoli, {self.coppie} coppie: levare al '
+                f'{self.percento:.1f}% del movimento (BUR {self.bur:.2f}), '
+                f'quartili {self.q1 * 100:.1f}%-{self.q3 * 100:.1f}%')
+
+
+def in_bur(levare: float) -> float:
+    """Da posizione del levare a BUR. 0,5 -> 1 (dritto), 0,667 -> 2."""
+    if not 0 < levare < 1:
+        raise ValueError(f'il levare sta fra 0 e 1, non {levare}')
+    return levare / (1 - levare)
+
+
+def levare_da_dati(battiti, note, finestra=FINESTRA_LEVARE) -> list[float]:
+    """Le posizioni del levare, da battiti e note gia' letti.
+
+    `battiti` sono terne `(bar, beat, onset)` in ordine; `note` sono quaterne
+    `(bar, beat, tatum, onset)`. Sta separata dal database per poterla
+    provare su dati costruiti a mano.
+
+    Si tiene un movimento solo quando contiene **esattamente due eventi** e il
+    primo sta **sul** movimento (`tatum == 1`): due eventi in un movimento
+    sono una coppia di crome, tre o piu' sono un'altra figura.
+
+    Il `tatum` del SECONDO evento non viene guardato di proposito -- vedi la
+    nota qui sopra: quello e' annotato e lo swing ce l'ha gia' dentro.
+    """
+    griglia = {(b, m): t for b, m, t in battiti}
+    ordine = [(b, m) for b, m, _ in battiti]
+    dopo = {ordine[i]: ordine[i + 1] for i in range(len(ordine) - 1)}
+
+    dentro: dict[tuple[int, int], list[tuple[int, float]]] = {}
+    for bar, beat, tatum, onset in note:
+        dentro.setdefault((bar, beat), []).append((tatum, onset))
+
+    basso, alto = finestra
+    fuori = []
+    for chiave, eventi in dentro.items():
+        if len(eventi) != 2:
+            continue
+        (tatum_a, _), (_, onset_b) = eventi
+        if tatum_a != 1:
+            continue
+        seguente = dopo.get(chiave)
+        if seguente is None or chiave not in griglia or seguente not in griglia:
+            continue
+        t0, t1 = griglia[chiave], griglia[seguente]
+        if t1 <= t0:
+            continue
+        p = (onset_b - t0) / (t1 - t0)
+        if basso < p < alto:
+            fuori.append(p)
+    return fuori
+
+
+def levare(path: Path | str, melid: int,
+           finestra=FINESTRA_LEVARE) -> list[float]:
+    """Le posizioni del levare di un assolo."""
+    with apri(path) as con:
+        battiti = [(r['bar'], r['beat'], r['onset']) for r in con.execute(
+            'select bar, beat, onset from beats where melid = ? '
+            'order by beatid', (melid,))]
+        note = [(r['bar'], r['beat'], r['tatum'], r['onset'])
+                for r in con.execute(
+                    'select bar, beat, tatum, onset from melody '
+                    'where melid = ? order by eventid', (melid,))]
+    return levare_da_dati(battiti, note, finestra)
+
+
+def swing(path: Path | str, *, melid: int | None = None,
+          style: str | None = None, rhythmfeel: str | None = None,
+          instrument: str | None = None, tempo_min: float | None = None,
+          tempo_max: float | None = None, minimo_coppie: int = 20,
+          finestra=FINESTRA_LEVARE) -> Swing:
+    """Quanto e' swingato un insieme di assoli.
+
+    Si aggrega sulla **mediana per assolo**, non su tutte le coppie in un
+    mucchio: se no un assolo lungo e prolisso peserebbe come dieci corti, e si
+    misurerebbe chi ha suonato piu' note invece di come si suona.
+
+    Gli assoli con meno di `minimo_coppie` coppie non entrano: una mediana su
+    quattro valori non e' una mediana.
+    """
+    dove, arg = [], []
+    for campo, valore in (('melid', melid), ('style', style),
+                          ('rhythmfeel', rhythmfeel),
+                          ('instrument', instrument)):
+        if valore is not None:
+            dove.append(f'{campo} = ?')
+            arg.append(valore)
+    if tempo_min is not None:
+        dove.append('avgtempo >= ?')
+        arg.append(tempo_min)
+    if tempo_max is not None:
+        dove.append('avgtempo <= ?')
+        arg.append(tempo_max)
+    filtro = ('where ' + ' and '.join(dove)) if dove else ''
+
+    from statistics import median, quantiles                # noqa: PLC0415
+
+    with apri(path) as con:
+        scelti = [r[0] for r in con.execute(
+            f'select melid from solo_info {filtro} order by melid', arg)]
+        mediane, coppie = [], 0
+        for uno in scelti:
+            battiti = [(r['bar'], r['beat'], r['onset']) for r in con.execute(
+                'select bar, beat, onset from beats where melid = ? '
+                'order by beatid', (uno,))]
+            note = [(r['bar'], r['beat'], r['tatum'], r['onset'])
+                    for r in con.execute(
+                        'select bar, beat, tatum, onset from melody '
+                        'where melid = ? order by eventid', (uno,))]
+            v = levare_da_dati(battiti, note, finestra)
+            if len(v) >= minimo_coppie:
+                mediane.append(median(v))
+                coppie += len(v)
+
+    if not mediane:
+        return Swing(assoli=0, coppie=0, levare=0.5, q1=0.5, q3=0.5)
+    if len(mediane) >= 4:
+        q = quantiles(mediane, n=4)
+        q1, q3 = q[0], q[2]
+    else:
+        q1 = q3 = median(mediane)
+    return Swing(assoli=len(mediane), coppie=coppie, levare=median(mediane),
+                 q1=q1, q3=q3)
+
+
 def racconta(path: Path | str, melid: int) -> str:
     """Cosa c'e' in un assolo, in parole. Il gemello di `midi.racconta()`."""
     s = solo(path, melid)

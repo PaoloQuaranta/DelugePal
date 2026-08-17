@@ -17,7 +17,7 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > generato il suo primo pezzo vero — un dub in sol minore, tre versioni,
 > ciascuna corretta dall'ascolto dell'utente. Verdetto sull'ultima: *«va
 > meglio, ma musicalmente ci sarebbe ancora moltissimo da dire»*.
-> **819 test.** Il progetto è **pubblicato su GitHub** senza il corpus.
+> **834 test.** Il progetto è **pubblicato su GitHub** senza il corpus.
 >
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
@@ -332,9 +332,9 @@ La tabella qui sopra si è fermata all'11 agosto. Da allora sono arrivate le
 fasi 6 e 7 — arranger, MIDI/CV, audio, e lo strato in linguaggio naturale —
 tutte verificate sul dispositivo: vedi §6-ter e `docs/FINDINGS.md`.
 
-**819 test** in `tests/test_all.py`, tutti verdi.
+**834 test** in `tests/test_all.py`, tutti verdi.
 
-⚠️ **Con il corpus sul disco sono 819 su 819; senza `refs/`, sono 369 su 371
+⚠️ **Con il corpus sul disco sono 834 su 834; senza `refs/`, sono 384 su 386
 con 71 SALTATI.** I salti non sono un guasto: `refs/` e `corpus_versions/`
 non sono più versionati (§9), e `salta()` distingue "manca materiale che non è
 del repo" da "il codice è rotto". Un clone che non abbia nemmeno `to-read/`
@@ -522,7 +522,7 @@ D:\DelugePal\
   out\                   tabella di formato, inventari, file generati. L'unico
                          versionato e' `format_table.json`: e' un artefatto
                          DERIVATO e non contiene musica
-  tests\test_all.py      819 test (369/371 + 71 salti senza corpus)
+  tests\test_all.py      834 test (384/386 + 71 salti senza corpus)
   .venv\                 mido + python-rtmidi, per il SysEx
 ```
 
@@ -919,11 +919,8 @@ La tabella `melody` porta **la posizione metrica** (`bar/beat/tatum/division`)
 dedotta: è scritta. E **la differenza fra le due è la micro-tempistica**, che
 è il motivo per cui questo database vale più di una raccolta di MIDI.
 
-⚠️ **Quella misura non è ancora stata fatta.** Il lettore converte la griglia;
-confrontare gli onset con la griglia — cioè ricavare lo swing ratio e il
-laid-back *misurati* per stile e per `rhythmfeel` — è il passo successivo, ed
-è quello che darebbe numeri veri alle tabelle `[WEB]` di `docs/MUSICA.md` e
-un valore misurato a `set_swing()`.
+**Lo swing misurato è arrivato subito dopo**, il 17 agosto: `WJ.swing()`, e i
+primi numeri `[MIS]` del progetto. Vedi §6-decies.
 
 ⚠️ `division` vale 5 o 10 per 7242 note su 200 809 (il 3,6%) e 96 non si
 divide per 5: quelle si arrotondano, e `Conversione` lo dichiara.
@@ -942,6 +939,60 @@ altezze e quella sbagliata per estrarre un prefisso.
 `groove-v1.0.0-midionly.zip` (Groove MIDI, velocity e microtiming per genere,
 reggae compreso), `POP909`, `maestro`, `The_Magic_of_MIDI`, le librerie per
 genere e `(aq) Dub Beat Builder`.
+
+---
+
+## 6-decies. Lo swing misurato — 17 agosto 2026
+
+`WJ.swing(db, style=…, rhythmfeel=…, tempo_min=…, tempo_max=…)`. Su **333
+assoli e 27 943 coppie di crome**: levare al **61,7%** del movimento, cioè
+**BUR 1,61**. Tabelle per stile, feel e tempo in `docs/MUSICA.md`, «Lo swing
+del jazz, misurato» — sono i primi numeri `[MIS]` del progetto, contro i
+`[WEB]` di tutto il resto della pagina.
+
+Il risultato in una riga: **il jazz non swinga in terzine.** Sta fra il dritto
+e la terzina, HARDBOP e BEBOP in cima (1,80 e 1,75), FUSION in fondo (1,26), e
+lo swing **cala al salire del tempo** — 1,89 fra 120 e 180 BPM, 1,35 sopra i
+240.
+
+### L'errore, che vale più del risultato
+
+⚠️ **Tre tentativi hanno dato 1,10, 1,19 e 1,10 e sembravano confermarsi a
+vicenda. Erano lo stesso errore tre volte.**
+
+La posizione **annotata** (`tatum`/`division`) **contiene già lo swing**: i
+trascrittori scrivono una coppia di crome swingate come *tatum 1 e 3 di
+division 3*. Quindi selezionare le crome con `division == 2` — che sembra la
+cosa ovvia — seleziona le sole coppie giudicate **dritte**, e la misura torna
+1,0 per costruzione. Non un errore di calcolo: di **selezione**.
+
+Due cose l'hanno smascherato, e nessuna delle due era un test:
+
+1. **Un controllo esterno.** La letteratura dice che lo swing cala col tempo e
+   che i generi a crome dritte stanno sotto. Nessuna delle due previsioni
+   compariva. *Una misura che non riproduce una previsione nota è sbagliata
+   anche quando è ripetibile* — e ripetibile lo era, tre volte.
+2. **Guardare le righe grezze** di un assolo lento, e vedere `tatum=1/3`.
+
+È la stessa famiglia dei quattro modelli sbagliati del 16 agosto: test verdi
+che asserivano il modello che avevo in testa. Qui però i test non c'entrano
+nemmeno — il codice faceva esattamente quel che dicevo io, ed era la domanda
+a essere posta male.
+
+### Cosa NON è verificato
+
+- **Il valore assoluto non è riconciliato con la letteratura.** «Playing It
+  Straight» riporta ~1,3 sullo **stesso** database, qui viene 1,61. Il metodo
+  di quel lavoro è dietro un paywall, quindi la differenza resta non spiegata
+  e i valori assoluti sono provvisori. Le *differenze* fra sottoinsiemi sono
+  invece nella direzione pubblicata.
+- **La mappatura su `set_swing()` è ignota.** Il display va 0-100 con 50 =
+  dritto, ma che quella scala sia la percentuale di posizione del levare **non
+  è verificato**. Serve una **coppia controllata**: mettere lo swing a due
+  valori noti, far salvare al Deluge, leggere il file. Finché non è fatta, i
+  numeri dicono come suona il jazz, non cosa scrivere nella song.
+- **Sotto i 120 BPM la misura guarda probabilmente il livello metrico
+  sbagliato**: nelle ballad lo swing si sposta sulle semicrome. `[OSS]`
 
 ---
 

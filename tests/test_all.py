@@ -5203,6 +5203,98 @@ def test_wjazz_conversione_dichiarata():
           conv.scarto_massimo <= 0.5, f'{conv.scarto_massimo:.3f}')
 
 
+def test_wjazz_levare_nucleo():
+    """Il calcolo del levare, su dati costruiti a mano.
+
+    E' la parte pura: un movimento che va da t0 a t1, e dentro esattamente
+    due eventi. Dove cade il secondo, in frazione del movimento, E' lo swing.
+    0,5 e' dritto; 0,667 e' la terzina, cioe' BUR 2.
+    """
+    from delugexml import wjazz as WJ                       # noqa: PLC0415
+
+    battiti = [(1, 1, 0.0), (1, 2, 1.0), (1, 3, 2.0), (1, 4, 3.0), (2, 1, 4.0)]
+
+    dritto = WJ.levare_da_dati(battiti, [(1, 1, 1, 0.0), (1, 1, 2, 0.5)])
+    check('due eventi a meta movimento danno 0,5', dritto == [0.5], str(dritto))
+
+    terzina = WJ.levare_da_dati(battiti, [(1, 2, 1, 1.0), (1, 2, 3, 1.6667)])
+    check('a due terzi danno la terzina', abs(terzina[0] - 2 / 3) < 1e-3,
+          str(terzina))
+    check('e in BUR e 2', abs(WJ.in_bur(terzina[0]) - 2.0) < 0.02,
+          f'{WJ.in_bur(terzina[0]):.3f}')
+
+    tre = WJ.levare_da_dati(battiti, [(1, 3, 1, 2.0), (1, 3, 2, 2.3),
+                                      (1, 3, 3, 2.6)])
+    check('un movimento con TRE eventi non e una coppia di crome',
+          tre == [], str(tre))
+
+    senza = WJ.levare_da_dati(battiti, [(1, 4, 2, 3.2), (1, 4, 3, 3.6)])
+    check('se il primo evento non e sul movimento, si scarta',
+          senza == [], str(senza))
+
+    fuori = WJ.levare_da_dati(battiti, [(1, 1, 1, 0.0), (1, 1, 2, 0.95)])
+    check('un levare fuori finestra si scarta', fuori == [], str(fuori))
+
+
+def test_wjazz_levare_non_usa_la_griglia_annotata():
+    """La posizione ANNOTATA non va usata: contiene gia' lo swing.
+
+    E' l'errore che ha bruciato tre tentativi. I trascrittori di Weimar
+    scrivono una coppia di crome swingate come `tatum 1 e 3 di division 3`,
+    cioe' la terzina e' gia' nella griglia metrica. Filtrare su
+    `division == 2` selezionava percio' le sole coppie giudicate DRITTE, e la
+    misura tornava 1,0 per costruzione.
+
+    Qui si verifica che il `tatum` del secondo evento non cambi il risultato:
+    conta solo dove cade l'onset VERO.
+    """
+    from delugexml import wjazz as WJ                       # noqa: PLC0415
+
+    battiti = [(1, 1, 0.0), (1, 2, 1.0)]
+    for tatum in (2, 3, 5):
+        got = WJ.levare_da_dati(battiti, [(1, 1, 1, 0.0), (1, 1, tatum, 0.62)])
+        check(f'con tatum={tatum} il levare resta 0,62',
+              got and abs(got[0] - 0.62) < 1e-6, str(got))
+
+
+def test_wjazz_swing_misurato():
+    """La misura vera sul database. SALTA se non c'e'.
+
+    Due previsioni della letteratura, che qui servono da controllo esterno:
+    lo swing **cala al salire del tempo**, e i generi a crome dritte stanno
+    **sotto** lo swing. Se non compaiono, la misura e' sbagliata -- ed e'
+    esattamente cosi' che sono stati scoperti i tre tentativi precedenti.
+    """
+    from delugexml import wjazz as WJ                       # noqa: PLC0415
+
+    db = ROOT / 'to-read' / 'MIDI' / 'wjazzd.db'
+    if not db.exists():
+        raise FileNotFoundError(str(db))
+
+    tutto = WJ.swing(db)
+    check('la misura copre piu di 300 assoli', tutto.assoli > 300,
+          str(tutto.assoli))
+    check('il levare sta fra il 55% e il 68% del movimento',
+          0.55 < tutto.levare < 0.68, f'{tutto.levare:.3f}')
+    check('cioe un BUR fra 1,2 e 2,1 -- swingato, non dritto e non terzina',
+          1.2 < tutto.bur < 2.1, f'{tutto.bur:.2f}')
+
+    swing_feel = WJ.swing(db, rhythmfeel='SWING')
+    funk = WJ.swing(db, rhythmfeel='FUNK')
+    check('SWING e piu swingato di FUNK',
+          swing_feel.bur > funk.bur,
+          f'SWING {swing_feel.bur:.2f} vs FUNK {funk.bur:.2f}')
+
+    lento = WJ.swing(db, tempo_min=120, tempo_max=180)
+    veloce = WJ.swing(db, tempo_min=240)
+    check('e lo swing cala al salire del tempo',
+          lento.bur > veloce.bur,
+          f'120-180 {lento.bur:.2f} vs >240 {veloce.bur:.2f}')
+
+    check('un filtro che non seleziona niente non esplode',
+          WJ.swing(db, rhythmfeel='NON-ESISTE').assoli == 0)
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

@@ -298,6 +298,8 @@ che lo usano saltano se non c'è, come quelli del corpus.
 | le note | `WJ.melodia(db, melid)` → `(altezza -> note, Conversione)`, stessa forma di `MI.melodia()` |
 | la griglia armonica | `WJ.armonia(db, melid)` → lista di `Accordo(tick, bar, beat, testo, sigla)`, con la `MU.Sigla` **già sciolta** |
 | una sigla del dialetto | `WJ.sigla_weimar('Ebj7911#')` |
+| **quanto è swingato** | `WJ.swing(db, style='BEBOP')` → levare al 63,6% del movimento, BUR 1,75. Filtri: `style`, `rhythmfeel`, `instrument`, `tempo_min/max`, `melid` |
+| le posizioni grezze | `WJ.levare(db, melid)` |
 
 ⚠️ **Gli accordi sono in un dialetto**, e le differenze sono sistematiche:
 `j7` è maj7, l'alterazione sta **dopo** il grado (`79b` = 7♭9), `o` è il
@@ -314,10 +316,17 @@ un database solo, messe lì, la sporcherebbero per sempre. Vale per i lettori
 che verranno (MusicXML, kern).
 
 ⚠️ **Le posizioni vengono dalla griglia metrica annotata** (`bar/beat/tatum`),
-non dagli onset in secondi. Gli onset sono l'esecuzione vera e servono a
-*misurare* lo scarto, non a collocare le note — quella misura non è ancora
-fatta. `division` vale 5 o 10 per il 3,6% delle note e 96 non si divide per 5:
-lì `Conversione` dichiara l'arrotondamento, come in `midi.py`.
+non dagli onset in secondi. `division` vale 5 o 10 per il 3,6% delle note e 96
+non si divide per 5: lì `Conversione` dichiara l'arrotondamento, come in
+`midi.py`.
+
+⚠️ **Ma per misurare lo swing la griglia annotata NON si usa: contiene già lo
+swing.** I trascrittori scrivono una coppia di crome swingate come *tatum 1 e
+3 di division 3*, quindi filtrare su `division == 2` seleziona le sole coppie
+giudicate **dritte** e la misura torna 1,0 per costruzione. È costato tre
+tentativi che si confermavano a vicenda. `WJ.swing()` usa i battiti veri di
+`beats.onset` e ignora il `tatum` del levare. Risultati e cautele in
+`docs/MUSICA.md`, «Lo swing del jazz, misurato».
 
 ## Quando qualcosa non si vede sul dispositivo
 
