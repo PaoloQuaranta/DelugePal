@@ -5055,6 +5055,154 @@ def test_racconta_armonia():
           'sus2' in testo and 'add9' in testo, testo[:200])
 
 
+# ------------------------------------------------ Weimar Jazz Database
+
+def test_wjazz_dialetto():
+    """La notazione di accordo di Weimar e' un DIALETTO, e va tradotta.
+
+    Non e' un caso limite: il 22% delle 30 548 occorrenze del database non e'
+    leggibile da `MU.sigla()`, e i fallimenti sono tutti sistematici --
+    `j7` per maj7, l'alterazione DOPO il grado (`79b` = 7b9), `o` per il
+    diminuito, `sus7` invece di `7sus4`.
+
+    Sta qui e non in `MU.SIGLE` di proposito: `SIGLE` e' la notazione da lead
+    sheet, comune a tutte le fonti. Il dialetto appartiene alla SORGENTE, e
+    infilarlo nella tabella generale la sporcherebbe per sempre con le
+    abitudini di un database solo.
+
+    I valori attesi vengono dalla grammatica, non dal codice: quality prefix,
+    poi una `j` che rende maggiore la settima che segue, poi una lista di
+    gradi ognuno con la sua alterazione in coda.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+    from delugexml import wjazz as WJ                       # noqa: PLC0415
+
+    attesi = {
+        'Ebj7':     (3,  (0, 4, 7, 11)),          # maj7
+        'D79b':     (2,  (0, 4, 7, 10, 13)),      # 7b9
+        'C79':      (0,  (0, 4, 7, 10, 14)),      # 9 di dominante
+        'G79#':     (7,  (0, 4, 7, 10, 15)),      # 7#9
+        'Fsus7':    (5,  (0, 5, 7, 10)),          # 7sus4
+        'Co':       (0,  (0, 3, 6)),              # triade diminuita
+        'Co7':      (0,  (0, 3, 6, 9)),           # settima diminuita
+        'G+7':      (7,  (0, 4, 8, 10)),          # 7#5
+        'C-79':     (0,  (0, 3, 7, 10, 14)),      # m9
+        'C-7911':   (0,  (0, 3, 7, 10, 14, 17)),  # m11
+        'C-69':     (0,  (0, 3, 7, 9, 14)),       # m6/9
+        'C-j7':     (0,  (0, 3, 7, 11)),          # m(maj7)
+        'Ebj7911#': (3,  (0, 4, 7, 11, 14, 18)),  # maj7 con 9 e #11
+        'C79b13b':  (0,  (0, 4, 7, 10, 13, 20)),  # 7b9b13
+    }
+    for testo, (fond, intervalli) in attesi.items():
+        s = WJ.sigla_weimar(testo)
+        check(f'{testo} -> {intervalli}',
+              s.fondamentale == fond and s.intervalli == intervalli,
+              f'{s.fondamentale} {s.intervalli}')
+
+    check('lo slash resta un basso', WJ.sigla_weimar('Cj7/A').basso == 9,
+          str(WJ.sigla_weimar('Cj7/A').basso))
+    check('NC non e un accordo e torna None',
+          WJ.sigla_weimar('NC') is None)
+    check('e nemmeno una casella vuota', WJ.sigla_weimar('') is None)
+
+    # Dove i due dialetti COINCIDONO devono dare lo stesso risultato: se no
+    # una delle due letture e' sbagliata e nessuno se ne accorgerebbe.
+    for comune in ('C7', 'C-7', 'C', 'C6', 'C-6', 'Csus', 'Cm7b5'):
+        check(f'{comune} letto uguale dai due dialetti',
+              WJ.sigla_weimar(comune).intervalli == MU.sigla(comune).intervalli,
+              f'{WJ.sigla_weimar(comune).intervalli} vs '
+              f'{MU.sigla(comune).intervalli}')
+
+
+def test_wjazz_dialetto_rifiuta():
+    from delugexml import wjazz as WJ                       # noqa: PLC0415
+
+    try:
+        WJ.sigla_weimar('Cfrullato')
+        check('una coda ignota viene rifiutata', False, 'nessun errore')
+    except ValueError as e:
+        check('una coda ignota viene rifiutata', True)
+        check('e l errore mostra cosa non ha saputo leggere',
+              'frullato' in str(e), str(e)[:90])
+
+
+def test_wjazz_lettura():
+    """Lettura vera del database. SALTA se non c'e': non e' roba del repo.
+
+    I valori attesi vengono dal database stesso, che qui e' l'artefatto in
+    esame -- solo 1 e' `Anthropology` di Art Pepper, che e' un rhythm
+    changes in sib, e infatti la griglia comincia Bb6 | Bb6 G7 | C-7 F7.
+    """
+    from delugexml import wjazz as WJ                       # noqa: PLC0415
+
+    db = ROOT / 'to-read' / 'MIDI' / 'wjazzd.db'
+    if not db.exists():
+        raise FileNotFoundError(str(db))
+
+    check('il database ha 456 assoli', WJ.quanti(db) == 456, str(WJ.quanti(db)))
+
+    s = WJ.solo(db, 1)
+    check('il primo e Art Pepper', s.performer == 'Art Pepper', s.performer)
+    check('su Anthropology', s.title == 'Anthropology', s.title)
+    check('stile COOL, feel SWING',
+          s.style == 'COOL' and s.rhythmfeel == 'SWING',
+          f'{s.style} {s.rhythmfeel}')
+
+    note, conv = WJ.melodia(db, 1)
+    check('530 note lette', conv.note == 530, str(conv.note))
+    check('la prima nota sta a tick 0',
+          min(n.pos for ns in note.values() for n in ns) == 0)
+
+    # (bar,beat,tatum,division) delle prime note, dal database:
+    #   (0,1,1,1) (0,2,1,4) (0,2,4,4) (0,3,1,1) (0,4,1,1) (1,1,1,1)
+    # con 96 tick per movimento e 4 movimenti per battuta:
+    #   0, 96, 96+72=168, 192, 288, 384
+    posizioni = sorted({n.pos for ns in note.values() for n in ns})[:6]
+    check('le prime sei posizioni seguono la griglia metrica',
+          posizioni == [0, 96, 168, 192, 288, 384], str(posizioni))
+
+    acc = WJ.armonia(db, 1)
+    check('la griglia comincia con Bb6',
+          acc[0].testo == 'Bb6' and acc[0].tick == 0,
+          f'{acc[0].testo} @ {acc[0].tick}')
+    check('e prosegue col rhythm changes Bb6 G7 C-7 F7',
+          [a.testo for a in acc[1:5]] == ['Bb6', 'G7', 'C-7', 'F7'],
+          str([a.testo for a in acc[1:5]]))
+    check('gli accordi portano una Sigla gia sciolta',
+          acc[3].sigla is not None and acc[3].sigla.intervalli == (0, 3, 7, 10),
+          str(acc[3].sigla and acc[3].sigla.intervalli))
+
+    testo = WJ.racconta(db, 1)
+    check('racconta() nomina esecutore e pezzo',
+          'Art Pepper' in testo and 'Anthropology' in testo, testo[:60])
+    check('e dichiara la conversione', 'note' in testo, testo[:120])
+
+
+def test_wjazz_conversione_dichiarata():
+    """Le suddivisioni 5 e 10 NON dividono 96: 19,2 e 9,6 tick.
+
+    Sono 7242 note su 200 809 in tutto il database, il 3,6%. La conversione
+    le arrotonda -- e deve DIRLO, come fa `midi.py`, perche' li' se ne va
+    proprio la micro-tempistica per cui questo database vale.
+    """
+    from delugexml import wjazz as WJ                       # noqa: PLC0415
+
+    db = ROOT / 'to-read' / 'MIDI' / 'wjazzd.db'
+    if not db.exists():
+        raise FileNotFoundError(str(db))
+
+    # un assolo con quintine dentro: si cerca quello, non si suppone
+    melid = WJ.con_suddivisione(db, 5)
+    if melid is None:
+        salta('test_wjazz_conversione_dichiarata', 'nessuna quintina')
+        return
+    _, conv = WJ.melodia(db, melid)
+    check('la conversione dichiara di aver arrotondato',
+          conv.arrotondate > 0 and not conv.esatta, str(conv))
+    check('e lo scarto massimo e sotto mezzo tick',
+          conv.scarto_massimo <= 0.5, f'{conv.scarto_massimo:.3f}')
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

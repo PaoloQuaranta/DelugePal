@@ -17,7 +17,7 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > generato il suo primo pezzo vero — un dub in sol minore, tre versioni,
 > ciascuna corretta dall'ascolto dell'utente. Verdetto sull'ultima: *«va
 > meglio, ma musicalmente ci sarebbe ancora moltissimo da dire»*.
-> **779 test.** Il progetto è **pubblicato su GitHub** senza il corpus.
+> **819 test.** Il progetto è **pubblicato su GitHub** senza il corpus.
 >
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
@@ -332,12 +332,14 @@ La tabella qui sopra si è fermata all'11 agosto. Da allora sono arrivate le
 fasi 6 e 7 — arranger, MIDI/CV, audio, e lo strato in linguaggio naturale —
 tutte verificate sul dispositivo: vedi §6-ter e `docs/FINDINGS.md`.
 
-**779 test** in `tests/test_all.py`, tutti verdi.
+**819 test** in `tests/test_all.py`, tutti verdi.
 
-⚠️ **Con il corpus sul disco sono 779 su 779; senza, sono 329 su 331 con 71
-SALTATI.** I salti non sono un guasto: `refs/` e `corpus_versions/` non sono
-più versionati (§9), e `salta()` distingue "manca materiale che non è del
-repo" da "il codice è rotto".
+⚠️ **Con il corpus sul disco sono 819 su 819; senza `refs/`, sono 369 su 371
+con 71 SALTATI.** I salti non sono un guasto: `refs/` e `corpus_versions/`
+non sono più versionati (§9), e `salta()` distingue "manca materiale che non è
+del repo" da "il codice è rotto". Un clone che non abbia nemmeno `to-read/`
+salta in più i due test che leggono `wjazzd.db` (§6-nonies); i test del
+dialetto di Weimar sono funzioni pure e girano sempre.
 
 **I due che FALLISCONO senza corpus, invece, sono un difetto piccolo e reale**
 — misurato il 17 agosto 2026, e la cifra scritta qui prima ("284 passano e 73
@@ -520,7 +522,7 @@ D:\DelugePal\
   out\                   tabella di formato, inventari, file generati. L'unico
                          versionato e' `format_table.json`: e' un artefatto
                          DERIVATO e non contiene musica
-  tests\test_all.py      779 test (329/331 + 71 salti senza corpus)
+  tests\test_all.py      819 test (369/371 + 71 salti senza corpus)
   .venv\                 mido + python-rtmidi, per il SysEx
 ```
 
@@ -864,6 +866,82 @@ come promemoria: `C6/9/E` ha due slash con due significati diversi — l'ultimo
 è il basso, quello dentro `6/9` è parte della sigla. I dieci test erano tutti
 verdi e non lo vedevano. È la quinta volta in questo progetto che il difetto
 sta in un caso che nessun test aveva pensato di scrivere.
+
+---
+
+## 6-nonies. Il lettore della Weimar Jazz Database — 17 agosto 2026
+
+Secondo passo del perimetro nuovo, e il primo lettore vero.
+`tools/delugexml/wjazz.py`, solo `sqlite3` della stdlib — nessuna dipendenza,
+come `midi.py` che si era scritto il lettore di SMF invece di tirarsi dentro
+`mido`.
+
+| per | funzione |
+|---|---|
+| cercare | `WJ.elenco(db, style=…, rhythmfeel=…, instrument=…)`, `WJ.valori(db, campo)` |
+| vedere | `WJ.racconta(db, melid)` |
+| le note | `WJ.melodia(db, melid)` → `(altezza → note, Conversione)` |
+| la griglia | `WJ.armonia(db, melid)` → `Accordo(tick, bar, beat, testo, sigla)` |
+| il dialetto | `WJ.sigla_weimar(testo)` |
+
+`melodia()` e `armonia()` hanno le forme che il progetto usa già, e
+`armonia()` restituisce `MU.Sigla` **sciolte** — cioè atterrano in
+`MU.armonia()` e in `MU.scrivi()`. Era il motivo per cui §6-octies veniva
+prima.
+
+### Il dialetto, e la misura che ha guidato il progetto
+
+Il 22% delle 30 548 occorrenze di accordo **non era leggibile** da
+`MU.sigla()`, e i fallimenti erano tutti sistematici: `j7` per maj7,
+l'alterazione **dopo** il grado (`79b` = 7♭9), `o` per il diminuito, `sus7`
+per 7sus4, `NC` per nessun accordo.
+
+⚠️ **La verifica che contava non era quel 22%, ma l'altro 78%.** Un simbolo
+che si legge non è un simbolo che si legge *giusto*, e un falso positivo lì
+sarebbe stato muto. Misurato una per una: le code comuni ai due dialetti —
+`7`, `-7`, `-`, `6`, `-6`, `sus`, `m7b5`, `69`, `+`, `7alt` — vogliono dire
+la stessa cosa. **È quella misura che ha deciso l'architettura**:
+`sigla_weimar()` prova prima la lettura canonica e scende alla grammatica di
+Weimar solo quando fallisce, invece di riscrivere una grammatica che esiste.
+
+Copertura finale: **419 simboli distinti su 419, zero fallimenti**; le 401
+caselle `NC` tornano `None`.
+
+**Il dialetto sta in `wjazz.py`, non in `MU.SIGLE`.** `SIGLE` è la notazione
+da lead sheet, comune a tutte le fonti; le abitudini di un database solo,
+messe lì, la sporcherebbero per sempre. Vale come regola per i lettori che
+verranno.
+
+### Cosa è annotato e cosa no
+
+La tabella `melody` porta **la posizione metrica** (`bar/beat/tatum/division`)
+**accanto** al tempo reale (`onset` in secondi). Quindi la metrica non va
+dedotta: è scritta. E **la differenza fra le due è la micro-tempistica**, che
+è il motivo per cui questo database vale più di una raccolta di MIDI.
+
+⚠️ **Quella misura non è ancora stata fatta.** Il lettore converte la griglia;
+confrontare gli onset con la griglia — cioè ricavare lo swing ratio e il
+laid-back *misurati* per stile e per `rhythmfeel` — è il passo successivo, ed
+è quello che darebbe numeri veri alle tabelle `[WEB]` di `docs/MUSICA.md` e
+un valore misurato a `set_swing()`.
+
+⚠️ `division` vale 5 o 10 per 7242 note su 200 809 (il 3,6%) e 96 non si
+divide per 5: quelle si arrotondano, e `Conversione` lo dichiara.
+
+### Un difetto trovato dai test, che vale come promemoria
+
+La prima versione estraeva la fondamentale con `MU.sigla()`. Ma `MU.sigla()`
+è un parser di **accordi interi**: su `C7` restituiva la fondamentale *e si
+mangiava la settima*, lasciando una triade. Quindici test rossi in una volta.
+
+È la stessa famiglia di «un nome osservato nel posto sbagliato è comunque il
+posto sbagliato»: la funzione era quella giusta per il vocabolario delle
+altezze e quella sbagliata per estrarre un prefisso.
+
+**Il materiale che resta in `to-read/MIDI/`**, ora che il primo è aperto:
+`groove-v1.0.0-midionly.zip` (Groove MIDI, velocity e microtiming per genere,
+reggae compreso), `POP909`, `maestro`, `The_Magic_of_MIDI`, le librerie per
+genere e `(aq) Dub Beat Builder`.
 
 ---
 

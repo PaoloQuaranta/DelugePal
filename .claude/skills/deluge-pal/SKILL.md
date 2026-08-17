@@ -281,6 +281,44 @@ dice quante note ha arrotondato e di quanto.
 Le altezze **coincidono**: il numero di nota MIDI è già la `y` del Deluge,
 nessuno scarto di ottava. Verificato, non supposto.
 
+## Importare dalla Weimar Jazz Database
+
+`from delugexml import wjazz as WJ` — 456 assoli jazz trascritti a mano, con
+**gli accordi e i battiti allineati**. È l'unica fonte che porta la linea
+suonata *insieme* all'accordo su cui è suonata. Solo `sqlite3`, stdlib.
+
+Il database sta in `to-read/MIDI/wjazzd.db`, che **non è versionato**: i test
+che lo usano saltano se non c'è, come quelli del corpus.
+
+| per | usare |
+|---|---|
+| cercare un assolo | `WJ.elenco(db, style='BEBOP', instrument='as')` — etichette, non testo libero |
+| quali etichette esistono | `WJ.valori(db, 'style')`, `'rhythmfeel'`, `'instrument'`… |
+| vedere cosa c'è | `WJ.racconta(db, melid)` |
+| le note | `WJ.melodia(db, melid)` → `(altezza -> note, Conversione)`, stessa forma di `MI.melodia()` |
+| la griglia armonica | `WJ.armonia(db, melid)` → lista di `Accordo(tick, bar, beat, testo, sigla)`, con la `MU.Sigla` **già sciolta** |
+| una sigla del dialetto | `WJ.sigla_weimar('Ebj7911#')` |
+
+⚠️ **Gli accordi sono in un dialetto**, e le differenze sono sistematiche:
+`j7` è maj7, l'alterazione sta **dopo** il grado (`79b` = 7♭9), `o` è il
+diminuito, `sus7` è 7sus4. `sigla_weimar()` prova prima la lettura canonica —
+è **misurato** che le code comuni (`7`, `-7`, `-`, `6`, `sus`, `m7b5`, `7alt`)
+vogliono dire la stessa cosa nei due dialetti — e scende alla grammatica di
+Weimar solo quando quella fallisce. Copertura: **419 simboli distinti su 419,
+30 548 occorrenze, zero fallimenti**; le 401 caselle `NC` tornano `None`, che
+vuol dire "qui non c'è un accordo", non "non ho saputo leggere".
+
+⚠️ **Il dialetto sta in `wjazz.py`, non in `MU.SIGLE`**, ed è una scelta:
+`SIGLE` è la notazione da lead sheet, comune a tutte le fonti. Le abitudini di
+un database solo, messe lì, la sporcherebbero per sempre. Vale per i lettori
+che verranno (MusicXML, kern).
+
+⚠️ **Le posizioni vengono dalla griglia metrica annotata** (`bar/beat/tatum`),
+non dagli onset in secondi. Gli onset sono l'esecuzione vera e servono a
+*misurare* lo scarto, non a collocare le note — quella misura non è ancora
+fatta. `division` vale 5 o 10 per il 3,6% delle note e 96 non si divide per 5:
+lì `Conversione` dichiara l'arrotondamento, come in `midi.py`.
+
 ## Quando qualcosa non si vede sul dispositivo
 
 Quattro volte su quattro il contenuto era giusto e mancava uno stato di
