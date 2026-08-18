@@ -190,9 +190,9 @@ la SD — prima di poterci scrivere: non c'è modo di farlo al volo via SysEx.
 | **forma, densità, sviluppo, transizioni, revisione** — tutto ciò che dura più di una battuta | `music-composition` (installata il 17 agosto 2026, 1,3 MB in 106 file). Si parte **sempre** da `references/00-navigation.md` e si caricano **1-3 file**, non di più |
 | progressioni, teoria, e MIDI da rileggere con `midi.py` | `music-composer` — piccola (62 KB): utile per i suoi `scripts/*.py`, non come prosa |
 | sintesi, filtri, timbro | `dsp-recipes` |
-| **come si compone davvero in un genere** | `docs/MUSICA.md` — pattern per genere, velocity groove, arco di densità, e le correzioni ricevute |
+| **come si compone davvero in un repertorio** | `docs/MUSICA.md` per lo schema e ciò che vale per tutti, poi **la sola scheda che serve** in `docs/repertori/`. Mai tutte: l'indice in fondo a `MUSICA.md` dice cosa c'è e cosa manca, casella per casella |
 
-⚠️ **Su reggae e dub comanda `docs/MUSICA.md`, non le skill.** Misurato il 17
+⚠️ **Su reggae e dub comanda `docs/repertori/reggae-dub.md`, non le skill.** Misurato il 17
 agosto 2026: `music-composer` non li ha affatto, `music-composition` ha quattro
 righe in tutto e sullo skank dice «precisely on 2 and 4», che è la conta in
 half-time e su una griglia a 16 passi **mette lo skank nel posto sbagliato**.
