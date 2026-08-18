@@ -5558,6 +5558,59 @@ def test_bur_in_comune():
           WJ.in_bur is MU.in_bur)
 
 
+def test_groove_prefisso():
+    """`reggae` prende `reggae/slow` e NON `latin/reggaeton`.
+
+    La sottostringa e' la regola sbagliata, ed e' scritta come controesempio
+    nella casella 6 di `docs/repertori/jazz.md`. Nucleo puro: nessun file.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    check('un prefisso prende se stesso', GR.per_prefisso('reggae', 'reggae'))
+    check('e prende la sottocategoria',
+          GR.per_prefisso('reggae/slow', 'reggae'))
+    check('ma NON una parola che lo contiene',
+          not GR.per_prefisso('latin/reggaeton', 'reggae'))
+    check('ne una che ci somiglia',
+          not GR.per_prefisso('latin/brazilian-sambareggae', 'reggae'))
+    check('jazz prende jazz/funk', GR.per_prefisso('jazz/funk', 'jazz'))
+    check('e non prende funk', not GR.per_prefisso('funk', 'jazz'))
+
+
+def test_groove_inventario():
+    """Lettura vera del dataset. SALTA se non c'e': non e' roba del repo.
+
+    I conteggi vengono dal dataset stesso, che qui e' l'artefatto in esame,
+    e sono lo stato del disco del 18 agosto 2026.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    base = ROOT / 'to-read' / 'MIDI' / 'groove-v1.0.0-midionly' / 'groove'
+    if not (base / GR.INVENTARIO).exists():
+        raise FileNotFoundError(str(base / GR.INVENTARIO))
+
+    tutte = GR.elenco(base)
+    check('il dataset ha 1150 esecuzioni', len(tutte) == 1150, str(len(tutte)))
+
+    jazz = GR.elenco(base, style='jazz')
+    check('101 esecuzioni jazz', len(jazz) == 101, str(len(jazz)))
+    beat = GR.elenco(base, style='jazz', beat_type='beat')
+    check('di cui 50 `beat`', len(beat) == 50, str(len(beat)))
+    check('e 5 batteristi', len({e.drummer for e in jazz}) == 5,
+          str(sorted({e.drummer for e in jazz})))
+
+    reggae = GR.elenco(base, style='reggae')
+    check('20 esecuzioni reggae', len(reggae) == 20, str(len(reggae)))
+    check('ma UN batterista sole quattro `beat`',
+          len({e.drummer for e in reggae}) == 2
+          and len([e for e in reggae if e.beat_type == 'beat']) == 4,
+          f'{sorted({e.drummer for e in reggae})}, '
+          f'{len([e for e in reggae if e.beat_type == "beat"])} beat')
+    check('e nessuna e reggaeton',
+          all(not e.style.startswith('latin') for e in reggae),
+          str(sorted({e.style for e in reggae})))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
