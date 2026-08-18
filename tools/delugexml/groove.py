@@ -409,9 +409,15 @@ def scala(base: Path | str, *, style: str | None = None,
     fuori = {}
     for nome, vs in raccolta.items():
         vs.sort()
-        # sotto le quattro battute i quartili interpolati non direbbero
-        # niente di sensato: si tiene il minimo, che almeno e' un dato vero.
-        q = statistics.quantiles(vs, n=4) if len(vs) >= 4 else [vs[0]] * 3
+        # sotto i quattro COLPI (non battute: e' len(vs), il conteggio dei
+        # colpi raccolti, non una misura di tempo) i quartili interpolati di
+        # statistics.quantiles() non direbbero niente di sensato -- e con
+        # pochi punti possono anche cadere sotto la mediana, che e' calcolata
+        # a parte. Il ripiego deve preservare q1 <= mediana <= q3 SEMPRE:
+        # il minimo e il massimo lo fanno per costruzione (mediana e' uno
+        # dei vs, quindi vs[0] <= mediana <= vs[-1]), mentre collassare
+        # entrambi al minimo no -- vedi il rilievo di revisione sul Task 6.
+        q = statistics.quantiles(vs, n=4) if len(vs) >= 4 else [vs[0], 0, vs[-1]]
         fuori[nome] = Livelli(
             strumento=nome, mediana=int(statistics.median(vs)),
             q1=int(q[0]), q3=int(q[2]), minimo=vs[0], massimo=vs[-1],

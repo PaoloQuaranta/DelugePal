@@ -5901,6 +5901,20 @@ def test_groove_scala():
           max(v.batteristi for v in reggae.values()) == 2,
           str({k: v.batteristi for k, v in reggae.items()}))
 
+    # l'invariante q1 <= mediana <= q3 su jazz['ride'] (sopra) non prova
+    # niente sul ramo dei campioni piccoli: 7422 colpi non toccano mai il
+    # ripiego sotto i 4. Il reggae si', e ci sta apposta 'crash' con SOLI
+    # DUE colpi -- e' il caso che il rilievo di revisione ha trovato rotto.
+    rotte = {k: (v.q1, v.mediana, v.q3) for k, v in reggae.items()
+             if not (v.q1 <= v.mediana <= v.q3)}
+    check('i quartili sono in ordine su OGNI riga del reggae, comprese '
+          'quelle con pochissimi colpi (es. crash, 2 colpi)',
+          not rotte, str(rotte))
+    check('e il reggae ha davvero una riga sotto i 4 colpi, altrimenti il '
+          'check sopra non proverebbe niente',
+          any(v.colpi < 4 for v in reggae.values()),
+          str({k: v.colpi for k, v in reggae.items() if v.colpi < 4}))
+
 
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
