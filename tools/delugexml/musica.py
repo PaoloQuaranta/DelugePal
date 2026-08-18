@@ -189,6 +189,51 @@ def passi(pattern: str, *, velocity: int = VEL_COLPO,
     return out
 
 
+def applica_groove(note, profilo, dove: str) -> dict[str, object]:
+    """Posa velocity e residuo misurati su un pattern uscito da `passi()`.
+
+    Il pattern resta la stringa leggibile che e'; il feel arriva da
+    un'esecuzione vera. `dove` e' il nome GM dello strumento nel profilo.
+
+    ⚠️ LO SWING NON E' QUI. Il profilo porta il solo RESIDUO -- il ride che
+    spinge rispetto al rullante che tiene indietro -- perche' lo swing lo fa
+    `song.set_swing()`, che e' di song e vale anche per basso e comping. Un
+    template che portasse anche lo swing lo farebbe applicare due volte.
+
+    ⚠️ NON INVENTA. Se il pattern chiede un colpo su un passo dove quel
+    batterista non ha mai suonato, la nota resta com'e' e il passo finisce
+    in `senza_appoggio`. Riempire i buchi da se' sarebbe inventare con la
+    benedizione della funzione scritta per impedirlo.
+
+    Ritorna un rapporto (regola 4: un'operazione silenziosa non e'
+    correggibile).
+    """
+    if dove not in profilo.passi:
+        raise ValueError(
+            f'lo strumento {dove!r} non e\' nel profilo {profilo.id!r}: '
+            f'ci sono {sorted(profilo.passi)}')
+    per_passo = {p.passo: p for p in profilo.passi[dove]}
+
+    toccate = 0
+    senza = []
+    for n in note:
+        passo = (n.pos // TICK_PER_PASSO) % 16
+        misura = per_passo.get(passo)
+        if misura is None:
+            if passo not in senza:
+                senza.append(passo)
+            continue
+        # `Note` e' una dataclass MUTABILE: si scrivono i campi.
+        # `max(0, ...)` perche' un residuo negativo sul primo passo manderebbe
+        # la nota prima dell'inizio della clip, che il Deluge non sa leggere.
+        n.velocity = misura.velocity
+        n.pos = max(0, n.pos + int(round(misura.scarto)))
+        toccate += 1
+
+    return {'strumento': dove, 'da': profilo.id, 'toccate': toccate,
+            'senza_appoggio': sorted(senza)}
+
+
 def durata_in_tick(spec: str | int) -> int:
     """`'1/8'` -> 48 tick. Un intero passa invariato, gia' in tick."""
     if isinstance(spec, int):

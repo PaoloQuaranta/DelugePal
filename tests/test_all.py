@@ -5916,6 +5916,64 @@ def test_groove_scala():
           str({k: v.colpi for k, v in reggae.items() if v.colpi < 4}))
 
 
+def test_applica_groove():
+    """Il template posato su un pattern di `passi()`.
+
+    ⚠️ E il RIFIUTO che lo fa valere: su un passo dove quel batterista non ha
+    mai suonato, la funzione NON inventa una velocity. E' lo stesso cancello
+    della sigla sconosciuta in `MU.armonia()`, e serve alla stessa cosa --
+    un template che riempie i buchi da se' sarebbe di nuovo inventare con la
+    benedizione della riga scritta per impedirlo.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    prof = GR.Profilo(
+        id='finto/1', drummer='drummerX', style='jazz', bpm=120, bur=1.6,
+        battute=1,
+        passi={'ride': [GR.Passo(passo=0, velocity=104, scarto=2.0, colpi=8),
+                        GR.Passo(passo=4, velocity=78, scarto=-1.0, colpi=8)]})
+
+    note = MU.passi('x...x...........')
+    rapporto = MU.applica_groove(note, prof, dove='ride')
+
+    check('due note toccate', rapporto['toccate'] == 2, str(rapporto))
+    check('la prima prende velocity e scarto',
+          note[0].velocity == 104 and note[0].pos == 2,
+          f'{note[0].velocity} {note[0].pos}')
+    check('la seconda tiene indietro',
+          note[1].velocity == 78 and note[1].pos == MU.TICK_PER_PASSO * 4 - 1,
+          f'{note[1].velocity} {note[1].pos}')
+    check('e nessun passo e rimasto senza appoggio',
+          rapporto['senza_appoggio'] == [], str(rapporto['senza_appoggio']))
+
+    orfane = MU.passi('x.x.x...........')
+    r2 = MU.applica_groove(orfane, prof, dove='ride')
+    check('il passo 2 non ha appoggio e lo DICE',
+          r2['senza_appoggio'] == [2], str(r2['senza_appoggio']))
+    check('e quella nota resta com era, non inventata',
+          orfane[1].velocity == 90 and orfane[1].pos == MU.TICK_PER_PASSO * 2,
+          f'{orfane[1].velocity} {orfane[1].pos}')
+
+    check('uno strumento assente dal profilo e un errore che elenca',
+          _raises(lambda: MU.applica_groove(MU.passi('x...'), prof,
+                                            dove='rullante'), ValueError))
+
+    # ⚠️ il residuo negativo sul PRIMO passo manderebbe la nota prima
+    # dell'inizio della clip, che il Deluge non sa leggere: va fermata a 0.
+    presto = GR.Profilo(
+        id='finto/2', drummer='drummerX', style='jazz', bpm=120, bur=1.6,
+        battute=1,
+        passi={'kick': [GR.Passo(passo=0, velocity=100, scarto=-5.0,
+                                 colpi=8)]})
+    bordo = MU.passi('x...............')
+    MU.applica_groove(bordo, presto, dove='kick')
+    check('un residuo negativo sul primo passo si ferma a zero',
+          bordo[0].pos == 0, str(bordo[0].pos))
+    check('ma la velocity la prende lo stesso', bordo[0].velocity == 100,
+          str(bordo[0].velocity))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
