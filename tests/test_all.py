@@ -5707,7 +5707,12 @@ def test_groove_bur_nucleo():
 
     Un movimento contribuisce solo se dentro la finestra c'e' ESATTAMENTE un
     colpo: due colpi vogliono dire semicrome, e li' una coppia di crome non
-    c'e'. E' la stessa cautela di `WJ.levare_da_dati()`.
+    c'e'. Parentela di intento con `WJ.levare_da_dati()`, non identita': la
+    Weimar richiede DUE eventi totali nel movimento col primo su tatum 1,
+    garanzia piu' stretta di questa, che conta solo i colpi dentro la
+    finestra e ignora quanti ce ne siano fuori. Su una batteria -- polifonica,
+    a differenza degli assoli monofonici della Weimar -- la garanzia piu'
+    debole ammette qualche falso positivo in piu'.
     """
     from delugexml import groove as GR                      # noqa: PLC0415
 
@@ -5746,6 +5751,30 @@ def test_groove_bur_nucleo():
 
     check('senza coppie il BUR e None',
           GR.bur_da_posizioni([0.0, 96.0, 192.0], ppq) is None)
+
+    # posizioni negative e non a partire da zero: e' la forma esatta in cui
+    # il Task 5 le passera' (gia' traslate). Il raggruppamento per movimento
+    # usa floor-division (`p // ppq`): con il troncamento (`int(p / ppq)`)
+    # un movimento su due perderebbe il proprio levare, che finirebbe
+    # accorpato nel movimento accanto -- vedi la nota nel codice.
+    negativo = []
+    for k in range(1, 9):               # movimenti -8..-1, mai zero
+        negativo += [-k * ppq, -k * ppq + ppq / 2]
+    lev_neg = GR.levare_da_posizioni(negativo, ppq)
+    check('posizioni negative danno lo stesso levare a 0,5 e nel movimento giusto',
+          len(lev_neg) == 8 and all(abs(v - 0.5) < 1e-9 for v in lev_neg),
+          str(lev_neg))
+    check('e in BUR fa 1 anche sul negativo',
+          abs(GR.bur_da_posizioni(negativo, ppq) - 1.0) < 1e-9,
+          str(GR.bur_da_posizioni(negativo, ppq)))
+
+    # il bordo superiore ESATTO della finestra (0,75): e' la semicroma che
+    # FINESTRA_LEVARE dichiara di voler escludere, e un colpo isolato li'
+    # non deve MAI passare per levare, anche da solo in finestra.
+    bordo_esatto = [0.0, 0.75 * ppq]
+    check('un colpo isolato esattamente sul bordo (0,75) non e il levare',
+          GR.levare_da_posizioni(bordo_esatto, ppq) == [],
+          str(GR.levare_da_posizioni(bordo_esatto, ppq)))
 
 
 if __name__ == '__main__':

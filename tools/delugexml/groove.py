@@ -200,13 +200,23 @@ def levare_da_posizioni(posizioni, ppq: float, *,
     """
     per_movimento: dict[int, list[float]] = {}
     for p in posizioni:
+        # floor-division, non troncamento: per p negativi (li' dove il Task
+        # 5 li passera', gia' traslati) -144 // 96 fa -2, non -1 -- il resto
+        # p % ppq segue la stessa convenzione e la fase resta corretta.
         per_movimento.setdefault(int(p // ppq), []).append((p % ppq) / ppq)
     fuori = []
     for fasi in per_movimento.values():
         if not any(f < finestra[0] for f in fasi):
             continue                    # senza battere non e' una coppia
+        # il bordo superiore resta CHIUSO qui: un colpo esattamente sul
+        # bordo (0,75) conta ancora per il conteggio, perche' e' cosi' che
+        # la semicroma a quattro colpi (0, 0,25, 0,5, 0,75) finisce con DUE
+        # colpi in finestra e si scarta -- vedi il test 'semicrome'.
         dentro = [f for f in fasi if finestra[0] <= f <= finestra[1]]
-        if len(dentro) == 1:
+        # ma da SOLO, un colpo esattamente sul bordo non e' mai il levare:
+        # e' la semicroma che FINESTRA_LEVARE dichiara di voler escludere.
+        # Il confronto e' quindi stretto solo qui, all'accettazione finale.
+        if len(dentro) == 1 and dentro[0] < finestra[1]:
             fuori.append(dentro[0])
     return fuori
 
