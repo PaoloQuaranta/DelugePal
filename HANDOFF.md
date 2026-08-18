@@ -1,6 +1,6 @@
 ﻿# HANDOFF — Deluge Pal
 
-**Data:** 17 agosto 2026
+**Data:** 18 agosto 2026
 **Progetto:** `D:\DelugePal` (fino al 14 agosto si chiamava `deluge-xml-workflow`)
 **Pubblico su:** <https://github.com/PaoloQuaranta/DelugePal>, GPL-3.0 — vedi §9
 **SD card:** `E:` quando è nel lettore del PC (spesso è nel Deluge, quindi assente)
@@ -17,7 +17,10 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > generato il suo primo pezzo vero — un dub in sol minore, tre versioni,
 > ciascuna corretta dall'ascolto dell'utente. Verdetto sull'ultima: *«va
 > meglio, ma musicalmente ci sarebbe ancora moltissimo da dire»*.
-> **850 test.** Il progetto è **pubblicato su GitHub** senza il corpus.
+> **859 test.** Il progetto è **pubblicato su GitHub** senza il corpus.
+> Il 17-18 agosto `docs/MUSICA.md` è stato **rifondato sullo schema neutro**
+> (§6-duodecies): il reggae non è più la forma del documento ma un caso
+> compilato fra molti, e l'**indice** dice cosa manca a quale repertorio.
 >
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
@@ -37,7 +40,19 @@ ascoltato il terzo tentativo di dub:
 > moltissimo materiale e in una prossima chat ci occuperemo di costruire un
 > database serio.»
 
-È il lavoro nominato, e tutto il resto è secondario. Cosa c'è già in mano:
+È il lavoro nominato, e tutto il resto è secondario.
+
+**Da dove si comincia, adesso che lo schema esiste: dall'indice in fondo a
+`docs/MUSICA.md`.** Non serve una lista di cose da fare a parte — ogni casella
+vuota dichiara *cosa servirebbe per riempirla*, quindi l'agenda si legge dalla
+matrice. Le due più vicine a chiudersi hanno il materiale **già sul disco**:
+
+| casella | cosa la chiude, e dov'è |
+|---|---|
+| **jazz 6** (dinamica), e i `[WEB]` della **6 del reggae** | il **Groove MIDI**, `to-read/MIDI/groove-v1.0.0-midionly/`: 1150 esecuzioni con velocity e microtiming di batteristi veri, **101 jazz e 20 reggae**. Rimpiazzerebbe con `[MIS]` i numeri di velocity presi dal web, che l'ascolto ha già dovuto correggere una volta |
+| **jazz 8** (melodia e ornamentazione) | `wjazzd.db`, già leggibile con `WJ.melodia()`/`WJ.armonia()`: 456 assoli con **gli accordi allineati alla linea**, guardati finora solo per lo swing |
+
+Cosa c'è già in mano:
 
 | | |
 |---|---|
@@ -333,10 +348,13 @@ La tabella qui sopra si è fermata all'11 agosto. Da allora sono arrivate le
 fasi 6 e 7 — arranger, MIDI/CV, audio, e lo strato in linguaggio naturale —
 tutte verificate sul dispositivo: vedi §6-ter e `docs/FINDINGS.md`.
 
-**850 test** in `tests/test_all.py`, tutti verdi.
+**859 test** in `tests/test_all.py`, tutti verdi. I nove aggiunti il 17-18
+agosto sono quelli dello schema neutro (6-duodecies): leggono file
+versionati, quindi girano sempre, corpus o no.
 
-⚠️ **Con il corpus sul disco sono 850 su 850; senza `refs/`, sono 390 su 392
-con 71 SALTATI.** I salti non sono un guasto: `refs/` e `corpus_versions/`
+⚠️ **Con il corpus sul disco sono 859 su 859; senza `refs/`, sono 399 su 401
+con 71 SALTATI** (derivato: i nove test nuovi non toccano `refs/`; non
+rimisurato spostando il corpus). I salti non sono un guasto: `refs/` e `corpus_versions/`
 non sono più versionati (§9), e `salta()` distingue "manca materiale che non è
 del repo" da "il codice è rotto". Un clone che non abbia nemmeno `to-read/`
 salta in più i due test che leggono `wjazzd.db` (§6-nonies); i test del
@@ -525,7 +543,7 @@ D:\DelugePal\
   out\                   tabella di formato, inventari, file generati. L'unico
                          versionato e' `format_table.json`: e' un artefatto
                          DERIVATO e non contiene musica
-  tests\test_all.py      850 test (390/392 + 73 salti senza corpus)
+  tests\test_all.py      859 test (399/401 + 71 salti senza corpus)
   .venv\                 mido + python-rtmidi, per il SysEx
 ```
 
@@ -1077,6 +1095,139 @@ In `/SONGS/DelugePal/`: `SWTEST01`-`SWTEST05` (la bisezione di `isPlaying`),
 dispositivo**: sono la prova, non ripulirle), `SWJAZZ01` (sbagliata,
 intervallo 5) e `SWJAZZ02` (giusta). Le prime e `SWJAZZ01` si possono
 togliere; le `SWDIV` no.
+
+---
+
+## 6-duodecies. La rifondazione di `MUSICA.md` — 17-18 agosto 2026
+
+Chiude il punto lasciato aperto dalla sessione dello swing: *«`MUSICA.md` è
+ancora a forma di batteria reggae»*. Il documento era cresciuto attorno a un
+solo genere e non reggeva il perimetro vero — jazz, classica, barocca, antica,
+contemporanei.
+
+**Lo schema neutro sono undici caselle formulate come domande**, scelte col
+criterio che dovessero sopravvivere **sia a Josquin sia alla jungle**:
+
+    1 Cos'è, e cosa non è      5 Ruoli e spartizione      9 Forma e densità
+    2 Metro e griglia          6 Dinamica                10 Sul Deluge
+    3 Tempo                    7 Armonia                 11 Trappole del generatore
+    4 Feel                     8 Melodia e ornamentazione
+
+`MUSICA.md` tiene lo schema, il **comune** e l'**indice**; ogni repertorio è
+una scheda in `docs/repertori/`. Si legge il comune più **la sola scheda che
+serve**, mai tutte.
+
+**Il guadagno non è l'ordine, è la collisione.** A documento organizzato per
+genere, l'*inégalité* barocca e lo swing del jazz non si sfiorerebbero mai — e
+sono la stessa domanda, dove cade il levare dentro il movimento, fatta a due
+repertori. Lo schema le mette nella stessa casella 4.
+
+### Due invarianti che un test tiene in piedi
+
+Le undici caselle esistono e sono in ordine in ogni scheda; e **l'indice
+coincide con lo stato che ogni scheda dichiara di sé**. Lo stato si legge dalla
+**prima riga non vuota** di ogni casella: `**Vuota.**` (o `**Vuota, …**`),
+`**Parziale.**` esatto, qualunque altra cosa = piena. Provato rompendolo: il
+test diventa rosso e nomina la casella. **La scheda è la fonte, l'indice ne è
+la vista** — quando divergono è l'indice a sbagliare.
+
+### La riga «nel frattempo», e perché è il pezzo che conta
+
+Una casella vuota dichiara *cosa servirebbe* per riempirla, ed è ciò che rende
+l'indice un'agenda. Ma chi apre i file per comporre **stasera** non ha un corpus
+da leggere: ha un pezzo da scrivere, e una casella che dice solo «servirebbe
+MusicXML» **lo lascia libero di inventare**. Ogni casella non piena porta quindi
+una riga che dice dove prendere la risposta provvisoria e con che fiducia —
+chiedere a una skill (nominando il file e segnando `[WEB]`), chiedere
+all'utente, **lasciare la parte fuori**, o prendere ciò che dà una casella
+sorella.
+
+⚠️ **Una riga «nel frattempo» che prescrive ciò che la libreria non sa fare è
+peggio di nessuna riga.** È successo in revisione: quella della casella 7 del
+jazz mandava a realizzare l'alternanza A/B dei voicing del ii-V-I, che è giusta
+musicalmente ed è scritta nella skill — ma `MU.VOICING` ha **una sola** forma
+senza fondamentale e `voci()` ordina sempre dal basso, quindi la "B" non è
+raggiungibile. Chi la seguiva sceglieva un voicing qualunque, lo chiamava B, e
+**inventava con la benedizione della riga scritta per impedirlo.** Ora manda
+alle altezze a mano con `MU.accordi()` e nomina la strada da non prendere.
+
+### Il cancello, e cosa è costato davvero
+
+La regola della migrazione era **le frasi si spostano come sono**: il contenuto
+era stato corretto due volte dall'ascolto dell'utente, e riformularlo avrebbe
+perso proprio le correzioni. Delle 745 righe smontate, **una sola era contenuto
+vero perduto** — la regola *«ogni volta che una proposta viene corretta, la
+lezione va qui, con la data»*, che sciogliendo il registro era rimasta
+**dimostrata in quattro blocchi ma non più prescritta**. Rimessa.
+
+L'istruttoria completa, riga per riga, è in
+`docs/superpowers/2026-08-17-musica-cancello-migrazione.md`, conservata apposta:
+è l'unica prova che smontando il documento non si è perso niente.
+
+**Tre cose di metodo che valgono oltre questo lavoro:**
+
+- **assemblare un file estraendo intervalli di righe invece di ribatterle rende
+  la letteralità *misurabile*** invece che dichiarata. È così che una revisione
+  ha potuto verificare «quattordici diff di sola inserzione, zero righe
+  riscritte» invece di crederci;
+- **quella regola protegge il contenuto, non le coordinate della vecchia
+  impaginazione.** «In fondo alla sezione», «più sopra» sono indirizzi: se
+  diventano falsi si correggono, ed è un difetto che la regola non era fatta per
+  conservare;
+- **uno snippet può essere una prova, non un esempio.** Nella casella 10 del
+  reggae resta `S.set_swing(doc, 57)` **senza `figura=`**, cioè inerte: non è
+  stato corretto perché la casella 4 dice «*fu scritto senza*», e aggiustarlo
+  renderebbe falsa quella frase. La cautela sta nella prosa.
+
+⚠️ **Una trappola di Markdown da conoscere prima di scrivere queste schede:**
+una riga che comincia con `>` e uno spazio apre una **citazione** in CommonMark,
+e le righe successive ci entrano dentro come continuazione. Un confronto come
+«oltre 240 BPM» scritto col segno di maggiore e mandato a capo all'inizio di una
+riga si mangia mezza casella, e si vede solo a pagina resa.
+
+### Il Groove MIDI: la versione giusta è quella che c'è
+
+`info.csv` ha una colonna `audio_filename` popolata su 1090 righe su 1150:
+**la differenza fra midionly e versione completa è l'audio delle esecuzioni**,
+non un formato diverso. Per la casella 6 — velocity e microtiming — **il MIDI è
+completo e l'audio non aggiunge niente**: porta nota, velocity e l'onset esatto
+di ogni colpo, e il microtiming *è* lo scarto di quegli onset dalla griglia.
+
+L'audio servirebbe per **un'altra cosa**: il **break tagliato** di jungle e DnB,
+che vive in `audio.py` — un'esecuzione a kit intero *è* un break, e siccome il
+MIDI dà l'onset esatto di ogni colpo i tagli si farebbero **su posizioni note**
+invece che per rilevamento dei transienti. Per cavarne colpi singoli puliti
+invece serve poco: è una ripresa a kit intero, quindi un rullante estratto porta
+dentro il charleston. Jungle e DnB stanno in fondo alle priorità: **non
+riscaricare niente adesso.**
+
+### Gli archivi non vanno decompressi
+
+`zipfile`, `tarfile` e `gzip` sono **stdlib**, quindi rientrano nella regola di
+non aggiungere dipendenze: si elencano e si leggono i membri di un archivio
+senza estrarre nulla. Provato su `POP909.zip` — 2898 MIDI elencati, uno letto in
+memoria e dato a `midi.py`, che ha risposto col suo rapporto di conversione.
+
+L'unico attrito: `MI.leggi()` vuole un **percorso**, quindi il membro va
+appoggiato in un file temporaneo. Si toglie in tre righe — `leggi()` fa già
+`Path(path).read_bytes()` al suo interno, basta affiancargli un `leggi_bytes()`.
+**Non fatto**, è un'offerta rimasta aperta.
+
+### Cosa NON rifare, e i residui dichiarati
+
+- **non ricopiare un numero in due file.** Il vincolo è che un numero vive dove
+  serve a prendere una decisione musicale; altrove è un rimando. È stato violato
+  e corretto tre volte in questo lavoro;
+- **non fidarsi di cosa contiene una skill senza aprirla.** `music-composition`
+  non ha *niente* su ska, rocksteady e dancehall — zero occorrenze in 106 file —
+  e **non ha una sezione POSTBOP**, che è lo stile più numeroso della misura
+  dello swing. Le righe «nel frattempo» del reggae non ci mandano apposta;
+- tre residui piccoli e dichiarati: la casella 10 del reggae letta **da sola**
+  mostra ancora lo snippet inerte (di proposito, vedi sopra); il corpo della
+  casella 8 del reggae usa il nome corto `(aq) Dub Beat Builder` mentre sul disco
+  è `(aq) Dub Beat Builder - Demo`; e il contorno del Groove MIDI (percorso,
+  data, avvertenza sul `.gitignore`) compare in entrambe le schede — il *numero*
+  no, ed è il contorno a rendere ogni scheda leggibile da sola.
 
 ---
 
