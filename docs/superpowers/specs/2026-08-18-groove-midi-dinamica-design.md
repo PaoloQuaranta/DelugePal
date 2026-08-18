@@ -167,10 +167,19 @@ Ricalca il precedente collaudato: `wjazz.py` legge un corpus e non tocca mai un
 ### `tools/delugexml/groove.py` — legge, non scrive
 
 Riceve la radice del dataset come argomento, esattamente come `WJ` riceve il
-percorso del `.db`, così i test saltano quando `to-read/` non c'è. Non importa
-`parser` né `musica`. Riusa `MI.leggi()` e `MI.GM_PERCUSSIONI`: **nessun
-secondo vocabolario di nomi di percussione**, che è la regola contro la
-duplicazione applicata ai nomi invece che ai numeri.
+percorso del `.db`, così i test saltano quando `to-read/` non c'è. **Non tocca
+mai un `Document`**: è quello il confine, non l'elenco degli import. Riusa
+`MI.leggi()` e `MI.GM_PERCUSSIONI` — **nessun secondo vocabolario di nomi di
+percussione** — e `musica` per il vocabolario comune, come già fa `wjazz.py`.
+
+⚠️ **L'aritmetica del BUR è già scritta, e sta nel posto sbagliato per due
+lettori.** `in_bur()` — `BUR = p / (1 − p)`, 0,5 dritto e 0,667 terzina — vive
+oggi in `wjazz.py:497`. `groove.py` ha bisogno della stessa conversione, e le
+alternative sono tre: duplicarla (vietato), far dipendere un lettore di corpus
+dall'altro (assurdo: sono corpora diversi), o **promuoverla in `musica.py`**,
+che è il vocabolario musicale comune che `wjazz.py` già importa. Si promuove.
+È il primo compito del piano proprio perché tocca codice che funziona: va
+fatto quando i test esistenti possono ancora dire se si è rotto qualcosa.
 
 | per | funzione |
 |---|---|
