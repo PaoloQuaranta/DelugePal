@@ -80,8 +80,13 @@ swing e laid-back non sono la stessa cosa». La chiuderebbero un corpus di dub
 misurato come si è misurato il jazz, e poi l'ascolto.
 
 *Nel frattempo, per comporre:* lo swing si prende dalla **casella sorella**,
-la 10, che porta il valore da scrivere — non è misurato, e la 10 lo dice. Il
-laid-back invece si **lascia fuori**: finché `MU.laid_back()` non esiste,
+la 10, che porta il valore da scrivere — non è misurato, e la 10 lo dice. Ma
+lo snippet lì è `set_swing(doc, 57)` **senza `figura=`**, cioè com'era stato
+scritto: preso alla lettera il 57 cade sulle semicrome e su questo groove di
+crome non muove niente. Si scrive **`figura='1/8'`**, che è la figura che
+questa casella nomina due righe più sotto — senza, stasera non si sente
+niente e sembra che il valore sia sbagliato. Il laid-back invece si **lascia
+fuori**: finché `MU.laid_back()` non esiste,
 `MU.sposta()` farebbe uscire dalla clip le note che ritarda, e un one drop
 senza laid-back è una mancanza che si sente e si corregge, mentre un colpo
 perso a fine battuta si cerca per ore altrove.
@@ -271,7 +276,9 @@ ripiego ma la risposta. Nel roots la melodia è la linea di basso, che la
 casella 5 ha per intero: un pezzo senza voce, senza fiati e senza melodica è
 un pezzo dub, non un pezzo a cui manca qualcosa — «si compone togliendo» è
 scritto nella casella 1. Se una linea in cima la si vuole davvero, si apre
-`(aq) Dub Beat Builder` con `MI.melodia()` invece di inventarla.
+`to-read/MIDI/(aq) Dub Beat Builder - Demo` — è quello il nome sul disco — con
+`MI.melodia()` invece di inventarla, e quel che se ne ricava è `[OSS]` su una
+libreria di loop, non un fatto del repertorio.
 
 ## 9. Forma e densità
 

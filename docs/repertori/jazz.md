@@ -34,13 +34,17 @@ segna `[WEB]`.
 abbiano una `division` che non si divide in due, sta in
 [`../../HANDOFF.md`](../../HANDOFF.md) §6-nonies, «Cosa è annotato e cosa no».
 
-*Nel frattempo, per comporre:* la **casella sorella 4** l'ha già posta senza
-dirlo — lo swing è misurato su **coppie di crome dentro il movimento**, quindi
-è quella l'unità in cui stanno tutte le domande dalla 4 in poi, e la casella 10
-la converte in `figura='1/8'`. Basta a scrivere un pattern. Non basta per
-quello che esce dal movimento diviso in due: i metri dispari, e le ballad,
-dove la casella 4 stessa sospetta che lo swing si sposti sulle semicrome. Lì
-si chiede **all'utente** che pezzo ha in mente, prima di scegliere la griglia.
+*Nel frattempo, per comporre:* si scrive in **4/4**, e lo si dichiara come
+**assunto `[IPO]`** — non è misurato qui, e `wjazzd.db` avrebbe le metriche
+per stabilirlo. La griglia è quella di `MU.passi()` **a 16 passi per
+battuta**, la stessa che la scheda del reggae usa nella sua casella 2: un
+movimento sono quattro passi, quindi **la croma è due passi**, ed è la croma
+che la casella 10 fa swingare con `figura='1/8'`. È anche l'unità in cui la
+**casella sorella 4** ha già misurato — coppie di crome dentro il movimento —
+quindi le domande dalla 4 in poi cadono su questa griglia senza conversioni.
+Quello che esce dall'assunto — i metri dispari, e le ballad, dove la casella 4
+stessa sospetta che lo swing si sposti sulle semicrome — si chiede
+**all'utente** prima di scrivere.
 
 ## 3. Tempo
 
@@ -189,8 +193,8 @@ GM, e il suo rapporto PPQ dice quanto microtiming l'arrotondamento si porta
 via.
 
 *Nel frattempo, per comporre:* si usa la scala del comune, «Velocity groove» —
-i tre livelli e le escursioni per strumento — sapendo che è `[WEB]` e che non
-è del jazz: è quello che c'è, non la risposta. Ed è la casella dove il ripiego
+i suoi cinque livelli su 127, e le escursioni per strumento — sapendo che è
+`[WEB]` e che non è del jazz: è quello che c'è, non la risposta. Ed è la casella dove il ripiego
 può diventare la cosa vera in mezz'ora, perché il corpus non è da procurare ed
 è **già sul disco** e il lettore c'è: leggerne una esecuzione con
 `MI.batteria()` costa meno che cercare altrove.
@@ -211,12 +215,16 @@ stati sciolti, e su quante occorrenze, in §6-nonies. **La chiuderebbe
 voicing vengono e che l'alternanza A/B la specifica: qui manca implementarla,
 non trovarla.
 
-*Nel frattempo, per comporre:* la si fa **a mano**, e la fonte è quella appena
-nominata — `assets/jazz-voicings.md` di `music-composition`, a cui si arriva
-dal suo `references/00-navigation.md`. L'alternanza A/B che quel file
-specifica si realizza scegliendo il `voicing=` **accordo per accordo** invece
-che una volta per tutta la progressione: la libreria non la fa da sola, ma non
-la impedisce. `[WEB]` a quello che viene dalla skill.
+*Nel frattempo, per comporre:* si scrivono le **altezze a mano**, con
+`MU.accordi()`, leggendole da `assets/jazz-voicings.md` di
+`music-composition` — la fonte già nominata qui sopra, raggiunta dal suo
+`references/00-navigation.md` — e `[WEB]` a quello che ne esce. **Non** con
+`MU.armonia()` cambiando `voicing=`: `MU.VOICING` ha **una sola** forma senza
+fondamentale (3-5-7-9, cioè la sola «A») e `voci()` la restituisce sempre
+ascendente, quindi la «B» non esiste e nessun argomento la produce. Un secondo
+voicing scelto lì — `chiuso`, `drop2` — sarebbe un'alternanza **inventata**,
+non quella del documento, ed è esattamente ciò che questa riga esiste per
+impedire.
 
 ## 8. Melodia e ornamentazione
 
