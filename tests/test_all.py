@@ -5611,6 +5611,39 @@ def test_groove_inventario():
           str(sorted({e.style for e in reggae})))
 
 
+def test_groove_id_sbagliato_dice_quante_ce_ne_sono():
+    """L'errore su un id inesistente dice quante esecuzioni ci sono in tutto.
+
+    Rilievo di revisione: la docstring di `_una()` prometteva "un errore che
+    dice quante ce ne sono", ma il messaggio diceva solo cosa mancava, non
+    cosa c'era -- lo stesso difetto che `valori()` evita gia' elencando le
+    colonne disponibili. Si passa da `racconta()`, l'entrata pubblica, non
+    dalla funzione privata.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    base = ROOT / 'to-read' / 'MIDI' / 'groove-v1.0.0-midionly' / 'groove'
+    if not (base / GR.INVENTARIO).exists():
+        raise FileNotFoundError(str(base / GR.INVENTARIO))
+
+    check('un id inesistente solleva ValueError',
+          _raises(lambda: GR.racconta(base, 'non-esiste-questo-id'),
+                  ValueError))
+
+    try:
+        GR.racconta(base, 'non-esiste-questo-id')
+        messaggio = ''
+    except ValueError as e:
+        messaggio = str(e)
+    check('il messaggio nomina l id sbagliato',
+          'non-esiste-questo-id' in messaggio, messaggio)
+    check('e dice quante esecuzioni ci sono in tutto (1150)',
+          '1150' in messaggio, messaggio)
+    veri = {e.id for e in GR.elenco(base)}
+    check('e mostra almeno un id vero come esempio',
+          any(vero in messaggio for vero in veri), messaggio)
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

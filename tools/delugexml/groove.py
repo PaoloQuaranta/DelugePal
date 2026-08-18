@@ -108,10 +108,14 @@ def valori(base: Path | str, colonna: str) -> dict[str, int]:
 
 def _una(base: Path | str, id: str) -> Esecuzione:
     """L'esecuzione con quell'id, o un errore che dice quante ce ne sono."""
-    for e in elenco(base):
+    tutte = elenco(base)
+    for e in tutte:
         if e.id == id:
             return e
-    raise ValueError(f'nessuna esecuzione con id {id!r}')
+    esempi = ', '.join(e.id for e in tutte[:3])
+    raise ValueError(
+        f'nessuna esecuzione con id {id!r}: ce ne sono {len(tutte)}, per '
+        f'esempio {esempi} -- vedi elenco() per la lista completa')
 
 
 def racconta(base: Path | str, id: str) -> str:
