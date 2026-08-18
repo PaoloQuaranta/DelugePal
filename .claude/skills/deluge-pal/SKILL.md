@@ -327,7 +327,7 @@ swing.** I trascrittori scrivono una coppia di crome swingate come *tatum 1 e
 giudicate **dritte** e la misura torna 1,0 per costruzione. È costato tre
 tentativi che si confermavano a vicenda. `WJ.swing()` usa i battiti veri di
 `beats.onset` e ignora il `tatum` del levare. Risultati e cautele in
-`docs/MUSICA.md`, «Lo swing del jazz, misurato».
+`docs/repertori/jazz.md`, «Lo swing del jazz, MISURATO» (casella 4).
 
 ## Quando qualcosa non si vede sul dispositivo
 
