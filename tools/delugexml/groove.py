@@ -39,7 +39,8 @@ import statistics
 from pathlib import Path
 from typing import NamedTuple
 
-from .musica import in_bur
+from . import midi as MI
+from .musica import da_bur, in_bur
 
 #: Il file che etichetta ogni esecuzione. Sta nella radice del dataset.
 INVENTARIO = 'info.csv'
@@ -232,3 +233,130 @@ def bur_da_posizioni(posizioni, ppq: float, *,
     if not lev:
         return None
     return in_bur(statistics.median(lev))
+
+
+class Passo(NamedTuple):
+    """Cosa fa uno strumento su un passo della battuta, misurato."""
+
+    passo: int          # 0..15
+    velocity: int       # la MEDIANA dei colpi su quel passo
+    scarto: float       # tick di residuo, con segno. + spinge, - trattiene
+    colpi: int          # quante volte quel passo e' stato colpito
+
+
+class Profilo(NamedTuple):
+    """Il groove template: una esecuzione, misurata e ripulita.
+
+    ⚠️ Viene da UNA esecuzione nominata, non dalla media di un sottoinsieme.
+    Mediare il microtiming di batteristi diversi lo tira verso zero, cioe'
+    verso la griglia: si perderebbe esattamente cio' che si e' andati a
+    prendere. Percio' quello che ne esce e' [OSS] su quell'esecuzione, mentre
+    la scala aggregata di `scala()` e' [MIS].
+    """
+
+    id: str
+    drummer: str
+    style: str
+    bpm: int
+    bur: float | None
+    battute: int
+    passi: dict[str, list[Passo]]
+
+
+def _senza_swing(fase: float, levare: float) -> float:
+    """Da fase dentro il movimento a fase SENZA swing.
+
+    L'inverso della mappa dello swing, che e' lineare a tratti: la prima
+    meta' del movimento e' stata dilatata fino a `levare`, la seconda
+    compressa in quel che resta. Con `levare` = 0,5 non cambia niente.
+    """
+    if levare <= 0 or levare >= 1:
+        return fase
+    if fase < levare:
+        return fase * 0.5 / levare
+    return 0.5 + (fase - levare) * 0.5 / (1 - levare)
+
+
+def profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float,
+                     *, id: str = '', drummer: str = '', style: str = '',
+                     bpm: int = 0) -> Profilo:
+    """Il profilo, da colpi gia' letti: strumento -> [(posizione, velocity)].
+
+    LA CATENA, E L'ORDINE E' LA COSA CHE CONTA:
+
+    1. togli l'ORIGINE della griglia -- se no ogni esecuzione dichiara un
+       anticipo che e' latenza di cattura, non feel;
+    2. misura il BUR e TOGLILO -- se no lo swing viene applicato due volte,
+       una dal firmware e una da qui;
+    3. quel che resta e' il RESIDUO: il ride che spinge rispetto al rullante
+       che tiene indietro. E' il solo microtiming che il template porta;
+    4. aggrega per strumento e per passo, sedici per battuta.
+    """
+    passo_tick = ppq / 4                            # un 1/16
+    tutte = [p for note in colpi.values() for p, _ in note]
+    off = origine(tutte, passo_tick)
+
+    bur = bur_da_posizioni([p - off for p in tutte], ppq)
+    levare = da_bur(bur) if bur is not None else 0.5
+
+    per_passo: dict[str, dict[int, list[tuple[int, float]]]] = {}
+    ultimo = 0
+    for nome, note in colpi.items():
+        for pos, vel in note:
+            p = pos - off
+            # il movimento PIU' VICINO, tollerando un colpo appena prima di
+            # esso. ⚠️ senza il mezzo passo di grazia un anticipo finirebbe
+            # nel movimento precedente con fase 0,99 invece che -0,01, e il
+            # residuo uscirebbe grande quanto un movimento intero.
+            movimento = math.floor(p / ppq + 0.125)
+            fase = p / ppq - movimento
+            dritta = (movimento + _senza_swing(fase, levare)) * ppq
+            # ⚠️ il passo si decide DOPO aver tolto lo swing: un levare
+            # swingato sta a 2,67 passi e si arrotonderebbe al 3.
+            passo = round(dritta / passo_tick)
+            ultimo = max(ultimo, passo)
+            residuo = dritta - passo * passo_tick
+            per_passo.setdefault(nome, {}).setdefault(
+                passo % 16, []).append((vel, residuo))
+
+    passi = {}
+    for nome, dentro in per_passo.items():
+        passi[nome] = [
+            Passo(passo=k,
+                  velocity=int(round(statistics.median(v for v, _ in vs))),
+                  scarto=statistics.median(s for _, s in vs),
+                  colpi=len(vs))
+            for k, vs in sorted(dentro.items())]
+
+    return Profilo(id=id, drummer=drummer, style=style, bpm=bpm, bur=bur,
+                   battute=ultimo // 16 + 1, passi=passi)
+
+
+def profilo(base: Path | str, id: str) -> Profilo:
+    """Il profilo di UNA esecuzione del dataset, nominata.
+
+    Le posizioni del file MIDI sono nella risoluzione DEL FILE (nel Groove
+    MIDI Dataset, 480 tick per movimento), non in quella del Deluge (96). Se
+    si passassero cosi' come sono a `profilo_da_colpi()`, `Passo.scarto`
+    uscirebbe in tick-file: un residuo di ~40 ms (grande quanto lo swing
+    stesso) uscirebbe come "59 tick", che sembra enorme, mentre in tick
+    Deluge e' ~12 -- piccolo, com'e' un residuo dopo aver tolto lo swing.
+    `Profilo` non porta con se' il ppq di provenienza, quindi la scala va
+    fissata qui, una volta per tutte, sulla stessa risoluzione che usa il
+    resto del progetto per scrivere sul Deluge (`musica.TICK_PER_PASSO`,
+    `midi.TICK_PER_MOVIMENTO_DELUGE`): e' la stessa conversione che
+    `MI._converti()` applica gia' per `MI.batteria()`.
+    """
+    e = _una(base, id)
+    f = MI.leggi(Path(base) / e.midi_filename)
+    fattore = MI.TICK_PER_MOVIMENTO_DELUGE / f.ppq
+    colpi: dict[str, list[tuple[float, int]]] = {}
+    for t in f.tracce:
+        for n in t.note:
+            nome = MI.GM_PERCUSSIONI.get(n.y)
+            if nome is None:
+                continue                # una percussione fuori dalla mappa GM
+            colpi.setdefault(nome, []).append((n.pos * fattore, n.velocity))
+    return profilo_da_colpi(colpi, float(MI.TICK_PER_MOVIMENTO_DELUGE),
+                            id=e.id, drummer=e.drummer, style=e.style,
+                            bpm=e.bpm)

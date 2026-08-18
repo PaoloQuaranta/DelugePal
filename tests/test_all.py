@@ -5777,6 +5777,93 @@ def test_groove_bur_nucleo():
           str(GR.levare_da_posizioni(bordo_esatto, ppq)))
 
 
+def test_groove_profilo_nucleo():
+    """La catena: origine, poi BUR, poi il RESIDUO. In quest'ordine.
+
+    Su un'esecuzione costruita a mano che swinga a BUR 2 e ha un ride
+    spostato di +2 tick rispetto a tutto il resto: il template deve portare
+    quel +2 e NON lo swing, che sul Deluge lo fa `set_swing()`. Se portasse
+    anche lo swing, lo swing verrebbe applicato due volte.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    ppq = 96.0
+
+    # ---- fixture A: swing. Tutti i colpi SULLA griglia hanno lo stesso
+    # scarto (+2), cosi' l'origine e' esattamente 2 e il BUR viene esatto.
+    a = {'kick': [], 'ride': []}
+    for b in range(16):                             # 16 movimenti = 4 battute
+        a['kick'].append((b * ppq + 2, 100))
+        a['ride'].append((b * ppq + 2, 90))
+        a['ride'].append((b * ppq + 2 + ppq * 2 / 3, 70))
+
+    pa = GR.profilo_da_colpi(a, ppq)
+    check('il BUR misurato e 2', abs(pa.bur - 2.0) < 0.02, str(pa.bur))
+    check('quattro battute', pa.battute == 4, str(pa.battute))
+
+    # ⚠️ IL TEST CHE CONTA. Il levare swingato sta a 2,67 passi: senza
+    # togliere lo swing finirebbe arrotondato al passo 3. Se e' sul 2, lo
+    # swing e' stato tolto -- ed e' giusto che lo sia, perche' sul Deluge lo
+    # rimette `set_swing()`, e due volte sarebbe una volta di troppo.
+    ride = {s.passo for s in pa.passi['ride']}
+    check('il levare swingato cade sul passo 2, non sul 3',
+          2 in ride and 3 not in ride, str(sorted(ride)))
+
+    r2 = [s for s in pa.passi['ride'] if s.passo == 2][0]
+    check('e senza residuo, perche lo swing era tutto lo scarto',
+          abs(r2.scarto) < 0.6, str(r2.scarto))
+    check('con la sua velocity piu bassa', r2.velocity == 70, str(r2.velocity))
+
+    k0 = [s for s in pa.passi['kick'] if s.passo == 0][0]
+    check('il kick porta la sua velocity', k0.velocity == 100, str(k0.velocity))
+    check('e quante volte e stato colpito', k0.colpi == 4, str(k0.colpi))
+    check('uno strumento assente non compare', 'rullante' not in pa.passi,
+          str(sorted(pa.passi)))
+
+    # ---- fixture B: il residuo RELATIVO, senza swing di mezzo.
+    #
+    # ⚠️ Si misura la DIFFERENZA fra strumenti, non il valore assoluto: se
+    # il kick sta a 0 e il ride a +2, non esiste un'origine "vera" che dica
+    # quale dei due e' spostato. E' la ragione per cui la scheda dichiara il
+    # ride che spinge RISPETTO al rullante, e mai un anticipo assoluto.
+    b_ = {'kick': [], 'ride': []}
+    for b in range(16):
+        b_['kick'].append((b * ppq, 100))
+        b_['ride'].append((b * ppq + 2, 90))
+
+    pb = GR.profilo_da_colpi(b_, ppq)
+    dk = [s for s in pb.passi['kick'] if s.passo == 0][0].scarto
+    dr = [s for s in pb.passi['ride'] if s.passo == 0][0].scarto
+    check('il ride spinge di 2 tick RISPETTO al kick',
+          abs((dr - dk) - 2) < 0.6, f'{dr:.2f} - {dk:.2f}')
+
+
+def test_groove_profilo_corpus():
+    """Il profilo di un'esecuzione vera. SALTA senza il dataset.
+
+    L'esecuzione e' nominata apposta: un profilo viene da UN batterista, e
+    dichiararlo e' cio' che tiene onesto il marcatore [OSS].
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    base = ROOT / 'to-read' / 'MIDI' / 'groove-v1.0.0-midionly' / 'groove'
+    if not (base / GR.INVENTARIO).exists():
+        raise FileNotFoundError(str(base / GR.INVENTARIO))
+
+    p = GR.profilo(base, 'drummer1/session3/2')
+    check('e drummer1 in jazz/swing a 185',
+          p.drummer == 'drummer1' and p.style == 'jazz/swing' and p.bpm == 185,
+          f'{p.drummer} {p.style} {p.bpm}')
+    check('il BUR e fra 1 e 2,5', p.bur is not None and 1.0 < p.bur < 2.5,
+          str(p.bur))
+    check('c e il ride', 'ride' in p.passi, str(sorted(p.passi))[:120])
+    check('ogni passo sta fra 0 e 15',
+          all(0 <= s.passo <= 15 for v in p.passi.values() for s in v))
+    check('e il residuo e piccolo: e cio che RESTA dopo aver tolto lo swing',
+          all(abs(s.scarto) <= 12 for v in p.passi.values() for s in v),
+          str(max(abs(s.scarto) for v in p.passi.values() for s in v)))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
