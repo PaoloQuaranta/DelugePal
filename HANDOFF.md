@@ -41,7 +41,7 @@ ascoltato il terzo tentativo di dub:
 
 | | |
 |---|---|
-| `docs/MUSICA.md` | non è più vuoto: convenzioni reggae/dub con le griglie a 16 passi, velocity groove con i numeri, catalogo di pattern per genere, e **sei correzioni ricevute** con la data |
+| `docs/MUSICA.md` | non è più vuoto: uno schema neutro di **undici caselle**, pensato per reggere da Josquin alla jungle, più **il comune** a ogni repertorio e **l'indice** — la matrice repertorio × casella che è anche l'**agenda**: dice cosa manca a quale repertorio senza aprire niente. I repertori compilati sono schede a sé in `docs/repertori/`: oggi reggae/dub e jazz, stato di ciascuna nell'indice |
 | `tools/delugexml/midi.py` | il ponte per far entrare il materiale: legge Standard MIDI File **senza dipendenze**, validato nota per nota contro `mido` |
 | `to-read/` | 112 000 file e 4,8 GB di libri, paper e librerie MIDI già raccolti dall'utente. **Fuori dal versionamento** |
 
@@ -92,8 +92,9 @@ materiale compositivo è il **break tagliato**, che vive in `audio.py` e nelle
 righe di kit, non in nessuna notazione.
 
 ⚠️ **Da sapere prima di ripartire:** le due skill di composizione sono ora
-**due**, e nessuna delle due sa il reggae — vedi `SKILL.md` e la testa di
-`docs/MUSICA.md`. I due difetti di `music-composer` sono stati riparati a mano
+**due**, e nessuna delle due sa il reggae — vedi `SKILL.md` e la casella 11,
+«Trappole del generatore», di `docs/repertori/reggae-dub.md`. I due difetti
+di `music-composer` sono stati riparati a mano
 il 16 agosto in una skill *globale* dell'utente, fuori da questo repo: se
 viene reinstallata spariscono.
 
@@ -277,9 +278,9 @@ Ordine di lettura consigliato:
 
 1. `docs/ARCHITETTURA.md` — il modello concettuale, dal manuale
 2. `docs/FINDINGS.md` — lo schema derivato dai file, con prove e numeri
-3. `docs/MUSICA.md` — **come si compone davvero**: pattern per genere, velocity
-   groove, e le correzioni ricevute dall'utente. È il documento su cui verte il
-   prossimo lavoro
+3. `docs/MUSICA.md` — lo schema neutro delle **undici caselle** e ciò che vale
+   per ogni repertorio; le schede compilate stanno in `docs/repertori/` e se
+   ne legge **una per volta**. È il documento su cui verte il prossimo lavoro
 4. `docs/SYSEX.md` — il canale USB MIDI
 5. `docs/FONTI.md` — l'ordine di ricerca e quello di autorità, che sono opposti
 6. `README.md` — ora è **in inglese**: è la porta d'ingresso del repo pubblico,
@@ -474,6 +475,8 @@ D:\DelugePal\
   docs\
     ARCHITETTURA.md      modello concettuale, dal manuale e dalla doc community
     FINDINGS.md          schema derivato dai file, con numeri e prove
+    MUSICA.md            schema neutro delle undici caselle, il comune, l'indice
+    repertori\           una scheda per repertorio compilato: reggae-dub.md, jazz.md
     SYSEX.md             canale USB MIDI: cosa funziona e cosa no
     FONTI.md             cosa è stato letto, in ordine di autorità
     PROSSIMI_PASSI.md    piano operativo delle sette fasi, chiuso
@@ -789,8 +792,8 @@ Gli errori concreti, tutti dallo stesso buco:
 | `set_swing(50)`, dritto | il one drop è **swingato e laid-back** |
 | pad a note lunghe come parte armonica | in reggae l'armonia è **ritmica**, staccata, in levare |
 
-Tutto questo è ora in `docs/MUSICA.md` con le griglie a 16 passi, i numeri
-delle velocity e le fonti.
+Tutto questo è ora nella scheda `docs/repertori/reggae-dub.md`, con le
+griglie a 16 passi, i numeri delle velocity e le fonti.
 
 ### E una correzione di sound design che vale in generale
 
@@ -936,9 +939,11 @@ posto sbagliato»: la funzione era quella giusta per il vocabolario delle
 altezze e quella sbagliata per estrarre un prefisso.
 
 **Il materiale che resta in `to-read/MIDI/`**, ora che il primo è aperto:
-`groove-v1.0.0-midionly.zip` (Groove MIDI, velocity e microtiming per genere,
-reggae compreso), `POP909`, `maestro`, `The_Magic_of_MIDI`, le librerie per
-genere e `(aq) Dub Beat Builder`.
+`groove-v1.0.0-midionly/` — non uno zip da decomprimere, è già una cartella
+decompressa; il suo `groove/info.csv` ha **1150 righe, di cui 101 con `style`
+= jazz e 20 = reggae** (contate il 17 agosto 2026 — la scheda
+`docs/repertori/jazz.md` lo dice giusto) — poi `POP909`, `maestro`,
+`The_Magic_of_MIDI`, le librerie per genere e `(aq) Dub Beat Builder`.
 
 ---
 
@@ -946,9 +951,9 @@ genere e `(aq) Dub Beat Builder`.
 
 `WJ.swing(db, style=…, rhythmfeel=…, tempo_min=…, tempo_max=…)`. Su **333
 assoli e 27 943 coppie di crome**: levare al **61,7%** del movimento, cioè
-**BUR 1,61**. Tabelle per stile, feel e tempo in `docs/MUSICA.md`, «Lo swing
-del jazz, misurato» — sono i primi numeri `[MIS]` del progetto, contro i
-`[WEB]` di tutto il resto della pagina.
+**BUR 1,61**. Tabelle per stile, feel e tempo in `docs/repertori/jazz.md`,
+«Lo swing del jazz, MISURATO», nella casella 4 — sono i primi numeri `[MIS]`
+del progetto, contro i `[WEB]` di tutto il resto della pagina.
 
 Il risultato in una riga: **il jazz non swinga in terzine.** Sta fra il dritto
 e la terzina, HARDBOP e BEBOP in cima (1,80 e 1,75), FUSION in fondo (1,26), e
