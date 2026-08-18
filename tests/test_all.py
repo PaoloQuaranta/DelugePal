@@ -5702,6 +5702,52 @@ def test_groove_origine_della_griglia():
           abs(GR.origine(bordo, passo)) < 1e-9, str(GR.origine(bordo, passo)))
 
 
+def test_groove_bur_nucleo():
+    """Dove cade il levare, su colpi costruiti a mano.
+
+    Un movimento contribuisce solo se dentro la finestra c'e' ESATTAMENTE un
+    colpo: due colpi vogliono dire semicrome, e li' una coppia di crome non
+    c'e'. E' la stessa cautela di `WJ.levare_da_dati()`.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    ppq = 96.0
+
+    dritto = []
+    for k in range(8):
+        dritto += [k * ppq, k * ppq + ppq / 2]
+    lev = GR.levare_da_posizioni(dritto, ppq)
+    check('crome dritte danno il levare a 0,5',
+          len(lev) == 8 and all(abs(v - 0.5) < 1e-9 for v in lev), str(lev[:3]))
+    check('e in BUR fa 1', abs(GR.bur_da_posizioni(dritto, ppq) - 1.0) < 1e-9,
+          str(GR.bur_da_posizioni(dritto, ppq)))
+
+    terzina = []
+    for k in range(8):
+        terzina += [k * ppq, k * ppq + ppq * 2 / 3]
+    check('la terzina da BUR 2',
+          abs(GR.bur_da_posizioni(terzina, ppq) - 2.0) < 0.01,
+          str(GR.bur_da_posizioni(terzina, ppq)))
+
+    jazz = []
+    for k in range(8):
+        jazz += [k * ppq, k * ppq + ppq * 0.617]
+    check('il levare del jazz misurato da 1,61',
+          abs(GR.bur_da_posizioni(jazz, ppq) - 1.61) < 0.02,
+          str(GR.bur_da_posizioni(jazz, ppq)))
+
+    semicrome = []
+    for k in range(8):
+        semicrome += [k * ppq, k * ppq + ppq / 4, k * ppq + ppq / 2,
+                      k * ppq + ppq * 3 / 4]
+    check('con DUE colpi in finestra il movimento si scarta',
+          GR.levare_da_posizioni(semicrome, ppq) == [],
+          str(GR.levare_da_posizioni(semicrome, ppq)))
+
+    check('senza coppie il BUR e None',
+          GR.bur_da_posizioni([0.0, 96.0, 192.0], ppq) is None)
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

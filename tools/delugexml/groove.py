@@ -35,8 +35,11 @@ from __future__ import annotations
 
 import csv
 import math
+import statistics
 from pathlib import Path
 from typing import NamedTuple
+
+from .musica import in_bur
 
 #: Il file che etichetta ogni esecuzione. Sta nella radice del dataset.
 INVENTARIO = 'info.csv'
@@ -178,3 +181,44 @@ def racconta(base: Path | str, id: str) -> str:
     e = _una(base, id)
     return (f'{e.id}: {e.drummer}, {e.style}, {e.bpm} BPM, '
             f'{e.beat_type}, {e.time_signature}, {e.duration:.1f} s')
+
+
+#: La finestra dentro il movimento in cui si cerca il levare, in frazione.
+#: Larga abbastanza da prendere sia il dritto (0,5) sia la terzina (0,667) e
+#: oltre, stretta abbastanza da non prendere la semicroma a 0,25 ne quella a
+#: 0,75, che farebbero passare per levare cio' che levare non e'.
+FINESTRA_LEVARE = (0.35, 0.75)
+
+
+def levare_da_posizioni(posizioni, ppq: float, *,
+                        finestra=FINESTRA_LEVARE) -> list[float]:
+    """Le posizioni del levare in frazione di movimento, una per movimento.
+
+    Un movimento contribuisce SOLO se ha un colpo sul battere e ESATTAMENTE
+    un colpo dentro la finestra. Due colpi vogliono dire semicrome, e li' non
+    c'e' una coppia di crome da misurare.
+    """
+    per_movimento: dict[int, list[float]] = {}
+    for p in posizioni:
+        per_movimento.setdefault(int(p // ppq), []).append((p % ppq) / ppq)
+    fuori = []
+    for fasi in per_movimento.values():
+        if not any(f < finestra[0] for f in fasi):
+            continue                    # senza battere non e' una coppia
+        dentro = [f for f in fasi if finestra[0] <= f <= finestra[1]]
+        if len(dentro) == 1:
+            fuori.append(dentro[0])
+    return fuori
+
+
+def bur_da_posizioni(posizioni, ppq: float, *,
+                     finestra=FINESTRA_LEVARE) -> float | None:
+    """La BUR MEDIANA dell'esecuzione, o None se non ci sono coppie.
+
+    Mediana e non media: la distribuzione ha una coda lunga di colpi che la
+    finestra non ha saputo scartare, e la media ci andrebbe dietro.
+    """
+    lev = levare_da_posizioni(posizioni, ppq, finestra=finestra)
+    if not lev:
+        return None
+    return in_bur(statistics.median(lev))
