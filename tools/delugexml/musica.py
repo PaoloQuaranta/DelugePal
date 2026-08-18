@@ -189,8 +189,15 @@ def passi(pattern: str, *, velocity: int = VEL_COLPO,
     return out
 
 
-def applica_groove(note, profilo, dove: str) -> dict[str, object]:
+def applica_groove(note: list[Note], profilo, dove: str) -> dict[str, object]:
     """Posa velocity e residuo misurati su un pattern uscito da `passi()`.
+
+    ⚠️ MUTA `note` IN POSTO E NON RITORNA NOTE. E' l'eccezione del modulo:
+    `passi()`, `melodia()`, `accordi()` e `armonia()` COSTRUISCONO e
+    RITORNANO `Note` nuove, questa invece scrive dentro le `Note` che le
+    vengono passate -- il ritorno e' solo il rapporto (vedi sotto), non le
+    note aggiornate. Chi chiama tiene il riferimento alla stessa lista
+    passata in ingresso; e' quella, mutata, il risultato musicale.
 
     Il pattern resta la stringa leggibile che e'; il feel arriva da
     un'esecuzione vera. `dove` e' il nome GM dello strumento nel profilo.
