@@ -481,7 +481,7 @@ def origine(posizioni, passo: float) -> float:
     return math.atan2(y, x) / (2 * math.pi) * passo
 ```
 
-La firma è `origine(posizioni, passo: float, *, finestra: float = 0.25) -> float`. Il confronto è **stretto** (`<`, non `<=`) apposta: un levare swingato cade a esattamente un quarto di passo dal bordo, e con `<=` rientrerebbe.
+La firma è `origine(posizioni, passo: float, *, finestra: float = 0.25) -> float`. Il confronto è **stretto** (`<`, non `<=`) apposta — ma non perché un levare swingato ci caschi sopra: con passo=24 e finestra=0.25 il suo scarto è di 8 tick, un terzo oltre il bordo di 6 (finestra × passo), non "a un quarto di passo dal bordo" come diceva prima questa frase. La ragione vera è che il bordo va deciso in un verso solo e dichiarato: un colpo con scarto esattamente uguale al bordo deve avere un esito fisso, perché il Task 4 (lo swing) e il Task 5 (i groove template) si appoggiano a questa soglia.
 
 - [ ] **Step 4: Eseguire e verificare che passi**
 

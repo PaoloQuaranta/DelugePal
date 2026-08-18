@@ -154,6 +154,13 @@ def origine(posizioni, passo: float, *, finestra: float = 0.25) -> float:
         scarto = p % passo
         if scarto > passo / 2:
             scarto -= passo             # la fase gira: 23 su 24 e' -1
+        # confronto stretto (< non <=): NON e' per tenere fuori i levare
+        # swingati -- quelli stanno a 8 tick su 24, ben oltre il bordo a 6
+        # (finestra di default 0.25 * passo), un terzo di margine, non ci
+        # arrivano vicino. E' che il bordo va deciso in un verso solo e
+        # dichiarato: un colpo con scarto ESATTAMENTE uguale al bordo deve
+        # avere un esito fisso, perche' il Task 4 (swing) e il Task 5 (i
+        # groove template) si appoggiano a questa soglia.
         if abs(scarto) < finestra * passo:
             vicini.append(scarto)
     if not vicini:

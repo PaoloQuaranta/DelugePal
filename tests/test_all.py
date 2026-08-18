@@ -5689,6 +5689,18 @@ def test_groove_origine_della_griglia():
           abs(GR.origine(swingate, passo)) < 1e-9,
           str(GR.origine(swingate, passo)))
 
+    # il bordo ESATTO della finestra: con passo=24 e finestra di default
+    # 0.25, il bordo sta a 6.0 tick. Un colpo li' deve restare ESCLUSO:
+    # e' il confronto stretto (< non <=) a deciderlo, ed e' l'unico caso
+    # in cui i due operatori danno risultati diversi -- non il levare
+    # swingato di sopra, che sta a 8 tick, ben oltre il bordo. Verificato
+    # sostituendo < con <= in una copia della funzione: con < l origine
+    # resta 0.0 esatto, con <= diventa ~0.123 (il colpo di bordo entra
+    # nella media circolare e la sposta).
+    bordo = [k * passo for k in range(31)] + [31 * passo + 6.0]
+    check('un colpo esattamente sul bordo della finestra resta escluso',
+          abs(GR.origine(bordo, passo)) < 1e-9, str(GR.origine(bordo, passo)))
+
 
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
