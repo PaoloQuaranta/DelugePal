@@ -5864,6 +5864,44 @@ def test_groove_profilo_corpus():
           str(max(abs(s.scarto) for v in p.passi.values() for s in v)))
 
 
+def test_groove_scala():
+    """La scala di velocity, aggregata. SALTA senza il dataset.
+
+    ⚠️ Ogni riga porta quanti BATTERISTI la sostengono, e non e' un dettaglio
+    di rendicontazione: e' cio' che decide fra [MIS] e [OSS].
+
+    Il brief originale di questo task diceva che sul reggae del Groove MIDI
+    il batterista fosse UNO. Misurato con queste stesse funzioni (`elenco()`
+    con `style='reggae'`, `beat_type='beat'`, cioe' il default di `scala()`)
+    risultano invece QUATTRO esecuzioni di DUE batteristi (drummer1 e
+    drummer5) -- si veda `info.csv`. Il numero giusto e' due, non uno, ma il
+    punto resta: contro i cinque del jazz, due non bastano per chiamare
+    [MIS] quel che ne esce, e infatti la tabella reggae resta [WEB].
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    base = ROOT / 'to-read' / 'MIDI' / 'groove-v1.0.0-midionly' / 'groove'
+    if not (base / GR.INVENTARIO).exists():
+        raise FileNotFoundError(str(base / GR.INVENTARIO))
+
+    jazz = GR.scala(base, style='jazz')
+    check('il jazz ha il ride', 'ride' in jazz, str(sorted(jazz))[:120])
+    r = jazz['ride']
+    check('le velocity stanno fra 1 e 127',
+          1 <= r.minimo <= r.mediana <= r.massimo <= 127,
+          f'{r.minimo}/{r.mediana}/{r.massimo}')
+    check('i quartili sono in ordine', r.q1 <= r.mediana <= r.q3,
+          f'{r.q1}/{r.mediana}/{r.q3}')
+    check('e la riga dichiara 5 batteristi', r.batteristi == 5,
+          str(r.batteristi))
+
+    reggae = GR.scala(base, style='reggae')
+    check('il reggae ne dichiara al piu due, non cinque come il jazz -- '
+          'per questo resta [WEB]',
+          max(v.batteristi for v in reggae.values()) == 2,
+          str({k: v.batteristi for k, v in reggae.items()}))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

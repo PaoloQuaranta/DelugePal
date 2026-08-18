@@ -360,3 +360,61 @@ def profilo(base: Path | str, id: str) -> Profilo:
     return profilo_da_colpi(colpi, float(MI.TICK_PER_MOVIMENTO_DELUGE),
                             id=e.id, drummer=e.drummer, style=e.style,
                             bpm=e.bpm)
+
+
+class Livelli(NamedTuple):
+    """La distribuzione delle velocity di uno strumento, su un sottoinsieme.
+
+    ⚠️ `batteristi` NON e' rendicontazione: e' il numero che decide se
+    l'affermazione e' [MIS] su un repertorio o [OSS] su un esecutore.
+    """
+
+    strumento: str
+    mediana: int
+    q1: int
+    q3: int
+    minimo: int
+    massimo: int
+    colpi: int
+    esecuzioni: int
+    batteristi: int
+
+
+def scala(base: Path | str, *, style: str | None = None,
+          beat_type: str | None = 'beat') -> dict[str, Livelli]:
+    """La scala di velocity per strumento, su un sottoinsieme del dataset.
+
+    Il default `beat_type='beat'` e' voluto: i `fill` sono un altro animale,
+    e mescolarli alle esecuzioni continue alzerebbe le code senza dire niente
+    di nessuno dei due. Per i fill si passa `beat_type='fill'`.
+
+    Non riscala le posizioni -- non ne legge nemmeno: guarda solo le
+    velocity, che non dipendono dalla risoluzione temporale del file.
+    """
+    scelte = elenco(base, style=style, beat_type=beat_type)
+    raccolta: dict[str, list[int]] = {}
+    quali: dict[str, set[str]] = {}
+    chi: dict[str, set[str]] = {}
+    for e in scelte:
+        f = MI.leggi(Path(base) / e.midi_filename)
+        for t in f.tracce:
+            for n in t.note:
+                nome = MI.GM_PERCUSSIONI.get(n.y)
+                if nome is None:
+                    continue                # percussione fuori dalla mappa GM
+                raccolta.setdefault(nome, []).append(n.velocity)
+                quali.setdefault(nome, set()).add(e.id)
+                chi.setdefault(nome, set()).add(e.drummer)
+
+    fuori = {}
+    for nome, vs in raccolta.items():
+        vs.sort()
+        # sotto le quattro battute i quartili interpolati non direbbero
+        # niente di sensato: si tiene il minimo, che almeno e' un dato vero.
+        q = statistics.quantiles(vs, n=4) if len(vs) >= 4 else [vs[0]] * 3
+        fuori[nome] = Livelli(
+            strumento=nome, mediana=int(statistics.median(vs)),
+            q1=int(q[0]), q3=int(q[2]), minimo=vs[0], massimo=vs[-1],
+            colpi=len(vs), esecuzioni=len(quali[nome]),
+            batteristi=len(chi[nome]))
+    return dict(sorted(fuori.items(), key=lambda kv: -kv[1].colpi))
