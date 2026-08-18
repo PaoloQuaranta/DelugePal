@@ -1048,8 +1048,19 @@ def test_applica_groove():
           _raises(lambda: MU.applica_groove(MU.passi('x...'), prof,
                                             dove='rullante'), ValueError))
 
-    check('e nessuna nota finisce prima di zero',
-          all(n.pos >= 0 for n in MU.passi('x...')))
+    # ⚠️ il residuo negativo sul PRIMO passo manderebbe la nota prima
+    # dell'inizio della clip, che il Deluge non sa leggere: va fermata a 0.
+    presto = GR.Profilo(
+        id='finto/2', drummer='drummerX', style='jazz', bpm=120, bur=1.6,
+        battute=1,
+        passi={'kick': [GR.Passo(passo=0, velocity=100, scarto=-5.0,
+                                 colpi=8)]})
+    bordo = MU.passi('x...............')
+    MU.applica_groove(bordo, presto, dove='kick')
+    check('un residuo negativo sul primo passo si ferma a zero',
+          bordo[0].pos == 0, str(bordo[0].pos))
+    check('ma la velocity la prende lo stesso', bordo[0].velocity == 100,
+          str(bordo[0].velocity))
 ```
 
 - [ ] **Step 2: Eseguire e verificare che fallisca**
