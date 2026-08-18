@@ -5644,6 +5644,52 @@ def test_groove_id_sbagliato_dice_quante_ce_ne_sono():
           any(vero in messaggio for vero in veri), messaggio)
 
 
+def test_groove_origine_della_griglia():
+    """Lo scarto comune si stima e si toglie, con la media CIRCOLARE.
+
+    E' il trabocchetto di questo corpus: il tick 0 del file non e' un
+    movimento del batterista, e misurare da li' darebbe un anticipo
+    sistematico del 5% per OGNI esecuzione. Stesso errore della Weimar,
+    nella stessa posizione: l'origine della misura.
+
+    Nucleo puro: liste di numeri, nessun file.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    passo = 24.0                                    # un 1/16 sul Deluge
+
+    dritte = [k * passo for k in range(32)]
+    check('senza scarto, l origine e zero',
+          abs(GR.origine(dritte, passo)) < 1e-9, str(GR.origine(dritte, passo)))
+
+    avanti = [k * passo + 3 for k in range(32)]
+    check('uno scarto di +3 tick si ritrova',
+          abs(GR.origine(avanti, passo) - 3) < 1e-9, str(GR.origine(avanti, passo)))
+
+    # il caso che la media aritmetica sbaglia: una fase appena PRIMA del
+    # passo successivo e' un anticipo, non un ritardo di quasi un passo.
+    indietro = [k * passo - 1 for k in range(1, 32)]
+    check('e uno di -1 torna NEGATIVO, non +23',
+          abs(GR.origine(indietro, passo) + 1) < 1e-9,
+          str(GR.origine(indietro, passo)))
+
+    misto = [k * passo - 1 for k in range(1, 16)] + [k * passo + 1
+                                                     for k in range(16, 32)]
+    check('scarti opposti si annullano',
+          abs(GR.origine(misto, passo)) < 0.1, str(GR.origine(misto, passo)))
+
+    check('senza colpi, l origine e zero e non un errore',
+          GR.origine([], passo) == 0.0)
+
+    # i levare swingati NON devono entrare nella stima: stanno a 2/3 di
+    # movimento, cioe' a 2,67 passi, e la loro fase e' swing, non origine.
+    swingate = [k * passo for k in range(32)] + [
+        k * 96 + 64 for k in range(8)]
+    check('un levare swingato non sporca l origine',
+          abs(GR.origine(swingate, passo)) < 1e-9,
+          str(GR.origine(swingate, passo)))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

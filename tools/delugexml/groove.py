@@ -34,6 +34,7 @@ Cercare `reggae` dentro l'etichetta prenderebbe anche `latin/reggaeton` e
 from __future__ import annotations
 
 import csv
+import math
 from pathlib import Path
 from typing import NamedTuple
 
@@ -116,6 +117,53 @@ def _una(base: Path | str, id: str) -> Esecuzione:
     raise ValueError(
         f'nessuna esecuzione con id {id!r}: ce ne sono {len(tutte)}, per '
         f'esempio {esempi} -- vedi elenco() per la lista completa')
+
+
+def origine(posizioni, passo: float, *, finestra: float = 0.25) -> float:
+    """Lo scarto comune di tutti gli onset dalla griglia, in tick, CON SEGNO.
+
+    MEDIA CIRCOLARE, e non e' pignoleria. La fase dentro il passo e' una
+    grandezza che GIRA: un colpo a 23 tick su 24 e' un anticipo di 1, non un
+    ritardo di 23, e la media aritmetica di 1 e 23 darebbe 12 -- cioe' il
+    contrario di zero. Si mediano i versori e si torna indietro.
+
+    Il risultato sta in (-passo/2, +passo/2]. Va SOTTRATTO dalle posizioni.
+
+    SI STIMA SOLO SUI COLPI VICINI ALLA GRIGLIA, dentro `finestra`. Se no
+    lo swing la sporca: un levare swingato sta a 2/3 di movimento, cioe' a
+    2,67 passi, e la sua fase (-8 tick su 24) entrerebbe nella media come se
+    fosse uno scarto comune. Non lo e': e' swing, e lo toglie il passo dopo.
+
+    IL LIMITE, DICHIARATO: uno scarto comune piu' grande di un quarto di
+    passo cadrebbe fuori dalla finestra e non verrebbe visto. Nel dataset
+    misurato vale circa un tick su ventiquattro, quindi la finestra sta larga
+    dieci volte il necessario -- ma se un giorno un corpus diverso desse
+    origine zero su dati palesemente storti, e' il primo posto da guardare.
+
+    PERCHE' ESISTE. Misurato su `drummer1/session3/2_jazz-swing_185_beat_4-4`:
+    ride, kick, rullante e charleston hanno TUTTI il picco a 0,958 del
+    movimento. Tutti insieme vuol dire che non e' feel, e' l'origine. La
+    prima nota del file sta a tick 1287, e il tick 0 non e' un movimento.
+
+    Quello che si toglie NON si dichiara come feel: a 185 BPM il 5% vale
+    16 ms, indistinguibile dalla latenza di cattura del kit elettronico su
+    cui il dataset e' registrato. Il feel e' cio' che RESTA dopo averlo tolto.
+    """
+    vicini = []
+    for p in posizioni:
+        scarto = p % passo
+        if scarto > passo / 2:
+            scarto -= passo             # la fase gira: 23 su 24 e' -1
+        if abs(scarto) < finestra * passo:
+            vicini.append(scarto)
+    if not vicini:
+        return 0.0
+    fasi = [s / passo * 2 * math.pi for s in vicini]
+    x = sum(math.cos(a) for a in fasi) / len(fasi)
+    y = sum(math.sin(a) for a in fasi) / len(fasi)
+    if abs(x) < 1e-12 and abs(y) < 1e-12:
+        return 0.0                      # fasi sparse: nessuna origine comune
+    return math.atan2(y, x) / (2 * math.pi) * passo
 
 
 def racconta(base: Path | str, id: str) -> str:
