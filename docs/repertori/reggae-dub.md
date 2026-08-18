@@ -23,6 +23,12 @@ copre, quindi oggi «reggae» qui vuol dire *roots* e basta, e un vicino si
 scambia senza accorgersene. La chiuderebbe una ricerca sui **confini** fra i
 quattro: non le etichette, ma cosa si sente di diverso.
 
+*Nel frattempo, per comporre:* si scrive **roots**, e lo si dichiara — è
+l'unica cosa che questa scheda descrive, e restare dentro il suo perimetro è
+una risposta, sconfinarci senza saperlo no. Se la richiesta nomina ska,
+rocksteady o dancehall, la domanda va **all'utente** prima di scrivere: qui le
+skill non sono un ripiego, e la casella 11 dice perché.
+
 ### Il dub come *pratica*, non come stile
 
 Il dub nasce al banco del mixer: si parte da un riddim già suonato e lo si
@@ -72,6 +78,13 @@ c'è nessuna misura, solo `[WEB]`. E manca lo strumento per il laid-back:
 finiscono oltre la fine della clip restano fuori, e il comune lo spiega in «Ma
 swing e laid-back non sono la stessa cosa». La chiuderebbero un corpus di dub
 misurato come si è misurato il jazz, e poi l'ascolto.
+
+*Nel frattempo, per comporre:* lo swing si prende dalla **casella sorella**,
+la 10, che porta il valore da scrivere — non è misurato, e la 10 lo dice. Il
+laid-back invece si **lascia fuori**: finché `MU.laid_back()` non esiste,
+`MU.sposta()` farebbe uscire dalla clip le note che ritarda, e un one drop
+senza laid-back è una mancanza che si sente e si corregge, mentre un colpo
+perso a fine battuta si cerca per ore altrove.
 
 Il one drop è **laid-back**: gli ottavi di charleston sono **swingati**, e i
 levare arrivano leggermente in ritardo — «leaning into the space rather than
@@ -210,6 +223,19 @@ skank  = '..x...x...x...x.'   # accordi staccatissimi, TUTTI i levare
 bubble = '.oo..oo..oo..oo.'   # organo, i sedicesimi attorno al levare
 ```
 
+### L'agenda: qui i `[WEB]` si possono rimpiazzare con dei `[MIS]`
+
+Questa casella è piena, ma i suoi numeri vengono dal web e l'ascolto
+dell'utente li ha già corretti una volta. Il corpus che li rifarebbe misurati è
+il **Groove MIDI**, decompresso in `to-read/MIDI/groove-v1.0.0-midionly/`:
+`groove/info.csv` porta **20 esecuzioni reggae** — 19 con `style` esattamente
+`reggae`, una `reggae/slow` — contate il 17 agosto 2026 `[OSS]`, cioè velocity
+e microtiming di batteristi veri. Si contano **per prefisso**, e non per
+sottostringa: perché la sottostringa sia la regola sbagliata sta nella casella
+6 di [`jazz.md`](jazz.md), col controesempio. `to-read/` è in `.gitignore`,
+quindi chi clona non trova i file e quel numero è lo stato del disco di quel
+giorno. Il lettore c'è già: `MI.batteria()`.
+
 ## 7. Armonia
 
 **Parziale.** C'è il ritmo armonico — pochi accordi, spesso due alternati —
@@ -218,6 +244,14 @@ il **vocabolario**: quali sono i due accordi, nessuna progressione tipica,
 nessuna sigla, e niente su come si muovono le voci dello skank. Servirebbe una
 ricerca sulle progressioni del roots più il voicing di chitarra in levare —
 roba che `MU.armonia()` saprebbe già scrivere, e che oggi nessuno le dice.
+
+*Nel frattempo, per comporre:* il **ritmo** dello skank c'è già nelle caselle
+sorelle — la griglia della 2 e il pattern della 6 — e quello basta a scriverlo
+al posto giusto. Mancano solo le **altezze**, e quelle si chiedono
+**all'utente**: la tonalità e i due accordi sono una frase sua, e su questo
+repertorio la skill grande non è una fonte (casella 11). Un'armonia scritta
+senza chiedergliela va segnata `[IPO]` e portata all'ascolto, non lasciata
+passare per acquisita.
 
 **Pochi accordi, spesso solo due alternati.** [WEB] Quello che distingue
 l'armonia reggae non è la complessità ma il **ritmo con cui è suonata** — lo
@@ -232,6 +266,13 @@ il melodica — e nessuna delle fonti lette lo copre. La chiuderebbero le
 librerie MIDI per genere già in `to-read/MIDI/`, compresa
 `(aq) Dub Beat Builder`, che però nessuno ha ancora aperto.
 
+*Nel frattempo, per comporre:* si **lascia fuori**, e qui l'omissione non è un
+ripiego ma la risposta. Nel roots la melodia è la linea di basso, che la
+casella 5 ha per intero: un pezzo senza voce, senza fiati e senza melodica è
+un pezzo dub, non un pezzo a cui manca qualcosa — «si compone togliendo» è
+scritto nella casella 1. Se una linea in cima la si vuole davvero, si apre
+`(aq) Dub Beat Builder` con `MI.melodia()` invece di inventarla.
+
 ## 9. Forma e densità
 
 **Parziale.** C'è l'arco dub a sette tratti, ed è tutto quello che c'è: è
@@ -242,6 +283,13 @@ sceglierebbero i numeri sta nel comune, «L'arco di densità»; e che dentro il
 giro la variazione sia scelta e non randomizzata — un fantasma spostato, un
 charleston mancato, non rumore aggiunto ovunque — nel comune, «Variare è
 scelto, non randomizzato».
+
+*Nel frattempo, per comporre:* **l'arco qui sotto è il ripiego**, e si usa
+com'è, con la fiducia che dichiara da sé — `[WEB/skill]`, misurato su niente.
+Il controllo che si può fare stasera senza aprire altro sta nel comune,
+«L'arco di densità»: i tempi oltre i quali l'ascoltatore si stacca, contati in
+battute al tempo che si sta usando. Chiuderla è un'altra cosa, e la fa solo
+l'**utente** dicendo dove il pezzo è lungo e dove è corto.
 
 Le griglie a 16 passi, le velocity, lo swing, il turnaround ogni 4: sono la
 grana fine, ed erano giuste da correggere. Ma il giudizio dell'utente su
@@ -281,6 +329,14 @@ quindi ha i suoi FX, ma se basti — e cosa costi in righe di kit e in clip — 
 lo sa nessuno, perché non è stato provato sul dispositivo. È la prima cosa in
 cui inciampa chi costruisce un dub su questa macchina, e questa casella la pone
 senza rispondere.
+
+*Nel frattempo, per comporre:* **non c'è un ripiego onesto** — come si ottenga
+un eco su un colpo solo e non su tutta la parte è comportamento del
+dispositivo, e supporlo qui sarebbe scrivere una risposta che nessuno ha
+provato. Si chiede **all'utente**, che il Deluge ce l'ha in mano, prima di
+costruire il kit. Quello che si può scrivere senza quella risposta è l'eco
+come **decisione di arrangiamento** — i buchi fra le istanze in `arranger.py`,
+qui sotto — che da essa non dipende.
 
 Il telaio è comune e non si ripete qui: kit e drum costruiti dal synth vuoto
 `TEMPL.XML`, le norme di sound design, il compenso fra risonanza e volume

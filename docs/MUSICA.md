@@ -177,6 +177,15 @@ la musica dove non dipende dal repertorio; **la macchina**, il Deluge e la
 libreria. Dove un pezzo di comune alimenta una casella precisa, la casella è
 nominata.
 
+**Dove sono documentate le funzioni.** Qui e nelle schede i nomi della
+libreria — `MU.*`, `S.*`, `kit.*`, `sound.*`, `arranger.py` — compaiono per
+dire *quando* si usano. **Come** si chiamano, con firma ed esempio, sta in
+[`SKILL.md`](../.claude/skills/deluge-pal/SKILL.md), nelle tabelle «Come si
+fa», «Importare MIDI» e «Importare dalla Weimar Jazz Database». Il rimando è
+scritto qui una volta sola e vale per tutte le menzioni di queste pagine: una
+scheda si legge sempre insieme al comune, e un rimando accanto a ogni nome
+sarebbe rumore da mantenere.
+
 ### Metodo
 
 #### Le due skill, e chi comanda su cosa — 17 agosto 2026
