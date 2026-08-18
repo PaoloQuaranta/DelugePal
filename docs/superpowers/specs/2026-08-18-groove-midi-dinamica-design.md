@@ -41,9 +41,19 @@ Sulle sole `beat` del jazz i batteristi si spartiscono così: `drummer1` 19,
 «il jazz», abbastanza per dire «cinque batteristi di studio», ed è quest'ultima
 la frase che va scritta accanto al numero.
 
-⚠️ **Il reggae del Groove MIDI è un batterista solo e dieci minuti di
-musica.** Quattro esecuzioni continue (78, 78, 141, 126 BPM) più sedici fill da
-meno di tre secondi. Chiamare `[MIS]` quello che ne uscirebbe sarebbe
+⚠️ **Il reggae del Groove MIDI sono due batteristi e dieci minuti di musica.**
+Quattro esecuzioni continue (78, 78, 141, 126 BPM), **due di `drummer1` e due
+di `drummer5`**, più sedici fill da meno di tre secondi, tutti di `drummer1`.
+
+> **Correzione del 18 agosto 2026, e vale come promemoria.** Questo paragrafo
+> diceva «un batterista solo», ed era falso: l'ha trovato l'implementatore del
+> Task 6, misurando invece di rileggere. La frase era una deduzione — `drummer1`
+> ha 18 righe su 20, quindi «praticamente uno» — e la deduzione ha mangiato il
+> dato. Il numero non cambia la conclusione, perché a renderla `[WEB]` sono le
+> **quattro** esecuzioni continue, non quanti le hanno suonate; ma una tesi
+> giusta difesa con un numero sbagliato resta un numero sbagliato.
+
+Chiamare `[MIS]` quello che ne uscirebbe sarebbe
 travestire un esecutore da repertorio — la stessa cosa che la casella 8 del
 jazz vieta in una riga («un assolo è un musicista, non un repertorio»). Quindi
 la casella 6 del reggae **resta `[WEB]`**, e ci si scrive il conteggio col
