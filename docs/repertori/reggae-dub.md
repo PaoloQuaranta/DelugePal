@@ -79,13 +79,10 @@ cutting through it». [WEB]
 
 Lo **swing** si fa con lo swing di song. Come funziona la scala — display,
 BUR, e soprattutto `swingInterval`, che sceglie **quale figura** viene swingata
-— sta nel comune, «Il meccanismo dello swing». Serve saperlo per leggere la riga
-qui sotto, che fu scritta senza: col default del firmware lo swing cade sulle
-semicrome, e su un groove di crome quel 57 non muove niente.
-
-```python
-S.set_swing(doc, 57)      # unita' del display: sopra 50 = swingato
-```
+— sta nel comune, «Il meccanismo dello swing». Serve saperlo per leggere il
+valore, che sta nella casella 10 e fu scritto senza: col default del firmware
+lo swing cade sulle semicrome, e su un groove di crome quel 57 non muove
+niente.
 
 ⚠️ In `DUBPAL01` avevo scritto `set_swing(doc, 50)`, cioè **dritto**. Per un
 one drop è sbagliato in partenza.
@@ -140,7 +137,7 @@ Le varianti, che cambiano il carattere lasciando il rullante sul 3:
 
 ### Cassa e basso, quale dei quattro rapporti
 
-Nella griglia delle quattro parti, più sopra, cassa e basso sono descritti in
+Nella griglia delle sei parti, nella casella 2, cassa e basso sono descritti in
 due righe separate e il rapporto non è mai detto. Guardandolo adesso:
 
 ```
@@ -156,10 +153,22 @@ La regola generale — che il rapporto vada **dichiarato** invece che subìto �
 sta nel comune, «Cassa e basso sono una coppia, e va dichiarata». Qui c'è quale
 dei quattro rapporti è questo.
 
+### La playability vincola il roots, non il dub
+
+Se il pattern debba restare suonabile da quattro arti non è una regola ma una
+**decisione**, e qui le risposte sono due a seconda di cosa si sta facendo: il
+roots one drop nasce da una batteria vera e la playability lo vincola; il dub
+da banco del mixer, con kit sintetizzato, no — `DUBPAL01` ha un kit costruito
+dal synth vuoto, senza nessun batterista implicito. Le due righe per esteso, e
+perché dichiararlo invece di subirlo, stanno nel comune, «La playability è una
+decisione, non una regola».
+
 ## 6. Dinamica
 
 I tre livelli — colpo, accento, fantasma — e le loro escursioni per strumento
-stanno nel comune, «Velocity groove». Qui c'è dove cadono nel one drop.
+stanno nel comune, «Velocity groove»; che le variazioni siano **poche e
+scelte**, e non velocity randomizzate, sta nel comune, «Variare è scelto, non
+randomizzato». Qui c'è dove cadono nel one drop.
 
 ### Il velocity groove del one drop
 
@@ -229,7 +238,10 @@ librerie MIDI per genere già in `to-read/MIDI/`, compresa
 `[WEB/skill]` e **non è misurato su niente**, come dice la riga che lo precede.
 La chiuderebbe l'ascolto: un pezzo costruito su quest'arco, e il giudizio
 dell'utente su dove è lungo e dove è corto. La scala di densità 1-9 con cui si
-sceglierebbero i numeri sta nel comune, «L'arco di densità».
+sceglierebbero i numeri sta nel comune, «L'arco di densità»; e che dentro il
+giro la variazione sia scelta e non randomizzata — un fantasma spostato, un
+charleston mancato, non rumore aggiunto ovunque — nel comune, «Variare è
+scelto, non randomizzato».
 
 Le griglie a 16 passi, le velocity, lo swing, il turnaround ogni 4: sono la
 grana fine, ed erano giuste da correggere. Ma il giudizio dell'utente su
@@ -282,6 +294,14 @@ cosa, che sul Deluge è una decisione di arrangiamento e non di suono:
   stab — non su tutta la parte.
 - in `arranger.py` questo si scrive con i **buchi fra le istanze**.
 
+E il valore dello swing di song, che è realizzazione sulla macchina e non
+feel. Perché il one drop lo voglia — e che qui il numero non è misurato — sta
+nella casella 4; qui c'è il numero da scrivere:
+
+```python
+S.set_swing(doc, 57)      # unita' del display: sopra 50 = swingato
+```
+
 ## 11. Trappole del generatore
 
 **16 agosto 2026 — «è molto elementare e non assomiglia per niente a un pezzo
@@ -315,7 +335,7 @@ corregge la battuta 4 e lascia identiche la 1, la 2 e la 3.
 ### E le due skill, qui, sbagliano
 
 ⚠️ **Su reggae e dub comanda questo file, non le skill.** Misurato il 17 agosto
-2026: `music-composition` ha **tre righe** sul reggae in
+2026: `music-composition` ha **quattro righe in tutto** sul reggae — tre in
 `rhythm-groove/groove-and-feel.md` e una in `rhythmic-devices.md`;
 `music-composer` non ha né l'uno né l'altro. E su un punto la skill grande
 **indurrebbe in errore**: dice «skank guitar precisely on 2 and 4», che è la
@@ -328,8 +348,8 @@ una fonte che sembra autorevole perché è grande.
 > ⚠️ **Nessuna delle due skill serve per questo genere.** `music-composer` non
 > ha né reggae né dub: il suo `references/genres.md` copre Dubstep, Reggaeton,
 > Bossa Nova e altro, ma di reggae e dub non c'è nessuna voce (verificato il 16
-> agosto 2026). `music-composition`, che è venti volte più grande, ne ha
-> **quattro righe in tutto** e sullo skank dice una cosa che qui sarebbe
+> agosto 2026). `music-composition`, che è venti volte più grande, ne ha le
+> poche righe contate qui sopra, e sullo skank dice una cosa che qui sarebbe
 > sbagliata (verificato il 17 agosto 2026, dettaglio qui sopra).
 > Controllare prima di appoggiarcisi, sempre.
 

@@ -298,7 +298,7 @@ che lo usano saltano se non c'è, come quelli del corpus.
 | le note | `WJ.melodia(db, melid)` → `(altezza -> note, Conversione)`, stessa forma di `MI.melodia()` |
 | la griglia armonica | `WJ.armonia(db, melid)` → lista di `Accordo(tick, bar, beat, testo, sigla)`, con la `MU.Sigla` **già sciolta** |
 | una sigla del dialetto | `WJ.sigla_weimar('Ebj7911#')` |
-| **quanto è swingato** | `WJ.swing(db, style='BEBOP')` → levare al 63,6% del movimento, BUR 1,75. Filtri: `style`, `rhythmfeel`, `instrument`, `tempo_min/max`, `melid` |
+| **quanto è swingato** | `WJ.swing(db, style='BEBOP')` → dove cade il levare dentro il movimento, e il BUR. I numeri già misurati — per stile, per feel, per tempo — stanno in `docs/repertori/jazz.md`, casella 4. Filtri: `style`, `rhythmfeel`, `instrument`, `tempo_min/max`, `melid` |
 | **scrivere quello swing** | `S.set_swing(doc, 62, figura='1/8')` — il display **è** la percentuale di posizione del levare, e `figura` dice **quale figura swingare**. Il default del firmware (`7`) swinga le semicrome: su un groove di crome non muove niente |
 | le posizioni grezze | `WJ.levare(db, melid)` |
 

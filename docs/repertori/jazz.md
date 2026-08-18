@@ -21,15 +21,18 @@ swing.
 ## 2. Metro e griglia
 
 **Vuota.** La chiuderebbe una misura sulle metriche di `wjazzd.db`, che porta
-`bar/beat/tatum/division` per 200 809 note.
+`bar/beat/tatum/division` per ogni nota trascritta — quante siano, e quante
+abbiano una `division` che non si divide in due, sta in
+[`../../HANDOFF.md`](../../HANDOFF.md) §6-nonies, «Cosa è annotato e cosa no».
 
 ## 3. Tempo
 
 **Parziale.** **Il grosso del repertorio misurato sta fra 120 e 240 BPM.**
-È quello che dicono le quattro fasce su cui è stato misurato lo swing (≤ 120,
-120-180, 180-240, oltre 240 BPM) distribuendo 333 assoli: una distribuzione
-empirica dei tempi, letta da dati raccolti per un'altra ragione. Non è però un
-range *dichiarato* del repertorio, e manca il tempo *tipico* per stile, che
+È quello che dice la distribuzione degli assoli sulle fasce di tempo su cui è
+stato misurato lo swing — le fasce, e quanti assoli cadano in ognuna, stanno
+nella casella 4, «Per tempo». È una distribuzione empirica dei tempi, letta da
+dati raccolti per un'altra ragione. Non è però un range *dichiarato* del
+repertorio, e manca il tempo *tipico* per stile, che
 `wjazzd.db` ha e che non è stato ancora estratto.
 
 ## 4. Feel
@@ -141,8 +144,12 @@ di partitura. Qui non manca il corpus, manca il codice che lo apre.
 che la Weimar ha fatto per lo swing: velocity e microtiming di esecuzioni umane
 misurati per genere. Non è più in attesa di niente — sta decompresso in
 `to-read/MIDI/groove-v1.0.0-midionly/`, e `groove/info.csv` etichetta ogni file
-con stile e BPM: **101 esecuzioni `jazz`** su 1150, contate il 17 agosto 2026
-`[OSS]`. `to-read/` è in `.gitignore`, quindi chi clona non trova né i file né
+con stile e BPM: **101 esecuzioni con `style` che comincia per `jazz`** (46
+esatte, 55 nelle sottocategorie) **su 1150 righe**, e 20 per il reggae (19
+esatte, una `reggae/slow`), contate il 17 agosto 2026 `[OSS]`. Il **prefisso**
+è la regola giusta, non la sottostringa: cercare `reggae` dentro l'etichetta
+prenderebbe anche `latin/reggaeton` e `latin/brazilian-sambareggae`, che reggae
+non sono. `to-read/` è in `.gitignore`, quindi chi clona non trova né i file né
 il conteggio da rifare: quel numero è lo stato del disco di quel giorno. Manca
 solo leggerle, e il lettore c'è già: `MI.batteria()` dà le percussioni per nome
 GM, e il suo rapporto PPQ dice quanto microtiming l'arrotondamento si porta
@@ -153,12 +160,13 @@ via.
 **Parziale.** C'è il **vocabolario**, ed è completo: `MU.armonia()`,
 `MU.voci()`, `MU.sigla()`, i quattro voicing di `MU.VOICING` — `chiuso`,
 `shell`, `senza-fondamentale`, `drop2` — e il dialetto di Weimar, che
-`WJ.sigla_weimar()` scioglie per intero, 419 simboli su 419. Manca **la
+`WJ.sigla_weimar()` scioglie **per intero, senza fallimenti**. Manca **la
 condotta delle parti**: ogni accordo è costruito per conto suo, e i voicing
 alternati A/B del ii-V-I non sono implementati — cioè manca esattamente quello
 che fa suonare un comping invece di una fila di accordi. Come ci si è arrivati,
 e che cosa copre la grammatica delle sigle, sta in
-[`../../HANDOFF.md`](../../HANDOFF.md) §6-octies. **La chiuderebbe
+[`../../HANDOFF.md`](../../HANDOFF.md) §6-octies; quanti simboli distinti siano
+stati sciolti, e su quante occorrenze, in §6-nonies. **La chiuderebbe
 `assets/jazz-voicings.md` di `music-composition`**, che è già la fonte da cui i
 voicing vengono e che l'alternanza A/B la specifica: qui manca implementarla,
 non trovarla.
@@ -166,9 +174,11 @@ non trovarla.
 ## 8. Melodia e ornamentazione
 
 **Vuota, ed è la più vicina a chiudersi.** `wjazzd.db` è esattamente questo —
-456 assoli trascritti a mano con **gli accordi allineati alla linea** — ed è
-già su disco e già leggibile con `WJ.melodia()` e `WJ.armonia()`. Manca solo
-guardarlo per lo sviluppo motivico invece che per lo swing.
+assoli trascritti a mano con **gli accordi allineati alla linea**, e quanti
+siano lo dice [`../../HANDOFF.md`](../../HANDOFF.md), «La decisione sui
+formati simbolici» — ed è già su disco e già leggibile con `WJ.melodia()` e
+`WJ.armonia()`. Manca solo guardarlo per lo sviluppo motivico invece che per
+lo swing.
 
 ## 9. Forma e densità
 
@@ -178,8 +188,12 @@ stessa avvertenza della casella 5: il lettore va scritto, non procurato.
 
 ## 10. Sul Deluge
 
-**Parziale.** C'è **quanto** swing e **su quale figura**, ed è l'unica cosa
-del jazz già verificata sul dispositivo: serve
+**Parziale.** C'è **quanto** swing e **su quale figura**. Verificato sul
+dispositivo è il **meccanismo**, e in tutto il jazz è l'unica cosa che lo sia:
+che il display sia la percentuale di posizione del levare, e che
+`swingInterval` scelga quale figura viene swingata. Il **62** no: è aritmetica
+su quel meccanismo a partire dal BUR misurato sul corpus Weimar, e nessuno
+l'ha ancora ascoltato uscire dal Deluge. Serve
 `S.set_swing(doc, 62, figura='1/8')`, perché il default del firmware swinga le
 semicrome e su una linea di crome non muove niente. Come funziona la scala — la
 formula fra display e BUR, e quale `swingInterval` nomina quale figura — sta nel

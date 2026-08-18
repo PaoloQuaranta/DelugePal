@@ -940,10 +940,11 @@ altezze e quella sbagliata per estrarre un prefisso.
 
 **Il materiale che resta in `to-read/MIDI/`**, ora che il primo è aperto:
 `groove-v1.0.0-midionly/` — non uno zip da decomprimere, è già una cartella
-decompressa; il suo `groove/info.csv` ha **1150 righe, di cui 101 con `style`
-= jazz e 20 = reggae** (contate il 17 agosto 2026 — la scheda
-`docs/repertori/jazz.md` lo dice giusto) — poi `POP909`, `maestro`,
-`The_Magic_of_MIDI`, le librerie per genere e `(aq) Dub Beat Builder`.
+decompressa; il suo `groove/info.csv` etichetta ogni file con stile e BPM, e
+**quante esecuzioni jazz e reggae porti sta nella casella 6 di
+`docs/repertori/jazz.md`**, che è dove quel conteggio serve a decidere — poi
+`POP909`, `maestro`, `The_Magic_of_MIDI`, le librerie per genere e
+`(aq) Dub Beat Builder`.
 
 ---
 

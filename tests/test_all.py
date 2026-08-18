@@ -5495,19 +5495,30 @@ def _stato_di(path):
 
 
 def _righe_indice():
-    """Le righe della matrice di MUSICA.md, come {nome file: [stati]}."""
-    fuori = {}
+    """Le righe della matrice di MUSICA.md, come [(nome file, [stati])].
+
+    Una lista e non un dizionario: due righe che linkano alla stessa scheda
+    sono un difetto da vedere, e in un dizionario la seconda cancellerebbe la
+    prima in silenzio, cioe' l'indice tornerebbe coerente proprio perche' e'
+    sbagliato.
+    """
+    fuori = []
     for riga in (ROOT / 'docs' / 'MUSICA.md').read_text(encoding='utf-8').splitlines():
         if not riga.startswith('|') or '](repertori/' not in riga:
             continue
         celle = [c.strip() for c in riga.strip('|').split('|')]
         nome = celle[0].split('](repertori/')[1].rstrip(')')
-        fuori[nome] = [SIMBOLI.get(c.strip('* '), c) for c in celle[1:]]
+        fuori.append((nome, [SIMBOLI.get(c.strip('* '), c) for c in celle[1:]]))
     return fuori
 
 
 def test_indice_repertori_coerente_con_le_schede():
-    indice = _righe_indice()
+    righe = _righe_indice()
+    nomi = [n for n, _ in righe]
+    doppi = sorted({n for n in nomi if nomi.count(n) > 1})
+    check('l indice non ha due righe per la stessa scheda',
+          not doppi, f'ripetute: {doppi}')
+    indice = dict(righe)
     schede = sorted(REPERTORI.glob('*.md')) if REPERTORI.is_dir() else []
     check('l indice nomina tutte le schede',
           set(indice) == {s.name for s in schede},

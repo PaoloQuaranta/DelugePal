@@ -20,7 +20,7 @@ sta lavorando. È la disciplina che `SKILL.md` già prescrive per la skill grand
 solo a quello altrui.
 
 Stessa disciplina del resto del progetto: si scrive ciò che è stato
-verificato, e si segna `[OSS]` ciò che è supposto.
+verificato, e si segna `[IPO]` ciò che è supposto.
 
 I marcatori, e cosa vuol dire ciascuno:
 
@@ -95,7 +95,7 @@ repertori collidono, e l'unica del progetto che abbia numeri `[MIS]`.
 ### 5. Ruoli e spartizione
 
 Chi occupa cosa, e soprattutto **cosa lascia libero**. Il basso continuo
-più le voci, il comping più il walking, le quattro parti del reggae: è la stessa
+più le voci, il comping più il walking, le sei parti del reggae: è la stessa
 domanda fatta a repertori diversi. **Vuota** vuol dire parti che si
 sovrappongono senza che nessuno l'abbia deciso.
 
@@ -553,7 +553,10 @@ S.set_swing(doc, 62, figura='1/8')     # il jazz misurato, SULLE CROME
 
 L'esempio è **illustrativo**: mostra come si nomina la figura, non quale
 valore scegliere. I valori per repertorio — quale display per quale BUR —
-vivono nella casella 4 della scheda di quel repertorio, e solo lì.
+vivono nella casella 10 della scheda di quel repertorio, e solo lì: un numero
+da scrivere con `set_swing()` è realizzazione sulla macchina, non feel. Il
+feel — dove cade il levare, e se è misurato o supposto — sta nella casella 4,
+e la 10 lo converte.
 
 | `swingInterval` | schermo del Deluge | figura swingata |
 |---|---|---|
