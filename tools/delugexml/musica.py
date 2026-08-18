@@ -321,6 +321,31 @@ def accordi(spec: str, *, durata: str | int = '1/4', da: int = 0,
     return out
 
 
+# ------------------------------------------------------------- lo swing
+#
+# Dove cade il LEVARE dentro il movimento, in frazione: 0,5 e' dritto,
+# 0,667 e' la terzina. Il rapporto fra le due meta' del movimento e' la BUR
+# (beat-upbeat ratio) della letteratura: 1 dritto, 2 terzina.
+#
+# Sta QUI e non in un lettore di corpus perche' la usano in due -- `wjazz`
+# sulla Weimar e `groove` sul Groove MIDI -- e un numero, o una formula,
+# vive in un posto solo.
+
+
+def in_bur(levare: float) -> float:
+    """Da posizione del levare a BUR. 0,5 -> 1 (dritto), 0,667 -> 2."""
+    if not 0 < levare < 1:
+        raise ValueError(f'il levare sta fra 0 e 1, non {levare}')
+    return levare / (1 - levare)
+
+
+def da_bur(bur: float) -> float:
+    """L'inverso: da BUR a posizione del levare. 2 -> 0,667."""
+    if bur <= 0:
+        raise ValueError(f'la BUR e\' positiva, non {bur}')
+    return bur / (1 + bur)
+
+
 # -------------------------------------------------- sigle di accordo e voicing
 #
 # PERCHE' ESISTE

@@ -5532,6 +5532,32 @@ def test_indice_repertori_coerente_con_le_schede():
               f'indice {indice.get(s.name)} vs scheda {vero}')
 
 
+def test_bur_in_comune():
+    """L'aritmetica del BUR sta in `musica`, e i due lettori la condividono.
+
+    Stava in `wjazz.py`. Serve anche a `groove.py`, e le alternative erano
+    duplicarla (vietato) o far dipendere un corpus dall'altro (assurdo).
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+    from delugexml import wjazz as WJ                       # noqa: PLC0415
+
+    check('dritto e BUR 1', MU.in_bur(0.5) == 1.0, str(MU.in_bur(0.5)))
+    check('la terzina e BUR 2', abs(MU.in_bur(2 / 3) - 2.0) < 1e-9,
+          str(MU.in_bur(2 / 3)))
+    check('il jazz misurato, 61,7%, da 1,61',
+          abs(MU.in_bur(0.617) - 1.61) < 0.01, f'{MU.in_bur(0.617):.3f}')
+
+    for bur in (1.0, 1.61, 2.0, 3.0):
+        check(f'da_bur e l inverso di in_bur, BUR {bur}',
+              abs(MU.in_bur(MU.da_bur(bur)) - bur) < 1e-9,
+              f'{MU.in_bur(MU.da_bur(bur))}')
+
+    check('un levare fuori da (0,1) e un errore',
+          _raises(lambda: MU.in_bur(1.0), ValueError))
+    check('e `wjazz` usa la stessa funzione, non una copia',
+          WJ.in_bur is MU.in_bur)
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
