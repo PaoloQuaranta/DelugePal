@@ -226,7 +226,7 @@ def il_profilo_aggregato():
     vel: dict[str, dict[int, list[int]]] = {}
     chi: dict[str, set] = {}
     quante: dict[str, int] = {}
-    residuo: dict[str, list[float]] = {}
+    residuo: dict[str, list[tuple[float, str]]] = {}
     for e in GR.elenco(BASE, style=STILE, beat_type='beat',
                        time_signature='4-4'):
         if e.style in FUORI_DALLO_SWING:
@@ -329,28 +329,66 @@ def il_profilo_aggregato():
                             len(diff), statistics.median(diff),
                             sum(1 for x in diff if x > 0),
                             len({dr for _, dr in v}), diff[0], diff[-1]))
-    for _, primo, secondo, n, med, avanti, batt, lo, hi in sorted(
+    # ⚠️ IL SEGNO, DETTO UNA VOLTA PER TUTTE. `Passo.scarto` e' il residuo
+    # rispetto al passo: POSITIVO = il colpo cade DOPO la griglia (tardi),
+    # NEGATIVO = prima (anticipa). Lo conferma `applica_groove()`, che fa
+    # `pos + scarto`. Quindi `primo - secondo > 0` vuol dire che il PRIMO
+    # arriva PIU' TARDI del secondo, non che gli sta davanti. Una versione
+    # precedente di questa riga la chiamava "AVANTI" e faceva concludere il
+    # rovescio della realta' sul charleston a pedale.
+    for _, primo, secondo, n, med, tardi, batt, lo, hi in sorted(
             tabella, reverse=True):
         print(f'    {primo} - {secondo}'.ljust(50)
               + f'n={n:3d} batt={batt}  mediana {med:+5.2f} tick  '
-                f'il primo AVANTI in {avanti:2d}/{n:<3d} '
+                f'il primo e piu TARDI in {tardi:2d}/{n:<3d} '
                 f'(min {lo:+.2f}, max {hi:+.2f})')
 
-    # ⚠️ MESTIERE O LATENZA DEL TRIGGER? Su un kit elettronico un ritardo
-    # sistematico puo' essere il pad, non il batterista, e un template lo
-    # cuocerebbe dentro come se fosse feel. I dati sanno distinguere, e la
-    # leva e' il TEMPO:
+    # ⚠️ IL CONTROLLO CHE TOGLIE IL CONFONDIMENTO POSIZIONALE. Il residuo
+    # dipende dal passo, e i due strumenti non suonano sugli stessi passi:
+    # il charleston a pedale concentra i colpi sul 4 e sul 12 molto piu' del
+    # ride. La differenza fra i due potrebbe quindi essere "chi suona dove" e
+    # non "chi trattiene". Si rimisura sui SOLI passi 4 e 12, dove suonano
+    # entrambi, e si guarda se regge.
+    print('\n--- ride contro charleston, sui SOLI passi 4 e 12 ---')
+    for quali, eti in (((4, 12), 'passi 4 e 12'), (tuple(range(16)), 'tutti i passi')):
+        v = []
+        for e, _ in per_es:
+            prof = GR.profilo(BASE, e.id)
+            d = {}
+            for nome in ('ride', 'charleston a pedale'):
+                sel = [x for x in prof.passi.get(nome, [])
+                       if x.passo in quali and x.colpi >= 10]
+                if sum(x.colpi for x in prof.passi.get(nome, [])) < 40 or not sel:
+                    continue
+                d[nome] = statistics.median(
+                    [x.scarto for x in sel for _ in range(x.colpi)])
+            if len(d) == 2:
+                v.append(d['ride'] - d['charleston a pedale'])
+        if v:
+            print(f'    {eti:16s} n={len(v):3d}  ride - charleston '
+                  f'{statistics.median(v):+5.2f} tick  '
+                  f'il ride e piu TARDI in {sum(1 for x in v if x > 0)}/{len(v)}')
+
+    # ⚠️ MESTIERE O LATENZA? E LA FISICA, SCRITTA GIUSTA.
     #
-    #   - una latenza di trigger e' un ritardo FISICO, costante in
-    #     MILLISECONDI: in tick quindi CALA al salire del BPM, perche' il
-    #     tick si accorcia;
-    #   - una scelta musicale e' una frazione del movimento, costante in
-    #     TICK: in millisecondi quindi cala al salire del BPM.
+    # Un tick dura 60000/(BPM*96) ms, quindi SI ACCORCIA al salire del tempo.
+    # Ne segue che una latenza FISSA di D millisecondi vale
     #
-    # Si stampano tutte e due le unita' per fascia di tempo e si guarda
-    # quale delle due sta ferma. Non e' una prova -- restano pochi
-    # batteristi -- ma esclude l'ipotesi piu' semplice.
-    print('\n--- mestiere o latenza? quale unita sta ferma al variare del tempo ---')
+    #     D * BPM * 96 / 60000  tick
+    #
+    # cioe' e' proporzionale al BPM e in tick CRESCE al salire del tempo
+    # (20 ms = 3,04 tick a 95 BPM, 6,88 tick a 215). Una scelta musicale e'
+    # invece una frazione del movimento: costante in TICK, e in ms cala.
+    #
+    # ⚠️ Una versione precedente di questo blocco aveva la legge ROVESCIATA.
+    # La conclusione reggeva lo stesso -- piatto-in-tick e' incompatibile sia
+    # con "cresce" sia con "cala" -- ma la regola enunciata era falsa.
+    #
+    # ⚠️ E LA COLONNA IN MS NON E' UN SECONDO RISCONTRO: e' tick * 60000 /
+    # (BPM*96), aritmetica sugli stessi numeri. Si stampa per leggibilita',
+    # non come prova indipendente.
+    print('\n--- latenza fissa in ms, o frazione del movimento? ---')
+    print('    una latenza fissa CRESCE in tick col BPM; una scelta musicale sta ferma')
     for nome in ('charleston a pedale', 'rullante', 'kick', 'ride'):
         v = [(e.bpm, d[nome], d[nome] * 60000 / e.bpm / 96, e.drummer)
              for e, d in per_es if nome in d]
@@ -358,12 +396,50 @@ def il_profilo_aggregato():
             continue
         print(f'    {nome} (n={len(v)}, batt={len({dr for *_, dr in v})})')
         for lo2, hi2 in ((0, 110), (110, 130), (130, 999)):
-            sel = [(t, m) for b, t, m, _ in v if lo2 < b <= hi2]
+            sel = [(t, m, dr) for b, t, m, dr in v if lo2 < b <= hi2]
             if len(sel) < 3:
                 continue
-            print(f'      {lo2:3d}-{hi2:3d} BPM (n={len(sel):2d}): '
-                  f'tick {statistics.median(t for t, _ in sel):+6.2f}   '
-                  f'ms {statistics.median(m for _, m in sel):+7.2f}')
+            tick = [t for t, _, _ in sel]
+            sd = statistics.stdev(tick) if len(tick) > 1 else 0.0
+            print(f'      {lo2:3d}-{hi2:3d} BPM  n={len(sel):2d} '
+                  f'batt={len({dr for *_, dr in sel})}  '
+                  f'tick mediana {statistics.median(tick):+6.2f} '
+                  f'media {statistics.mean(tick):+6.2f} '
+                  f'dev.st {sd:4.2f} err.st {sd / len(tick) ** 0.5:4.2f}  '
+                  f'(ms {statistics.median(m for _, m, _ in sel):+7.2f})')
+
+        # ⚠️ LA VERSIONE FORTE: una regressione, non tre mediane. Le fasce
+        # sono un raggruppamento arbitrario e la loro piattezza potrebbe
+        # essere fortuna di composizione. La pendenza no.
+        def pendenza(campione):
+            n = len(campione)
+            mx = statistics.mean(b for b, _ in campione)
+            my = statistics.mean(t for _, t in campione)
+            sxx = sum((b - mx) ** 2 for b, _ in campione)
+            if n < 4 or sxx == 0:
+                return None
+            m = sum((b - mx) * (t - my) for b, t in campione) / sxx
+            q = my - m * mx
+            res = sum((t - (m * b + q)) ** 2 for b, t in campione)
+            se = ((res / (n - 2)) / sxx) ** 0.5
+            # cosa prevede una latenza FISSA pari alla mediana osservata in ms
+            ms_med = statistics.median(t * 60000 / b / 96 for b, t in campione)
+            atteso = ms_med * 96 / 60000
+            return m, se, atteso, n
+
+        for eti, camp in (('tutte', [(b, t) for b, t, _, _ in v]),
+                          ('solo drummer1',
+                           [(b, t) for b, t, _, dr in v if dr == 'drummer1'])):
+            r = pendenza(camp)
+            if r is None:
+                continue
+            m, se, atteso, n = r
+            bpm = [b for b, _ in camp]
+            sigma = abs(m - atteso) / se if se else float('inf')
+            print(f'      pendenza [{eti}] n={n:2d} ({min(bpm)}-{max(bpm)} BPM): '
+                  f'{m:+.4f} +/- {se:.4f} tick/BPM   '
+                  f'latenza fissa prevede {atteso:+.4f}   '
+                  f'distanza {sigma:.1f} sigma')
 
 
 def i_fill():
