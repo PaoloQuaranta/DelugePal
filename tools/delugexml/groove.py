@@ -240,7 +240,14 @@ class Passo(NamedTuple):
 
     passo: int          # 0..15
     velocity: int       # la MEDIANA dei colpi su quel passo
-    scarto: float       # tick di residuo, con segno. + spinge, - trattiene
+    #: tick di residuo rispetto al passo, con segno. POSITIVO = il colpo
+    #: cade DOPO la griglia (in ritardo), NEGATIVO = prima (in anticipo).
+    #: Lo conferma `musica.applica_groove()`, che fa `pos + scarto`.
+    #: ⚠️ Fino al 19 agosto 2026 questa riga diceva '+ spinge, -
+    #: trattiene', cioe' il rovescio, ed era copiata in altri tre posti:
+    #: ha fatto concludere che il charleston a pedale del jazz stesse
+    #: DIETRO agli altri mentre li ANTICIPA. Il segno si legge da qui.
+    scarto: float
     colpi: int          # quante volte quel passo e' stato colpito
 
 
@@ -288,8 +295,8 @@ def profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float,
        anticipo che e' latenza di cattura, non feel;
     2. misura il BUR e TOGLILO -- se no lo swing viene applicato due volte,
        una dal firmware e una da qui;
-    3. quel che resta e' il RESIDUO: il ride che spinge rispetto al rullante
-       che tiene indietro. E' il solo microtiming che il template porta;
+    3. quel che resta e' il RESIDUO -- chi arriva prima e chi dopo rispetto
+       al resto del kit. E' il solo microtiming che il template porta;
     4. aggrega per strumento e per passo, sedici per battuta.
     """
     passo_tick = ppq / 4                            # un 1/16

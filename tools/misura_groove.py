@@ -32,6 +32,10 @@ FUORI_DALLO_SWING = {'jazz/funk', 'jazz/fusion'}
 #: I tre pad che il ride occupa nella mappa GM.
 RIDE = {'ride', 'ride 2', 'campana del ride'}
 
+#: Il charleston suonato col PIEDE. Nel jazz sta sul 2 e sul 4, ed e' lo
+#: strumento su cui cade la stratificazione misurata nella casella 6.
+PEDALE = 'charleston a pedale'
+
 PPQ = float(MI.TICK_PER_MOVIMENTO_DELUGE)
 
 
@@ -273,7 +277,8 @@ def il_profilo_aggregato():
         print()
 
     print('--- il RESIDUO per strumento, in tick Deluge (96 per movimento) ---')
-    print('    + spinge, - trattiene. Origine e swing sono gia stati tolti.')
+    print('    POSITIVO = dopo la griglia, NEGATIVO = prima. '
+          'Origine e swing sono gia stati tolti.')
     for nome, vs in sorted(residuo.items(), key=lambda kv: -len(kv[1])):
         if len(vs) < 8:
             continue
@@ -355,7 +360,7 @@ def il_profilo_aggregato():
         for e, _ in per_es:
             prof = GR.profilo(BASE, e.id)
             d = {}
-            for nome in ('ride', 'charleston a pedale'):
+            for nome in ('ride', PEDALE):
                 sel = [x for x in prof.passi.get(nome, [])
                        if x.passo in quali and x.colpi >= 10]
                 if sum(x.colpi for x in prof.passi.get(nome, [])) < 40 or not sel:
@@ -363,11 +368,13 @@ def il_profilo_aggregato():
                 d[nome] = statistics.median(
                     [x.scarto for x in sel for _ in range(x.colpi)])
             if len(d) == 2:
-                v.append(d['ride'] - d['charleston a pedale'])
+                v.append((d['ride'] - d[PEDALE], e.drummer))
         if v:
-            print(f'    {eti:16s} n={len(v):3d}  ride - charleston '
-                  f'{statistics.median(v):+5.2f} tick  '
-                  f'il ride e piu TARDI in {sum(1 for x in v if x > 0)}/{len(v)}')
+            print(f'    {eti:16s} n={len(v):3d} '
+                  f'batt={len({dr for _, dr in v})}  ride - charleston '
+                  f'{statistics.median(x for x, _ in v):+5.2f} tick  '
+                  f'il ride e piu TARDI in '
+                  f'{sum(1 for x, _ in v if x > 0)}/{len(v)}')
 
     # ⚠️ MESTIERE O LATENZA? E LA FISICA, SCRITTA GIUSTA.
     #
@@ -408,38 +415,92 @@ def il_profilo_aggregato():
                   f'dev.st {sd:4.2f} err.st {sd / len(tick) ** 0.5:4.2f}  '
                   f'(ms {statistics.median(m for _, m, _ in sel):+7.2f})')
 
-        # ⚠️ LA VERSIONE FORTE: una regressione, non tre mediane. Le fasce
-        # sono un raggruppamento arbitrario e la loro piattezza potrebbe
-        # essere fortuna di composizione. La pendenza no.
-        def pendenza(campione):
-            n = len(campione)
-            mx = statistics.mean(b for b, _ in campione)
-            my = statistics.mean(t for _, t in campione)
-            sxx = sum((b - mx) ** 2 for b, _ in campione)
-            if n < 4 or sxx == 0:
-                return None
-            m = sum((b - mx) * (t - my) for b, t in campione) / sxx
-            q = my - m * mx
-            res = sum((t - (m * b + q)) ** 2 for b, t in campione)
-            se = ((res / (n - 2)) / sxx) ** 0.5
-            # cosa prevede una latenza FISSA pari alla mediana osservata in ms
-            ms_med = statistics.median(t * 60000 / b / 96 for b, t in campione)
-            atteso = ms_med * 96 / 60000
-            return m, se, atteso, n
+    # ⚠️ LA VERSIONE FORTE, E SULLA GRANDEZZA GIUSTA.
+    #
+    # Due correzioni rispetto a una versione precedente di questo blocco:
+    #
+    # 1. una REGRESSIONE invece di tre mediane per fascia. Le fasce sono un
+    #    raggruppamento arbitrario e la loro piattezza puo' essere fortuna di
+    #    composizione; la pendenza no.
+    # 2. sul DIVARIO APPAIATO, non sui livelli. Dopo `origine()` il livello di
+    #    ogni esecuzione ha uno ZERO ARBITRARIO -- l'origine tolta e' comune al
+    #    kit e puo' variare da esecuzione a esecuzione -- quindi una pendenza
+    #    sui livelli confonde. La DIFFERENZA fra due strumenti della stessa
+    #    esecuzione quell'offset lo cancella per costruzione, ed e' l'unica
+    #    grandezza definita. E' anche l'unica coerente con cio' che questo
+    #    modulo puo' dire: un confronto fra pad, mai una latenza assoluta.
+    #
+    # Le due ipotesi fanno previsioni opposte sul divario:
+    #   - divario costante in TICK (frazione del movimento: mestiere, oppure
+    #     un gesto come la corsa del pedale)      -> pendenza 0
+    #   - divario costante in MILLISECONDI (latenza fissa di un pad rispetto
+    #     all'altro)  -> pendenza = ms_mediano * 96/60000, dello STESSO SEGNO
+    #     del divario
+    print('\n--- la stessa domanda sul DIVARIO APPAIATO (l unica grandezza definita) ---')
+    for pad in ('rullante', 'kick', 'ride'):
+        camp = [(e.bpm, d[pad] - d[PEDALE], e.drummer)
+                for e, d in per_es if pad in d and PEDALE in d]
+        if len(camp) < 4:
+            continue
+        n = len(camp)
+        mx = statistics.mean(b for b, _, _ in camp)
+        my = statistics.mean(y for _, y, _ in camp)
+        sxx = sum((b - mx) ** 2 for b, _, _ in camp)
+        if sxx == 0:
+            continue
+        m = sum((b - mx) * (y - my) for b, y, _ in camp) / sxx
+        q = my - m * mx
+        res = sum((y - (m * b + q)) ** 2 for b, y, _ in camp)
+        se = ((res / (n - 2)) / sxx) ** 0.5
+        ms = statistics.median(y * 60000 / b / 96 for b, y, _ in camp)
+        atteso = ms * 96 / 60000
+        print(f'    {pad} - {PEDALE}'.ljust(48)
+              + f'n={n:2d} batt={len({dr for *_, dr in camp})}  '
+                f'divario {statistics.median(y for _, y, _ in camp):+5.2f} tick '
+                f'({ms:+5.1f} ms)')
+        print(f'      pendenza {m:+.4f} +/- {se:.4f} tick/BPM   '
+              f'da COSTANTE-IN-TICK (0,0000) {abs(m) / se:.1f} sigma   '
+              f'da LATENZA FISSA ({atteso:+.4f}) {abs(m - atteso) / se:.1f} sigma')
 
-        for eti, camp in (('tutte', [(b, t) for b, t, _, _ in v]),
-                          ('solo drummer1',
-                           [(b, t) for b, t, _, dr in v if dr == 'drummer1'])):
-            r = pendenza(camp)
-            if r is None:
-                continue
-            m, se, atteso, n = r
-            bpm = [b for b, _ in camp]
-            sigma = abs(m - atteso) / se if se else float('inf')
-            print(f'      pendenza [{eti}] n={n:2d} ({min(bpm)}-{max(bpm)} BPM): '
-                  f'{m:+.4f} +/- {se:.4f} tick/BPM   '
-                  f'latenza fissa prevede {atteso:+.4f}   '
-                  f'distanza {sigma:.1f} sigma')
+    # ⚠️ IL CONTROLLO SENZA NIENTE TOLTO. Le fasi grezze dentro il movimento,
+    # senza `origine()` e senza togliere lo swing: se il disegno c'e' deve
+    # vedersi anche cosi'. Un colpo conta se sta entro un quarto di movimento
+    # dal battere, e uno strumento conta se ne ha almeno venti.
+    print('\n--- controprova sulle FASI GREZZE (nessuna origine tolta) ---')
+    grezze: dict[str, list[float]] = {}
+    coppia = []
+    for e in GR.elenco(BASE, style=STILE, beat_type='beat',
+                       time_signature='4-4'):
+        if e.style in FUORI_DALLO_SWING:
+            continue
+        c = _colpi(e)
+        riga = {}
+        for nome in (PEDALE, 'ride', 'rullante', 'kick'):
+            fasi = []
+            for pos, _ in c.get(nome, []):
+                f = pos % PPQ
+                if f > PPQ / 2:
+                    f -= PPQ
+                if abs(f) < PPQ / 4:
+                    fasi.append(f)
+            if len(fasi) >= 20:
+                riga[nome] = statistics.median(fasi)
+        for k, val in riga.items():
+            grezze.setdefault(k, []).append(val)
+        if PEDALE in riga and 'ride' in riga:
+            coppia.append(riga[PEDALE] - riga['ride'])
+    for nome in (PEDALE, 'rullante', 'kick', 'ride'):
+        v = grezze.get(nome, [])
+        if v:
+            print(f'    {nome:24s} n={len(v):3d}  '
+                  f'fase mediana {statistics.median(v):+6.2f} tick')
+    if coppia:
+        print(f'    {PEDALE} - ride: n={len(coppia)}  '
+              f'mediana {statistics.median(coppia):+.2f} tick  '
+              f'il charleston ANTICIPA in '
+              f'{sum(1 for x in coppia if x < 0)}/{len(coppia)}')
+
+
 
 
 def i_fill():
@@ -507,13 +568,75 @@ def il_template():
     # mediane su decine di esecuzioni: il profilo di UNA esecuzione porta uno
     # scarto per ogni passo, e l'escursione e' un'altra grandezza. Confonderle
     # farebbe sembrare il template molto piu' timido di quello che e'.
-    tutti = [s2.scarto for passi in p.passi.values() for s2 in passi
-             if s2.colpi >= p.battute * 0.05]
+    # ⚠️ SENZA SOGLIA. `applica_groove()` non ne ha nessuna (`musica.py`: cerca
+    # `per_passo.get(passo)` e applica quel che trova), quindi l'escursione
+    # vera e' su TUTTI i passi, non solo su quelli che la stampa qui sopra
+    # tiene. Una versione precedente riportava il 6,64 filtrato come se fosse
+    # il massimo spostamento: era meta' del vero.
+    ms = 60000 / p.bpm / 96
+    tutti = [(s2.scarto, nome, s2.passo, s2.colpi)
+             for nome, passi in p.passi.items() for s2 in passi]
     if tutti:
-        ms = 60000 / p.bpm / 96
-        print(f'  scarti che il template scrivera: da {min(tutti):+.2f} a '
-              f'{max(tutti):+.2f} tick, escursione {max(tutti) - min(tutti):.2f} '
-              f'tick = {(max(tutti) - min(tutti)) * ms:.1f} ms a {p.bpm} BPM')
+        lo = min(tutti)[0]
+        hi = max(tutti)[0]
+        estremo = max(tutti, key=lambda x: abs(x[0]))
+        print(f'  scarti che applica_groove() scrivera (TUTTI i passi): '
+              f'da {lo:+.2f} a {hi:+.2f} tick, escursione {hi - lo:.2f} tick '
+              f'= {(hi - lo) * ms:.1f} ms a {p.bpm} BPM')
+        print(f'  massimo SPOSTAMENTO singolo: {estremo[0]:+.2f} tick '
+              f'= {abs(estremo[0]) * ms:.1f} ms  ({estremo[1]}, passo '
+              f'{estremo[2]}, {estremo[3]} colpi)')
+        print('  i cinque piu grandi in modulo, coi colpi che li sostengono:')
+        for sc, nome, passo, colpi in sorted(tutti, key=lambda x: -abs(x[0]))[:5]:
+            print(f'    {sc:+6.2f} tick  {nome:22s} passo {passo:2d}  {colpi} colpi')
+        filtrati = [x[0] for x in tutti if x[3] >= p.battute * 0.05]
+        print(f'  (con la soglia della stampa qui sopra sarebbe stato '
+              f'{min(filtrati):+.2f}..{max(filtrati):+.2f}, '
+              f'escursione {max(filtrati) - min(filtrati):.2f} tick: meta del vero)')
+
+    # ⚠️ IL TEMPLATE DENTRO IL CAMPIONE. La casella 6 dice "15 su 15" sulla
+    # stratificazione ride/charleston: va detto dove cade in quella fila
+    # proprio l'esecuzione che si raccomanda come template.
+    print('\n--- dove cade il template nel campione appaiato ride/charleston ---')
+    camp = []
+    for e2 in GR.elenco(BASE, style=STILE, beat_type='beat',
+                        time_signature='4-4'):
+        if e2.style in FUORI_DALLO_SWING:
+            continue
+        pr = GR.profilo(BASE, e2.id)
+        d = {}
+        for nome in ('ride', PEDALE):
+            passi = pr.passi.get(nome, [])
+            forti = [x for x in passi if x.colpi >= 10]
+            if sum(x.colpi for x in passi) < 40 or not forti:
+                continue
+            d[nome] = statistics.median(
+                [x.scarto for x in forti for _ in range(x.colpi)])
+        if len(d) == 2:
+            camp.append((d['ride'] - d[PEDALE], e2.id))
+    camp.sort()
+    for v, quale in camp:
+        print(f'    {v:+6.2f} tick  {quale}'
+              + ('   <-- IL TEMPLATE' if quale == scelta.id else ''))
+    senza = [v for v, quale in camp if quale != scelta.id]
+    if senza:
+        print(f'    tutte: n={len(camp)} mediana '
+              f'{statistics.median(v for v, _ in camp):+.2f} '
+              f'ride piu tardi in {sum(1 for v, _ in camp if v > 0)}/{len(camp)}')
+        print(f'    senza il template: n={len(senza)} mediana '
+              f'{statistics.median(senza):+.2f} '
+              f'ride piu tardi in {sum(1 for v in senza if v > 0)}/{len(senza)}')
+
+    # e PERCHE' quel file sta al bordo: due stimatori danno segni opposti
+    print('    i due stimatori su quel file:')
+    for nome in ('ride', PEDALE):
+        passi = p.passi[nome]
+        forti = [x for x in passi if x.colpi >= 10]
+        sui_colpi = statistics.median(
+            [x.scarto for x in forti for _ in range(x.colpi)])
+        sui_passi = statistics.median([x.scarto for x in passi])
+        print(f'      {nome:22s} sui COLPI (passi con >=10 colpi) '
+              f'{sui_colpi:+6.2f}   sui PASSI (tutti, non pesata) {sui_passi:+6.2f}')
 
     # ⚠️ i due pad non suonano mai insieme: la stessa voce musicale --
     # il disegno di crome swingate -- cambia nome GM a meta' esecuzione.

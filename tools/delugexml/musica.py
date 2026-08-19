@@ -202,8 +202,8 @@ def applica_groove(note: list[Note], profilo, dove: str) -> dict[str, object]:
     Il pattern resta la stringa leggibile che e'; il feel arriva da
     un'esecuzione vera. `dove` e' il nome GM dello strumento nel profilo.
 
-    ⚠️ LO SWING NON E' QUI. Il profilo porta il solo RESIDUO -- il ride che
-    spinge rispetto al rullante che tiene indietro -- perche' lo swing lo fa
+    ⚠️ LO SWING NON E' QUI. Il profilo porta il solo RESIDUO -- di quanto
+    ogni strumento arriva prima o dopo il resto del kit -- perche' lo swing lo fa
     `song.set_swing()`, che e' di song e vale anche per basso e comping. Un
     template che portasse anche lo swing lo farebbe applicare due volte.
 
