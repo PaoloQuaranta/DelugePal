@@ -7,7 +7,9 @@ Da leggere prima del resto: **nessun pezzo jazz è mai stato generato.**
 Quello che c'è in questa scheda o è misurato su un corpus — lo swing nella
 casella 4, la dinamica e i fill nelle caselle 6 e 9 — o è già in libreria (la
 7); **niente è passato dall'ascolto dell'utente**, perché non c'è ancora niente
-da ascoltare, e **niente è stato verificato sul dispositivo**. È la ragione per
+da ascoltare. Sul dispositivo è stato verificato **il solo meccanismo dello
+swing** (casella 10) e nient'altro: del groove template, in particolare, non è
+stata provata neppure una nota. È la ragione per
 cui cinque caselle su undici sono ancora vuote, e per cui la 11 è vuota **per
 costruzione** e non per trascuratezza: una trappola del generatore si osserva,
 non si prevede.
@@ -190,8 +192,14 @@ assoli con meno di **20 coppie** di crome — «una mediana su quattro valori no
 **18 delle 41 esecuzioni** poggiano su meno di 20 coppie, e alcune su una sola.
 Rialzando la soglia il numero però **non si muove**: 1,48 senza soglia, 1,43 a
 5 coppie, 1,46 a 10, **1,49 a 20** (23 esecuzioni, 4 batteristi) `[MIS]`. La
-mediana non sta in piedi sulle esecuzioni magre. Sul solo ride, stesso
-controllo: 1,99 senza soglia, **2,00** con `[MIS]`.
+mediana non sta in piedi sulle esecuzioni magre.
+
+Sul **solo ride** lo stesso controllo va fatto sulle **coppie del ride**, non
+su quelle del kit — filtrare un numero col conteggio di un altro non
+verificherebbe niente — e lì il campione **si dimezza**: 1,99 su 21 esecuzioni
+e 4 batteristi senza soglia, **2,00 su 10 esecuzioni e 3 batteristi** con la
+soglia a 20 `[MIS]`. Il valore non si muove, ma **il 2,00 poggia su metà delle
+esecuzioni e su un batterista in meno**, e va citato con questo accanto.
 
 ⚠️ **Ma l'accordo fra due mediane non è un accordo su cosa faccia un
 batterista jazz**, e questa è la parte che serve a chi compone. Il numero si
@@ -245,15 +253,21 @@ La casella qui sopra sospettava, `[OSS]` e non verificato, che **sotto i 120
 BPM lo swing cali** perché nelle ballad si sposta sulle semicrome. Il Groove
 MIDI, che non sa niente di Weimar, dice la stessa cosa `[MIS]`:
 
-| tempo | esecuzioni | BUR Groove MIDI | BUR Weimar |
-|---|---|---|---|
-| ≤ 120 | 21 | **1,11** | 1,41 |
-| 120-180 | 11 | 1,59 | 1,89 |
-| 180-240 | 8 | 1,60 | 1,75 |
-| > 240 | 1 | — | 1,35 |
+| tempo | esecuzioni | batteristi | BUR Groove MIDI | BUR Weimar |
+|---|---|---|---|---|
+| ≤ 120 | 21 | 4 | **1,11** | 1,41 |
+| 120-180 | 11 | 3 | 1,59 | 1,89 |
+| 180-240 | 8 | **2** | 1,60 | 1,75 |
+| > 240 | 1 | 1 | — | 1,35 |
 
 *(la colonna Weimar è quella della tabella «Per tempo» qui sopra, riportata
 solo per affiancarla: se un giorno si corregge, si corregge lì.)*
+
+⚠️ **La colonna dei batteristi va letta insieme alla forma.** Il massimo sta
+sui medi, ma la fascia 180-240 sono **due soli batteristi** e quella sopra i
+240 **uno**: la parte solida dell'accordo è il **minimo sui lenti**, che poggia
+su 21 esecuzioni e 4 batteristi. Il resto della curva è nella stessa direzione
+di Weimar e su un campione che non la sosterrebbe da solo.
 
 I due corpora non concordano sui valori, ma concordano sulla **forma**: il
 minimo sta sui lenti, il massimo sui medi. Un secondo corpus che riproduce una
@@ -283,7 +297,9 @@ comunque **dichiarato** e non subìto, qualunque sia la fonte: il comune,
 **Misurata sul Groove MIDI Dataset — 18 agosto 2026.** La velocity della
 batteria jazz non viene più dal web: viene da **101 esecuzioni** col prefisso
 `jazz` su **1150 righe** di `info.csv` — **50 `beat`** e **51 `fill`** — suonate
-da **cinque batteristi di studio** su un kit elettronico `[OSS]`. Le misure si
+da **cinque batteristi** `[OSS]`, su un kit elettronico e in studio, che è
+quanto dichiara la documentazione del dataset e non qualcosa che si legga nei
+file `[MAN]`. Le misure si
 rifanno con `.venv/Scripts/python.exe tools/misura_groove.py`; `to-read/` è in
 `.gitignore`, quindi i conteggi qui sotto sono lo stato del disco di quel
 giorno e non si riproducono senza il dataset.
@@ -301,8 +317,12 @@ L'etichetta si prende **per prefisso** — la regola di `GR.per_prefisso()`, non
 la sottostringa: cercare `reggae` dentro l'etichetta prenderebbe anche
 `latin/reggaeton` e `latin/brazilian-sambareggae`, che reggae non sono. Dentro
 `jazz` così preso ci stanno però anche **`jazz/funk` (24 esecuzioni)** e
-**`jazz/fusion` (11)**, che di swing di crome non ne hanno `[OSS]`. Le misure
-di **swing** li escludono, e la casella 4 lo dichiara.
+**`jazz/fusion` (11)**, che di swing di crome non ne hanno — e non è
+un'impressione, è misurato: BUR **0,73** sulle 2 `beat` di funk (1 batterista)
+e **1,10** sulle 4 di fusion (1 batterista), contro l'**1,48** delle 41 del
+resto (5 batteristi) `[MIS]`. Cioè crome quasi dritte, su campioni piccoli ma
+concordi. Le misure di **swing** li escludono per questo, e la casella 4 lo
+ripete con la tabella.
 
 Per la **dinamica** invece il taglio quasi non conta, ed è misurato e non
 supposto: nel sottoinsieme `beat` funk e fusion sono appena **2 e 4 esecuzioni
@@ -382,28 +402,93 @@ Quello che ne esce è il jazz che ci si aspetta, e nessuno gliel'ha imposto:
 Tolti l'origine della griglia e lo swing — la catena di `GR.profilo()` — quello
 che resta è il **residuo**, in tick Deluge (96 per movimento) `[MIS]`:
 
-| strumento | esecuzioni | mediana | q1-q3 |
-|---|---|---|---|
-| charleston a pedale | 23 | −3,39 | −4,78 … −2,11 |
-| rullante | 26 | −2,17 | −3,10 … −0,20 |
-| kick | 22 | −1,23 | −2,68 … −0,50 |
-| ride | 18 | −0,81 | −2,02 … +0,21 |
+| strumento | esecuzioni | batteristi | mediana | q1-q3 |
+|---|---|---|---|---|
+| charleston a pedale | 23 | 3 | −3,39 | −4,78 … −2,11 |
+| rullante | 26 | 4 | −2,17 | −3,10 … −0,20 |
+| kick | 22 | 4 | −1,23 | −2,68 … −0,50 |
+| ride | 18 | 4 | −0,81 | −2,02 … +0,21 |
 
 Un tick vale 6,25 ms a 100 BPM e 3,38 ms a 185, quindi **le mediane stanno
 tutte entro 3,4 tick**: 21 ms a 100 BPM, 11 ms a 185. Cioè sul **bordo
 inferiore** della finestra di 20-40 ms che il comune dichiara udibile, e sotto
 di essa ai tempi veloci.
 
-⚠️ **E qui il corpus non conferma il pocket a strati.** Il comune («Ma swing e
-laid-back non sono la stessa cosa») riporta da `music-composition` che il
-groove è a strati — rullante appena dietro, charleston appena avanti — e lo
-segna `[IPO]`. Su questo corpus **non si vede**: le quartili delle quattro
-righe si sovrappongono quasi per intero, e dentro **la stessa** esecuzione il
-ride sta avanti al rullante in **8 casi su 14**, con differenza mediana di
-**+0,34 tick** `[MIS]`. Otto su quattordici è testa o croce. Il residuo del
-jazz è dunque piccolo e **non ordinato per strumento**: chi cerca un pocket a
-strati non lo trovi qui, e chi scrive un template sappia che sta portando
-qualche tick, non un carattere.
+#### C'è una stratificazione, ed è il contrario di quella prevista
+
+Le mediane qui sopra vengono da esecuzioni diverse, e un'esecuzione intera può
+stare avanti o indietro per conto suo: confrontarle fra loro direbbe poco. La
+domanda va fatta **dentro la stessa esecuzione**, e a **tutte** le coppie —
+sceglierne una dopo aver visto le mediane sarebbe scegliere il risultato.
+Esecuzioni `beat` 4/4 senza funk e fusion `[MIS]`:
+
+| coppia | esecuzioni | batteristi | mediana | il primo è avanti in |
+|---|---|---|---|---|
+| ride − charleston a pedale | 15 | 3 | **+2,59 tick** | **15 su 15** |
+| kick − charleston a pedale | 18 | 2 | +2,23 | 14 su 18 |
+| rullante − charleston a pedale | 22 | 3 | +1,38 | 17 su 22 |
+| kick − ride | 12 | 3 | −0,54 | 5 su 12 |
+| rullante − ride | 14 | 3 | −0,34 | 6 su 14 |
+| rullante − kick | 21 | 3 | +0,22 | 11 su 21 |
+
+Il disegno è netto e sta tutto in una riga: **il charleston a pedale sta
+dietro a tutto il resto**, in tutte e tre le coppie che lo riguardano — e
+contro il ride in **15 esecuzioni su 15**, con scarti da +0,08 a +6,03 tick.
+Fra ride, cassa e rullante invece non c'è ordine: mediane sotto il mezzo tick e
+conteggi da testa o croce.
+
+⚠️ **E questo smentisce l'`[IPO]` del comune, ma non nel verso che ci si
+aspetterebbe.** «Ma swing e laid-back non sono la stessa cosa» riporta da
+`music-composition` un pocket a strati con *«cassa sul tempo, rullante appena
+dietro, charleston appena avanti»*. Qui il charleston non è appena avanti: è
+**il più indietro di tutti**, e il rullante non è dietro alla cassa. La
+stratificazione **esiste ed è sistematica** — quel che è sbagliato è il segno.
+
+⚠️ **Ma prima di cuocerla in un template: è mestiere o è il pedale?** Su un kit
+elettronico un ritardo sistematico può essere il trigger e non il batterista, e
+un template lo scriverebbe dentro come se fosse feel. **I dati sanno
+distinguere**, e la leva è il tempo: una latenza di trigger è un ritardo
+fisico, costante in **millisecondi**, che in tick *cala* al salire del BPM;
+una scelta musicale è una frazione del movimento, costante in **tick**. Sul
+charleston a pedale `[MIS]`:
+
+| fascia | esecuzioni | in tick | in ms |
+|---|---|---|---|
+| ≤ 110 BPM | 6 | −3,39 | −22,30 |
+| 110-130 BPM | 8 | −3,32 | −16,61 |
+| > 130 BPM | 9 | −3,39 | −9,15 |
+
+**In tick non si muove di un centesimo; in millisecondi si dimezza.** È la
+firma di una grandezza proporzionale al movimento, cioè musicale, e **non**
+quella di una latenza fissa. Non è una prova — sono **tre batteristi** e fasce
+da 6-9 esecuzioni — ma esclude l'ipotesi più semplice, ed è il controllo da
+rifare se un giorno il corpus si allarga. (Gli altri tre strumenti fanno il
+contrario, e i loro residui crescono in tick col tempo: lì una componente
+fissa in millisecondi è più plausibile, ed è anche dove le mediane sono così
+piccole da non valere una decisione.)
+
+#### Due grandezze diverse, e la domanda che resta aperta
+
+⚠️ **Le mediane aggregate non sono quello che un template scrive**, e
+confonderle sarebbe comodo e falso. Le mediane qui sopra stanno entro 3,4 tick
+perché sono **mediane su decine di esecuzioni**; il profilo di **una**
+esecuzione porta invece uno scarto **per ogni passo e per ogni strumento**, e
+sul template raccomandato quegli scarti vanno da **−6,01 a +6,64 tick** —
+un'escursione di 12,65 tick, cioè **42,7 ms a 185 BPM** `[OSS]`. È
+`MU.applica_groove()` a scrivere questi, non le mediane.
+
+Quindi le due affermazioni vere sono separate: **in media** il jazz sta quasi
+sulla griglia (con il piede dietro a tutto); **una singola esecuzione** porta
+scarti larghi il doppio della finestra udibile.
+
+**E se non si sentisse affatto?** È la domanda che questa casella non può
+chiudere. I 42,7 ms del template stanno dentro la finestra 20-40 ms che il
+comune dichiara udibile — ma «rappresentabile» non è «percepibile», e nessuno
+ha ancora ascoltato un pezzo jazz uscire dal Deluge. **Se all'ascolto il
+residuo non si distinguesse**, il valore di `MU.applica_groove()` starebbe
+tutto nella **velocity** — che è la metà che non dipende dalla posizione, e che
+la scala e il profilo posizionale qui sopra sostengono da sole. La risposta
+sta nel cancello sul dispositivo, e va scritta qui con la data quando arriva.
 
 ### Lo swing non sta in questa casella
 
@@ -438,9 +523,12 @@ le `jazz/swing`, `beat`, 4/4 è **`drummer1/session3/2` — `drummer1`,
 disegno continuo di crome swingate — il ride, musicalmente — sta per otto
 decimi dell'esecuzione sulla nota **43**, che la mappa GM chiama `tom basso`
 (**805 colpi**), e solo nel quinto centrale sulla nota **51**, `ride` (**238
-colpi**); le due **non suonano mai insieme** `[OSS]`. Chi scrive
-`dove='ride'` prende quindi il profilo di un quinto di esecuzione, non il
-disegno del pezzo. La voce si sceglie **dal numero di colpi e dalla posizione**
+colpi**). Le due **si scambiano il disegno** in una transizione di **26
+battute** su 193 — 142 battute portano la sola 43, 20 la sola 51, e solo 10
+hanno almeno due colpi di ciascuna — **senza mai raddoppiare lo stesso colpo**
+(zero simultaneità esatte; 55 dei 238 colpi di `n51` hanno una `n43` entro una
+croma) `[OSS]`. Chi scrive `dove='ride'` prende quindi il profilo di un quinto
+di esecuzione, non il disegno del pezzo. La voce si sceglie **dal numero di colpi e dalla posizione**
 che `GR.profilo()` riferisce, mai dal nome — e per un pattern di ride jazz
 scritto da zero è più sicuro il profilo **aggregato** della tabella qui sopra,
 che sta su 18 esecuzioni e 4 batteristi.
@@ -544,12 +632,15 @@ raddoppiando i colpi sarebbe già fuori dal corpus.
 su cinque a uno su trenta, i tom triplicano. È questa la firma del fill, non
 la densità.
 
-**E non alza la voce.** Rullante **42**, cassa **40**, tom basso **67** `[MIS]`:
-tutte e tre **sotto** le mediane dei `beat`, che stanno nella tabella della
-casella 6 e non si ricopiano qui. Un fill jazz non è un crescendo — è un
-cambio di strumento a volume uguale o minore. Il tom in particolare scende
-proprio perché cambia ruolo: nei `beat` compare di rado e come accento, nei
-fill è la voce corrente.
+**E non alza la voce.** Rullante **42**, cassa **40**, tom basso **67** — su 51
+esecuzioni e 2 batteristi `[MIS]`. Tutte e tre stanno **sotto** la mediana
+dello stesso strumento nei `beat`: per rullante e cassa il confronto è con la
+tabella della casella 6, per il tom basso — che lì non compare perché la
+tabella porta i cinque strumenti portanti — la mediana `beat` è **81**, dalla
+stessa misura `[MIS]`. Un fill jazz non è un crescendo: è un cambio di
+strumento a volume uguale o minore. Il tom in particolare scende proprio
+perché cambia ruolo — nei `beat` compare di rado e come accento, nei fill è la
+voce corrente.
 
 ### Cosa manca ancora
 
@@ -621,11 +712,14 @@ uno scarto di pochi tick; il rapporto fra le due crome lo mette
 basso e comping compresi. Un template che portasse anche lo swing lo farebbe
 applicare **due volte**, una dal firmware e una dalle posizioni scritte.
 
-⚠️ **Il dispositivo ha un quantize/humanize che cancella il template**, per
-riga e **distruttivo**, e chi lo gira non ha modo di sapere cosa sta
-sovrascrivendo. Il meccanismo è di macchina e vale per ogni repertorio, quindi
-sta nel comune di [`../MUSICA.md`](../MUSICA.md), «La macchina» — qui solo il
-rimando, perché copiarlo vorrebbe dire tenerne due copie da correggere.
+⚠️ **Il dispositivo ha un quantize/humanize che cancella il template**:
+`AUDITION` + `TEMPO`, orario quantizza e antiorario umanizza, **per riga e
+distruttivo** — chi lo gira non ha modo di sapere cosa sta sovrascrivendo. Il
+meccanismo è di macchina e vale per ogni repertorio, quindi il suo posto è il
+comune di [`../MUSICA.md`](../MUSICA.md), «La macchina», **dove non è ancora
+scritto**: finché non c'è, questa riga è tutto quello che il progetto ne dice.
+Qui resta comunque il minimo, perché una scheda che tace su un comando che
+cancella il proprio lavoro è peggio di una che lo ripete.
 
 ⚠️ **`length` sulla `<noteRow>` è un meccanismo altro, e non serve qui.** Dà
 alla singola riga una lunghezza propria, che **può superare quella della

@@ -141,7 +141,11 @@ def lo_swing():
         # cui `WJ.swing()` mette una soglia (`minimo_coppie=20`) e questa
         # misura no, quindi va almeno riferita -- vedi il controllo in fondo.
         coppie = len(GR.levare_da_posizioni([p - off for p in tutte], PPQ))
-        righe.append((e, b_kit, b_ride, len(pos_ride), coppie))
+        # e quelle del solo ride, che sono un'ALTRA grandezza: la soglia va
+        # messa sulle coppie della voce che si sta misurando, non su quelle
+        # del kit -- se no si filtra un numero con il conteggio di un altro.
+        coppie_ride = len(GR.levare_da_posizioni(pos_ride, PPQ)) if pos_ride else 0
+        righe.append((e, b_kit, b_ride, len(pos_ride), coppie, coppie_ride))
         print(f'{e.id:24s} {e.style:16s} {e.bpm:4d} BPM  '
               f'kit {"--  " if b_kit is None else f"{b_kit:.2f}"}  '
               f'ride {"--  " if b_ride is None else f"{b_ride:.2f}"}'
@@ -200,8 +204,15 @@ def lo_swing():
           f'su {sum(1 for r in dentro if r[1] is not None)}')
     for soglia in (0, 5, 10, 20):
         sel = [r for r in dentro if r[1] is not None and r[4] >= soglia]
-        _riassunto(f'  coppie >= {soglia:2d}',
+        _riassunto(f'  kit,  coppie >= {soglia:2d}',
                    [r[1] for r in sel], len({r[0].drummer for r in sel}))
+    # ⚠️ la stessa soglia sul RIDE, contata sulle coppie DEL RIDE. Il campione
+    # si dimezza (il ride non c'e' in tutte le esecuzioni) e va detto: e' la
+    # differenza fra "1,99 su 21 esecuzioni" e "2,00 su 10".
+    for soglia in (0, 20):
+        sel = [r for r in dentro if r[2] is not None and r[5] >= soglia]
+        _riassunto(f'  ride, coppie di ride >= {soglia:2d}',
+                   [r[2] for r in sel], len({r[0].drummer for r in sel}))
 
 
 def il_profilo_aggregato():
@@ -234,8 +245,9 @@ def il_profilo_aggregato():
                     s.passo, []).append(s.velocity)
             forti = [s for s in passi if s.colpi >= 10]
             if forti:
-                residuo.setdefault(nome, []).append(statistics.median(
-                    [s.scarto for s in forti for _ in range(s.colpi)]))
+                residuo.setdefault(nome, []).append((statistics.median(
+                    [s.scarto for s in forti for _ in range(s.colpi)]),
+                    e.drummer))
 
     for nome in sorted(quante, key=lambda n: -quante[n]):
         if quante[nome] < 8:
@@ -265,9 +277,10 @@ def il_profilo_aggregato():
     for nome, vs in sorted(residuo.items(), key=lambda kv: -len(kv[1])):
         if len(vs) < 8:
             continue
-        v = sorted(vs)
+        v = sorted(x for x, _ in vs)
         q = statistics.quantiles(v, n=4)
-        print(f'{nome:24s} n={len(v):3d}  mediana {statistics.median(v):+6.2f}  '
+        print(f'{nome:24s} n={len(v):3d} batt={len({d for _, d in vs})}  '
+              f'mediana {statistics.median(v):+6.2f}  '
               f'q1-q3 {q[0]:+6.2f}..{q[2]:+6.2f}  min-max {v[0]:+6.2f}..{v[-1]:+6.2f}')
     print('    un tick vale: '
           + ', '.join(f'{b} BPM = {60000 / b / 96:.2f} ms'
@@ -277,31 +290,80 @@ def il_profilo_aggregato():
     # sopra vengono da esecuzioni diverse, e un'esecuzione intera puo' stare
     # avanti o indietro per conto suo: confrontarle fra loro direbbe poco.
     # Dentro la STESSA esecuzione, invece, l'ordine fra due strumenti e' una
-    # domanda musicale -- il ride spinge, il rullante trattiene? -- e la
-    # risposta e' un conteggio, non una differenza di mediane.
-    print('\n--- ride contro rullante DENTRO la stessa esecuzione ---')
-    coppie = []
+    # domanda musicale -- chi spinge e chi trattiene? -- e la risposta e' un
+    # conteggio, non una differenza di mediane.
+    #
+    # ⚠️ SI APPAIANO TUTTE LE COPPIE, non una scelta a mano. Una versione
+    # precedente confrontava il solo ride col solo rullante e concludeva
+    # "nessun ordine": ma quelle due sono le mediane PIU' VICINE del gruppo,
+    # cioe' il confronto che aveva meno probabilita' di mostrare qualcosa.
+    # Scegliere la coppia dopo aver visto le mediane e' scegliere il
+    # risultato. Qui le coppie le decide il dataset, e si stampano tutte.
+    print('\n--- OGNI coppia di strumenti, DENTRO la stessa esecuzione ---')
+    per_es = []
     for e in GR.elenco(BASE, style=STILE, beat_type='beat',
                        time_signature='4-4'):
         if e.style in FUORI_DALLO_SWING:
             continue
-        p = GR.profilo(BASE, e.id)
+        prof = GR.profilo(BASE, e.id)
         d = {}
-        for nome, passi in p.passi.items():
+        for nome, passi in prof.passi.items():
             forti = [s for s in passi if s.colpi >= 10]
             if sum(s.colpi for s in passi) < 40 or not forti:
                 continue
             d[nome] = statistics.median(
                 [s.scarto for s in forti for _ in range(s.colpi)])
-        if 'ride' in d and 'rullante' in d:
-            coppie.append(d['ride'] - d['rullante'])
-    if coppie:
-        v = sorted(coppie)
-        print(f'    ride - rullante, su {len(v)} esecuzioni: '
-              f'mediana {statistics.median(v):+.2f} tick '
-              f'(min {v[0]:+.2f}, max {v[-1]:+.2f})')
-        print(f'    il ride e AVANTI al rullante in '
-              f'{sum(1 for x in v if x > 0)} esecuzioni su {len(v)}')
+        per_es.append((e, d))
+
+    nomi = sorted({n for _, d in per_es for n in d},
+                  key=lambda n: -sum(1 for _, d in per_es if n in d))
+    tabella = []
+    for i, primo in enumerate(nomi):
+        for secondo in nomi[i + 1:]:
+            v = [(d[primo] - d[secondo], e.drummer)
+                 for e, d in per_es if primo in d and secondo in d]
+            if len(v) < 8:
+                continue        # sotto le otto esecuzioni non si conta niente
+            diff = sorted(x for x, _ in v)
+            tabella.append((abs(statistics.median(diff)), primo, secondo,
+                            len(diff), statistics.median(diff),
+                            sum(1 for x in diff if x > 0),
+                            len({dr for _, dr in v}), diff[0], diff[-1]))
+    for _, primo, secondo, n, med, avanti, batt, lo, hi in sorted(
+            tabella, reverse=True):
+        print(f'    {primo} - {secondo}'.ljust(50)
+              + f'n={n:3d} batt={batt}  mediana {med:+5.2f} tick  '
+                f'il primo AVANTI in {avanti:2d}/{n:<3d} '
+                f'(min {lo:+.2f}, max {hi:+.2f})')
+
+    # ⚠️ MESTIERE O LATENZA DEL TRIGGER? Su un kit elettronico un ritardo
+    # sistematico puo' essere il pad, non il batterista, e un template lo
+    # cuocerebbe dentro come se fosse feel. I dati sanno distinguere, e la
+    # leva e' il TEMPO:
+    #
+    #   - una latenza di trigger e' un ritardo FISICO, costante in
+    #     MILLISECONDI: in tick quindi CALA al salire del BPM, perche' il
+    #     tick si accorcia;
+    #   - una scelta musicale e' una frazione del movimento, costante in
+    #     TICK: in millisecondi quindi cala al salire del BPM.
+    #
+    # Si stampano tutte e due le unita' per fascia di tempo e si guarda
+    # quale delle due sta ferma. Non e' una prova -- restano pochi
+    # batteristi -- ma esclude l'ipotesi piu' semplice.
+    print('\n--- mestiere o latenza? quale unita sta ferma al variare del tempo ---')
+    for nome in ('charleston a pedale', 'rullante', 'kick', 'ride'):
+        v = [(e.bpm, d[nome], d[nome] * 60000 / e.bpm / 96, e.drummer)
+             for e, d in per_es if nome in d]
+        if len(v) < 8:
+            continue
+        print(f'    {nome} (n={len(v)}, batt={len({dr for *_, dr in v})})')
+        for lo2, hi2 in ((0, 110), (110, 130), (130, 999)):
+            sel = [(t, m) for b, t, m, _ in v if lo2 < b <= hi2]
+            if len(sel) < 3:
+                continue
+            print(f'      {lo2:3d}-{hi2:3d} BPM (n={len(sel):2d}): '
+                  f'tick {statistics.median(t for t, _ in sel):+6.2f}   '
+                  f'ms {statistics.median(m for _, m in sel):+7.2f}')
 
 
 def i_fill():
@@ -364,6 +426,19 @@ def il_template():
             for s in passi if s.colpi >= p.battute * 0.05)
         print(f'{nome:22s} ({tot:4d} colpi su {p.battute} battute)  {righe}')
 
+    # ⚠️ L'ESCURSIONE VERA che `applica_groove()` scrivera'. Le mediane
+    # aggregate della sezione precedente stanno entro ~3,4 tick, ma sono
+    # mediane su decine di esecuzioni: il profilo di UNA esecuzione porta uno
+    # scarto per ogni passo, e l'escursione e' un'altra grandezza. Confonderle
+    # farebbe sembrare il template molto piu' timido di quello che e'.
+    tutti = [s2.scarto for passi in p.passi.values() for s2 in passi
+             if s2.colpi >= p.battute * 0.05]
+    if tutti:
+        ms = 60000 / p.bpm / 96
+        print(f'  scarti che il template scrivera: da {min(tutti):+.2f} a '
+              f'{max(tutti):+.2f} tick, escursione {max(tutti) - min(tutti):.2f} '
+              f'tick = {(max(tutti) - min(tutti)) * ms:.1f} ms a {p.bpm} BPM')
+
     # ⚠️ i due pad non suonano mai insieme: la stessa voce musicale --
     # il disegno di crome swingate -- cambia nome GM a meta' esecuzione.
     print('\n--- dove stanno, nel tempo, `ride` (n51) e `tom basso` (n43) ---')
@@ -375,6 +450,30 @@ def il_template():
         dentro = [y for pos, y in note if a <= pos < b]
         print(f'    decimo {k}: n43 `tom basso` = {dentro.count(43):4d}   '
               f'n51 `ride` = {dentro.count(51):4d}')
+
+    # ⚠️ "mai insieme" va misurato, non dedotto dai decimi. La domanda giusta
+    # non e' la simultaneita' esatta (che sarebbe un doppio colpo sullo stesso
+    # istante, cosa che non fa nessuno) ma la SOVRAPPOSIZIONE: quante battute
+    # portano entrambe le note, cioe' quanto dura il cambio di pad.
+    bar = 4 * f.ppq
+    b43, b51 = {}, {}
+    for pos, y in note:
+        if y == 43:
+            b43[pos // bar] = b43.get(pos // bar, 0) + 1
+        elif y == 51:
+            b51[pos // bar] = b51.get(pos // bar, 0) + 1
+    ent = set(b43) & set(b51)
+    p43 = sorted(pos for pos, y in note if y == 43)
+    p51 = [pos for pos, y in note if y == 51]
+    croma = f.ppq // 2
+    vicini = sum(1 for x in p51 if any(abs(x - c) <= croma for c in p43))
+    print(f'    battute con ENTRAMBE: {len(ent)}  '
+          f'(di cui {sum(1 for b in ent if b43[b] >= 2 and b51[b] >= 2)} '
+          f'con almeno 2 colpi ciascuna)')
+    print(f'    battute con la sola n43: {len(set(b43) - set(b51))}   '
+          f'con la sola n51: {len(set(b51) - set(b43))}')
+    print(f'    colpi n51 con una n43 entro una croma: {vicini} su {len(p51)}')
+    print(f'    colpi esattamente simultanei: {len(set(p43) & set(p51))}')
 
 
 def main() -> None:
