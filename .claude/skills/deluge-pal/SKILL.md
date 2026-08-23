@@ -99,6 +99,7 @@ import sys; sys.path.insert(0, 'tools')
 from delugexml import parse_file, write_file, musica as MU
 from delugexml import song as S, create as C, arranger as A, kit as K
 from delugexml import midicv, audio
+from delugexml import groove as GR
 from delugexml.writer import FormatTable
 ```
 
@@ -264,8 +265,14 @@ l'accordo in levare di chitarra e organo.
 
 `from delugexml import midi as MI` — lettore di Standard MIDI File **senza
 dipendenze**, validato nota per nota contro `mido`. Serve per le librerie
-libere di loop divisi per genere e per i **groove template**, che sono file
-MIDI ordinari e portano timing e velocity di un groove suonato.
+libere di loop divisi per genere.
+
+⚠️ **I groove template non si costruiscono più da qui a mano.** Sono file MIDI
+ordinari, sì, ma prenderne timing e velocity vuol dire scegliere l'esecuzione,
+togliere l'origine della griglia e togliere lo swing — e tutto questo c'è già
+in `GR`, «Importare dal Groove MIDI» qui sotto, che legge un corpus già
+etichettato per stile, BPM e batterista. `MI` resta sotto: è `GR.profilo()` a
+chiamarlo.
 
 | per | usare |
 |---|---|
@@ -328,6 +335,49 @@ giudicate **dritte** e la misura torna 1,0 per costruzione. È costato tre
 tentativi che si confermavano a vicenda. `WJ.swing()` usa i battiti veri di
 `beats.onset` e ignora il `tatum` del levare. Risultati e cautele in
 `docs/repertori/jazz.md`, «Lo swing del jazz, MISURATO» (casella 4).
+
+## Importare dal Groove MIDI
+
+Il **Groove MIDI Dataset**: **1150 esecuzioni** di batteria di **dieci
+batteristi** su un kit elettronico, ognuna etichettata per stile, per BPM, per
+metro e per `beat_type` — `beat`, cioè un groove continuo, contro `fill`. È da
+qui che vengono la velocity e la micro-tempistica di **batteristi veri**, cioè
+un **groove template**, invece che dal web. Solo stdlib, e per leggere i file
+riusa `MI`.
+
+Il dataset sta in `to-read/MIDI/groove-v1.0.0-midionly/groove/`, che **non è
+versionato**: i test che lo usano saltano se non c'è, come quelli di `WJ`.
+Quel percorso è la `base` di tutte le funzioni qui sotto.
+
+| per | usare |
+|---|---|
+| cercare un'esecuzione | `GR.elenco(base, style='jazz', beat_type='beat', drummer=…, time_signature='4-4')` — ogni filtro è opzionale, `style` va per **prefisso** |
+| quali etichette esistono | `GR.valori(base, 'style')`, `'drummer'`, `'beat_type'`, `'bpm'`… → etichetta → quante volte |
+| vedere cosa c'è | `GR.racconta(base, id)` → una riga: batterista, stile, BPM, `beat`/`fill`, metro, durata |
+| **la scala di velocity** | `GR.scala(base, style='jazz')` → strumento → `Livelli(mediana, q1, q3, minimo, massimo, colpi, esecuzioni, batteristi)`. Il default `beat_type='beat'` è voluto: i `fill` sono un altro animale e si chiedono a parte |
+| **il groove template** | `GR.profilo(base, id)` → `Profilo(id, drummer, style, bpm, bur, battute, passi)`, con `passi[strumento] = [Passo(passo, velocity, scarto, colpi)]`. `scarto` è in **tick Deluge** e **positivo vuol dire DOPO la griglia**. La voce si sceglie da `colpi` e dalla posizione, **mai dal nome GM**, che non è il ruolo musicale |
+| **posarlo su un pattern** | `MU.applica_groove(note, prof, dove=…)` — sta in `musica` e non qui: `GR` legge e non scrive mai. **Muta la lista**, e i passi senza appoggio li riferisce invece di inventarli |
+| quanto è swingato | `GR.bur_da_posizioni(posizioni, ppq)` → la BUR mediana, `None` se non ci sono coppie di crome. I numeri già misurati stanno in `docs/repertori/jazz.md`, casella 4 |
+
+⚠️ **Si filtra per PREFISSO, mai per sottostringa.** È la regola di
+`GR.per_prefisso()`, che è una funzione a sé proprio perché è il punto in cui è
+facile sbagliare: cercare `reggae` *dentro* l'etichetta prenderebbe anche
+`latin/reggaeton` e `latin/brazilian-sambareggae`, che reggae non sono. E il
+prefisso **prende i figli**: `jazz` prende anche `jazz/funk` e `jazz/fusion`,
+che di swing di crome non ne hanno e vanno esclusi a mano quando si misura il
+feel — non quando si misura la dinamica. Perché sia diverso nei due casi sta
+in `docs/repertori/jazz.md`, casella 6.
+
+⚠️ **Un profilo è `[OSS]` su un ESECUTORE, non `[MIS]` su un repertorio.**
+`GR.profilo()` legge **una** esecuzione, e va **nominata** ogni volta che se ne
+cita un numero: mediare il microtiming di batteristi diversi lo tira verso la
+griglia, cioè verso zero, e si perde esattamente quello che si era andati a
+prendere. `GR.scala()` è l'altra cosa — aggrega — e per questo restituisce
+`esecuzioni` e `batteristi` accanto a ogni mediana: sono quei due numeri a
+dire se l'affermazione è `[MIS]` su un repertorio o `[OSS]` su chi l'ha
+suonata. Un corpus può averne troppo pochi, e allora lo si dice invece di
+firmare col nome del genere: **il reggae è quel caso**, e
+`docs/repertori/reggae-dub.md`, casella 6, porta il conteggio e la conclusione.
 
 ## Quando qualcosa non si vede sul dispositivo
 

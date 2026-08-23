@@ -899,17 +899,18 @@ cioè quasi 40 ms**, e la casella 6 lo dà per esteso insieme all'avvertenza che
 serve, cioè che gli estremi poggiano su uno o tre colpi su 193 battute. Il
 rapporto fra le due crome lo mette invece
 `S.set_swing(doc, …, figura='1/8')`, che vale per tutte le tracce insieme —
-basso e comping compresi. Un template che portasse anche lo swing lo farebbe
-applicare **due volte**, una dal firmware e una dalle posizioni scritte.
+basso e comping compresi. **Perché** le due cose vadano tenute separate — cioè
+che un template il quale portasse anche lo swing lo farebbe applicare due volte
+— non è del jazz e sta nel comune, «Il groove template»; del jazz sono i numeri
+qui sopra e la figura da swingare.
 
-⚠️ **Il dispositivo ha un quantize/humanize che cancella il template**:
-`AUDITION` + `TEMPO`, orario quantizza e antiorario umanizza, **per riga e
-distruttivo** — chi lo gira non ha modo di sapere cosa sta sovrascrivendo. Il
+⚠️ **Il dispositivo ha un quantize/humanize che cancella il template.** Il
 meccanismo è di macchina e vale per ogni repertorio, quindi il suo posto è il
-comune di [`../MUSICA.md`](../MUSICA.md), «La macchina», **dove non è ancora
-scritto**: finché non c'è, questa riga è tutto quello che il progetto ne dice.
-Qui resta comunque il minimo, perché una scheda che tace su un comando che
-cancella il proprio lavoro è peggio di una che lo ripete.
+comune di [`../MUSICA.md`](../MUSICA.md), «La macchina» — «Il quantize/humanize
+del dispositivo cancella il groove template», dove dal 23 agosto 2026 c'è per
+esteso: quale gesto, in quale verso, e perché non si somma al template. Qui
+resta il rimando e non la copia, ma il rimando ci resta: una scheda che tace su
+un comando che cancella il proprio lavoro è peggio di una che lo ripete.
 
 ⚠️ **`length` sulla `<noteRow>` è un meccanismo altro, e non serve qui.** Dà
 alla singola riga una lunghezza propria, che **può superare quella della

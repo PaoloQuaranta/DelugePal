@@ -180,8 +180,9 @@ nominata.
 **Dove sono documentate le funzioni.** Qui e nelle schede i nomi della
 libreria dicono *quando* si usa una cosa; firma ed esempio stanno in
 [`SKILL.md`](../.claude/skills/deluge-pal/SKILL.md), che le chiama con gli
-alias `MU`, `S`, `C`, `A`, `K`, `MI`, `WJ` — tabelle «Come si fa», «Importare
-MIDI», «Importare dalla Weimar Jazz Database» — tranne il modulo `sound`,
+alias `MU`, `S`, `C`, `A`, `K`, `MI`, `WJ`, `GR` — tabelle «Come si fa»,
+«Importare MIDI», «Importare dalla Weimar Jazz Database», «Importare dal Groove
+MIDI» — tranne il modulo `sound`,
 patch cable compresi, che lì non c'è e sta in
 [`HANDOFF.md`](../HANDOFF.md) §6-septies. Scritto qui una volta: una scheda si
 legge sempre insieme al comune.
@@ -294,6 +295,16 @@ La scala corrente della programmazione di batteria, su 127: [WEB]
 | normale | 90-100 | il corpo del pattern |
 | sottovoce | 70-90 | riempimento |
 | **fantasma** | **< 70** (rullante: 35-50) | tessuto, non evento |
+
+⚠️ **Questa scala è `[WEB]`, e vale finché un repertorio non ha misure sue.**
+È il ripiego onesto: dove nessuno ha aperto un corpus, questi sono i numeri che
+ci sono, e valgono per qualunque genere. Ma dove un corpus è stato aperto la
+scala misurata **vince su questa**, e un repertorio ce l'ha già: la **casella 6
+di [`repertori/jazz.md`](repertori/jazz.md)** porta mediana, quartili ed
+escursione per strumento della batteria jazz, con accanto quante esecuzioni e
+quanti batteristi sostengono ogni riga. Là i numeri, qui il ripiego — e sono
+**diversi**, in qualche riga di parecchio: chi scrive jazz usa quelli, non
+questi. **Non si ricopiano qui**, per la regola in cima a questa pagina.
 
 E di quanto varia un accento rispetto al colpo normale, per strumento: [WEB]
 
@@ -592,6 +603,61 @@ una scala, il display un'altra», da cui viene la formula qui sopra, e
 era arrivati sbagliando e cosa resta ignoto del sorgente
 (`song.SWING_SCARTO_SORGENTE`). Qui c'è come si usa, lì come si è stabilito.
 
+#### Il groove template: velocity e microtiming da un'esecuzione vera
+
+*Alimenta le caselle 6 e 10.*
+
+Un **groove template** è la velocity e la micro-tempistica di un groove suonato
+davvero, prese da un'esecuzione e posate su un pattern scritto. Non è un
+effetto del dispositivo e non è una funzione che «umanizza»: è **materiale**, e
+si legge da un corpus. Due funzioni, e la seconda è l'unica che scriva:
+
+- `GR.profilo(base, id)` costruisce il profilo da **una esecuzione nominata**
+  del Groove MIDI — per ogni passo e per ogni strumento: quanti colpi, con che
+  velocity, e con che scarto dalla griglia;
+- `MU.applica_groove(note, prof, dove=…)` lo posa su un pattern uscito da
+  `MU.passi()`. **Muta la lista** e ritorna il rapporto, non le note; e **non
+  inventa**: un passo su cui quel batterista non ha mai suonato lascia la nota
+  com'è e finisce in `senza_appoggio`, che va letto.
+
+⚠️ **L'esecuzione va nominata, sempre.** Quello che esce da un profilo è
+`[OSS]` **su un esecutore**, non `[MIS]` su un repertorio — e mediare il
+microtiming di batteristi diversi lo tirerebbe verso la griglia, cioè verso
+zero, perdendo esattamente ciò che si era andati a prendere. Quale esecuzione
+scegliere, e perché il nome GM di una riga non è il suo ruolo musicale, è di
+repertorio e sta nella casella 6 della scheda.
+
+⚠️ **E il template porta il SOLO residuo: lo swing lo fa la song.** Il rapporto
+fra le due crome lo mette `S.set_swing()`, che è un'impostazione **della song**
+e vale per tutte le tracce insieme, basso e armonia compresi. Un template che
+portasse anche lo swing lo farebbe applicare **due volte** — una dal firmware e
+una dalle posizioni scritte — e il risultato non sarebbe «più swingato», sarebbe
+sbagliato. Quale valore di swing, e su quale figura, sta nella casella 10 della
+scheda; quanto è grande il residuo che il template scrive, nella casella 6.
+
+#### Il quantize/humanize del dispositivo cancella il groove template
+
+*Alimenta la casella 10.*
+
+⚠️ `AUDITION` + `TEMPO`: **in senso orario quantizza, in senso antiorario
+umanizza**, e agisce **per riga e in modo distruttivo** — riscrive le posizioni
+di quella riga, e chi gira la manopola non ha modo di sapere che cosa sta
+sovrascrivendo. `[MAN]`, dal manuale della community: sul dispositivo **non è
+stato provato**.
+
+È il **concorrente diretto** del groove template, e la differenza sta tutta in
+una riga: quello **randomizza**, il nostro **misura**. Fanno la stessa cosa —
+togliere le note dalla griglia — con due idee opposte di dove vadano messe, e
+non si sommano: **chi passa per ultimo vince**. Chi ha appena posato un profilo
+con `MU.applica_groove()` e poi gira `TEMPO` su quella riga ha buttato via una
+misura, in un verso o nell'altro: in senso orario per riportarla sulla griglia,
+in senso antiorario per sostituirla con del rumore. In nessuno dei due casi il
+dispositivo lo dice.
+
+Sta qui e non in una scheda perché è meccanismo di macchina e vale per ogni
+repertorio — e perché una scheda che tace su un comando che cancella il proprio
+lavoro è peggio di una che lo ripete.
+
 #### Quattro inviluppi e quattro LFO, non due — correzione del 16 agosto 2026
 
 *Alimenta la casella 10, «Sul Deluge».*
@@ -615,7 +681,7 @@ casella della scheda corrispondente: la scheda è la fonte, questa matrice ne
 | repertorio | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | [reggae / dub](repertori/reggae-dub.md) | ◐ | ● | ● | ◐ | ● | ● | ◐ | ○ | ◐ | ◐ | ● |
-| [jazz](repertori/jazz.md) | ○ | ○ | ◐ | ● | ○ | ○ | ◐ | ○ | ○ | ◐ | ○ |
+| [jazz](repertori/jazz.md) | ○ | ○ | ◐ | ● | ○ | ● | ◐ | ○ | ◐ | ◐ | ○ |
 | classica · barocca · antica | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | elettronica · IDM · techno · hip hop · trip hop · DnB · jungle | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 
