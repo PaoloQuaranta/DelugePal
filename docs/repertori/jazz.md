@@ -410,9 +410,33 @@ che resta è il **residuo**, in tick Deluge (96 per movimento) `[MIS]`:
 | ride | 18 | 4 | −0,81 | −2,02 … +0,21 |
 
 Un tick vale 6,25 ms a 100 BPM e 3,38 ms a 185, quindi **le mediane stanno
-tutte entro 3,4 tick**: 21 ms a 100 BPM, 11 ms a 185. Cioè sul **bordo
-inferiore** della finestra di 20-40 ms che il comune dichiara udibile, e sotto
-di essa ai tempi veloci.
+tutte entro 3,4 tick**: poche unità su 96 per movimento, e tutte dalla stessa
+parte — **prima** della griglia.
+
+⚠️ **Ma questi sono livelli, e un livello in millisecondi non vuol dire
+niente.** Convertirli e confrontarli con la finestra dell'udibile sarebbe la
+scorciatoia comoda, ed è sbagliata: dopo `GR.origine()` il livello di ogni
+esecuzione ha uno **zero arbitrario** — l'origine tolta è comune a tutto il kit
+e cambia da esecuzione a esecuzione — quindi «−3,39 tick» non dice *rispetto a
+che cosa*, e un millisecondo ricavato da lì non ha un referente. Qui i tick
+servono a una cosa sola: a dire che il residuo è **piccolo**.
+
+Con la finestra di 20-40 ms del comune si confrontano **due altre** grandezze,
+e danno due verdetti opposti perché *sono* due cose diverse — non perché una
+delle due sia sbagliata:
+
+| grandezza | quanto | contro la finestra 20-40 ms | dove sta |
+|---|---|---|---|
+| **divario fra due pad** (ride − charleston) `[MIS]` | 13,0 ms | **sotto** | «E prima di tutto: 13 ms» |
+| **singolo spostamento** che un template scrive `[OSS]` | 39,9 ms | al **bordo superiore** | «Due grandezze diverse» |
+
+La prima sta su decine di esecuzioni ed è la stratificazione misurata; la
+seconda sta su **una** esecuzione e poggia su **un colpo solo**. Il divario è
+inoltre convertito col BPM di **ogni** esecuzione, non a un 100 BPM di comodo:
+è l'altra ragione per cui i conti di questa casella non si sommano fra loro. Le
+cautele di ciascuna sono scritte nella sua sezione, e **nessuna delle due è il
+livello della tabella qui sopra** — che infatti in millisecondi non viene
+convertito.
 
 #### C'è una stratificazione, e il piede anticipa tutto il resto
 
@@ -444,10 +468,16 @@ a pedale ha il residuo **più negativo** di tutti (−3,39), quindi è il **più
 anticipo**. E la stessa cosa si vede **senza togliere niente** — né origine né
 swing — sulle fasi grezze dentro il movimento, contando i soli colpi entro un
 quarto di movimento dal battere e i soli strumenti che ne hanno almeno venti:
-charleston **−6,85** tick (24 esecuzioni) contro ride **−2,35** (18), con
-rullante a −4,10 e cassa a −4,90; e appaiando dentro la stessa esecuzione, il
-charleston anticipa il ride in **15 su 15** (15 esecuzioni, 3 batteristi)
-`[MIS]`.
+charleston **−6,85** tick (24 esecuzioni, 4 batteristi) contro ride **−2,35**
+(18 esecuzioni, 4 batteristi), con rullante a **−4,10** (29 esecuzioni, 5
+batteristi) e cassa a **−4,90** (25 esecuzioni, 4 batteristi); e appaiando
+dentro la stessa esecuzione, il charleston anticipa il ride in **15 su 15**
+(15 esecuzioni, 3 batteristi) `[MIS]`. Sono **tutte** negative perché qui
+l'origine non è stata tolta e il kit intero sta prima della griglia: quello che
+si guarda non è il valore, è **chi sta prima di chi**. E lì i due estremi
+tengono — charleston primo, ride ultimo, come nella tabella del residuo —
+mentre rullante e cassa **si scambiano di posto** fra le due misure, che è la
+stessa cosa che dice il conteggio da testa o croce di quella coppia.
 
 **E non è un artefatto di dove i due suonano.** Il residuo dipende dal passo, e
 i due strumenti non suonano sugli stessi: il charleston concentra i colpi sul 4
@@ -465,23 +495,32 @@ Con uno stimatore appena diverso quel file **cambia segno**: la mediana sui
 **passi** non pesata dà −3,41 — perché i valori positivi grossi del charleston
 stanno su passi da 1 a 24 colpi, mentre i suoi due passi dominanti (4 e 12,
 172 e 165 colpi) sono negativi. **La conclusione aggregata non dipende da lui**
-— togliendolo resta **14 su 14** con mediana +2,61 `[MIS]` — ma chi usa quel
-file come template sappia che su di lui la stratificazione **non c'è**.
+— togliendolo restano **14 su 14** con mediana +2,61, su **14 esecuzioni e 3
+batteristi** `[MIS]` — ma chi usa quel file come template sappia che su di lui
+la stratificazione **non c'è**.
 
 ⚠️ **E questo CONFERMA metà dell'`[IPO]` del comune, non lo smentisce.** «Ma
 swing e laid-back non sono la stessa cosa» riporta da `music-composition` un
 pocket a strati con *«cassa sul tempo, rullante appena dietro, charleston
 appena avanti»*. Il **charleston appena avanti c'è**, ed è la cosa più solida
-che questa casella misuri. Quello che **non** si trova è il resto: il rullante
-non sta dietro alla cassa (0,22 tick in 11 casi su 21, testa o croce), e fra i
-tre strumenti battuti non c'è nessun ordine. Il pocket a strati del jazz, qui,
-è **un solo strato**: il piede.
+che questa casella misuri.
+
+Quello che **non** si trova è il resto — e va detto con precisione, perché il
+numero e il verbo qui vanno letti insieme. Il **rullante dietro alla cassa**
+c'è **come segno**: la mediana è +0,22 tick, e positivo vuol dire dopo. Ma non
+c'è **come sistematicità**, che è quel che servirebbe per chiamarlo uno strato:
+succede in **11 casi su 21**, cioè testa o croce, e vale un **quarto di tick**
+contro i 2,59 che separano il piede dal ride. Un segno giusto senza
+sistematicità non è un pocket. Fra i tre strumenti battuti, insomma, non c'è
+ordine, e il pocket a strati del jazz è **un solo strato**: il piede.
 
 #### Cosa esclude il test del tempo — e cosa no
 
 ⚠️ **Prima di cuocere quei 2,6 tick in un template.** Su un kit elettronico un
-ritardo sistematico può venire dal pad e non dal batterista. Una parte della
-domanda i dati la chiudono, un'altra no, e le due vanno tenute separate.
+divario sistematico fra due pad può venire dall'elettronica e non dal
+batterista — e nei due versi: o il piede che scatta presto, o i tre pad battuti
+che rispondono tardi. Una parte della domanda i dati la chiudono, un'altra no,
+e le due vanno tenute separate.
 
 **La fisica, scritta giusta.** Un tick dura `60000/(BPM × 96)` ms, quindi si
 **accorcia** al salire del tempo. Ne segue che una latenza **fissa** di `D`
@@ -497,6 +536,12 @@ composizione — ed è fatta sul **divario appaiato**, non sui livelli. Il motiv
 **zero arbitrario**, quindi una pendenza sui livelli confonde; la *differenza*
 fra due strumenti della stessa esecuzione quell'offset lo cancella per
 costruzione, ed è l'unica grandezza definita.
+
+⚠️ **E la tabella qui sotto è scritta al contrario di quella delle coppie**,
+perché il charleston fa da riferimento: si legge **pad meno charleston**,
+quindi il segno **positivo** dice che quel pad arriva **dopo** il piede. È lo
+stesso fatto letto dall'altro capo — «ride − charleston = +2,59» e «charleston
+− ride = 2,59 tick prima» sono la stessa riga, non due misure.
 
 Le due ipotesi fanno previsioni **opposte** sul divario: se è una frazione del
 movimento la pendenza è **zero**; se è una latenza fissa in millisecondi la
@@ -519,15 +564,28 @@ Per le altre due coppie non regge nessuna delle due ipotesi pure: il divario si
 quel che i dati rifiutano è netto, quel che affermano vale solo per la coppia
 ride/charleston.
 
-Per fascia di tempo, con i conteggi che mancavano `[MIS]`:
+⚠️ **Qui sotto la grandezza CAMBIA, e il segno con lei.** La tabella per fascia
+di tempo non porta un divario: porta il **livello del solo charleston a
+pedale**, cioè il suo residuo dopo `GR.origine()` — la stessa colonna «mediana»
+della tabella del residuo in cima a questa casella. È per questo che i numeri
+sono **negativi** mentre i divari qui sopra sono positivi: negativo vuol dire
+**prima della griglia**, ed è il piede che anticipa. Chi la leggesse come un
+divario che si rovescia leggerebbe il contrario di quello che c'è scritto.
 
-| fascia | esecuzioni | batteristi | tick (mediana) | tick (media) | dev. standard | errore standard |
+Il **livello del charleston a pedale** per fascia di tempo, con i conteggi che
+mancavano `[MIS]`:
+
+| fascia | esecuzioni | batteristi | charleston, tick (mediana) | (media) | dev. standard | errore standard |
 |---|---|---|---|---|---|---|
 | ≤ 110 BPM | 6 | 3 | −3,39 | −3,92 | 1,75 | 0,72 |
 | 110-130 BPM | 8 | 3 | −3,32 | −3,42 | 1,87 | 0,66 |
 | > 130 BPM | 9 | **2** | −3,39 | −2,92 | 1,99 | 0,66 |
 
-⚠️ **Le tre mediane vanno lette per quello che sono.** Coincidono a 0,07 tick,
+⚠️ **E si guarda, non si conclude.** Un livello ha lo zero arbitrario detto
+qui sopra, quindi da questa tabella non esce nessuna prova: la conclusione la
+porta la regressione appaiata, che è sul divario. Questa tabella sta qui per
+mostrare il **rumore** che c'è sotto, ed è tutto quello che le si può chiedere
+— **le tre mediane vanno lette per quello che sono.** Coincidono a 0,07 tick,
 ma l'errore standard è **0,66-0,72 tick**: l'accordo è **un decimo del
 rumore**, cioè una coincidenza e non una precisione — e infatti le *medie*
 delle stesse fasce si muovono di un tick pieno (−3,92 → −3,42 → −2,92). La
@@ -540,13 +598,18 @@ numeri.
 **Cosa il test esclude, detto stretto:** che il divario fra il charleston e gli
 altri pad sia un ritardo **costante in millisecondi**. Nient'altro.
 
-⚠️ **E in particolare non esclude il pedale**, che è il meccanismo sospettato.
-Il «chick» scatta quando la corsa del pedale supera una soglia: quel ritardo è
-la **durata di un gesto del piede**, e un gesto è una frazione della battuta,
-non un numero fisso di millisecondi. Un effetto così è **costante in tick** e
-supera questo test **identico al mestiere**. La domanda del titolo — mestiere o
-pedale — resta quindi **senza risposta**: a cadere è solo l'ipotesi più
-semplice.
+⚠️ **E in particolare non esclude il pedale**, che è il meccanismo sospettato —
+ma va detto **nel verso giusto**, perché è dove questa casella ha già sbagliato
+una volta. Il charleston a pedale **anticipa**: un pad che *ritarda* non lo
+spiegherebbe, lo contraddirebbe. Il meccanismo plausibile è l'altro. Il «chick»
+non scatta a fine corsa, scatta quando la corsa del pedale **supera una
+soglia** — cioè a un punto *dentro* il gesto del piede, e non alla sua fine.
+Dove cada quel punto è una **frazione del gesto**, e un gesto è una frazione
+della battuta: l'anticipo che ne viene è **costante in tick**, non un numero
+fisso di millisecondi, e supera questo test **identico al mestiere**. La
+domanda del titolo — mestiere o pedale — resta quindi **senza risposta**: a
+cadere è solo l'ipotesi più semplice, cioè un ritardo fisso in millisecondi dei
+tre pad battuti.
 
 ⚠️ **E il confronto è sempre e solo fra pad.** `GR.origine()` toglie già lo
 scarto comune a tutto il kit, quindi qui si esclude una latenza **di quel pad
@@ -555,8 +618,10 @@ essendo comune a tutti è **invisibile per costruzione**.
 
 ⚠️ **E prima di tutto: 13 ms.** Il divario ride/charleston, che è il più largo
 dei tre, in millisecondi vale **13,0 ms** — cioè **sotto** la finestra di 20-40
-ms che questa stessa casella invoca poco più in basso come soglia di ciò che si
-sente. La stratificazione è **misurata bene e piccola**: che si senta è
+ms che il comune dichiara udibile. È l'unica grandezza di questa sezione che
+con quella finestra si possa confrontare, per la ragione detta più in alto: gli
+altri numeri sono livelli, e un livello ha lo zero arbitrario. La
+stratificazione è **misurata bene e piccola**: che si senta è
 un'altra affermazione, e non è ancora stata fatta da nessuno. Decide il
 cancello sul dispositivo.
 
@@ -572,8 +637,9 @@ Sul template raccomandato, quindi `[OSS]`:
 
 - il **massimo spostamento singolo** è **+11,80 tick = 39,9 ms** a 185 BPM
   (ride, passo 13). Confrontato con la finestra 20-40 ms del comune — che
-  qualifica *uno* spostamento — sta al suo **bordo superiore**, non inferiore:
-  è quanto di più grande quella finestra chiami ancora microtiming;
+  qualifica *uno* spostamento, ed è quindi la grandezza giusta da metterle
+  accanto — sta al suo **bordo superiore**: è quanto di più grande quella
+  finestra chiami ancora microtiming, non il minimo che chiami udibile;
 - l'**escursione picco-picco** fra tutti i passi e tutti gli strumenti è
   **22,83 tick = 77,1 ms**. Ma è la distanza fra il colpo più anticipato e il
   più ritardato del kit, non uno spostamento: a nessuna nota viene applicata.
@@ -815,7 +881,11 @@ vivono; qui c'è solo la parte di macchina.
 
 E la parte di macchina è una sola cosa, ma decisiva: **il template porta il
 solo residuo, lo swing lo fa la song.** `MU.applica_groove()` scrive velocity e
-uno scarto di pochi tick; il rapporto fra le due crome lo mette
+**uno scarto per ogni passo e per ogni strumento**, senza nessuna soglia — non
+«pochi tick»: sul template raccomandato il più grande arriva a **quasi 12 tick,
+cioè quasi 40 ms**, e la casella 6 lo dà per esteso insieme all'avvertenza che
+serve, cioè che gli estremi poggiano su uno o tre colpi su 193 battute. Il
+rapporto fra le due crome lo mette invece
 `S.set_swing(doc, …, figura='1/8')`, che vale per tutte le tracce insieme —
 basso e comping compresi. Un template che portasse anche lo swing lo farebbe
 applicare **due volte**, una dal firmware e una dalle posizioni scritte.

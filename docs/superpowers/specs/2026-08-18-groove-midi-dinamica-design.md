@@ -112,7 +112,21 @@ applicato due volte.
 | chi | cosa fa |
 |---|---|
 | `set_swing()` | lo swing, per tutta la song — batteria, basso e comping insieme |
-| il groove template | **solo il residuo**: il ride che spinge rispetto al rullante che tiene indietro |
+| il groove template | **solo il residuo**: di quanto ogni strumento arriva prima o dopo il resto del kit |
+
+⚠️ **Correzione del 19 agosto 2026 — questa riga era scritta al rovescio.**
+Diceva «il ride che spinge rispetto al rullante che tiene indietro», che
+invertiva la convenzione di segno **e** i fatti: nel Groove MIDI il ride è il
+**più tardi** dei quattro pad, e il charleston a pedale il più in anticipo. La
+convenzione vera si legge dal sito definitorio, `Passo.scarto` in
+[`../../../tools/delugexml/groove.py`](../../../tools/delugexml/groove.py), e
+si conferma da `musica.applica_groove()`, che fa `pos + scarto`: **positivo =
+il colpo cade dopo la griglia, cioè ritarda; negativo = prima, cioè anticipa.**
+La stessa frase invertita stava in **sei** punti del piano
+([`../plans/2026-08-18-groove-midi-dinamica.md`](../plans/2026-08-18-groove-midi-dinamica.md),
+Task 5 e Task 7) ed è corretta anche lì; è costata tre giri di revisione al
+Task 8, ed è per questo che viene sostituita invece che lasciata com'era — Task
+9 e Task 10 leggono da qui.
 
 Quindi `profilo()` misura il BUR dell'esecuzione e **lo toglie**. Quel BUR non
 è materiale di scarto: è il **controllo indipendente** sull'1,61 misurato sulla

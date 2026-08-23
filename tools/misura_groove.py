@@ -224,6 +224,10 @@ def il_profilo_aggregato():
 
     Ogni esecuzione pesa uno: se no il file da 193 battute deciderebbe da solo
     che cosa fa un batterista jazz.
+
+    RITORNA il campione appaiato -- `[(esecuzione, {strumento: residuo})]` --
+    perche' `il_template()` ne ha bisogno e ricostruirlo vorrebbe dire
+    rileggere tutti i MIDI una seconda volta.
     """
     print('\n=== profilo posizionale AGGREGATO (senza funk e fusion) ===')
     quota: dict[str, dict[int, list[float]]] = {}
@@ -466,9 +470,13 @@ def il_profilo_aggregato():
     # senza `origine()` e senza togliere lo swing: se il disegno c'e' deve
     # vedersi anche cosi'. Un colpo conta se sta entro un quarto di movimento
     # dal battere, e uno strumento conta se ne ha almeno venti.
+    # ⚠️ OGNI RIGA PORTA I SUOI BATTERISTI. Il numero di esecuzioni da solo
+    # non dice se cio' che si scrive e' [MIS] su un repertorio o [OSS] su un
+    # esecutore: quattro esecuzioni di quattro batteristi e quattro dello
+    # stesso non sono la stessa misura, e la scheda deve poterlo dire.
     print('\n--- controprova sulle FASI GREZZE (nessuna origine tolta) ---')
-    grezze: dict[str, list[float]] = {}
-    coppia = []
+    grezze: dict[str, list[tuple[float, str]]] = {}
+    coppia: list[tuple[float, str]] = []
     for e in GR.elenco(BASE, style=STILE, beat_type='beat',
                        time_signature='4-4'):
         if e.style in FUORI_DALLO_SWING:
@@ -486,21 +494,26 @@ def il_profilo_aggregato():
             if len(fasi) >= 20:
                 riga[nome] = statistics.median(fasi)
         for k, val in riga.items():
-            grezze.setdefault(k, []).append(val)
+            grezze.setdefault(k, []).append((val, e.drummer))
         if PEDALE in riga and 'ride' in riga:
-            coppia.append(riga[PEDALE] - riga['ride'])
+            coppia.append((riga[PEDALE] - riga['ride'], e.drummer))
     for nome in (PEDALE, 'rullante', 'kick', 'ride'):
         v = grezze.get(nome, [])
         if v:
-            print(f'    {nome:24s} n={len(v):3d}  '
-                  f'fase mediana {statistics.median(v):+6.2f} tick')
+            print(f'    {nome:24s} n={len(v):3d} '
+                  f'batt={len({d for _, d in v})}  '
+                  f'fase mediana {statistics.median(x for x, _ in v):+6.2f} tick')
     if coppia:
-        print(f'    {PEDALE} - ride: n={len(coppia)}  '
-              f'mediana {statistics.median(coppia):+.2f} tick  '
+        print(f'    {PEDALE} - ride: n={len(coppia)} '
+              f'batt={len({d for _, d in coppia})}  '
+              f'mediana {statistics.median(x for x, _ in coppia):+.2f} tick  '
               f'il charleston ANTICIPA in '
-              f'{sum(1 for x in coppia if x < 0)}/{len(coppia)}')
+              f'{sum(1 for x, _ in coppia if x < 0)}/{len(coppia)}')
 
-
+    # il campione appaiato ride/charleston, calcolato QUI una volta sola:
+    # `il_template()` lo riusa invece di rileggere tutti i MIDI una seconda
+    # volta per ricostruire gli stessi quindici numeri.
+    return per_es
 
 
 def i_fill():
@@ -542,8 +555,12 @@ def i_fill():
               f'esecuzioni {v.esecuzioni:3d}  batteristi {v.batteristi}')
 
 
-def il_template():
-    """L'esecuzione da cui esce il groove template, e cosa c'e' dentro."""
+def il_template(per_es):
+    """L'esecuzione da cui esce il groove template, e cosa c'e' dentro.
+
+    `per_es` arriva da `il_profilo_aggregato()`: e' lo stesso campione
+    appaiato, gia' calcolato.
+    """
     print('\n=== profilo del template ===')
     scelte = GR.elenco(BASE, style='jazz/swing', beat_type='beat',
                        time_signature='4-4')
@@ -598,40 +615,35 @@ def il_template():
     # stratificazione ride/charleston: va detto dove cade in quella fila
     # proprio l'esecuzione che si raccomanda come template.
     print('\n--- dove cade il template nel campione appaiato ride/charleston ---')
-    camp = []
-    for e2 in GR.elenco(BASE, style=STILE, beat_type='beat',
-                        time_signature='4-4'):
-        if e2.style in FUORI_DALLO_SWING:
-            continue
-        pr = GR.profilo(BASE, e2.id)
-        d = {}
-        for nome in ('ride', PEDALE):
-            passi = pr.passi.get(nome, [])
-            forti = [x for x in passi if x.colpi >= 10]
-            if sum(x.colpi for x in passi) < 40 or not forti:
-                continue
-            d[nome] = statistics.median(
-                [x.scarto for x in forti for _ in range(x.colpi)])
-        if len(d) == 2:
-            camp.append((d['ride'] - d[PEDALE], e2.id))
-    camp.sort()
-    for v, quale in camp:
+    camp = sorted((d['ride'] - d[PEDALE], e2.id, e2.drummer)
+                  for e2, d in per_es if 'ride' in d and PEDALE in d)
+    for v, quale, _ in camp:
         print(f'    {v:+6.2f} tick  {quale}'
               + ('   <-- IL TEMPLATE' if quale == scelta.id else ''))
-    senza = [v for v, quale in camp if quale != scelta.id]
+    senza = [(v, dr) for v, quale, dr in camp if quale != scelta.id]
     if senza:
-        print(f'    tutte: n={len(camp)} mediana '
-              f'{statistics.median(v for v, _ in camp):+.2f} '
-              f'ride piu tardi in {sum(1 for v, _ in camp if v > 0)}/{len(camp)}')
-        print(f'    senza il template: n={len(senza)} mediana '
-              f'{statistics.median(senza):+.2f} '
-              f'ride piu tardi in {sum(1 for v in senza if v > 0)}/{len(senza)}')
+        print(f'    tutte: n={len(camp)} '
+              f'batt={len({dr for *_, dr in camp})} mediana '
+              f'{statistics.median(v for v, *_ in camp):+.2f} '
+              f'ride piu tardi in {sum(1 for v, *_ in camp if v > 0)}/{len(camp)}')
+        print(f'    senza il template: n={len(senza)} '
+              f'batt={len({dr for _, dr in senza})} mediana '
+              f'{statistics.median(v for v, _ in senza):+.2f} '
+              f'ride piu tardi in {sum(1 for v, _ in senza if v > 0)}/{len(senza)}')
 
-    # e PERCHE' quel file sta al bordo: due stimatori danno segni opposti
+    # e PERCHE' quel file sta al bordo: due stimatori danno segni opposti.
+    # ⚠️ `.get()`, non `[...]`: il criterio del template e' "la piu' lunga
+    # fra le jazz/swing", e niente garantisce che quella esecuzione porti
+    # entrambi i pad. Con l'accesso diretto un template senza ride faceva
+    # KeyError qui, dopo minuti di misure gia' stampate.
     print('    i due stimatori su quel file:')
     for nome in ('ride', PEDALE):
-        passi = p.passi[nome]
+        passi = p.passi.get(nome, [])
         forti = [x for x in passi if x.colpi >= 10]
+        if not forti:
+            print(f'      {nome:22s} assente da questo template '
+                  f'({sum(x.colpi for x in passi)} colpi)')
+            continue
         sui_colpi = statistics.median(
             [x.scarto for x in forti for _ in range(x.colpi)])
         sui_passi = statistics.median([x.scarto for x in passi])
@@ -679,9 +691,9 @@ def main() -> None:
     la_delimitazione()
     la_scala()
     lo_swing()
-    il_profilo_aggregato()
+    per_es = il_profilo_aggregato()
     i_fill()
-    il_template()
+    il_template(per_es)
 
 
 if __name__ == '__main__':

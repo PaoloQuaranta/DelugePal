@@ -5824,8 +5824,15 @@ def test_groove_profilo_nucleo():
     #
     # ⚠️ Si misura la DIFFERENZA fra strumenti, non il valore assoluto: se
     # il kick sta a 0 e il ride a +2, non esiste un'origine "vera" che dica
-    # quale dei due e' spostato. E' la ragione per cui la scheda dichiara il
-    # ride che spinge RISPETTO al rullante, e mai un anticipo assoluto.
+    # quale dei due e' spostato. E' la ragione per cui la scheda dichiara
+    # sempre un DIVARIO fra due pad -- il charleston a pedale che anticipa il
+    # ride -- e mai un anticipo assoluto.
+    #
+    # ⚠️ IL SEGNO. `Passo.scarto` POSITIVO = il colpo cade DOPO la griglia
+    # (ritarda), NEGATIVO = prima (anticipa); il sito definitorio e'
+    # `groove.Passo.scarto`. Qui il ride sta a `b*ppq + 2`, cioe' DUE TICK
+    # PIU' TARDI del kick: quindi TRATTIENE, non spinge. Fino al 19 agosto
+    # 2026 queste due etichette dicevano il rovescio.
     b_ = {'kick': [], 'ride': []}
     for b in range(16):
         b_['kick'].append((b * ppq, 100))
@@ -5834,7 +5841,7 @@ def test_groove_profilo_nucleo():
     pb = GR.profilo_da_colpi(b_, ppq)
     dk = [s for s in pb.passi['kick'] if s.passo == 0][0].scarto
     dr = [s for s in pb.passi['ride'] if s.passo == 0][0].scarto
-    check('il ride spinge di 2 tick RISPETTO al kick',
+    check('il ride TRATTIENE di 2 tick RISPETTO al kick',
           abs((dr - dk) - 2) < 0.6, f'{dr:.2f} - {dk:.2f}')
 
 
@@ -5941,7 +5948,9 @@ def test_applica_groove():
     check('la prima prende velocity e scarto',
           note[0].velocity == 104 and note[0].pos == 2,
           f'{note[0].velocity} {note[0].pos}')
-    check('la seconda tiene indietro',
+    # scarto -1 = un tick PRIMA della griglia (vedi `groove.Passo.scarto`):
+    # questa nota anticipa, non ritarda.
+    check('la seconda ANTICIPA di un tick',
           note[1].velocity == 78 and note[1].pos == MU.TICK_PER_PASSO * 4 - 1,
           f'{note[1].velocity} {note[1].pos}')
     check('e nessun passo e rimasto senza appoggio',

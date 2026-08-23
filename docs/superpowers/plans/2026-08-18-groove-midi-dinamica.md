@@ -635,6 +635,31 @@ La catena completa, e **l'ordine è la cosa che conta**: origine, poi BUR, poi i
 - Consumes: `groove.origine` (Task 3), `groove.bur_da_posizioni` (Task 4), `musica.da_bur` (Task 1), `midi.leggi`, `midi.GM_PERCUSSIONI`, `midi.TICK_PER_MOVIMENTO_DELUGE`, `musica.TICK_PER_PASSO`.
 - Produces: `groove.Passo(passo: int, velocity: int, scarto: float, colpi: int)`, `groove.Profilo(id, drummer, style, bpm, bur, battute, passi: dict[str, list[Passo]])`, `groove.profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float) -> Profilo`, `groove.profilo(base, id) -> Profilo`.
 
+⚠️ **CORREZIONE DEL 19 AGOSTO 2026 — LA CONVENZIONE DI SEGNO DI QUESTO TASK
+ERA SCRITTA AL ROVESCIO, QUI E IN ALTRI QUATTRO PUNTI DEL PIANO.** Questo
+documento diceva «`scarto`: + spinge, − trattiene» e «il ride che spinge
+rispetto al rullante che tiene indietro». **È l'inverso.** La convenzione vera,
+che si legge dal sito definitorio — `Passo.scarto` in
+[`../../../tools/delugexml/groove.py`](../../../tools/delugexml/groove.py) — e
+si conferma da `musica.applica_groove()`, che fa `pos + scarto`:
+
+**`scarto` positivo = il colpo cade DOPO la griglia, cioè ritarda. Negativo =
+prima, cioè anticipa.**
+
+La frase invertita è costata **tre giri di revisione** al Task 8: ha fatto
+scrivere che il charleston a pedale del jazz stava *dietro* agli altri pad,
+mentre li **anticipa** — che è poi l'unica stratificazione che quel corpus
+mostri. I punti corretti in questo file sono **sei**: il commento e l'etichetta
+della fixture B qui sotto, il campo `scarto` del Task 5, la catena di
+`profilo_da_colpi()`, e al Task 7 la docstring di `applica_groove()` più
+l'etichetta «la seconda tiene indietro» del suo test — che sotto la convenzione
+vera anticipa. Il gemello sta in
+[`../specs/2026-08-18-groove-midi-dinamica-design.md`](../specs/2026-08-18-groove-midi-dinamica-design.md).
+**Il testo qui sotto è quello corretto; la formulazione originale del piano era
+falsa e non viene conservata**, perché la regola di questo progetto protegge il
+contenuto dei documenti di lavoro, non i loro errori — e Task 9 e Task 10
+leggono da qui.
+
 - [ ] **Step 1: Scrivere il test che fallisce**
 
 ```python
@@ -685,8 +710,11 @@ def test_groove_profilo_nucleo():
     #
     # ⚠️ Si misura la DIFFERENZA fra strumenti, non il valore assoluto: se
     # il kick sta a 0 e il ride a +2, non esiste un'origine "vera" che dica
-    # quale dei due e' spostato. E' la ragione per cui la scheda dichiara il
-    # ride che spinge RISPETTO al rullante, e mai un anticipo assoluto.
+    # quale dei due e' spostato. E' la ragione per cui la scheda dichiara
+    # sempre un DIVARIO fra due pad, e mai un anticipo assoluto.
+    #
+    # ⚠️ IL SEGNO: il ride sta a `b*ppq + 2`, cioe' DUE TICK PIU' TARDI del
+    # kick, quindi TRATTIENE. Positivo = dopo la griglia.
     b_ = {'kick': [], 'ride': []}
     for b in range(16):
         b_['kick'].append((b * ppq, 100))
@@ -695,7 +723,7 @@ def test_groove_profilo_nucleo():
     pb = GR.profilo_da_colpi(b_, ppq)
     dk = [s for s in pb.passi['kick'] if s.passo == 0][0].scarto
     dr = [s for s in pb.passi['ride'] if s.passo == 0][0].scarto
-    check('il ride spinge di 2 tick RISPETTO al kick',
+    check('il ride TRATTIENE di 2 tick RISPETTO al kick',
           abs((dr - dk) - 2) < 0.6, f'{dr:.2f} - {dk:.2f}')
 ```
 
@@ -714,7 +742,13 @@ class Passo(NamedTuple):
 
     passo: int          # 0..15
     velocity: int       # la MEDIANA dei colpi su quel passo
-    scarto: float       # tick di residuo, con segno. + spinge, - trattiene
+    #: tick di residuo rispetto al passo, con segno. POSITIVO = il colpo
+    #: cade DOPO la griglia (ritarda), NEGATIVO = prima (anticipa). Lo
+    #: conferma `musica.applica_groove()`, che fa `pos + scarto`.
+    #: ⚠️ Questa riga diceva '+ spinge, - trattiene', cioe' il rovescio;
+    #: corretta il 19 agosto 2026. E' IL SITO DEFINITORIO: il segno si
+    #: legge da qui, e ogni altro posto che lo nomina cita questo.
+    scarto: float
     colpi: int          # quante volte quel passo e' stato colpito
 
 
@@ -762,8 +796,8 @@ def profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float,
        anticipo che e' latenza di cattura, non feel;
     2. misura il BUR e TOGLILO -- se no lo swing viene applicato due volte,
        una dal firmware e una da qui;
-    3. quel che resta e' il RESIDUO: il ride che spinge rispetto al rullante
-       che tiene indietro. E' il solo microtiming che il template porta;
+    3. quel che resta e' il RESIDUO -- chi arriva prima e chi dopo rispetto
+       al resto del kit. E' il solo microtiming che il template porta;
     4. aggrega per strumento e per passo, sedici per battuta.
     """
     passo_tick = ppq / 4                            # un 1/16
@@ -1030,7 +1064,9 @@ def test_applica_groove():
     check('la prima prende velocity e scarto',
           note[0].velocity == 104 and note[0].pos == 2,
           f'{note[0].velocity} {note[0].pos}')
-    check('la seconda tiene indietro',
+    # scarto -1 = un tick PRIMA della griglia: questa nota anticipa. Anche
+    # questa etichetta diceva il rovescio -- vedi la correzione al Task 5.
+    check('la seconda ANTICIPA di un tick',
           note[1].velocity == 78 and note[1].pos == MU.TICK_PER_PASSO * 4 - 1,
           f'{note[1].velocity} {note[1].pos}')
     check('e nessun passo e rimasto senza appoggio',
@@ -1079,9 +1115,9 @@ def applica_groove(note, profilo, dove: str) -> dict[str, object]:
     Il pattern resta la stringa leggibile che e'; il feel arriva da
     un'esecuzione vera. `dove` e' il nome GM dello strumento nel profilo.
 
-    ⚠️ LO SWING NON E' QUI. Il profilo porta il solo RESIDUO -- il ride che
-    spinge rispetto al rullante che tiene indietro -- perche' lo swing lo fa
-    `song.set_swing()`, che e' di song e vale anche per basso e comping. Un
+    ⚠️ LO SWING NON E' QUI. Il profilo porta il solo RESIDUO -- di quanto
+    ogni strumento arriva prima o dopo il resto del kit -- perche' lo swing
+    lo fa `song.set_swing()`, che e' di song e vale anche per basso e comping. Un
     template che portasse anche lo swing lo farebbe applicare due volte.
 
     ⚠️ NON INVENTA. Se il pattern chiede un colpo su un passo dove quel
