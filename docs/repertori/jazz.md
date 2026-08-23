@@ -409,9 +409,9 @@ che resta è il **residuo**, in tick Deluge (96 per movimento) `[MIS]`:
 | kick | 22 | 4 | −1,23 | −2,68 … −0,50 |
 | ride | 18 | 4 | −0,81 | −2,02 … +0,21 |
 
-Un tick vale 6,25 ms a 100 BPM e 3,38 ms a 185, quindi **le mediane stanno
-tutte entro 3,4 tick**: poche unità su 96 per movimento, e tutte dalla stessa
-parte — **prima** della griglia.
+**Le mediane stanno tutte entro 3,4 tick**: poche unità su 96 per movimento, e
+tutte dalla stessa parte — **prima** della griglia. Per la scala, e per i
+numeri che vengono dopo: un tick vale 6,25 ms a 100 BPM e 3,38 ms a 185.
 
 ⚠️ **Ma questi sono livelli, e un livello in millisecondi non vuol dire
 niente.** Convertirli e confrontarli con la finestra dell'udibile sarebbe la
@@ -596,20 +596,32 @@ un secondo riscontro**: è `tick × 60000/(BPM × 96)`, aritmetica sugli stessi
 numeri.
 
 **Cosa il test esclude, detto stretto:** che il divario fra il charleston e gli
-altri pad sia un ritardo **costante in millisecondi**. Nient'altro.
+altri pad sia un ritardo **costante in millisecondi**. Nient'altro — su **tutte
+e tre** le coppie; su due delle tre cade anche l'ipotesi opposta, ed è la riga
+qui sopra.
 
-⚠️ **E in particolare non esclude il pedale**, che è il meccanismo sospettato —
-ma va detto **nel verso giusto**, perché è dove questa casella ha già sbagliato
-una volta. Il charleston a pedale **anticipa**: un pad che *ritarda* non lo
-spiegherebbe, lo contraddirebbe. Il meccanismo plausibile è l'altro. Il «chick»
-non scatta a fine corsa, scatta quando la corsa del pedale **supera una
-soglia** — cioè a un punto *dentro* il gesto del piede, e non alla sua fine.
-Dove cada quel punto è una **frazione del gesto**, e un gesto è una frazione
-della battuta: l'anticipo che ne viene è **costante in tick**, non un numero
-fisso di millisecondi, e supera questo test **identico al mestiere**. La
-domanda del titolo — mestiere o pedale — resta quindi **senza risposta**: a
-cadere è solo l'ipotesi più semplice, cioè un ritardo fisso in millisecondi dei
-tre pad battuti.
+⚠️ **E non esclude un pedale proporzionale al movimento** — quello sì, ma solo
+quello, e va detto **nel verso giusto**, perché è dove questa casella ha già
+sbagliato una volta. Il charleston a pedale **anticipa**: un pad che *ritarda*
+non lo spiegherebbe, lo **contraddirebbe**. Il meccanismo dovrebbe essere
+l'altro, e da qui in poi si **suppone** `[IPO]`: il «chick» non scatta a fine
+corsa ma quando la corsa del pedale **supera una soglia**, cioè a un punto
+*dentro* il gesto del piede, e l'onset cade presto. Perché ne venga un anticipo
+**costante in tick** servono però **due** supposizioni, non una — che quel punto
+cada a una frazione **fissa** del gesto, e che il gesto sia una frazione della
+**battuta** e non una durata sua, mentre molla e massa di un pedale col tempo
+non scalano. **Quel pedale non è mai stato misurato.**
+
+⚠️ **E i numeri già scritti qui sopra lo stringono ancora.** Il charleston è il
+riferimento comune di tutte e tre le regressioni, quindi un effetto
+costante-in-tick dal **suo** lato prevede pendenza **zero su tutte e tre**: è
+0,8 σ sul ride, ma **2,4 e 3,0 σ** su cassa e rullante — le stesse due coppie
+per cui, più sopra, «non regge nessuna delle due ipotesi pure». **Due
+su tre respingono anche questa versione.** E un pedale che scattasse presto di
+un numero **fisso di millisecondi** è già rifiutato a ~4 σ dalla stessa
+regressione, esattamente come i pad battuti. La domanda del titolo — mestiere o
+pedale — resta quindi **senza risposta**, ma del pedale sopravvive **una
+versione sola, supposta, e su una coppia su tre**.
 
 ⚠️ **E il confronto è sempre e solo fra pad.** `GR.origine()` toglie già lo
 scarto comune a tutto il kit, quindi qui si esclude una latenza **di quel pad
