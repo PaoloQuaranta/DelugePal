@@ -42,8 +42,16 @@ Sulle sole `beat` del jazz i batteristi si spartiscono così: `drummer1` 19,
 la frase che va scritta accanto al numero.
 
 ⚠️ **Il reggae del Groove MIDI sono due batteristi e dieci minuti di musica.**
-Quattro esecuzioni continue (78, 78, 141, 126 BPM), **due di `drummer1` e due
-di `drummer5`**, più sedici fill da meno di tre secondi, tutti di `drummer1`.
+Quattro esecuzioni continue (78, **64**, 141, 126 BPM), **due di `drummer1` e
+due di `drummer5`**, più sedici fill di due-tre secondi, tutti di `drummer1`.
+
+> **Seconda correzione, 24 agosto 2026.** Questa riga diceva «78, 78, 141,
+> 126»: il secondo 78 era inventato, e la seconda esecuzione — `reggae/slow`,
+> `drummer1/session1/201` — sta a **64 BPM**. L'ha trovata l'implementatore del
+> Task 9 ricontando, ed è la seconda volta che questo paragrafo sbaglia un
+> numero mentre difende una tesi giusta. Qui il numero pesa: 64 è uno dei due
+> soli tempi che cadono nella fascia 50-100 BPM dichiarata dalla casella 3 del
+> reggae, quindi non era decorativo.
 
 > **Correzione del 18 agosto 2026, e vale come promemoria.** Questo paragrafo
 > diceva «un batterista solo», ed era falso: l'ha trovato l'implementatore del
