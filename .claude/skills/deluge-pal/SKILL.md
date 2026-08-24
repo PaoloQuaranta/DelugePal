@@ -347,14 +347,16 @@ riusa `MI`.
 
 Il dataset sta in `to-read/MIDI/groove-v1.0.0-midionly/groove/`, che **non è
 versionato**: i test che lo usano saltano se non c'è, come quelli di `WJ`.
-Quel percorso è la `base` di tutte le funzioni qui sotto.
+Quel percorso è la **`base`** delle funzioni che aprono il dataset, cioè le
+prime cinque della tabella. Le ultime due non lo prendono: lavorano su
+materiale già letto.
 
 | per | usare |
 |---|---|
 | cercare un'esecuzione | `GR.elenco(base, style='jazz', beat_type='beat', drummer=…, time_signature='4-4')` — ogni filtro è opzionale, `style` va per **prefisso** |
 | quali etichette esistono | `GR.valori(base, 'style')`, `'drummer'`, `'beat_type'`, `'bpm'`… → etichetta → quante volte |
 | vedere cosa c'è | `GR.racconta(base, id)` → una riga: batterista, stile, BPM, `beat`/`fill`, metro, durata |
-| **la scala di velocity** | `GR.scala(base, style='jazz')` → strumento → `Livelli(mediana, q1, q3, minimo, massimo, colpi, esecuzioni, batteristi)`. Il default `beat_type='beat'` è voluto: i `fill` sono un altro animale e si chiedono a parte |
+| **la scala di velocity** | `GR.scala(base, style='jazz')` → strumento → `Livelli(strumento, mediana, q1, q3, minimo, massimo, colpi, esecuzioni, batteristi)`. Il default `beat_type='beat'` è voluto: i `fill` sono un altro animale e si chiedono a parte |
 | **il groove template** | `GR.profilo(base, id)` → `Profilo(id, drummer, style, bpm, bur, battute, passi)`, con `passi[strumento] = [Passo(passo, velocity, scarto, colpi)]`. `scarto` è in **tick Deluge** e **positivo vuol dire DOPO la griglia**. La voce si sceglie da `colpi` e dalla posizione, **mai dal nome GM**, che non è il ruolo musicale |
 | **posarlo su un pattern** | `MU.applica_groove(note, prof, dove=…)` — sta in `musica` e non qui: `GR` legge e non scrive mai. **Muta la lista**, e i passi senza appoggio li riferisce invece di inventarli |
 | quanto è swingato | `GR.bur_da_posizioni(posizioni, ppq)` → la BUR mediana, `None` se non ci sono coppie di crome. I numeri già misurati stanno in `docs/repertori/jazz.md`, casella 4 |

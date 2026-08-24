@@ -69,6 +69,29 @@ bubble non c'è altro che questa riga e il pattern della casella 6.
 Tempo: **50-100 BPM**, con 70-78 al centro del roots. Quindi 70 BPM non è
 "lento per il dub", è il posto giusto.
 
+**E cosa dice il corpus** — che è la domanda dei bordi, e ha due risposte
+diverse. Il Groove MIDI etichetta `reggae` **venti esecuzioni**: quattro
+continue (`beat`), ai tempi di **78, 64, 141 e 126 BPM**, e sedici fill **tutti a 78**
+`[OSS]`. Il conteggio per intero, e perché su questo corpus non si misuri, sono
+nella **casella 6**.
+
+- **Il centro tiene.** Il 78 della `beat` e il 78 di tutti e sedici i fill
+  cadono in mezzo al «70-78» che la riga qui sopra afferma senza marcatore, e
+  il 64 sta dentro il range. È **corroborazione, non misura**: tutte le
+  esecuzioni in fascia sono di `drummer1`, e un esecutore non è un repertorio.
+- **Il tetto no, e non basta a spostarlo.** Il 141 e il 126 stanno **26-41 BPM
+  sopra** i 100 dichiarati. Ma questo dice **cosa il corpus etichetta**, non
+  fin dove arriva il reggae: l'etichetta può essere larga, come lo è `jazz`,
+  che sotto di sé porta anche `jazz/funk` e `jazz/fusion`. La differenza è che
+  lì le sottoetichette **si vedono e si escludono**, mentre qui le due veloci
+  portano `reggae` nudo — l'unica sottoetichetta è `reggae/slow`, ed è il 64.
+  **Il corpus non offre niente per separarle**, quindi il range di questa
+  casella **non si muove** e resta `[WEB]`. Il primo posto dove guardare è la
+  ricerca che la **casella 1** già chiede: ska, rocksteady e dancehall
+  «condividono il levare e cambiano tempo», e finché quel confine non è
+  tracciato non si sa se due esecuzioni veloci etichettate `reggae` siano
+  reggae veloce o un vicino.
+
 ## 4. Feel
 
 **Parziale.** C'è la direzione — il one drop è swingato e laid-back — e c'è
@@ -238,7 +261,7 @@ con questo corpus **non si può**, e il conteggio vero dice perché.
 Il corpus sarebbe il **Groove MIDI**, decompresso in
 `to-read/MIDI/groove-v1.0.0-midionly/`, che di reggae porta **20 esecuzioni** —
 19 con `style` esattamente `reggae`, una `reggae/slow`. Ma venti è il numero
-che non conta. Ricontate il 23 agosto 2026 con `GR.elenco(base,
+che non conta. Ricontate il 24 agosto 2026 con `GR.elenco(base,
 style='reggae')`, quelle venti si spartiscono così `[OSS]`:
 
 | | quante | chi le suona | quanto dura |
@@ -274,11 +297,12 @@ esecuzioni sono due, e sono le sole due da nominare:
 stanno a 141 e 126 BPM, cioè fuori dalla casella 3.
 
 ⚠️ Due avvertenze che restano valide comunque. Le etichette si contano **per
-prefisso**, e non per sottostringa: cercare `reggae` dentro l'etichetta
-prenderebbe anche `latin/reggaeton` e `latin/brazilian-sambareggae`, e il
-controesempio per esteso sta nella casella 6 di [`jazz.md`](jazz.md). E
-`to-read/` è in `.gitignore`, quindi chi clona non trova i file: i conteggi qui
-sopra sono lo stato del disco di quel giorno, non una proprietà del progetto.
+prefisso**, e non per sottostringa — regola che nasce proprio qui, perché è
+`reggae` la parola che dentro altre etichette compare senza essere reggae:
+quali siano, e il conto che ne verrebbe, stanno nella casella 6 di
+[`jazz.md`](jazz.md), col controesempio. E `to-read/` è in `.gitignore`, quindi
+chi clona non trova i file: i conteggi qui sopra sono lo stato del disco di
+quel giorno, non una proprietà del progetto.
 
 ## 7. Armonia
 

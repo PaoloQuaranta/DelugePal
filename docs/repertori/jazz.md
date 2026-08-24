@@ -907,7 +907,7 @@ qui sopra e la figura da swingare.
 ⚠️ **Il dispositivo ha un quantize/humanize che cancella il template.** Il
 meccanismo è di macchina e vale per ogni repertorio, quindi il suo posto è il
 comune di [`../MUSICA.md`](../MUSICA.md), «La macchina» — «Il quantize/humanize
-del dispositivo cancella il groove template», dove dal 23 agosto 2026 c'è per
+del dispositivo cancella il groove template», dove dal 24 agosto 2026 c'è per
 esteso: quale gesto, in quale verso, e perché non si somma al template. Qui
 resta il rimando e non la copia, ma il rimando ci resta: una scheda che tace su
 un comando che cancella il proprio lavoro è peggio di una che lo ripete.

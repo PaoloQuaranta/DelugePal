@@ -641,18 +641,30 @@ scheda; quanto è grande il residuo che il template scrive, nella casella 6.
 
 ⚠️ `AUDITION` + `TEMPO`: **in senso orario quantizza, in senso antiorario
 umanizza**, e agisce **per riga e in modo distruttivo** — riscrive le posizioni
-di quella riga, e chi gira la manopola non ha modo di sapere che cosa sta
-sovrascrivendo. `[MAN]`, dal manuale della community: sul dispositivo **non è
-stato provato**.
+di quella riga. `[MAN]`, dal manuale della community, e sul dispositivo **non
+è stato provato**. Il marcatore copre questa frase e **finisce qui**: tutto
+quello che segue è inferenza, e porta il suo.
 
-È il **concorrente diretto** del groove template, e la differenza sta tutta in
-una riga: quello **randomizza**, il nostro **misura**. Fanno la stessa cosa —
-togliere le note dalla griglia — con due idee opposte di dove vadano messe, e
-non si sommano: **chi passa per ultimo vince**. Chi ha appena posato un profilo
-con `MU.applica_groove()` e poi gira `TEMPO` su quella riga ha buttato via una
-misura, in un verso o nell'altro: in senso orario per riportarla sulla griglia,
-in senso antiorario per sostituirla con del rumore. In nessuno dei due casi il
-dispositivo lo dice.
+È il **concorrente diretto** del groove template. Toccano la stessa cosa — la
+posizione delle note rispetto alla griglia — quindi non si sommano: **chi passa
+per ultimo vince**, e chi ha appena posato un profilo con `MU.applica_groove()`
+e poi gira `TEMPO` su quella riga la sovrascrive. Le tre cose che vengono dopo
+sono invece tutte `[IPO]`, e vanno tenute distinte dalla riga qui sopra:
+
+- che l'umanizzazione lavori **randomizzando**, mentre il template **misura**,
+  è la lettura corrente della parola «humanize» `[IPO]`: il manuale non lo dice
+  e nessuno l'ha provato. È la differenza su cui poggia tutto il valore del
+  template, ed è la prima da verificare;
+- che quindi girare la manopola butti via una misura **nei due versi** — in
+  senso orario per riportare le note sulla griglia, in senso antiorario per
+  sostituirle con del rumore — segue dalla precedente `[IPO]`, non dal
+  manuale;
+- che il dispositivo **non lo segnali** è dedotto dal fatto che la manopola
+  agisce sulla riga corrente senza chiedere niente `[IPO]`, non osservato.
+
+Si verificano tutte e tre insieme, e con un gesto solo: girare quel comando su
+una riga che porta un template, e guardare cosa resta. Va fatto al **cancello
+sul dispositivo**, e scritto qui con la data quando arriva.
 
 Sta qui e non in una scheda perché è meccanismo di macchina e vale per ogni
 repertorio — e perché una scheda che tace su un comando che cancella il proprio
