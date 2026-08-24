@@ -1071,16 +1071,37 @@ usano da subito.
 
 ## 10. Sul Deluge
 
-**Parziale.** C'è **quanto** swing e **su quale figura**. Verificati sul
-dispositivo sono **due meccanismi**, e in tutto il jazz sono le sole cose che lo
-siano: che il display sia la percentuale di posizione del levare e che
-`swingInterval` scelga quale figura viene swingata, e — dal 24 agosto 2026 —
-che il dispositivo **conservi le posizioni fuori griglia** che il groove
-template scrive, «Il Deluge non riquantizza», qui sotto. Il **62** no: è
-aritmetica su quel meccanismo a partire dal BUR misurato sul corpus Weimar, e
-nessuno l'ha ancora **giudicato** — è uscito da un Deluge il 24 agosto 2026, ma
-su di lui non è stata fatta nessuna domanda, e in fondo a questa casella c'è
-perché. Serve
+**Parziale.** C'è **quanto** swing e **su quale figura**. Le cose di questo
+repertorio che sono passate per un Deluge sono **tre**, e in tutto il jazz sono
+le sole — ma non hanno lo stesso grado, e vanno contate separate.
+**Verificati sul dispositivo sono due meccanismi**: che il display sia la
+percentuale di posizione del levare e che `swingInterval` scelga quale figura
+viene swingata; e — dal 24 agosto 2026 — che il dispositivo **conservi le
+posizioni fuori griglia** che il groove template scrive, «Il Deluge non
+riquantizza», qui sotto.
+
+**Il terzo è di un altro genere: i primi due si vedono, questo si è sentito.**
+Il 24 agosto 2026, su una coppia costruita apposta, **togliere lo swing dalle
+posizioni e farlo rimettere al firmware non ha prodotto una differenza
+udibile** `[OSS]`. ⚠️ **Non si scrive «verificato sul dispositivo», e non è
+pedanteria.** Un ascoltatore, una sessione, nessuna ripetizione, nessuna prova
+alla cieca: quel che regge in modo forte è l'**esclusione** dei modelli di
+firmware che avrebbero prodotto differenze grosse, e quella non chiede
+all'orecchio nessuna finezza — chiede solo che un ride raddrizzato si sarebbe
+notato. Che non si senta **nessuna** differenza è invece osservato, e un
+modello resta in piedi. È la stessa separazione che «Il Deluge non riquantizza»
+fa già dentro di sé, presa nei due versi: non dire «verificato sul dispositivo»
+avendo ascoltato, né il contrario. La coppia, i sei modelli del firmware, la
+previsione scritta prima dell'ascolto e quel che resta aperto stanno nel comune
+di [`../MUSICA.md`](../MUSICA.md), «Il groove template» — «Togliere lo swing e
+rimetterlo torna a zero — ma contro sé stesso»: è meccanismo di macchina e non
+del jazz, quindi qui il rimando e non la copia.
+
+Il **62** no: è aritmetica sul meccanismo dello swing a partire dal BUR
+misurato sul corpus Weimar, e nessuno l'ha ancora **giudicato** — è uscito da
+un Deluge il 24 agosto 2026, ma su di lui non è stata fatta nessuna domanda, e
+in fondo a questa casella c'è perché, insieme all'unico 62 che quel giorno una
+domanda l'ha avuta, e che non è questo. Serve
 `S.set_swing(doc, 62, figura='1/8')`, perché il default del firmware swinga le
 semicrome e su una linea di crome non muove niente. Come funziona la scala — la
 formula fra display e BUR, e quale `swingInterval` nomina quale figura — sta nel
@@ -1206,9 +1227,22 @@ niente di quello vale meno perché il repertorio è un altro. Il **62** qui sopr
 invece **è uscito** da un Deluge il 24 agosto 2026 — le due song della coppia lo
 portano entrambe, con `figura='1/8'` — ma non è stato **giudicato**: nessuno è
 stato interrogato su di lui, ed essendo identico nei due file quell'ascolto non
-lo metteva in gioco `[OSS]`. Resta quindi aritmetica non ascoltata, e ci vuole
-un pezzo jazz vero fatto **ascoltare all'utente**: la sua correzione è ciò che
-riempie la casella 11.
+lo metteva in gioco `[OSS]`.
+
+⚠️ **Lo stesso giorno un 62 è stato messo in gioco, ma non è questo.** Nella
+coppia dell'astrazione dello swing — quella descritta nel comune, e rimandata
+in cima a questa casella — `swingAmount` è la sola riga che cambia fra i due
+file, e in una delle due **tutto** lo swing viene di lì: che quella sia stata
+sentita «sufficientemente simile» all'altra, dove lo swing stava nelle
+posizioni di un'esecuzione vera, dice che un display 62 su `1/8` rifà a
+orecchio lo swing di **quell'esecuzione** `[OSS]`. Ma quel 62 viene dal BUR di
+quella singola esecuzione, non dal corpus
+Weimar: **coincide** col valore della tabella, non lo conferma. Ed era una
+domanda da «uguali o diverse», non un giudizio.
+
+Il 62 della tabella resta quindi non **giudicato**, e ci vuole un pezzo jazz
+vero fatto **ascoltare all'utente**: la sua correzione è ciò che riempie la
+casella 11.
 
 ## 11. Trappole del generatore
 

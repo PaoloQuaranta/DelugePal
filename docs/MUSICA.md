@@ -727,6 +727,11 @@ nella song, e lo stesso pattern col solo residuo più `set_swing()`, dovrebbero
 suonare uguali. Se non lo fossero, tanto varrebbe lasciare lo swing a 0 quando
 si usa un template.
 
+**Questa sottosezione ha due metà, e sono due prove diverse:** l'aritmetica
+della libreria contro sé stessa, che è qui subito sotto, e — dallo stesso
+giorno — l'**ascolto** che mette il dispositivo in mezzo alle due formule, che
+è in fondo. È la seconda quella che decide.
+
 L'aritmetica è stata rifatta su `drummer1/session3/2` — che qui fa da materiale
 di prova, e il risultato non è di quel repertorio — togliendo lo swing e
 rimettendolo con la formula del firmware che sta nella docstring di
@@ -752,11 +757,84 @@ e l'ignoranza è già dichiarata dove va, in `song.SWING_SCARTO_SORGENTE`: i
 «swung tick» del sorgente e i tick delle posizioni di nota differiscono di un
 **fattore 2**, e il punto in cui i due si convertono **non è stato trovato**.
 
-**L'esperimento che lo deciderebbe** è una coppia controllata come quella del
-cancello: stesso pattern con lo swing **scritto dentro** e swing 0 nella song,
-contro residuo più `set_swing()`, ascoltati in fila. È una domanda da
-*«uguali o diversi»*, cioè esattamente quel che un orecchio fa bene — vedi «Un
-ascolto non è una misura di percezione», che dice anche a cosa non serve.
+**L'esperimento che lo decide è stato fatto**, lo stesso giorno, ed è la metà
+che qui mancava. Le due metà vanno tenute separate, perché sono due cose
+diverse: qui sopra c'è l'**auto-consistenza** della libreria, che è aritmetica
+contro sé stessa e non poteva fallire; qui sotto c'è la **prova esterna**, che
+mette il dispositivo in mezzo alle due formule ed è la sola che possa portare
+un'informazione.
+
+**La coppia.** `SWINGA` e `SWINGB`: le stesse 22 note di un'esecuzione vera,
+quattro voci, due battute in loop a **102 BPM**. In A le posizioni portano lo
+swing **dentro** e la song sta a swing 50; in B le stesse note con lo swing
+tolto da `_senza_swing()`, più swing **62** su figura `1/8` — cioè lo swing lo
+fa il firmware. Fuori dalle note i due file differiscono per **una riga sola**,
+`swingAmount`: quel che si sente è attribuibile a una cosa sola. La previsione
+è stata scritta **prima** dell'ascolto e distingueva **sei** modelli di cosa il
+firmware faccia, perché muove «la seconda della coppia» e cosa faccia alle note
+che cadono **fra** le crome non è stabilito da nessuna parte. I sei modelli, e
+di quanto ciascuno divergerebbe nota per nota, si ristampano con
+`.venv/Scripts/python.exe tools/genera_swing.py`, che genera anche la coppia:
+lì c'è come si è costruita, qui cosa se ne ricava.
+
+**L'esito**, 24 agosto 2026 — un ascoltatore, una sessione, nessuna
+ripetizione, nessuna prova alla cieca `[OSS]`:
+
+*«Forse ci sono microscopiche differenze, ma direi che sono sufficientemente
+simili.»*
+
+**Quel che questo esclude, ed è l'affermazione forte.** Quattro dei sei modelli
+prevedevano differenze **da decine fino a oltre cento millisecondi a quel
+tempo**, e con effetti che hanno un nome: i levare del ride che tornano
+**dritti**, cioè B più rigido di A, oppure i movimenti stessi che si spostano,
+cioè il tempo che lurca. Sono cose che si sentono senza cercarle, e nessuna è
+stata riferita: **quei quattro modelli sono fuori.** L'inferenza regge proprio
+perché non chiede all'orecchio nessuna finezza — chiede solo che un ride
+raddrizzato si sarebbe notato.
+
+**Quel che invece NON dimostra.** Il modello che la libreria assume — il blocco
+di 96 tick che `_senza_swing()` inverte — prevedeva **identiche**: 22 note su
+22 sotto **0,56 tick, cioè 3,4 ms a 102 BPM**, che è sotto la griglia stessa
+dei tick. La risposta è «forse microscopiche differenze», non «identiche».
+Quindi il modello è **compatibile** con quel che si è sentito, non
+**confermato** da esso, e la distanza fra le due parole è tutta la cautela di
+«Un ascolto non è una misura di percezione».
+
+⚠️ **E un modello resta in piedi, indebolito ma non escluso.** È quello in cui
+il firmware **quantizza a una finestra** invece di deformare il tempo: sposta
+le note che cadono vicino alla croma e lascia dove sono tutte le altre. Su
+questo estratto divergeva dal blocco in **un punto solo** — tre colpi di
+rullante a un quarto di movimento, **6 tick, cioè 36,8 ms a 102 BPM** — e sotto
+un tick e mezzo ovunque altrove. All'ascoltatore quel rullante era stato
+indicato fra le tre cose da guardare, e non l'ha riportato come diverso: è
+evidenza contraria, e per questo il modello è indebolito. Ma 36,8 ms su tre
+colpi dentro un loop di due battute sono il genere di cosa che si perde, stanno
+**appena** dentro la finestra dell'udibile (vedi «Le due domande sono diverse,
+e la soglia dipende dal tempo»), e l'ascoltatore ha dichiarato imprecise le
+proprie valutazioni a questo livello di dettaglio. **Resta aperto.**
+
+**E si chiuderebbe così**, con una mossa che era già stata tenuta di riserva:
+una coppia **costruita** invece che presa da un'esecuzione, con le note messe
+apposta a fase 0,25 e 0,75 del movimento, cioè dove i due modelli divergono al
+massimo. Sui levare — dove cadono le note di un batterista vero — i due
+modelli quasi si toccano, ed è per questo che un estratto reale non basta a
+separarli: è il motivo per cui questa mossa era stata tenuta di riserva invece
+che fatta per prima.
+
+**La conseguenza pratica, che è la domanda da cui si era partiti:** l'ipotesi
+di riserva — *lasciare lo swing a 0 nella song quando si usa un groove
+template* — **non serve.** La spartizione «residuo al template, swing alla
+song» ha retto anche alla prova esterna, e si usa così. L'alternativa resta
+disponibile, e diventerebbe la scelta giusta solo se un giorno un modello a
+finestra venisse confermato: allora il template dovrebbe riportarsi dentro
+anche lo swing, e la song restare a 50.
+
+⚠️ **E `song.SWING_SCARTO_SORGENTE` resta esattamente com'era.** Il fattore 2
+fra i «swung tick» del sorgente e i tick delle posizioni di nota **non è stato
+spiegato** da questo esperimento. È stato solo reso **meno preoccupante**: uno
+dei quattro modelli esclusi era proprio quel fattore risolto dall'altra parte,
+cioè con un blocco di 192 tick, e quello è fuori. Il punto in cui i due si
+convertono resta non trovato, e la dichiarazione di ignoranza resta dov'è.
 
 #### Il quantize/humanize del dispositivo cancella il groove template
 
