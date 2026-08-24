@@ -6,7 +6,8 @@
 Da leggere prima del resto: **nessun pezzo jazz è mai stato generato.** Il
 24 agosto 2026 è uscita da un Deluge la prima cosa jazz che qualcuno abbia
 ascoltato, ed è **una clip di batteria di due battute** costruita per rispondere
-a una domanda sola — casella 6, «Il residuo si sente? Dipende da quale». Non è
+a una domanda sola — casella 6, «Cosa si è sentito, e cosa non se ne può
+dedurre». Non è
 un pezzo, e del suono jazz sul Deluge continua a non dire niente.
 
 Quello che c'è in questa scheda o è misurato su un corpus — lo swing nella
@@ -17,8 +18,8 @@ dal 24 agosto — che il dispositivo **conservi le posizioni fuori griglia** che
 il groove template scrive (casella 10). È la ragione per
 cui cinque caselle su undici sono ancora vuote, e per cui la 11 è vuota **per
 costruzione** e non per trascuratezza: una trappola del generatore si osserva,
-non si prevede — e quell'ascolto ha risposto a domande senza correggere niente,
-che è un'altra cosa.
+non si prevede — e le due correzioni che quell'ascolto ha prodotto non sono del
+jazz ma del metodo, quindi stanno nel comune. La casella 11 lo argomenta.
 
 ## 1. Cos'è, e cosa non è
 
@@ -642,15 +643,22 @@ altri numeri sono livelli, e un livello ha lo zero arbitrario. La
 stratificazione è **misurata bene e piccola**: che si senta è un'altra
 affermazione.
 
-⚠️ **E dal 24 agosto 2026 quella finestra non è nemmeno il righello giusto per
-lei.** I 13,0 ms sono un divario **fra due strumenti**, cioè una grandezza
-*relativa*, e il comune ora tiene separate le due domande — «La soglia non è
-una: assoluta e relativa». Del relativo si sa una cosa sola, e sta più in alto
-dei 13 ms: a **25 ms** l'utente ha sentito, e ha attribuito allo strumento
-giusto («Il residuo si sente? Dipende da quale», qui sotto). Fra i 6-12 ms
-delle separazioni piccole e quei 25 non è stato provato niente: **la
-stratificazione misurata resta indecisa**, non è stata sentita e nemmeno
-cercata.
+⚠️ **E dal 24 agosto 2026 quella finestra va maneggiata con due cautele.** La
+prima: i 13,0 ms sono un divario **fra due strumenti**, cioè una grandezza
+*relativa*, mentre la finestra qualifica **uno** spostamento contro la griglia.
+Sono due domande diverse, e il comune ora le tiene separate — «Le due domande
+sono diverse, e la soglia dipende dal tempo». Che la stratificazione si senta
+**non è stato provato**: i 13,0 ms non sono mai stati messi davanti a un
+orecchio, e gli ascolti del 24 agosto (qui sotto) non permettono di dedurlo,
+perché da lì **non esce nessuna soglia**.
+
+La seconda, che è più insidiosa: **i 13,0 ms non sono un numero, sono 2,59 tick
+letti a un tempo.** Sono la conversione fatta col BPM di ciascuna esecuzione — è
+detto qui sopra — e la stessa quantità **scritta** in una song vale altri
+millisecondi: 2,59 tick sono 8,8 ms a 185 BPM, **16,2 a 100**, 27 a 60. Cioè
+**se la stratificazione misurata si senta dipende dal tempo a cui la si scrive**,
+non solo da quanto è grande; e a 185 BPM, il tempo dell'esecuzione da cui il
+template viene, sarebbe la metà.
 
 #### Due grandezze diverse, e la domanda che resta aperta
 
@@ -689,7 +697,7 @@ dipende dalla posizione, e che la scala e il profilo posizionale qui sopra
 sostengono da sole. Non è andata così, e la risposta arrivata il 24 agosto 2026
 non è né un sì né un no: è la sezione qui sotto.
 
-#### Il residuo si sente? Dipende da quale — primo ascolto, 24 agosto 2026
+#### Cosa si è sentito, e cosa non se ne può dedurre — gli ascolti del 24 agosto 2026
 
 **Cosa è stato ascoltato.** Una coppia controllata di due battute a 100 BPM,
 `GROOVE0` e `GROOVE1`: stesso pattern, stesso kit, stesso swing, **identiche
@@ -697,51 +705,134 @@ riga per riga fuori dalle note**. `GROOVE1` porta il template di
 `drummer1/session3/2` posato con `MU.applica_groove()` su quattro voci — ride,
 charleston a pedale, cassa, rullante — e `GROOVE0` lo stesso pattern con le
 velocity mediane della tabella in cima a questa casella, così che la differenza
-fra i due file non fosse dominata dalla dinamica. **Un ascoltatore, tre
-ascolti, metronomo acceso** `[OSS]`. La coppia si rigenera con
+fra i due file non fosse dominata dalla dinamica. **Un ascoltatore, tre ascolti
+col metronomo acceso, più una quarta prova che l'ascoltatore ha fatto da sé**
+`[OSS]`. La coppia si rigenera con
 `tools/genera_groove.py`, che stampa i due file nota per nota e il loro
 confronto. Che il dispositivo **conservi** quelle posizioni è un'altra
 affermazione e sta nella casella 10: qui c'è **solo quello che si sente**.
 
-| ascolto | la grandezza in gioco | esito |
-|---|---|---|
-| il giro intero, `GROOVE0` poi `GROOVE1` | tutto insieme | *«sento e vedo variazioni di velocity tra le note e variazione di timing delle note (dove cadono)»* |
-| sola cassa contro sola linea di ride | **25 ms** di sfasamento fra due voci che nell'altro file cadono insieme | *«la cassa sul levare è anticipata rispetto al ride»* — **sentito, e attribuito allo strumento giusto** |
-| sola riga del pedale contro il click | **18,75 ms** di anticipo di una voce sola sulla griglia, su tutti e quattro i suoi colpi | *«cadono sul click»* — **non sentito** |
+| ascolto | la grandezza, **in tick** | a 100 BPM | esito |
+|---|---|---|---|
+| il giro intero, `GROOVE0` poi `GROOVE1` | tutto insieme | — | *«sento e vedo variazioni di velocity tra le note e variazione di timing delle note (dove cadono)»* |
+| sola cassa contro sola linea di ride | **4 tick** di sfasamento fra due voci che nell'altro file cadono insieme | 25 ms | *«la cassa sul levare è anticipata rispetto al ride»* — **sentito, e attribuito allo strumento giusto** |
+| sola riga del pedale contro il click | **3 tick** di anticipo di una voce sola sulla griglia, su tutti e quattro i suoi colpi | 18,75 ms | *«cadono sul click»* — **l'ascoltatore non lo distingueva**, ed è l'esito che ha poi corretto da sé, qui sotto |
+
+L'ultima colonna è **quello che una persona ha riferito di sentire**, non una
+misura: quanto ci si possa appoggiare sopra è scritto due sezioni più giù, ed è
+meno di quanto sembri.
+
+⚠️ **Le grandezze di questa sezione si dicono in tick, e i millisecondi sono una
+conversione dichiarata a un tempo nominato.** Il residuo che
+`MU.applica_groove()` scrive è **in tick**, cioè una frazione del movimento: un
+tick vale `60000/(BPM × 96)` ms — 6,25 a 100 BPM, 3,38 a 185. Presentare i
+millisecondi come *la* grandezza fa sembrare fisso qualcosa che si muove col
+tempo, ed è esattamente l'errore che la correzione qui sotto ha smascherato.
 
 ⚠️ **Le tre domande erano binarie, e portavano dentro le parole della
 risposta** — «volume o dove cadono?», «prima del ride o insieme?», «sul click o
 appena prima?». Chiedere così suggerisce, e un ascoltatore compiacente
-direbbe sempre di sì. Quel che tiene in piedi queste tre righe è che **non ha
+direbbe sempre di sì. Quel che le rende comunque informative è che **non ha
 detto sempre di sì**: alla stessa forma di domanda ha risposto due volte «c'è»
-e una volta «no», e la volta del «no» è proprio quella con lo spostamento più
-piccolo. Un accordo su tutta la linea non avrebbe distinto niente; questo
-distingue.
+e una volta «no». E la volta del «no» non se l'è tenuta: è andato a rifare
+l'esperimento in altre condizioni, che è il contrario dell'ascoltatore
+compiacente. Che le domande andassero fatte **aperte** resta un difetto di
+questa sessione, ed è registrato nel comune, «Un ascolto non è una misura di
+percezione».
 
-**Quel che ne esce, e nessuna previsione lo conteneva.** Le due grandezze non
-sono la stessa cosa, e in questo ascolto non hanno dato lo stesso esito: **uno
-sfasamento relativo fra due voci si è sentito; un anticipo assoluto, più
-piccolo, no** — e non si è sentito nella condizione più favorevole che esista,
-una riga sola contro un click, dove la velocity è praticamente identica nei due
-file e il confondimento con la dinamica è quasi zero. Dentro una tessitura, dove
-il click non c'è, avrebbe ancora meno appigli.
+##### La correzione, arrivata dall'utente e non richiesta
 
-Per chi compone, la riga da portarsi via: **il valore di un groove template sta
-nei rapporti fra gli strumenti, non nello spostare il tutto rispetto alla
-griglia.** Uno spostamento uguale per tutti sposta il *pezzo*, non il groove.
+L'ascolto 3 sembrava chiuso. L'utente ha rifatto la prova rallentando il tempo,
+e ha riferito:
 
-⚠️ **E qui ci si ferma, perché due punti non fanno una curva.** È **un**
-ascolto, di **una** persona, su **una** coppia di file: `[OSS]`, non `[MIS]`.
-Nessuna soglia è stata cercata. Quel che si sa è solo che **25 ms relativi
-stanno sopra** e **18,75 ms assoluti stanno sotto**; e siccome i due numeri
-sono diversi, da qui **non** segue che la soglia del relativo sia più bassa di
-quella dell'assoluto — **una soglia sola intorno ai 20 ms spiegherebbe tutti e
-due gli esiti**, ed è esattamente la finestra 20-40 ms che il comune dichiara
-`[WEB]`. Per separare le due soglie servirebbe lo stesso numero di millisecondi
-nelle due condizioni, ed è l'esperimento che manca. Che le due domande siano
-diverse e vadano poste separate è invece stabilito, e siccome vale per ogni
-repertorio sta nel comune di [`../MUSICA.md`](../MUSICA.md), «La soglia non è
-una: assoluta e relativa».
+*«però il punto 3 è un problema di percezione umana: difficile percepire
+variazioni di ms. Se rallento molto i BPM sento open HH anticipato rispetto al
+click, ma devo rallentare a 15 BPM.»*
+
+La riga del charleston aperto porta **−3 tick esatti** su tutti e quattro i suoi
+colpi — posizioni 93, 285, 477, 669 — e tre tick valgono `1875/BPM`
+millisecondi:
+
+| BPM | 3 tick valgono | esito |
+|---|---|---|
+| 185, il tempo dell'esecuzione da cui il template viene | 10,1 ms | mai provato |
+| **100**, il tempo della coppia | **18,75 ms** | **non sentito** |
+| 60 | 31,3 ms | mai provato |
+| 47 | 39,9 ms | mai provato |
+| **15** | **125 ms** | **sentito** |
+
+⚠️ **Cosa cambia, ed è molto.** L'ascolto 3 a 100 BPM **non ha misurato
+l'assenza dello scarto**: ha riferito che a quel tempo l'ascoltatore non lo
+distingueva. Lo scarto c'è, sta nel file, sopravvive al salvataggio del
+dispositivo — la casella 10 lo prova, 31 posizioni su 31 — e **si sente quando
+lo si amplifica abbastanza**. «Non si sente» non è una proprietà del template:
+la frase vera è **«a 100 BPM chi ascoltava non lo distingueva»** `[OSS]`.
+
+⚠️ **Ed è caduto un argomento che questa casella aveva scritto il giorno
+stesso.** Diceva che la riga del pedale era stata ascoltata «nella condizione
+più favorevole che esista, una riga sola contro un click». Non era la più
+favorevole: **mancava il tempo**. Un ascolto che vuole sapere se uno scarto è
+percepibile ha **due** manopole, non una — l'isolamento e il tempo — e quel
+giorno la seconda non era stata girata.
+
+**È anche la più solida delle quattro risposte**, e per una ragione che non
+dipende dall'orecchio di nessuno: non chiede di discriminare un millisecondo,
+chiede di sentire la stessa differenza **amplificata 6,7 volte**. Che a 15 BPM
+l'anticipo si senta dimostra che lo scarto è **davvero scritto e davvero
+suonato** — che è quello che il cancello doveva stabilire.
+
+##### Cosa NON se ne ricava: nessuna soglia — 24 agosto 2026
+
+⚠️ È l'ascoltatore stesso a declassare i propri risultati, e ha ragione:
+
+*«Considera che variazioni di pochi ms sono difficili da percepire
+consapevolmente da un umano, soprattutto con un orecchio poco allenato come il
+mio. Non credo che la differenza tra le mie risposte a 2 e 3 sia una "soglia". A
+questo livello di dettaglio tutte le mie valutazioni sono imprecise.»*
+
+Questa frase **è un dato**, e sta qui verbatim come le altre tre. Le ragioni
+sono due, e la seconda è la più forte:
+
+1. **gli ascolti 2 e 3 non sono lo stesso compito percettivo.** Il 2 confronta
+   due voci che suonano insieme; il 3 confronta una voce con un riferimento
+   esterno. Sono due domande diverse fatte all'orecchio, e la sensibilità
+   dell'una non si trasporta all'altra: metterle in fila per dedurne un punto
+   di passaggio **non era valido nemmeno prima** della prova a tempo lento;
+2. **chi ascoltava dichiara la propria imprecisione.** Un ascolto, una persona,
+   **nessuna ripetizione, nessuna prova alla cieca**, e per sua stessa ammissione
+   un orecchio non allenato a discriminare millisecondi. Non toglie valore a ciò
+   che ha **riferito**; toglie valore a ciò che se ne può **dedurre**.
+
+Quindi da qui **non esce nessuna soglia**: né quella dello sfasamento fra due
+voci, né quella dello spostamento contro un riferimento, né una loro differenza.
+E la finestra **20-40 ms** che il comune dichiara `[WEB]` **resta dov'era**:
+questi ascolti non la confermano e non la contraddicono, perché per toccarla
+servirebbe una misura di percezione e questa non lo è.
+
+**Quel che resta stabilito, e non è poco:** che le due domande — sfasamento fra
+voci e spostamento contro un riferimento — sono **diverse e vanno poste
+separate**; e che un residuo scritto **si sente, quando è abbastanza grande**.
+**Quanto grande** è precisamente ciò che non è stato stabilito, e non lo
+stabilirà un ascolto in più: servirebbe un protocollo diverso — **ripetizioni,
+ordine casuale, ascolto alla cieca** — cioè un esperimento di psicoacustica, non
+un'altra sessione al Deluge. È scritto qui come **ciò che manca**, non come una
+lacuna da colmare in fretta: il progetto può comporre benissimo senza saperlo,
+purché non finga di saperlo. Le due regole generali che ne escono stanno nel
+comune di [`../MUSICA.md`](../MUSICA.md) — «Un ascolto non è una misura di
+percezione» nel metodo, e «Le due domande sono diverse, e la soglia dipende dal
+tempo» nel mestiere.
+
+⚠️ **E niente di tutto questo tocca l'esito che si vede.** Che il dispositivo
+conservi le 31 posizioni su 31 è **meccanico**, si legge nei byte, e sta nella
+casella 10: le riserve di questa sezione riguardano l'orecchio, non il file.
+
+`[IPO]` **E una cosa che si ragiona, non che si è ascoltata.** Dentro un pezzo
+il click non c'è: il riferimento di una voce sono **le altre voci**. Uno
+spostamento «assoluto» di una riga sola, in una tessitura, torna quindi a essere
+una domanda *relativa* — contro gli altri strumenti — e l'assoluto puro esiste
+solo contro un metronomo, o contro un pulso già in testa a chi ascolta. Se è
+così, la grandezza che conta per un groove template è quella fra le voci; ma è
+un ragionamento, e finché resta tale porta il suo marcatore.
 
 **Le previsioni, e come sono andate.** Erano scritte **prima** dell'ascolto, nel
 rapporto con cui la coppia è stata costruita, quindi non sono riscrivibili
@@ -755,9 +846,11 @@ adesso:
   quelle da 25 ms cadono su colpi isolati: i numeri erano giusti, la conclusione
   che ne aveva tratto no;
 - previsione 3 — la riga del pedale, data per **incerta**, con un «forse» come
-  esito atteso — si è risolta in un **no netto**: *«cadono sul click»*. Ed è,
-  come il rapporto stesso prevedeva, il risultato più informativo dei tre,
-  perché lì il timing è quasi l'unica cosa che cambia;
+  esito atteso — **a 100 BPM** si è risolta in un **no netto**: *«cadono sul
+  click»*. Il rapporto la chiamava «il risultato più informativo dei tre», e su
+  una cosa aveva ragione: lì il timing è quasi l'unica cosa che cambia. Ma
+  **informativo su che cosa** era sbagliato — non sul template, sul **tempo**;
+  e a scoprirlo non è stato chi aveva previsto;
 - previsione 1 — la differenza dinamica si sente — **confermata**, e non è una
   notizia: serviva a sapere che metà della risposta dell'utente non riguardava
   la domanda;
@@ -767,14 +860,30 @@ adesso:
 **Che una previsione sia stata smentita vale più che averla azzeccata**, e va
 letto così: se la 2 fosse andata come previsto, questa casella oggi
 concluderebbe che `MU.applica_groove()` vale per metà — la velocity — e che la
-posizione è rappresentabile e non percepibile. Vale invece per intero, a
-condizione che quel che scrive **separi due voci** invece di spostarle insieme.
+posizione è rappresentabile e non percepibile. Non è andata così: la posizione
+si sente, quando è grande abbastanza, e **quanto grande dipende anche dal tempo
+a cui la si scrive**.
+
+E vale **due volte in più**, sulle conclusioni che questa sezione aveva scritto
+il giorno stesso: le ha corrette **l'utente**, prima rifacendo un esperimento
+che nessuno gli aveva chiesto di rifare, poi dicendo che le sue stesse risposte
+non reggono il peso che ci era stato messo sopra. Le versioni stanno qui tutte
+apposta — prima *«non si sente»*, poi *«a 100 BPM non lo distinguevo»*, infine
+*«a questo livello di dettaglio tutte le mie valutazioni sono imprecise»* —
+perché in questo progetto le correzioni venute dall'ascolto si conservano con la
+data, non si sostituiscono in silenzio.
 
 **Cosa resta aperto**, perché il passo dopo è già nominato:
 
-- **la soglia del relativo.** Fra i 6-12 ms delle separazioni sui colpi forti e
-  i 25 ms sentiti non è stato provato niente, e i **13,0 ms** della
-  stratificazione misurata cadono proprio lì in mezzo;
+- **quanto grande debba essere un residuo perché si senta.** Non lo sappiamo, e
+  **non lo chiuderà un ascolto in più**: servirebbe ripetere, mescolare
+  l'ordine, ascoltare alla cieca. Il tempo resta l'asse comodo per amplificare —
+  a 60 BPM 3 tick valgono 31,3 ms, a 47 ne valgono 39,9, cioè i due bordi della
+  finestra del comune — ma la manopola da girare per prima è il **protocollo**,
+  non il metronomo;
+- **se la stratificazione misurata si senta.** I **13,0 ms** del divario
+  ride/charleston non sono mai stati messi davanti a un orecchio, e per quanto
+  detto qui sopra non basterebbe metterceli una volta;
 - **la stratificazione non è mai entrata in gioco.** Il template ascoltato è
   `drummer1/session3/2`, che di stratificazione ne ha **+0,08 tick** — il caso
   estremo minimo della fila, come questa casella già dichiara più sopra: su
@@ -1067,8 +1176,10 @@ indietro, e `MU.origine()` legge ovunque proprio per questo.
 ⚠️ **Quello che questa sezione NON dice**, e vale la pena separarlo:
 
 - **è quello che si vede, non quello che si sente.** Che quelle posizioni
-  conservate si sentano è un'altra affermazione, sta nella casella 6, e la sua
-  risposta non è la stessa;
+  conservate si sentano — e da quanto grandi in poi — è un'altra affermazione e
+  sta nella casella 6, che su di essa è molto più cauta. Questa qui è
+  **meccanica**: si legge nei byte di due file, e nessuna riserva sull'orecchio
+  di chi ascolta la tocca;
 - **non riguarda il quantize/humanize.** `AUDITION` + `TEMPO` riscrive le
   posizioni di una riga ed è tuttora `[MAN]` e mai provato: durante questo giro
   è stato deliberatamente **non toccato**. Il comune, «Il quantize/humanize del
@@ -1101,15 +1212,29 @@ riempie la casella 11.
 
 ## 11. Trappole del generatore
 
-**Vuota, e dal 24 agosto 2026 per una ragione più stretta di prima: l'ascolto
-c'è stato, e non ha corretto niente.** Quel giorno l'utente ha ascoltato sul
-dispositivo la coppia `GROOVE0`/`GROOVE1` e ha **risposto a tre domande**
-(casella 6): tre affermazioni su cosa si sente, non una correzione. Una trappola
-è un «questo non va, cambia X» che arriva da chi ascolta — e non ne è arrivato
-nessuno, anche perché quella coppia non era un pezzo da giudicare ma uno
-strumento di misura, costruito per rispondere a una domanda sola. Questa casella
-si riempie al primo **ascolto corretto** dall'utente, come è successo al dub, e
-quel momento non è ancora venuto.
+**Vuota, e il 24 agosto 2026 una correzione dall'ascolto è arrivata davvero —
+ma non è di questo repertorio, e sta nel comune.** Vale la pena scrivere perché,
+perché è la prima volta che questa casella ha dovuto decidere.
+
+Quel giorno l'utente ha ascoltato la coppia `GROOVE0`/`GROOVE1` sul dispositivo,
+ha risposto a tre domande, e poi **ha corretto due volte**: rifacendo di sua
+iniziativa una prova a tempo lentissimo, e **declassando i propri stessi
+risultati** («a questo livello di dettaglio tutte le mie valutazioni sono
+imprecise»). Sono correzioni vere, e sono nella casella 6 con la data.
+
+Ma non sono trappole **di questo repertorio**. Riguardano *quanto peso dare
+all'orecchio come strumento di misura* e *a che tempo si ascolta uno scarto* —
+e l'orecchio è lo stesso quando ascolta dub, e un tick è una frazione di
+movimento in qualunque genere. Il criterio dello schema è preciso: qui sta ciò
+che **non si trasferisce**, e queste due si trasferiscono per intero. Stanno
+quindi nel comune di [`../MUSICA.md`](../MUSICA.md) — «Un ascolto non è una
+misura di percezione» e «Le due domande sono diverse, e la soglia dipende dal
+tempo» — dove valgono per tutti invece che per il jazz soltanto.
+
+E la coppia ascoltata, del resto, non era un pezzo da giudicare: era uno
+strumento di misura costruito per rispondere a una domanda sola. Questa casella
+si riempie al primo **pezzo jazz corretto dall'utente**, come è successo al dub,
+e quel momento non è ancora venuto.
 
 *Nel frattempo, per comporre:* qui non c'è dove andare a prendere niente, e
 non è una lacuna da colmare in fretta — **una trappola si osserva**, e

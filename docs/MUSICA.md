@@ -260,6 +260,47 @@ Resta regolabile: …
 le compete — la 11 della scheda se è una trappola di quel repertorio, il comune
 se vale per tutti — con la data)*
 
+#### Un ascolto non è una misura di percezione — 24 agosto 2026
+
+Tutto questo progetto poggia su un'idea giusta: **l'utente ascolta, e la sua
+correzione vale più di qualunque ragionamento.** Il 24 agosto 2026 quello
+strumento è stato usato per la prima volta per rispondere a una domanda
+**quantitativa** — di quanti millisecondi debba spostarsi una nota perché si
+senta — ed è l'ascoltatore stesso ad aver messo il limite:
+
+*«Considera che variazioni di pochi ms sono difficili da percepire
+consapevolmente da un umano, soprattutto con un orecchio poco allenato come il
+mio. […] A questo livello di dettaglio tutte le mie valutazioni sono
+imprecise.»*
+
+Non è modestia, è la descrizione corretta dello strumento. Tre regole ne
+discendono, e valgono per ogni repertorio:
+
+1. **quel che un ascoltatore riferisce è `[OSS]` su quell'ascoltatore in quella
+   sessione.** È fortissimo per *«funziona / non funziona»*, *«c'è / non c'è»*,
+   *«è sbagliato»* — che è ciò per cui il ciclo di revisione esiste. È debole per
+   *«quanto»*, e una risposta sola non diventa una soglia per il fatto di essere
+   stata data con sicurezza;
+2. **prima di concludere «non si sente», si amplifica.** La stessa differenza a
+   un tempo molto più lento è un'altra cosa: un «non si sente» è **datato alle
+   condizioni in cui si è ascoltato**, non è una proprietà del materiale. Un
+   ascolto che vuole sapere se uno scarto è percepibile ha **due manopole** —
+   l'isolamento della voce e il tempo — e girarne una sola dà una risposta che
+   sembra definitiva e non lo è;
+3. **e per misurare davvero una soglia servono ripetizioni, ordine casuale e
+   ascolto alla cieca.** È psicoacustica, non una sessione in più al Deluge: se
+   il numero serve, si cambia esperimento; se non serve, si scrive che non c'è.
+
+⚠️ **E le domande vanno fatte aperte.** Le tre del 24 agosto erano binarie e
+contenevano le parole della risposta — «volume o dove cadono?», «prima o
+insieme?». Quella volta ha retto perché l'ascoltatore non ha detto sempre di sì,
+e anzi è tornato a smentirsi da solo; ma è stata fortuna di formulazione, non
+una buona formulazione.
+
+Sta qui, nel metodo, e non nella casella 11 di una scheda, perché non riguarda
+un repertorio: riguarda **quanto peso dare all'orecchio come strumento di
+misura**, e l'orecchio è lo stesso quando ascolta dub o jazz.
+
 #### Si parte dal primo livello della gerarchia — correzione del 16 agosto 2026
 
 **16 agosto 2026 — «leggi anche documentazione», «leggi anche docs
@@ -372,42 +413,41 @@ per la prima volta — qui sotto — e non su un basso ma su una batteria. Quel 
 si è sentito è la **separazione fra due voci**; che uno strato spostato *suoni*
 come pocket invece che come errore resta non ascoltato.
 
-##### La soglia non è una: assoluta e relativa — primo ascolto, 24 agosto 2026
+##### Le due domande sono diverse, e la soglia dipende dal tempo — 24 agosto 2026
 
-⚠️ **La finestra 20-40 ms qui sopra qualifica UNO spostamento contro la
-griglia** — una parte che arriva prima o dopo il tempo, cioè una grandezza
-**assoluta**. Quanto due voci che suonano *insieme* debbano separarsi per essere
-sentite separate è **un'altra domanda**, e quella finestra non la risponde: sono
-due grandezze diverse, e vanno poste separate anche quando si misurano nella
-stessa unità.
+⚠️ **Uno scarto scritto è in tick; la finestra dell'udibile è in
+millisecondi.** Un tick è una frazione del movimento — `60000/(BPM × 96)` ms —
+quindi **la stessa scrittura vale millisecondi diversi secondo il tempo a cui la
+si suona**, e la sua udibilità con essa. Chi posa un groove template senza
+guardare il BPM sta decidendo, senza saperlo, quanto grande sarà il proprio
+lavoro in millisecondi: lo stesso residuo che a tempo lento si sente, a tempo
+veloce ne vale pochi e può non arrivare a nessuno. **I residui si dicono in
+tick**, e i millisecondi si scrivono accanto **con il tempo che li produce**,
+mai da soli.
 
-Il primo ascolto che questo progetto abbia mai fatto di note scritte fuori
-griglia — **un ascoltatore, un giro di due battute, metronomo acceso** `[OSS]` —
-dice questo e nient'altro:
+⚠️ **E le domande sono due, non una.** La finestra 20-40 ms qui sopra qualifica
+**uno spostamento contro la griglia** — una parte che arriva prima o dopo il
+tempo, cioè una grandezza **assoluta**. Quanto due voci che suonano *insieme*
+debbano separarsi per essere sentite separate è **un'altra domanda**: sono due
+compiti percettivi diversi, la sensibilità dell'uno non si trasporta all'altro,
+e quella finestra risponde solo al primo.
 
-- uno **sfasamento relativo dentro la finestra**, fra due voci che nell'altro
-  file cadono insieme, è stato **sentito**, e attribuito allo strumento giusto;
-- un **anticipo assoluto poco sotto la finestra**, di una voce sola contro il
-  click, **non** è stato sentito.
+Il primo ascolto di questo progetto su note scritte fuori griglia — **un
+ascoltatore, un giro di due battute, metronomo acceso**, 24 agosto 2026 `[OSS]`
+— ha stabilito **due cose**, ed è utile scriverle piccole: che le due domande
+qui sopra vanno **poste separate**, e che **uno scarto scritto si sente, quando
+è abbastanza grande** — lo stesso spostamento di 3 tick, non distinto al tempo a
+cui era scritto, è stato sentito rallentando il tempo di quasi sette volte.
 
-I due numeri, la coppia di file da cui vengono e le cautele che si portano
-dietro stanno nella **casella 6 di [`repertori/jazz.md`](repertori/jazz.md)**,
-che è dove sono stati osservati: qui la distinzione, là il caso.
+⚠️ **Quanto grande debba essere, invece, NON è stato stabilito, e non è un
+dettaglio mancante: è tutto il resto.** Da quegli ascolti non esce nessuna
+soglia — il perché sta nel metodo, «Un ascolto non è una misura di percezione» —
+e la finestra 20-40 ms qui sopra **resta esattamente dov'era**: non è stata
+confermata e non è stata contraddetta.
 
-⚠️ **E si legga per quel poco che è.** Due esiti non sono due soglie: presi
-insieme sono **compatibili con la finestra stessa** applicata a tutte e due le
-grandezze — quello dentro si sente, quello sotto no. Quindi da qui **non** segue
-che il relativo si senta prima dell'assoluto; segue che la finestra `[WEB]`, al
-suo primo contatto con un orecchio, non è stata smentita in nessuno dei due
-versi. Per separare davvero le due soglie servirebbe lo **stesso** numero di
-millisecondi nelle due condizioni, ed è l'esperimento che manca.
-
-**La conseguenza pratica invece regge, e non dipende dalle soglie:** il valore
-di un groove template sta nei **rapporti fra gli strumenti**, non nello spostare
-il tutto rispetto alla griglia. Uno spostamento uguale per tutti sposta il
-*pezzo*, non il groove — e nell'ascolto qui sopra è stato provato nella
-condizione più favorevole che esista, una riga sola contro un click, dove un
-ascolto normale non ha neppure il riferimento.
+I numeri, i tempi, la coppia di file e tutte le cautele stanno nella **casella 6
+di [`repertori/jazz.md`](repertori/jazz.md)**, che è dove sono stati osservati:
+qui la distinzione, là il caso.
 
 #### L'arco di densità
 
@@ -676,6 +716,47 @@ portasse anche lo swing lo farebbe applicare **due volte** — una dal firmware 
 una dalle posizioni scritte — e il risultato non sarebbe «più swingato», sarebbe
 sbagliato. Quale valore di swing, e su quale figura, sta nella casella 10 della
 scheda; quanto è grande il residuo che il template scrive, nella casella 6.
+
+##### Togliere lo swing e rimetterlo torna a zero — ma contro sé stesso — 24 agosto 2026
+
+La separazione qui sopra ha un punto in cui è facile sbagliare, ed è
+l'**astrazione**: `GR.profilo()` toglie lo swing dalle posizioni misurate
+(`_senza_swing()`), e `S.set_swing()` lo rimette a suonare. La domanda giusta è
+se il giro sia **neutro** — un pattern scritto con lo swing già dentro e swing 0
+nella song, e lo stesso pattern col solo residuo più `set_swing()`, dovrebbero
+suonare uguali. Se non lo fossero, tanto varrebbe lasciare lo swing a 0 quando
+si usa un template.
+
+L'aritmetica è stata rifatta su `drummer1/session3/2` — che qui fa da materiale
+di prova, e il risultato non è di quel repertorio — togliendo lo swing e
+rimettendolo con la formula del firmware che sta nella docstring di
+`set_swing()`, quella da cui viene anche `display = 100 × BUR / (BUR + 1)`
+`[OSS]`:
+
+| | scarto medio | massimo |
+|---|---|---|
+| col levare **esatto** (0,5985) | **0,0000 tick** | **0,0000 tick** |
+| col levare **arrotondato al display intero** (60) | 0,0526 tick | **0,1433 tick** |
+
+Cioè la catena è **esattamente invertibile**, e l'unica perdita è
+l'arrotondamento del display a un intero: **meno di un quinto di tick**, che a
+100 BPM è meno di un millisecondo. Nessuna ragione aritmetica, quindi, per
+lasciare lo swing a 0 quando si posa un template.
+
+⚠️ **E qui la cautela, che è tutto il valore di questa nota: NON dimostra che
+l'astrazione sia giusta. Dimostra che è auto-consistente.** `_senza_swing()` e
+la formula usata per rimettere lo swing **sono la stessa formula**: si invertono
+per costruzione, e tornerebbero a zero anche se fossero tutt'e due sbagliate.
+Quel che resta non verificato è se **il firmware faccia davvero quella cosa** —
+e l'ignoranza è già dichiarata dove va, in `song.SWING_SCARTO_SORGENTE`: i
+«swung tick» del sorgente e i tick delle posizioni di nota differiscono di un
+**fattore 2**, e il punto in cui i due si convertono **non è stato trovato**.
+
+**L'esperimento che lo deciderebbe** è una coppia controllata come quella del
+cancello: stesso pattern con lo swing **scritto dentro** e swing 0 nella song,
+contro residuo più `set_swing()`, ascoltati in fila. È una domanda da
+*«uguali o diversi»*, cioè esattamente quel che un orecchio fa bene — vedi «Un
+ascolto non è una misura di percezione», che dice anche a cosa non serve.
 
 #### Il quantize/humanize del dispositivo cancella il groove template
 
