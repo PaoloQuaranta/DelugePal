@@ -66,7 +66,7 @@ bubble non c'è altro che questa riga e il pattern della casella 6.
 
 ## 3. Tempo
 
-Tempo: **50-100 BPM**, con 70-78 al centro del roots. Quindi 70 BPM non è
+Tempo: **50-100 BPM**, con 70-78 al centro del roots. [WEB] Quindi 70 BPM non è
 "lento per il dub", è il posto giusto.
 
 **E cosa dice il corpus** — che è la domanda dei bordi, e ha due risposte
