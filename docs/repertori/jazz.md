@@ -3,16 +3,22 @@
 > Una scheda dello schema neutro. Lo schema, il materiale comune a tutti i
 > repertori e l'indice stanno in [`../MUSICA.md`](../MUSICA.md).
 
-Da leggere prima del resto: **nessun pezzo jazz è mai stato generato.**
+Da leggere prima del resto: **nessun pezzo jazz è mai stato generato.** Il
+24 agosto 2026 è uscita da un Deluge la prima cosa jazz che qualcuno abbia
+ascoltato, ed è **una clip di batteria di due battute** costruita per rispondere
+a una domanda sola — casella 6, «Il residuo si sente? Dipende da quale». Non è
+un pezzo, e del suono jazz sul Deluge continua a non dire niente.
+
 Quello che c'è in questa scheda o è misurato su un corpus — lo swing nella
 casella 4, la dinamica e i fill nelle caselle 6 e 9 — o è già in libreria (la
-7); **niente è passato dall'ascolto dell'utente**, perché non c'è ancora niente
-da ascoltare. Sul dispositivo è stato verificato **il solo meccanismo dello
-swing** (casella 10) e nient'altro: del groove template, in particolare, non è
-stata provata neppure una nota. È la ragione per
+7); dall'**ascolto dell'utente** è passata **una cosa sola**, ed è quella clip.
+Sul dispositivo sono verificati **due meccanismi** e nient'altro: lo swing, e —
+dal 24 agosto — che il dispositivo **conservi le posizioni fuori griglia** che
+il groove template scrive (casella 10). È la ragione per
 cui cinque caselle su undici sono ancora vuote, e per cui la 11 è vuota **per
 costruzione** e non per trascuratezza: una trappola del generatore si osserva,
-non si prevede.
+non si prevede — e quell'ascolto ha risposto a domande senza correggere niente,
+che è un'altra cosa.
 
 ## 1. Cos'è, e cosa non è
 
@@ -633,9 +639,18 @@ dei tre, in millisecondi vale **13,0 ms** — cioè **sotto** la finestra di 20-
 ms che il comune dichiara udibile. È l'unica grandezza di questa sezione che
 con quella finestra si possa confrontare, per la ragione detta più in alto: gli
 altri numeri sono livelli, e un livello ha lo zero arbitrario. La
-stratificazione è **misurata bene e piccola**: che si senta è
-un'altra affermazione, e non è ancora stata fatta da nessuno. Decide il
-cancello sul dispositivo.
+stratificazione è **misurata bene e piccola**: che si senta è un'altra
+affermazione.
+
+⚠️ **E dal 24 agosto 2026 quella finestra non è nemmeno il righello giusto per
+lei.** I 13,0 ms sono un divario **fra due strumenti**, cioè una grandezza
+*relativa*, e il comune ora tiene separate le due domande — «La soglia non è
+una: assoluta e relativa». Del relativo si sa una cosa sola, e sta più in alto
+dei 13 ms: a **25 ms** l'utente ha sentito, e ha attribuito allo strumento
+giusto («Il residuo si sente? Dipende da quale», qui sotto). Fra i 6-12 ms
+delle separazioni piccole e quei 25 non è stato provato niente: **la
+stratificazione misurata resta indecisa**, non è stata sentita e nemmeno
+cercata.
 
 #### Due grandezze diverse, e la domanda che resta aperta
 
@@ -664,15 +679,113 @@ fosse una regola. Chi costruisce un template farebbe bene a **guardare i colpi
 prima dello scarto** — `GR.profilo()` li riferisce — perché `applica_groove()`
 non distingue fra un passo da 172 colpi e uno da 1.
 
-**E se non si sentisse affatto?** È la domanda che questa casella non può
+**E se non si sentisse affatto?** Era la domanda che questa casella non poteva
 chiudere. I 39,9 ms del colpo estremo sono nella finestra udibile, ma poggiano
 su un colpo solo; la stratificazione che è **misurata bene** vale 13 ms, cioè
-**sotto** quella finestra. «Rappresentabile» non è «percepibile», e nessuno ha
-ancora ascoltato un pezzo jazz uscire dal Deluge. **Se all'ascolto il residuo
-non si distinguesse**, il valore di `MU.applica_groove()` starebbe tutto nella
-**velocity** — la metà che non dipende dalla posizione, e che la scala e il
-profilo posizionale qui sopra sostengono da sole. La risposta sta nel cancello
-sul dispositivo, e va scritta qui con la data quando arriva.
+**sotto** quella finestra. «Rappresentabile» non è «percepibile». **Se
+all'ascolto il residuo non si fosse distinto**, il valore di
+`MU.applica_groove()` sarebbe stato tutto nella **velocity** — la metà che non
+dipende dalla posizione, e che la scala e il profilo posizionale qui sopra
+sostengono da sole. Non è andata così, e la risposta arrivata il 24 agosto 2026
+non è né un sì né un no: è la sezione qui sotto.
+
+#### Il residuo si sente? Dipende da quale — primo ascolto, 24 agosto 2026
+
+**Cosa è stato ascoltato.** Una coppia controllata di due battute a 100 BPM,
+`GROOVE0` e `GROOVE1`: stesso pattern, stesso kit, stesso swing, **identiche
+riga per riga fuori dalle note**. `GROOVE1` porta il template di
+`drummer1/session3/2` posato con `MU.applica_groove()` su quattro voci — ride,
+charleston a pedale, cassa, rullante — e `GROOVE0` lo stesso pattern con le
+velocity mediane della tabella in cima a questa casella, così che la differenza
+fra i due file non fosse dominata dalla dinamica. **Un ascoltatore, tre
+ascolti, metronomo acceso** `[OSS]`. La coppia si rigenera con
+`tools/genera_groove.py`, che stampa i due file nota per nota e il loro
+confronto. Che il dispositivo **conservi** quelle posizioni è un'altra
+affermazione e sta nella casella 10: qui c'è **solo quello che si sente**.
+
+| ascolto | la grandezza in gioco | esito |
+|---|---|---|
+| il giro intero, `GROOVE0` poi `GROOVE1` | tutto insieme | *«sento e vedo variazioni di velocity tra le note e variazione di timing delle note (dove cadono)»* |
+| sola cassa contro sola linea di ride | **25 ms** di sfasamento fra due voci che nell'altro file cadono insieme | *«la cassa sul levare è anticipata rispetto al ride»* — **sentito, e attribuito allo strumento giusto** |
+| sola riga del pedale contro il click | **18,75 ms** di anticipo di una voce sola sulla griglia, su tutti e quattro i suoi colpi | *«cadono sul click»* — **non sentito** |
+
+⚠️ **Le tre domande erano binarie, e portavano dentro le parole della
+risposta** — «volume o dove cadono?», «prima del ride o insieme?», «sul click o
+appena prima?». Chiedere così suggerisce, e un ascoltatore compiacente
+direbbe sempre di sì. Quel che tiene in piedi queste tre righe è che **non ha
+detto sempre di sì**: alla stessa forma di domanda ha risposto due volte «c'è»
+e una volta «no», e la volta del «no» è proprio quella con lo spostamento più
+piccolo. Un accordo su tutta la linea non avrebbe distinto niente; questo
+distingue.
+
+**Quel che ne esce, e nessuna previsione lo conteneva.** Le due grandezze non
+sono la stessa cosa, e in questo ascolto non hanno dato lo stesso esito: **uno
+sfasamento relativo fra due voci si è sentito; un anticipo assoluto, più
+piccolo, no** — e non si è sentito nella condizione più favorevole che esista,
+una riga sola contro un click, dove la velocity è praticamente identica nei due
+file e il confondimento con la dinamica è quasi zero. Dentro una tessitura, dove
+il click non c'è, avrebbe ancora meno appigli.
+
+Per chi compone, la riga da portarsi via: **il valore di un groove template sta
+nei rapporti fra gli strumenti, non nello spostare il tutto rispetto alla
+griglia.** Uno spostamento uguale per tutti sposta il *pezzo*, non il groove.
+
+⚠️ **E qui ci si ferma, perché due punti non fanno una curva.** È **un**
+ascolto, di **una** persona, su **una** coppia di file: `[OSS]`, non `[MIS]`.
+Nessuna soglia è stata cercata. Quel che si sa è solo che **25 ms relativi
+stanno sopra** e **18,75 ms assoluti stanno sotto**; e siccome i due numeri
+sono diversi, da qui **non** segue che la soglia del relativo sia più bassa di
+quella dell'assoluto — **una soglia sola intorno ai 20 ms spiegherebbe tutti e
+due gli esiti**, ed è esattamente la finestra 20-40 ms che il comune dichiara
+`[WEB]`. Per separare le due soglie servirebbe lo stesso numero di millisecondi
+nelle due condizioni, ed è l'esperimento che manca. Che le due domande siano
+diverse e vadano poste separate è invece stabilito, e siccome vale per ogni
+repertorio sta nel comune di [`../MUSICA.md`](../MUSICA.md), «La soglia non è
+una: assoluta e relativa».
+
+**Le previsioni, e come sono andate.** Erano scritte **prima** dell'ascolto, nel
+rapporto con cui la coppia è stata costruita, quindi non sono riscrivibili
+adesso:
+
+- previsione 2 — *«il residuo di posizione, sul giro intero, non si
+  distinguerà»* — **smentita**, ed è la cosa più utile di tutto l'esperimento.
+  La domanda offriva un'alternativa — volume **o** posizione — e l'utente ha
+  nominato **tutt'e due**, che è più di quanto la domanda gli desse. Chi aveva
+  previsto sapeva che le separazioni sui colpi forti valgono 6-12 ms e che
+  quelle da 25 ms cadono su colpi isolati: i numeri erano giusti, la conclusione
+  che ne aveva tratto no;
+- previsione 3 — la riga del pedale, data per **incerta**, con un «forse» come
+  esito atteso — si è risolta in un **no netto**: *«cadono sul click»*. Ed è,
+  come il rapporto stesso prevedeva, il risultato più informativo dei tre,
+  perché lì il timing è quasi l'unica cosa che cambia;
+- previsione 1 — la differenza dinamica si sente — **confermata**, e non è una
+  notizia: serviva a sapere che metà della risposta dell'utente non riguardava
+  la domanda;
+- la previsione 4 riguarda quello che si **vede**, non quello che si sente, e
+  sta nella casella 10.
+
+**Che una previsione sia stata smentita vale più che averla azzeccata**, e va
+letto così: se la 2 fosse andata come previsto, questa casella oggi
+concluderebbe che `MU.applica_groove()` vale per metà — la velocity — e che la
+posizione è rappresentabile e non percepibile. Vale invece per intero, a
+condizione che quel che scrive **separi due voci** invece di spostarle insieme.
+
+**Cosa resta aperto**, perché il passo dopo è già nominato:
+
+- **la soglia del relativo.** Fra i 6-12 ms delle separazioni sui colpi forti e
+  i 25 ms sentiti non è stato provato niente, e i **13,0 ms** della
+  stratificazione misurata cadono proprio lì in mezzo;
+- **la stratificazione non è mai entrata in gioco.** Il template ascoltato è
+  `drummer1/session3/2`, che di stratificazione ne ha **+0,08 tick** — il caso
+  estremo minimo della fila, come questa casella già dichiara più sopra: su
+  quel file la stratificazione non c'è, quindi l'ascolto non poteva né
+  confermarla né smentirla. La coppia da fare adesso è su
+  **`drummer10/session1/1`** (`jazz/swing`, 124 BPM, 164 s, BUR 1,82): sui passi
+  4 e 12 il suo charleston a pedale sta a **−5,51 e −5,82** tick e il ride a
+  **−1,48 e −2,18**, cioè **4,03 e 3,64 tick di divario** sui due passi più
+  colpiti di ogni battuta, contro i +0,29 della stessa misura su
+  `drummer1/session3/2` `[OSS]` su due esecuzioni. E lì il ride **è** `ride`
+  (219 colpi, spang-a-lang su 0-4-6-8-12-14): niente trappola del nome GM.
 
 ### Lo swing non sta in questa casella
 
@@ -849,12 +962,16 @@ usano da subito.
 
 ## 10. Sul Deluge
 
-**Parziale.** C'è **quanto** swing e **su quale figura**. Verificato sul
-dispositivo è il **meccanismo**, e in tutto il jazz è l'unica cosa che lo sia:
-che il display sia la percentuale di posizione del levare, e che
-`swingInterval` scelga quale figura viene swingata. Il **62** no: è aritmetica
-su quel meccanismo a partire dal BUR misurato sul corpus Weimar, e nessuno
-l'ha ancora ascoltato uscire dal Deluge. Serve
+**Parziale.** C'è **quanto** swing e **su quale figura**. Verificati sul
+dispositivo sono **due meccanismi**, e in tutto il jazz sono le sole cose che lo
+siano: che il display sia la percentuale di posizione del levare e che
+`swingInterval` scelga quale figura viene swingata, e — dal 24 agosto 2026 —
+che il dispositivo **conservi le posizioni fuori griglia** che il groove
+template scrive, «Il Deluge non riquantizza», qui sotto. Il **62** no: è
+aritmetica su quel meccanismo a partire dal BUR misurato sul corpus Weimar, e
+nessuno l'ha ancora **giudicato** — è uscito da un Deluge il 24 agosto 2026, ma
+su di lui non è stata fatta nessuna domanda, e in fondo a questa casella c'è
+perché. Serve
 `S.set_swing(doc, 62, figura='1/8')`, perché il default del firmware swinga le
 semicrome e su una linea di crome non muove niente. Come funziona la scala — la
 formula fra display e BUR, e quale `swingInterval` nomina quale figura — sta nel
@@ -921,30 +1038,78 @@ feel. È **osservato nei file e non verificato sul dispositivo**: resta un punto
 aperto in [`../../HANDOFF.md`](../../HANDOFF.md) §7, dove sta anche cosa
 succede quando riga e clip non sono in rapporto intero.
 
-Manca tutto il resto: nessun pezzo jazz è mai stato generato, quindi del
-suono, dei kit e dell'arrangiamento jazz sul Deluge non si sa niente.
+### Il Deluge non riquantizza — VERIFICATO sul dispositivo il 24 agosto 2026
 
-⚠️ **E del groove template, sul dispositivo, non è stato verificato niente.**
-Il meccanismo dello *swing* sì — è quello che l'apertura di questa casella
-dichiara verificato — ma il template è un'altra cosa: **che il Deluge conservi
-le posizioni fuori griglia** invece di riquantizzarle non è ancora stato
-provato, e finché non lo è, lo scarto in tick che `MU.applica_groove()` scrive
-è una scommessa. La velocity, che non dipende dalla posizione, non corre questo
-rischio.
+Era la scommessa su cui poggiava tutto il template: **che il dispositivo tenga
+le posizioni fuori griglia invece di riportarle sulla griglia**. Adesso non lo è
+più, ed è la prima volta che questo progetto scrive note fuori griglia e le
+rivede tornare indietro.
+
+**Il giro, e cosa dice.** `GROOVE1` — la song della coppia della casella 6, 31
+note su quattro righe, con scarti da **−6 a +2 tick** rispetto ai passi — è
+stata caricata sul Deluge, **nessuna nota è stata toccata**, ed è stata
+risalvata dal dispositivo. Riscaricata e confrontata nota per nota con quella
+scritta: **31 posizioni su 31 conservate, nessuna spostata**, e i residui sono
+tutti ancora lì `[OSS]`.
+
+Il file risalvato è **36 545 byte** contro i 35 226 scritti — il firmware
+aggiunge roba sua — e conserva **entrambi** gli attributi
+`noteDataWithSplitProb` e `noteDataWithLift`, cioè non collassa le due
+codifiche in una `[OSS]`.
+
+⚠️ **Il sub-slot: il Deluge l'ha salvata come `GROOVE1 2`.** Nome col
+**numero dopo uno spazio**, nella stessa cartella `/SONGS/DelugePal/` — il
+dispositivo **non sovrascrive**, si fa un posto suo accanto. Chi risale un giro
+del genere deve quindi **leggere il nome sul display** prima di riscaricare: il
+percorso scritto con `MU.destinazione()` non è quello da cui la song torna
+indietro, e `MU.origine()` legge ovunque proprio per questo.
+
+⚠️ **Quello che questa sezione NON dice**, e vale la pena separarlo:
+
+- **è quello che si vede, non quello che si sente.** Che quelle posizioni
+  conservate si sentano è un'altra affermazione, sta nella casella 6, e la sua
+  risposta non è la stessa;
+- **non riguarda il quantize/humanize.** `AUDITION` + `TEMPO` riscrive le
+  posizioni di una riga ed è tuttora `[MAN]` e mai provato: durante questo giro
+  è stato deliberatamente **non toccato**. Il comune, «Il quantize/humanize del
+  dispositivo cancella il groove template»;
+- **è un giro solo, su una song sola.** `[OSS]`, non una legge del firmware —
+  ma è l'unico giro che serviva prima di scrivere altri template.
+
+*(Era una previsione scritta **prima** del giro e data per `[IPO]`: «il
+dispositivo tiene le posizioni in tick e la quantizzazione è un gesto
+esplicito, non qualcosa che accada aprendo o salvando». **Confermata.** Le
+altre tre previsioni riguardavano l'ascolto, e sono nella casella 6: due di
+quelle non sono andate così.)*
+
+Manca tutto il resto: nessun **pezzo** jazz è mai stato generato — la coppia del
+24 agosto è una clip di batteria di due battute su un kit CR78, che per
+giudicare una posizione va benissimo e del timbro jazz non dice niente — quindi
+del suono, dei kit e dell'arrangiamento jazz sul Deluge non si sa niente.
 
 *Nel frattempo, per comporre:* di macchina, e non di repertorio, c'è già tutto
 il telaio nel comune, «La macchina» — il synth vuoto `TEMPL.XML`, le norme di
 sound design, prima la struttura e poi il valore, un drum di kit che è un
 `<sound>` completo. Si parte da lì, esattamente come si è partiti per il dub, e
 niente di quello vale meno perché il repertorio è un altro. Il **62** qui sopra
-invece non è mai uscito da un Deluge: il primo pezzo jazz si fa **ascoltare
-all'utente**, e la sua correzione è ciò che riempie la casella 11.
+invece **è uscito** da un Deluge il 24 agosto 2026 — le due song della coppia lo
+portano entrambe, con `figura='1/8'` — ma non è stato **giudicato**: nessuno è
+stato interrogato su di lui, ed essendo identico nei due file quell'ascolto non
+lo metteva in gioco `[OSS]`. Resta quindi aritmetica non ascoltata, e ci vuole
+un pezzo jazz vero fatto **ascoltare all'utente**: la sua correzione è ciò che
+riempie la casella 11.
 
 ## 11. Trappole del generatore
 
-**Vuota, e per una ragione precisa: nessun pezzo jazz è ancora stato
-generato**, quindi nessuna trappola è stata osservata. Questa casella si
-riempie al primo ascolto corretto dall'utente, come è successo al dub.
+**Vuota, e dal 24 agosto 2026 per una ragione più stretta di prima: l'ascolto
+c'è stato, e non ha corretto niente.** Quel giorno l'utente ha ascoltato sul
+dispositivo la coppia `GROOVE0`/`GROOVE1` e ha **risposto a tre domande**
+(casella 6): tre affermazioni su cosa si sente, non una correzione. Una trappola
+è un «questo non va, cambia X» che arriva da chi ascolta — e non ne è arrivato
+nessuno, anche perché quella coppia non era un pezzo da giudicare ma uno
+strumento di misura, costruito per rispondere a una domanda sola. Questa casella
+si riempie al primo **ascolto corretto** dall'utente, come è successo al dub, e
+quel momento non è ancora venuto.
 
 *Nel frattempo, per comporre:* qui non c'è dove andare a prendere niente, e
 non è una lacuna da colmare in fretta — **una trappola si osserva**, e
@@ -956,3 +1121,8 @@ prestito**: lo schema dice che «cosa sbaglia un generatore *qui*» non si
 trasferisce, e riportate sotto un altro repertorio sembrerebbero lezioni
 generali senza esserlo. L'unica cosa che si porta dietro è la lezione di
 metodo, che sta nel comune perché vale per tutti.
+
+Il primo candidato è già nominato e sta nella **casella 10**: il valore di swing
+del jazz è aritmetica su un meccanismo, non ascolto, e se qualcuno dirà che
+quello swing suona sbagliato la correzione va scritta **qui**, col protocollo e
+con la data.

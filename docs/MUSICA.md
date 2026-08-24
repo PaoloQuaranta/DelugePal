@@ -351,8 +351,8 @@ e la seconda non copre la prima.**
 
 **E il Deluge ha la grana per farlo.** Con la RESOLUTION di default sono
 **96 tick per movimento**; a 70 BPM un movimento dura 857 ms, quindi
-**1 tick ≈ 8,9 ms**. La finestra di microtiming che si sente è 20-40 ms, cioè
-**2-5 tick**: abbondantemente rappresentabile. Lo strumento esiste già ed è
+**1 tick ≈ 8,9 ms**. La finestra di microtiming che si sente è 20-40 ms `[WEB]`,
+cioè **2-5 tick**: abbondantemente rappresentabile. Lo strumento esiste già ed è
 `MU.sposta(doc, clip, tick=…)` (§6-quinquies).
 
 ⚠️ **Ma `sposta()` oggi non serve a questo, e va sistemata prima di usarla
@@ -366,6 +366,48 @@ uscire l'ultimo colpo invece di riportarlo in testa. Serve uno spostamento
 è aritmetica sulla RESOLUTION documentata, ma che 3 tick di ritardo sul basso
 si *sentano* come pocket e non come errore lo può dire solo l'ascolto. E qui
 ascoltare è la verifica giusta: l'affermazione riguarda ciò che si sente.
+
+⚠️ Il **24 agosto 2026** una parte di questo `[IPO]` è stata messa alla prova
+per la prima volta — qui sotto — e non su un basso ma su una batteria. Quel che
+si è sentito è la **separazione fra due voci**; che uno strato spostato *suoni*
+come pocket invece che come errore resta non ascoltato.
+
+##### La soglia non è una: assoluta e relativa — primo ascolto, 24 agosto 2026
+
+⚠️ **La finestra 20-40 ms qui sopra qualifica UNO spostamento contro la
+griglia** — una parte che arriva prima o dopo il tempo, cioè una grandezza
+**assoluta**. Quanto due voci che suonano *insieme* debbano separarsi per essere
+sentite separate è **un'altra domanda**, e quella finestra non la risponde: sono
+due grandezze diverse, e vanno poste separate anche quando si misurano nella
+stessa unità.
+
+Il primo ascolto che questo progetto abbia mai fatto di note scritte fuori
+griglia — **un ascoltatore, un giro di due battute, metronomo acceso** `[OSS]` —
+dice questo e nient'altro:
+
+- uno **sfasamento relativo dentro la finestra**, fra due voci che nell'altro
+  file cadono insieme, è stato **sentito**, e attribuito allo strumento giusto;
+- un **anticipo assoluto poco sotto la finestra**, di una voce sola contro il
+  click, **non** è stato sentito.
+
+I due numeri, la coppia di file da cui vengono e le cautele che si portano
+dietro stanno nella **casella 6 di [`repertori/jazz.md`](repertori/jazz.md)**,
+che è dove sono stati osservati: qui la distinzione, là il caso.
+
+⚠️ **E si legga per quel poco che è.** Due esiti non sono due soglie: presi
+insieme sono **compatibili con la finestra stessa** applicata a tutte e due le
+grandezze — quello dentro si sente, quello sotto no. Quindi da qui **non** segue
+che il relativo si senta prima dell'assoluto; segue che la finestra `[WEB]`, al
+suo primo contatto con un orecchio, non è stata smentita in nessuno dei due
+versi. Per separare davvero le due soglie servirebbe lo **stesso** numero di
+millisecondi nelle due condizioni, ed è l'esperimento che manca.
+
+**La conseguenza pratica invece regge, e non dipende dalle soglie:** il valore
+di un groove template sta nei **rapporti fra gli strumenti**, non nello spostare
+il tutto rispetto alla griglia. Uno spostamento uguale per tutti sposta il
+*pezzo*, non il groove — e nell'ascolto qui sopra è stato provato nella
+condizione più favorevole che esista, una riga sola contro un click, dove un
+ascolto normale non ha neppure il riferimento.
 
 #### L'arco di densità
 
@@ -663,8 +705,17 @@ sono invece tutte `[IPO]`, e vanno tenute distinte dalla riga qui sopra:
   agisce sulla riga corrente senza chiedere niente `[IPO]`, non osservato.
 
 Si verificano tutte e tre insieme, e con un gesto solo: girare quel comando su
-una riga che porta un template, e guardare cosa resta. Va fatto al **cancello
-sul dispositivo**, e scritto qui con la data quando arriva.
+una riga che porta un template, e guardare cosa resta. Va fatto sul
+dispositivo, e scritto qui con la data quando arriva.
+
+⚠️ **Il primo giro sul dispositivo, il 24 agosto 2026, NON l'ha fatto — e
+apposta.** Quel giro serviva a sapere un'altra cosa: se il dispositivo
+**conservi** le posizioni scritte fuori griglia quando si carica e si risalva
+una song senza toccare niente. Le conserva `[OSS]`, ed è nella casella 10 di
+[`repertori/jazz.md`](repertori/jazz.md). Girare `TEMPO` su una di quelle righe
+avrebbe riscritto le posizioni proprio mentre si guardava se sopravvivevano: le
+tre `[IPO]` qui sopra restano quindi da verificare **dopo**, su una copia, e da
+sole.
 
 Sta qui e non in una scheda perché è meccanismo di macchina e vale per ogni
 repertorio — e perché una scheda che tace su un comando che cancella il proprio
