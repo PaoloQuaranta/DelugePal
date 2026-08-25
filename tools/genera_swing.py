@@ -177,13 +177,20 @@ def senza_swing(t: float, levare: float) -> float:
     La fase e' `(t mod 96)/96`, cioe' l'inversa ESATTA del blocco del
     firmware.
 
-    ⚠️ NON e' quel che fa `profilo_da_colpi()`, che assegna il movimento con
-    `floor(t/96 + 0.125)` e quindi tratta una nota nell'ultimo ottavo di
-    movimento come un ANTICIPO del movimento dopo. Quella grazia serve al
-    profilo -- decide su quale dei sedici passi la nota va a finire -- ma
-    NON e' l'inversa della mappa del firmware, e su questo estratto costa
-    fino a 3,2 tick. Tenerla qui mescolerebbe due variabili in una coppia
-    che ne deve avere una sola; `main()` la misura a parte e la riferisce.
+    ⚠️ MISURA STORICA, e la data conta: 24 agosto 2026. IL GIORNO IN CUI
+    QUESTA COPPIA E' STATA COSTRUITA E ASCOLTATA `profilo_da_colpi()`
+    assegnava il movimento con `floor(t/96 + 0.125)` -- mezzo passo di
+    grazia -- e trattava quindi una nota nell'ultimo ottavo di movimento
+    come un ANTICIPO del movimento dopo, con una fase NEGATIVA che non e'
+    nel dominio di `_senza_swing()`. Su questo estratto costava fino a
+    3,2 tick, e tenerla qui avrebbe mescolato due variabili in una coppia
+    che ne deve avere una sola: e' stata lasciata fuori apposta e `main()`
+    la misura a parte.
+
+    DAL COMMIT `18f26e5` LA GRAZIA NON C'E' PIU'. `profilo_da_colpi()` fa
+    `divmod(p, ppq)`, cioe' esattamente l'aritmetica di movimento e fase di
+    questa funzione, e la divergenza e' chiusa: quel che segue non descrive
+    piu' un ramo del codice, descrive quanto costava quello vecchio.
     """
     m, g = divmod(float(t), 96.0)
     return m * 96.0 + GR._senza_swing(g / 96.0, levare) * 96.0
@@ -293,7 +300,13 @@ def modelli(note, levare_esatto: float, display: int, bpm: int) -> None:
               f'({medio * tick_ms:5.3f} ms), massimo {massimo:6.4f} tick '
               f'({massimo * tick_ms:5.3f} ms)')
 
-    # la seconda variabile, misurata a parte e non messa dentro la coppia
+    # La seconda variabile, misurata a parte e non messa dentro la coppia.
+    # ⚠️ MISURA STORICA, non comportamento corrente: il conto qui sotto
+    # rifa' quel che `profilo_da_colpi()` faceva FINO AL COMMIT `18f26e5`
+    # (24 agosto 2026), cioe' col mezzo passo di grazia. Oggi quella
+    # funzione fa `divmod` come `senza_swing()` qui sopra, e questo ramo non
+    # esiste piu' da nessuna parte: resta perche' e' il numero che dice
+    # perche' la grazia e' stata tenuta fuori dalla coppia ascoltata.
     peggio = []
     for t, _, _ in note:
         movimento = math.floor(t / 96.0 + 0.125)
@@ -303,8 +316,9 @@ def modelli(note, levare_esatto: float, display: int, bpm: int) -> None:
     medio = sum(abs(x) for x in peggio) / len(peggio)
     massimo = max(abs(x) for x in peggio)
     print()
-    print(f'e se B togliesse lo swing come `profilo_da_colpi()`, cioe\' con '
-          f'la grazia di mezzo passo:')
+    print(f'e se B togliesse lo swing con la grazia di mezzo passo, come '
+          f'faceva `profilo_da_colpi()` FINO AL 24 agosto 2026 (misura '
+          f'storica: oggi quella funzione fa `divmod`, come qui sopra):')
     print(f'        medio {medio:5.2f} tick ({medio * tick_ms:5.1f} ms), '
           f'massimo {massimo:5.2f} tick ({massimo * tick_ms:5.1f} ms) '
           f'ANCHE sotto M96')

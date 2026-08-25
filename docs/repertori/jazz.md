@@ -333,10 +333,13 @@ ripete con la tabella.
 
 Per la **dinamica** invece il taglio quasi non conta, ed è misurato e non
 supposto: nel sottoinsieme `beat` funk e fusion sono appena **2 e 4 esecuzioni
-su 50** — 29 delle loro 35 stanno fra i `fill` — e togliendole le mediane
-della tabella qui sotto si spostano **al massimo di 3 punti su 127** `[MIS]`.
-La tabella vale quindi per l'etichetta intera, e lo dice invece di lasciarlo
-supporre.
+su 50** — 29 delle loro 35 stanno fra i `fill` — e togliendole le mediane dei
+**quattro strumenti portanti** della tabella qui sotto si spostano **al massimo
+di 3 punti su 127**: rullante 47→48, charleston a pedale 70→70, ride 64→65,
+kick 59→62. La **quinta riga si sposta di cinque**, `charleston chiuso` da
+**38 a 43** `[MIS]`, ed è anche la riga più magra della tabella — 545 colpi
+contro i 5 217-10 689 delle altre. La tabella vale quindi per l'etichetta
+intera dove poggia su molti colpi, e lo dice invece di lasciarlo supporre.
 
 ### La scala di velocity, per strumento
 
@@ -366,9 +369,12 @@ Tre cose che questa tabella dice e che la scala `[WEB]` del comune non diceva:
 
 ### Il profilo posizionale: quali passi vengono accentati davvero
 
-Sulla griglia a 16 passi della casella 2, aggregando le **41 esecuzioni `beat`
+Sulla griglia a 16 passi della casella 2, aggregando le **42 esecuzioni `beat`
 4/4 senza funk e fusion**, ogni esecuzione pesata uno — se no il file da 193
-battute deciderebbe da solo cosa fa un batterista jazz. Ogni cella è **quota
+battute deciderebbe da solo cosa fa un batterista jazz. Sono **42 e non le 41
+della casella 4**: là il conteggio è delle esecuzioni con un BUR misurabile, e
+la differenza è `drummer10/session1/7`, che non ha nemmeno una coppia di crome
+da misurare — «Il bordo fra due passi» la nomina. Ogni cella è **quota
 dei colpi di quello strumento · velocity mediana**; le colonne sono le otto
 crome, e quel che manca al 100% sta sui passi dispari, cioè sulle semicrome
 `[MIS]`:
@@ -672,11 +678,13 @@ Quello che **non** si trova è il resto — e va detto con precisione, perché i
 numero e il verbo qui vanno letti insieme. Il **rullante dietro alla cassa**
 non c'è nemmeno **come segno**: dal 24 agosto 2026 la mediana è **−0,21 tick**,
 e negativo vuol dire *prima*. E non c'è **come sistematicità**, che è quel che
-servirebbe per chiamarlo uno strato: succede in **12 casi su 21**, cioè testa o
-croce, e vale un **quinto di tick** contro i 3,21 che separano il piede dal
-ride. Un segno giusto senza
-sistematicità non è un pocket. Fra i tre strumenti battuti, insomma, non c'è
-ordine, e il pocket a strati del jazz è **un solo strato**: il piede.
+servirebbe per chiamarlo uno strato: **il rullante sta dietro alla cassa in 9
+esecuzioni su 21, e davanti nelle altre 12** `[MIS]` — è la riga «rullante −
+kick» della tabella qui sopra, letta dal capo che qui interessa — cioè testa o
+croce, e il divario vale un **quinto di tick** contro i 3,21 che separano il
+piede dal ride. Un segno rovesciato e un conteggio da testa o croce non fanno
+uno strato. Fra i tre strumenti battuti, insomma, non c'è ordine, e il pocket a
+strati del jazz è **un solo strato**: il piede.
 
 #### Cosa esclude il test del tempo — e cosa no
 
@@ -886,10 +894,24 @@ charleston a pedale, cassa, rullante — e `GROOVE0` lo stesso pattern con le
 velocity mediane della tabella in cima a questa casella, così che la differenza
 fra i due file non fosse dominata dalla dinamica. **Un ascoltatore, tre ascolti
 col metronomo acceso, più una quarta prova che l'ascoltatore ha fatto da sé**
-`[OSS]`. La coppia si rigenera con
-`tools/genera_groove.py`, che stampa i due file nota per nota e il loro
-confronto. Che il dispositivo **conservi** quelle posizioni è un'altra
+`[OSS]`. Che il dispositivo **conservi** quelle posizioni è un'altra
 affermazione e sta nella casella 10: qui c'è **solo quello che si sente**.
+
+⚠️ **La coppia è quella del 24 agosto 2026, ed è stata costruita PRIMA che la
+finestra di grazia fosse tolta** da `GR.profilo_da_colpi()` (il difetto è stato
+trovato quel giorno stesso, dopo l'ascolto; il commit che lo chiude è `18f26e5`,
+del 25 agosto). I numeri di questa sezione sono quindi veri **di ciò
+che è stato ascoltato**, ed è per questo che restano scritti così. Rifacendo
+oggi la stessa catena la riga del pedale esce a **−4 tick** invece di −3, e con
+lei cambiano **altre otto posizioni su 31**. `tools/genera_groove.py` descrive
+come la coppia è stata fatta e stampa i due file nota per nota: **non è un
+pulsante da premere.** Eseguirlo **sovrascriverebbe l'unico esemplare** di
+`out/GROOVE0.XML` e `out/GROOVE1.XML` — i file su cui poggiano sia i quattro
+ascolti qui sotto sia il giro sul dispositivo della casella 10, **31 posizioni
+su 31 conservate** — e l'unica traccia che ne resterebbe è l'hash che il
+registro di sessione conserva, `d781262c…` per `GROOVE1` e `853bcdec…` per
+`GROOVE0`. Chi volesse la coppia col codice di oggi la scriva **altrove**, e la
+confronti con questa invece di sostituirla.
 
 | ascolto | la grandezza, **in tick** | a 100 BPM | esito |
 |---|---|---|---|
@@ -939,6 +961,13 @@ millisecondi:
 | 60 | 31,3 ms | mai provato |
 | 47 | 39,9 ms | mai provato |
 | **15** | **125 ms** | **sentito** |
+
+⚠️ **Quei −3 tick sono della coppia del 24 agosto 2026**, costruita prima che
+fosse tolta la finestra di grazia: col codice di oggi la stessa riga uscirebbe
+a **−4 tick** — 25 ms a 100 BPM invece di 18,75 — e la coppia sarebbe un'altra.
+La tabella qui sopra resta com'è perché è **ciò che è stato ascoltato**;
+l'avvertenza per esteso, e il motivo per cui quei due file non vanno
+rigenerati, sono in cima a questa sezione.
 
 ⚠️ **Cosa cambia, ed è molto.** L'ascolto 3 a 100 BPM **non ha misurato
 l'assenza dello scarto**: ha riferito che a quel tempo l'ascoltatore non lo

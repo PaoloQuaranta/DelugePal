@@ -5601,7 +5601,12 @@ def test_groove_inventario():
 
     reggae = GR.elenco(base, style='reggae')
     check('20 esecuzioni reggae', len(reggae) == 20, str(len(reggae)))
-    check('ma UN batterista sole quattro `beat`',
+    # ⚠️ L'ETICHETTA DICEVA "UN batterista" e l'asserzione ne pretendeva DUE:
+    # stampava `PASS ma UN batterista...` fra i 943, cioe' rivendeva come
+    # verde proprio l'errore che il commit `3a0052e` di questo ramo esiste
+    # per correggere. Corretta l'etichetta, non l'asserzione: i batteristi
+    # reggae sono due (drummer1 e drummer5), misurati su `info.csv`.
+    check('ma DUE batteristi e sole quattro `beat`',
           len({e.drummer for e in reggae}) == 2
           and len([e for e in reggae if e.beat_type == 'beat']) == 4,
           f'{sorted({e.drummer for e in reggae})}, '
@@ -5961,6 +5966,8 @@ def test_groove_profilo_corpus():
     L'esecuzione e' nominata apposta: un profilo viene da UN batterista, e
     dichiararlo e' cio' che tiene onesto il marcatore [OSS].
     """
+    import statistics                                      # noqa: PLC0415
+
     from delugexml import groove as GR                      # noqa: PLC0415
 
     base = ROOT / 'to-read' / 'MIDI' / 'groove-v1.0.0-midionly' / 'groove'
@@ -5976,9 +5983,33 @@ def test_groove_profilo_corpus():
     check('c e il ride', 'ride' in p.passi, str(sorted(p.passi))[:120])
     check('ogni passo sta fra 0 e 15',
           all(0 <= s.passo <= 15 for v in p.passi.values() for s in v))
-    check('e il residuo e piccolo: e cio che RESTA dopo aver tolto lo swing',
-          all(abs(s.scarto) <= 12 for v in p.passi.values() for s in v),
-          str(max(abs(s.scarto) for v in p.passi.values() for s in v)))
+    # ⚠️ QUI C'ERA UNA SOGLIA CHE ERA UN TEOREMA, e va detto perche' non c'e'
+    # piu': `abs(s.scarto) <= 12` NON POTEVA FALLIRE. `profilo_da_colpi()`
+    # sceglie il passo con `round(dritta / passo_tick)`, cioe' il passo PIU'
+    # VICINO, quindi |residuo| <= mezzo passo = 12 tick per costruzione --
+    # con la grazia di mezzo passo e senza. Contato sul corpus: 0 residui
+    # oltre 12 tick su 28 604 colpi in entrambi i casi. Il registro di
+    # sessione la dichiarava "stretta, il 98% del budget": era il rovescio
+    # del vero, ed e' il genere di riga che invita ad allargare in futuro una
+    # soglia che non si puo' violare.
+    #
+    # Al suo posto la cosa che il residuo DEVE avere se lo swing e' stato
+    # tolto davvero. Lo swing vive sui passi di LEVARE -- 2, 6, 10, 14 -- e
+    # li' sposta la nota di `(levare - 0,5) * 96` tick: 9,46 su questa
+    # esecuzione. Se `_senza_swing()` fa il suo mestiere quello spostamento
+    # sparisce e resta il solo residuo; se non lo facesse resterebbe tutto.
+    # VERIFICATO PER INVERSIONE: neutralizzando `_senza_swing()` all'identita'
+    # la mediana pesata sui colpi sale da 2,00 a 5,86 tick e questo check
+    # diventa rosso.
+    levare = GR.da_bur(p.bur)
+    meta_swing = (levare - 0.5) * 96 / 2
+    sui_levare = [abs(s.scarto) for v in p.passi.values() for s in v
+                  if s.passo in (2, 6, 10, 14) for _ in range(s.colpi)]
+    mediana = statistics.median(sui_levare)
+    check('e sui passi di levare il residuo e meno di meta dello swing tolto',
+          mediana < meta_swing,
+          f'{mediana:.2f} tick contro {meta_swing:.2f} '
+          f'(levare {levare:.4f}, {len(sui_levare)} colpi)')
 
 
 def test_groove_scala():

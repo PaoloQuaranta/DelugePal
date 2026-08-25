@@ -810,9 +810,17 @@ def il_template(per_es):
               f'{min(filtrati):+.2f}..{max(filtrati):+.2f}, '
               f'escursione {max(filtrati) - min(filtrati):.2f} tick: meta del vero)')
 
-    # ⚠️ IL TEMPLATE DENTRO IL CAMPIONE. La casella 6 dice "15 su 15" sulla
+    # ⚠️ IL TEMPLATE DENTRO IL CAMPIONE. La casella 6 dice "12 su 15" sulla
     # stratificazione ride/charleston: va detto dove cade in quella fila
     # proprio l'esecuzione che si raccomanda come template.
+    #
+    # ⚠️ FINO AL 24 agosto 2026 quel conteggio era "15 su 15", e questo
+    # commento lo citava cosi'. E' caduto col mezzo passo di grazia (commit
+    # `18f26e5`): la sezione qui sotto stampa il numero vero, che oggi e' 12
+    # su 15 col divario mediano cresciuto da 2,59 a 3,21 tick. L'unanimita'
+    # che regge e' quella sulle FASI GREZZE, che non passa da nessuna catena
+    # -- la stampa `il_profilo_aggregato()`, «controprova sulle FASI GREZZE»,
+    # ed e' quella che la casella 6 cita adesso.
     print('\n--- dove cade il template nel campione appaiato ride/charleston ---')
     camp = sorted((d['ride'] - d[PEDALE], e2.id, e2.drummer)
                   for e2, d in per_es if 'ride' in d and PEDALE in d)

@@ -439,6 +439,16 @@ qui sopra vanno **poste separate**, e che **uno scarto scritto si sente, quando
 è abbastanza grande** — lo stesso spostamento di 3 tick, non distinto al tempo a
 cui era scritto, è stato sentito rallentando il tempo di quasi sette volte.
 
+⚠️ **Quei 3 tick sono la coppia del 24 agosto 2026**, costruita **prima** che la
+finestra di grazia fosse tolta da `GR.profilo_da_colpi()` (commit `18f26e5`). È
+il numero **di ciò che è stato ascoltato**, e come tale resta: rifacendo la
+stessa catena col codice di oggi la riga esce a **−4 tick** e altre otto
+posizioni su trentuno cambiano. I due file di quella coppia sono un **esemplare
+unico** e non vanno rigenerati — rieseguire lo script che li ha scritti li
+sovrascriverebbe, e con essi il materiale sia degli ascolti sia della casella 10.
+La casella 6 di [`repertori/jazz.md`](repertori/jazz.md) porta l'avvertenza per
+esteso.
+
 ⚠️ **Quanto grande debba essere, invece, NON è stato stabilito, e non è un
 dettaglio mancante: è tutto il resto.** Da quegli ascolti non esce nessuna
 soglia — il perché sta nel metodo, «Un ascolto non è una misura di percezione» —
