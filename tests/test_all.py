@@ -5845,6 +5845,116 @@ def test_groove_profilo_nucleo():
           abs((dr - dk) - 2) < 0.6, f'{dr:.2f} - {dk:.2f}')
 
 
+def test_groove_senza_grazia():
+    """La catena e' l'INVERSA ESATTA della mappa dello swing, anche in fondo.
+
+    ⚠️ IL DIFETTO CHE QUESTO TEST BLINDA, e come si rifa'. Fino al 24 agosto
+    2026 `profilo_da_colpi()` calcolava il movimento con mezzo passo di
+    grazia:
+
+        movimento = math.floor(p / ppq + 0.125)
+
+    Una nota nell'ultimo ottavo di movimento usciva allora con fase
+    NEGATIVA, e `_senza_swing()` le applicava il ramo della PRIMA meta'
+    (dilatata) mentre la nota sta nella SECONDA (compressa): non l'inversa
+    di niente che il firmware faccia. Sul corpus jazz del Groove MIDI
+    toccava un colpo su tre.
+
+    La fixture costruisce le posizioni applicando la mappa IN AVANTI a
+    posizioni dritte note, e chiede indietro quelle. E' l'unico modo per cui
+    il test non sia la stessa formula contro se' stessa: il valore atteso
+    non viene da `_senza_swing()`, viene da `con_swing()`.
+
+    ⚠️ I tre anticipi sono scelti perche' cadono nell'ultimo ottavo (dove
+    stava il difetto) e insieme abbastanza lontano dal battere da restare
+    FUORI dalla finestra di `origine()` (piu' di 6 tick swingati): se no
+    l'origine si sposterebbe e il valore atteso non sarebbe piu' esatto.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    ppq = 96.0
+    lev = 2.0 / 3.0                     # BUR 2, la terzina: numeri esatti
+
+    def con_swing(u, levare):
+        """La mappa del firmware IN AVANTI: da fase dritta a fase swingata."""
+        if u < 0.5:
+            return u * 2 * levare
+        return levare + (u - 0.5) * 2 * (1 - levare)
+
+    campione = [k / 100 for k in range(100)]
+    check('_senza_swing e l inversa della mappa in avanti su tutto [0,1)',
+          all(abs(GR._senza_swing(con_swing(u, lev), lev) - u) < 1e-12
+              for u in campione),
+          str(max(abs(GR._senza_swing(con_swing(u, lev), lev) - u)
+                  for u in campione)))
+
+    def fixture(anticipo):
+        """Kick e ride sulla griglia swingata, piu' un pad che ANTICIPA.
+
+        Il pad suona `anticipo` tick DRITTI prima del battere seguente: e'
+        una posizione dritta nota, portata avanti dalla mappa dello swing.
+        """
+        c = {'kick': [], 'ride': [], 'charleston a pedale': []}
+        for b in range(16):
+            c['kick'].append((b * ppq, 100))
+            c['ride'].append((b * ppq, 90))
+            c['ride'].append((b * ppq + con_swing(0.5, lev) * ppq, 70))
+            u = 1.0 - anticipo / ppq
+            c['charleston a pedale'].append(
+                (b * ppq + con_swing(u, lev) * ppq, 80))
+        return c
+
+    p10 = GR.profilo_da_colpi(fixture(10.0), ppq)
+    check('la fixture dichiara la terzina, e l origine non la sposta',
+          abs(p10.bur - 2.0) < 1e-9, str(p10.bur))
+
+    # ---- il CONTROLLO: fuori dall'ultimo ottavo la catena era gia' esatta.
+    # Il ride sta sul battere e sul levare swingato, e li' i due conti --
+    # con la grazia e senza -- coincidono. Se questo controllo fallisse, a
+    # essere rotta sarebbe la fixture, non il difetto.
+    ride = {s.passo: s.scarto for s in p10.passi['ride']}
+    check('il ride sul battere e sul levare non porta residuo',
+          sorted(ride) == [0, 2, 4, 6, 8, 10, 12, 14]
+          and all(abs(v) < 1e-9 for v in ride.values()),
+          str({k: round(v, 4) for k, v in ride.items()}))
+
+    # ---- 10 tick dritti di anticipo: il passo resta il battere, il residuo
+    # deve essere -10 ESATTI. Con la grazia usciva -5,0: meta'.
+    ped = {s.passo: s.scarto for s in p10.passi['charleston a pedale']}
+    check('10 tick dritti di anticipo restano sul battere',
+          sorted(ped) == [0, 4, 8, 12], str(sorted(ped)))
+    check('e il residuo e -10 tick esatti, non la meta',
+          all(abs(v + 10.0) < 1e-9 for v in ped.values()),
+          str({k: round(v, 4) for k, v in ped.items()}))
+
+    # ---- 14 e 17 tick: qui cambia anche il PASSO. Un colpo a 14 tick dritti
+    # dal battere e' piu' vicino alla semicroma precedente (a 24) che al
+    # battere, e la sedicesima e' dove va. La grazia lo attaccava al battere
+    # con un residuo di -7: un residuo che nessun batterista ha suonato.
+    for anticipo, passi_attesi, atteso in ((14.0, [3, 7, 11, 15], +10.0),
+                                           (17.0, [3, 7, 11, 15], +7.0)):
+        pr = GR.profilo_da_colpi(fixture(anticipo), ppq)
+        d = {s.passo: s.scarto for s in pr.passi['charleston a pedale']}
+        check(f'{anticipo:.0f} tick dritti di anticipo cadono sulla semicroma '
+              f'precedente', sorted(d) == passi_attesi, str(sorted(d)))
+        check(f'e il residuo e {atteso:+.0f} tick esatti',
+              all(abs(v - atteso) < 1e-9 for v in d.values()),
+              str({k: round(v, 4) for k, v in d.items()}))
+
+    # ⚠️ LA GIUSTIFICAZIONE CHE LA GRAZIA SI DAVA, FALSIFICATA. Il commento
+    # diceva che senza di essa "il residuo uscirebbe grande quanto un
+    # movimento intero". Non puo': `passo = round(dritta / passo_tick)`
+    # sceglie il passo PIU' VICINO, quindi |residuo| <= mezzo passo per
+    # costruzione, con la grazia e senza. Misurato anche sul corpus jazz:
+    # 0 residui oltre mezzo passo su 28 604 colpi.
+    for anticipo in (10.0, 14.0, 17.0):
+        pr = GR.profilo_da_colpi(fixture(anticipo), ppq)
+        peggio = max(abs(s.scarto)
+                     for v in pr.passi.values() for s in v)
+        check(f'con anticipo {anticipo:.0f} nessun residuo supera mezzo passo',
+              peggio <= ppq / 8 + 1e-9, str(peggio))
+
+
 def test_groove_profilo_corpus():
     """Il profilo di un'esecuzione vera. SALTA senza il dataset.
 

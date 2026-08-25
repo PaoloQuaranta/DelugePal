@@ -311,12 +311,30 @@ def profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float,
     for nome, note in colpi.items():
         for pos, vel in note:
             p = pos - off
-            # il movimento PIU' VICINO, tollerando un colpo appena prima di
-            # esso. ⚠️ senza il mezzo passo di grazia un anticipo finirebbe
-            # nel movimento precedente con fase 0,99 invece che -0,01, e il
-            # residuo uscirebbe grande quanto un movimento intero.
-            movimento = math.floor(p / ppq + 0.125)
-            fase = p / ppq - movimento
+            # il movimento in cui la nota CADE, e la sua fase dentro di
+            # esso: floor-division, la stessa convenzione di
+            # `levare_da_posizioni()`, e per p negativi -144 // 96 fa -2.
+            #
+            # ⚠️ LA FASE STA IN [0,1) E NON PUO' USCIRNE, perche' e' il
+            # dominio su cui `_senza_swing()` e' l'inversa della mappa del
+            # firmware. Fino al 24 agosto 2026 qui c'era mezzo passo di
+            # grazia -- `math.floor(p / ppq + 0.125)` -- per attribuire un
+            # colpo appena prima del battere al movimento seguente: una
+            # nota nell'ultimo ottavo usciva allora con fase NEGATIVA, e
+            # `_senza_swing()` le applicava il ramo della PRIMA meta'
+            # (dilatata) mentre la nota sta nella SECONDA (compressa). Non
+            # era l'inversa di niente. Sul corpus jazz toccava un colpo su
+            # tre e spostava il residuo fino a 12 tick.
+            #
+            # La tolleranza non serviva: il passo si sceglie qui sotto con
+            # `round()` sulla posizione ASSOLUTA, che gia' attribuisce al
+            # battere seguente qualunque colpo entro mezzo passo da esso.
+            # E la giustificazione scritta era falsa: `round()` sceglie il
+            # passo piu' vicino, quindi |residuo| <= mezzo passo per
+            # costruzione, e non puo' MAI uscire "grande quanto un
+            # movimento intero" -- ne' con la grazia ne' senza.
+            movimento, resto = divmod(p, ppq)
+            fase = resto / ppq
             dritta = (movimento + _senza_swing(fase, levare)) * ppq
             # ⚠️ il passo si decide DOPO aver tolto lo swing: un levare
             # swingato sta a 2,67 passi e si arrotonderebbe al 3.
