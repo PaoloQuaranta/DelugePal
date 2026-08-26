@@ -74,10 +74,28 @@ poi `passo = round((dritta − spostamento) / passo_tick)`.
 | valore | lo spostamento è | |
 |---|---|---|
 | `'vicino'` | `0` | l'attuale `round()`, il termine di paragone |
-| `'voce'` | `GR.origine(dritte_della_voce, passo_tick)` | riuso **letterale** della media circolare già scritta e già rivista |
+| `'voce'` | la media circolare delle fasi della voce sulla griglia dei passi, **su tutti i suoi colpi** | stessa aritmetica di `GR.origine()`, **senza la sua finestra** — vedi sotto |
 | `'rado'` | il punto di fase dove la voce ha meno colpi, meno mezzo passo | «non tagliare attraverso un gesto», con **ripiego dichiarato** a `0` |
 
-⚠️ **`'voce'` non è `origine()` del kit applicata due volte.** `origine()` toglie
+⚠️ **`'voce'` NON può chiamare `GR.origine()`, e questa correzione è del 26
+agosto 2026.** Una prima stesura di questa spec diceva «riuso letterale».
+Misurato: `origine()` tiene solo i colpi dentro `finestra = 0,25 · passo`, e
+sul charleston di `drummer10/session1/1` ne tiene **58 su 143** — cioè scarta
+proprio quelli anticipati, che sono il fenomeno. Il numero che ne esce è
+**−0,40 tick** invece di **−8,80**, e `'voce'` così non sposterebbe nessun
+passo: sarebbe un candidato finto, che passa il confronto senza aver fatto
+niente.
+
+La finestra di `origine()` **non è un difetto e non va tolta di là**: serve a
+tenere fuori dalla stima dello scarto comune del kit i levare swingati, che
+stanno a 8 tick su 24 dalla griglia dei passi. Ma qui lo swing è **già stato
+tolto** da `_senza_swing()` due righe sopra, e un levare swingato è ormai *su*
+un passo, non fra due. La ragione della finestra non si trasporta, quindi
+`'voce'` è una funzione **sorella**, con la stessa aritmetica circolare e senza
+finestra, e il docstring dell'una deve nominare l'altra dicendo perché
+differiscono.
+
+⚠️ **`'voce'` non è nemmeno `origine()` del kit applicata due volte.** `origine()` toglie
 lo scarto comune a tutto il kit e lo toglie *davvero*, lasciando a ogni
 esecuzione uno zero arbitrario. Qui lo spostamento della voce si usa **solo per
 decidere il passo** e non viene sottratto dal residuo riportato: il numero che
@@ -185,6 +203,13 @@ Misurata, sul charleston di `drummer10/session1/1` vale **−8,80 tick**
 ribaltata in un minuto. **La concentrazione bassa resta un sospetto vero** —
 una media circolare su una voce sparsa è un numero debole — ed è precisamente
 ciò che la prova di linearità deve mettere alla prova.
+
+⚠️ **Due numeri di questo documento non vanno confusi, e sono a un ordine di
+grandezza di distanza.** Sulla stessa voce, media circolare **senza** finestra
+= **−8,80 tick** (143 colpi); `GR.origine()`, cioè **con** la sua finestra, =
+**−0,40 tick** (58 colpi). Il secondo è il numero di una funzione che qui non
+va usata, per la ragione scritta al §3. Chiunque veda `-0,4` mentre lavora su
+`'voce'` sta chiamando la funzione sbagliata.
 
 ---
 
