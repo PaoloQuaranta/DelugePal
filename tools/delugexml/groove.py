@@ -144,6 +144,11 @@ def origine(posizioni, passo: float, *, finestra: float = 0.25) -> float:
     dieci volte il necessario -- ma se un giorno un corpus diverso desse
     origine zero su dati palesemente storti, e' il primo posto da guardare.
 
+    LA SORELLA: `_media_circolare()` fa la stessa aritmetica SENZA la
+    finestra, e serve al taglio `'voce'`. Le due non si possono
+    sostituire l'una all'altra: la a finestra stima lo scarto comune del
+    KIT prima che lo swing sia tolto, l'altra la fase di UNA VOCE dopo.
+
     PERCHE' ESISTE. Misurato su `drummer1/session3/2_jazz-swing_185_beat_4-4`:
     ride, kick, rullante e charleston hanno TUTTI il picco a 0,958 del
     movimento. Tutti insieme vuol dire che non e' feel, e' l'origine. La
@@ -241,6 +246,45 @@ def bur_da_posizioni(posizioni, ppq: float, *,
 TAGLI = ('vicino', 'voce', 'rado')
 
 
+def _media_circolare(posizioni, passo: float) -> float:
+    """La fase media della voce dentro il passo, in tick, CON SEGNO.
+
+    Stessa aritmetica di `origine()` -- si mediano i versori, perche' la
+    fase GIRA e la media aritmetica di 1 e 23 darebbe 12, cioe' il
+    contrario di zero -- ma SENZA la sua finestra, ed e' una differenza che
+    va capita prima di "semplificare" chiamando `origine()`.
+
+    ⚠️ PERCHE' SENZA FINESTRA. `origine()` tiene solo i colpi dentro
+    0,25 passo per non far sporcare lo scarto comune del kit dai LEVARE
+    SWINGATI, che stanno a 8 tick su 24 dalla griglia dei passi. Qui lo
+    swing lo ha gia' tolto `_senza_swing()`, e un levare swingato e' ormai
+    SU un passo: la ragione della finestra non si trasporta. Se la si
+    tenesse, sul charleston a pedale di `drummer10/session1/1` questa
+    funzione vedrebbe 58 colpi su 143 -- scartando proprio gli anticipati,
+    che sono il fenomeno -- e darebbe -0,40 tick invece di -8,80 `[OSS]`,
+    cioe' non sposterebbe nessun passo.
+
+    IL LIMITE, DICHIARATO: la media circolare di una voce sparsa e' un
+    numero debole. Sul charleston di quell'esecuzione la concentrazione
+    vale R = 0,16. E' il sospetto che la prova di traslazione per voce
+    (`tools/misura_groove.py`, `la_prova_di_traslazione()`) deve mettere
+    alla prova, e la ragione per cui i candidati sono due.
+    """
+    fasi = []
+    for p in posizioni:
+        s = p % passo
+        if s > passo / 2:
+            s -= passo                  # la fase gira: 23 su 24 e' -1
+        fasi.append(s / passo * 2 * math.pi)
+    if not fasi:
+        return 0.0
+    x = sum(math.cos(a) for a in fasi) / len(fasi)
+    y = sum(math.sin(a) for a in fasi) / len(fasi)
+    if abs(x) < 1e-12 and abs(y) < 1e-12:
+        return 0.0                      # fasi sparse: nessuna fase media
+    return math.atan2(y, x) / (2 * math.pi) * passo
+
+
 def spostamento_del_taglio(dritte, passo_tick: float,
                            modo: str = 'vicino') -> float:
     """Di quanto spostare il TAGLIO fra due passi, per questa voce, in tick.
@@ -255,7 +299,11 @@ def spostamento_del_taglio(dritte, passo_tick: float,
     """
     if modo not in TAGLI:
         raise ValueError(f'taglio {modo!r} sconosciuto: ci sono {list(TAGLI)}')
-    return 0.0
+    if modo == 'vicino':
+        return 0.0
+    if modo == 'voce':
+        return _media_circolare(dritte, passo_tick)
+    raise ValueError(f'taglio {modo!r} non ancora implementato')
 
 
 class Passo(NamedTuple):

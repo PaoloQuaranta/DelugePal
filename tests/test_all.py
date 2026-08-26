@@ -6182,6 +6182,72 @@ def test_groove_taglio_neutro_sul_corpus():
               f'{quale}')
 
 
+def test_groove_taglio_voce():
+    """`'voce'` chiude la spaccatura di un gesto a cavallo del confine.
+
+    Il caso: una voce che anticipa di 14 tick i passi 4 e 12 -- cioe' il 2 e
+    il 4, come il charleston a pedale del jazz -- con dispersione di 3 tick.
+    Anticipare di piu' di mezzo passo (12 tick) e' esattamente il caso che
+    `round()` non sa rappresentare.
+
+    ⚠️ Questo test NON asserisce su QUALE passo il gesto finisca ancorato.
+    L'ancoraggio e' una domanda a se' -- i dati soli non distinguono "14 tick
+    prima del passo 4" da "10 tick dopo il passo 3", e il gesto e' pure piu'
+    VICINO al passo 3 -- e la MISURA il Task 5. Qui si misura una cosa sola:
+    che il gesto smetta di stare in DUE celle con segni opposti.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    ppq = 96.0
+    # 12 battute, il gesto sul passo 4 e sul passo 12, anticipato di 14 tick
+    # con dispersione fissa (non casuale: un test deve dare sempre lo stesso
+    # numero). 96-14 = 82 e 288-14 = 274, piu' gli scarti.
+    posizioni = [float(b * 384 + base + d)
+                 for b in range(12) for base in (82, 274)
+                 for d in (-3, -1, 1, 3)]
+    colpi = {'charleston a pedale': [(p, 90) for p in posizioni]}
+
+    vicino = GR.profilo_da_colpi(colpi, ppq, taglio='vicino')
+    voce = GR.profilo_da_colpi(colpi, ppq, taglio='voce')
+
+    def celle(prof):
+        return {p.passo: p for p in prof.passi['charleston a pedale']
+                if p.colpi >= 10}
+
+    cv, cc = celle(vicino), celle(voce)
+
+    check('con "vicino" il gesto sta in quattro celle (due per battere)',
+          len(cv) == 4, str(sorted(cv)))
+    coppie = [(k, k + 1) for k in (3, 11) if k in cv and k + 1 in cv]
+    check('e sono coppie adiacenti di segno opposto',
+          len(coppie) == 2
+          and all(cv[a].scarto * cv[b].scarto < 0 for a, b in coppie),
+          str({k: round(v.scarto, 2) for k, v in sorted(cv.items())}))
+    check('col BATTERE IN MINORANZA: la semicroma prima porta piu colpi',
+          all(cv[a].colpi > cv[b].colpi for a, b in coppie),
+          str({k: v.colpi for k, v in sorted(cv.items())}))
+
+    check('con "voce" il gesto sta in due celle sole, una per battere',
+          len(cc) == 2, str(sorted(cc)))
+    check('e ognuna porta tutti i colpi del suo gesto',
+          all(v.colpi == 48 for v in cc.values()),
+          str({k: v.colpi for k, v in sorted(cc.items())}))
+
+    # lo spostamento e' quello che ci si aspetta da quelle fasi: le fasi
+    # sono 7, 9, 11 e -11 tick, la cui media circolare vale +10.
+    dritte = [p for p in posizioni]
+    sp = GR.spostamento_del_taglio(dritte, 24.0, 'voce')
+    check('lo spostamento della voce vale +10 tick',
+          abs(sp - 10.0) < 0.01, f'{sp:.3f}')
+
+    # ⚠️ la funzione col cancello sbagliato: GR.origine() ha una finestra
+    # che scarta proprio gli anticipati, e qui darebbe zero.
+    check('GR.origine() su questa voce da un numero DIVERSO, ed e per questo '
+          'che "voce" non la chiama',
+          abs(GR.origine(dritte, 24.0) - sp) > 1.0,
+          f'origine {GR.origine(dritte, 24.0):.3f} contro voce {sp:.3f}')
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
