@@ -235,6 +235,29 @@ def bur_da_posizioni(posizioni, ppq: float, *,
     return in_bur(statistics.median(lev))
 
 
+#: I modi di taglio: come si sceglie il passo su cui un colpo va contato.
+#: Il default resta `'vicino'` finche' la misura non ha scelto -- vedi
+#: `docs/superpowers/specs/2026-08-26-stimatore-per-passo-design.md`.
+TAGLI = ('vicino', 'voce', 'rado')
+
+
+def spostamento_del_taglio(dritte, passo_tick: float,
+                           modo: str = 'vicino') -> float:
+    """Di quanto spostare il TAGLIO fra due passi, per questa voce, in tick.
+
+    Il passo si sceglie poi con `round((dritta - spostamento) / passo_tick)`:
+    spostare il taglio NON sposta la griglia, sposta solo il confine su cui
+    si decide a quale passo un colpo appartiene. Il residuo riportato resta
+    misurato dalla griglia vera.
+
+    `'vicino'` e' l'assenza di spostamento, cioe' il `round()` di sempre:
+    taglia a meta' fra due passi. E' il termine di paragone.
+    """
+    if modo not in TAGLI:
+        raise ValueError(f'taglio {modo!r} sconosciuto: ci sono {list(TAGLI)}')
+    return 0.0
+
+
 class Passo(NamedTuple):
     """Cosa fa uno strumento su un passo della battuta, misurato."""
 
@@ -286,7 +309,7 @@ def _senza_swing(fase: float, levare: float) -> float:
 
 def profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float,
                      *, id: str = '', drummer: str = '', style: str = '',
-                     bpm: int = 0) -> Profilo:
+                     bpm: int = 0, taglio: str = 'vicino') -> Profilo:
     """Il profilo, da colpi gia' letti: strumento -> [(posizione, velocity)].
 
     LA CATENA, E L'ORDINE E' LA COSA CHE CONTA:
@@ -299,6 +322,8 @@ def profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float,
        al resto del kit. E' il solo microtiming che il template porta;
     4. aggrega per strumento e per passo, sedici per battuta.
     """
+    if taglio not in TAGLI:
+        raise ValueError(f'taglio {taglio!r} sconosciuto: ci sono {list(TAGLI)}')
     passo_tick = ppq / 4                            # un 1/16
     tutte = [p for note in colpi.values() for p, _ in note]
     off = origine(tutte, passo_tick)
@@ -306,8 +331,11 @@ def profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float,
     bur = bur_da_posizioni([p - off for p in tutte], ppq)
     levare = da_bur(bur) if bur is not None else 0.5
 
-    per_passo: dict[str, dict[int, list[tuple[int, float]]]] = {}
-    ultimo = 0
+    # PRIMA PASSATA: la posizione DRITTA di ogni colpo -- origine tolta,
+    # swing tolto -- raggruppata per strumento. Il passo NON si sceglie
+    # qui: uno spostamento del taglio dipende da TUTTI i colpi di una
+    # voce, e finche' non li abbiamo visti tutti non si puo' decidere.
+    dritte: dict[str, list[tuple[float, int]]] = {}
     for nome, note in colpi.items():
         for pos, vel in note:
             p = pos - off
@@ -318,28 +346,29 @@ def profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float,
             # ⚠️ LA FASE STA IN [0,1) E NON PUO' USCIRNE, perche' e' il
             # dominio su cui `_senza_swing()` e' l'inversa della mappa del
             # firmware. Fino al 24 agosto 2026 qui c'era mezzo passo di
-            # grazia -- `math.floor(p / ppq + 0.125)` -- per attribuire un
-            # colpo appena prima del battere al movimento seguente: una
-            # nota nell'ultimo ottavo usciva allora con fase NEGATIVA, e
-            # `_senza_swing()` le applicava il ramo della PRIMA meta'
-            # (dilatata) mentre la nota sta nella SECONDA (compressa). Non
-            # era l'inversa di niente. Sul corpus jazz toccava un colpo su
-            # tre e spostava il residuo fino a 12 tick.
-            #
-            # La tolleranza non serviva: il passo si sceglie qui sotto con
-            # `round()` sulla posizione ASSOLUTA, che gia' attribuisce al
-            # battere seguente qualunque colpo entro mezzo passo da esso.
-            # E la giustificazione scritta era falsa: `round()` sceglie il
-            # passo piu' vicino, quindi |residuo| <= mezzo passo per
-            # costruzione, e non puo' MAI uscire "grande quanto un
-            # movimento intero" -- ne' con la grazia ne' senza.
+            # grazia -- `math.floor(p / ppq + 0.125)` -- e una nota
+            # nell'ultimo ottavo usciva con fase NEGATIVA, su cui
+            # `_senza_swing()` applicava il ramo sbagliato. Non era
+            # l'inversa di niente.
             movimento, resto = divmod(p, ppq)
             fase = resto / ppq
-            dritta = (movimento + _senza_swing(fase, levare)) * ppq
+            dritte.setdefault(nome, []).append(
+                ((movimento + _senza_swing(fase, levare)) * ppq, vel))
+
+    # SECONDA PASSATA: una voce alla volta, col suo spostamento del taglio.
+    per_passo: dict[str, dict[int, list[tuple[int, float]]]] = {}
+    ultimo = 0
+    for nome, note in dritte.items():
+        sp = spostamento_del_taglio([d for d, _ in note], passo_tick, taglio)
+        for dritta, vel in note:
             # ⚠️ il passo si decide DOPO aver tolto lo swing: un levare
             # swingato sta a 2,67 passi e si arrotonderebbe al 3.
-            passo = round(dritta / passo_tick)
+            passo = round((dritta - sp) / passo_tick)
             ultimo = max(ultimo, passo)
+            # ⚠️ il residuo si misura dalla GRIGLIA, non dal taglio
+            # spostato: e' la posizione vera del colpo rispetto al passo su
+            # cui lo scriviamo. Sottrarre anche `sp` toglierebbe il feel
+            # invece di collocarlo.
             residuo = dritta - passo * passo_tick
             per_passo.setdefault(nome, {}).setdefault(
                 passo % 16, []).append((vel, residuo))
@@ -357,7 +386,7 @@ def profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float,
                    battute=ultimo // 16 + 1, passi=passi)
 
 
-def profilo(base: Path | str, id: str) -> Profilo:
+def profilo(base: Path | str, id: str, *, taglio: str = 'vicino') -> Profilo:
     """Il profilo di UNA esecuzione del dataset, nominata.
 
     Le posizioni del file MIDI sono nella risoluzione DEL FILE (nel Groove
@@ -384,7 +413,7 @@ def profilo(base: Path | str, id: str) -> Profilo:
             colpi.setdefault(nome, []).append((n.pos * fattore, n.velocity))
     return profilo_da_colpi(colpi, float(MI.TICK_PER_MOVIMENTO_DELUGE),
                             id=e.id, drummer=e.drummer, style=e.style,
-                            bpm=e.bpm)
+                            bpm=e.bpm, taglio=taglio)
 
 
 class Livelli(NamedTuple):

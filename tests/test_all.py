@@ -6124,6 +6124,64 @@ def test_applica_groove():
           str(bordo[0].velocity))
 
 
+def test_groove_taglio_neutro():
+    """Il parametro `taglio` esiste, e sul default non cambia NIENTE.
+
+    ⚠️ E' il cancello di tutto il confronto fra stimatori: se `'vicino'` non
+    riproduce esattamente i numeri di prima, ogni differenza misurata fra i
+    tagli e' inattribuibile -- non si sa se l'ha mossa lo stimatore o la
+    ristrutturazione del ciclo.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    ppq = 96.0
+    # due voci, posizioni scelte a mano: un kick sui battere e un ride sulle
+    # crome swingate. Nessun colpo al bordo: qui non si misura il bordo, si
+    # misura che il refactoring non abbia mosso niente.
+    colpi = {
+        'kick': [(float(b * 384 + m * 96), 100) for b in range(4)
+                 for m in (0, 2)],
+        'ride': [(float(b * 384 + m * 96 + d), 80) for b in range(4)
+                 for m in range(4) for d in (0, 64)],
+    }
+    senza = GR.profilo_da_colpi(colpi, ppq, id='finto/1')
+    con = GR.profilo_da_colpi(colpi, ppq, id='finto/1', taglio='vicino')
+    check('taglio="vicino" da lo stesso Profilo di prima', senza == con,
+          f'{senza}\n{con}')
+
+    check('un taglio sconosciuto e un errore che elenca i modi',
+          _raises(lambda: GR.profilo_da_colpi(colpi, ppq, taglio='pippo'),
+                  ValueError))
+    try:
+        GR.profilo_da_colpi(colpi, ppq, taglio='pippo')
+    except ValueError as e:
+        check('e il messaggio nomina i tre modi',
+              all(m in str(e) for m in GR.TAGLI), str(e))
+
+    check('lo spostamento di "vicino" e zero',
+          GR.spostamento_del_taglio([1.0, 2.0, 3.0], 24.0, 'vicino') == 0.0,
+          str(GR.spostamento_del_taglio([1.0, 2.0, 3.0], 24.0, 'vicino')))
+
+
+def test_groove_taglio_neutro_sul_corpus():
+    """Lo stesso cancello, sul dataset vero. SALTA se non c'e'.
+
+    Il caso sintetico non ha colpi al bordo; il corpus ne ha. Se la
+    ristrutturazione avesse cambiato qualcosa, e' qui che si vede.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    base = ROOT / 'to-read' / 'MIDI' / 'groove-v1.0.0-midionly' / 'groove'
+    if not (base / GR.INVENTARIO).exists():
+        raise FileNotFoundError(str(base / GR.INVENTARIO))
+
+    for quale in ('drummer1/session3/2', 'drummer10/session1/1'):
+        p = GR.profilo(base, quale)
+        v = GR.profilo(base, quale, taglio='vicino')
+        check(f'{quale}: il default e "vicino", identico', p == v,
+              f'{quale}')
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
