@@ -180,8 +180,9 @@ nominata.
 **Dove sono documentate le funzioni.** Qui e nelle schede i nomi della
 libreria dicono *quando* si usa una cosa; firma ed esempio stanno in
 [`SKILL.md`](../.claude/skills/deluge-pal/SKILL.md), che le chiama con gli
-alias `MU`, `S`, `C`, `A`, `K`, `MI`, `WJ` — tabelle «Come si fa», «Importare
-MIDI», «Importare dalla Weimar Jazz Database» — tranne il modulo `sound`,
+alias `MU`, `S`, `C`, `A`, `K`, `MI`, `WJ`, `GR` — tabelle «Come si fa»,
+«Importare MIDI», «Importare dalla Weimar Jazz Database», «Importare dal Groove
+MIDI» — tranne il modulo `sound`,
 patch cable compresi, che lì non c'è e sta in
 [`HANDOFF.md`](../HANDOFF.md) §6-septies. Scritto qui una volta: una scheda si
 legge sempre insieme al comune.
@@ -259,6 +260,47 @@ Resta regolabile: …
 le compete — la 11 della scheda se è una trappola di quel repertorio, il comune
 se vale per tutti — con la data)*
 
+#### Un ascolto non è una misura di percezione — 24 agosto 2026
+
+Tutto questo progetto poggia su un'idea giusta: **l'utente ascolta, e la sua
+correzione vale più di qualunque ragionamento.** Il 24 agosto 2026 quello
+strumento è stato usato per la prima volta per rispondere a una domanda
+**quantitativa** — di quanti millisecondi debba spostarsi una nota perché si
+senta — ed è l'ascoltatore stesso ad aver messo il limite:
+
+*«Considera che variazioni di pochi ms sono difficili da percepire
+consapevolmente da un umano, soprattutto con un orecchio poco allenato come il
+mio. […] A questo livello di dettaglio tutte le mie valutazioni sono
+imprecise.»*
+
+Non è modestia, è la descrizione corretta dello strumento. Tre regole ne
+discendono, e valgono per ogni repertorio:
+
+1. **quel che un ascoltatore riferisce è `[OSS]` su quell'ascoltatore in quella
+   sessione.** È fortissimo per *«funziona / non funziona»*, *«c'è / non c'è»*,
+   *«è sbagliato»* — che è ciò per cui il ciclo di revisione esiste. È debole per
+   *«quanto»*, e una risposta sola non diventa una soglia per il fatto di essere
+   stata data con sicurezza;
+2. **prima di concludere «non si sente», si amplifica.** La stessa differenza a
+   un tempo molto più lento è un'altra cosa: un «non si sente» è **datato alle
+   condizioni in cui si è ascoltato**, non è una proprietà del materiale. Un
+   ascolto che vuole sapere se uno scarto è percepibile ha **due manopole** —
+   l'isolamento della voce e il tempo — e girarne una sola dà una risposta che
+   sembra definitiva e non lo è;
+3. **e per misurare davvero una soglia servono ripetizioni, ordine casuale e
+   ascolto alla cieca.** È psicoacustica, non una sessione in più al Deluge: se
+   il numero serve, si cambia esperimento; se non serve, si scrive che non c'è.
+
+⚠️ **E le domande vanno fatte aperte.** Le tre del 24 agosto erano binarie e
+contenevano le parole della risposta — «volume o dove cadono?», «prima o
+insieme?». Quella volta ha retto perché l'ascoltatore non ha detto sempre di sì,
+e anzi è tornato a smentirsi da solo; ma è stata fortuna di formulazione, non
+una buona formulazione.
+
+Sta qui, nel metodo, e non nella casella 11 di una scheda, perché non riguarda
+un repertorio: riguarda **quanto peso dare all'orecchio come strumento di
+misura**, e l'orecchio è lo stesso quando ascolta dub o jazz.
+
 #### Si parte dal primo livello della gerarchia — correzione del 16 agosto 2026
 
 **16 agosto 2026 — «leggi anche documentazione», «leggi anche docs
@@ -294,6 +336,16 @@ La scala corrente della programmazione di batteria, su 127: [WEB]
 | normale | 90-100 | il corpo del pattern |
 | sottovoce | 70-90 | riempimento |
 | **fantasma** | **< 70** (rullante: 35-50) | tessuto, non evento |
+
+⚠️ **Questa scala è `[WEB]`, e vale finché un repertorio non ha misure sue.**
+È il ripiego onesto: dove nessuno ha aperto un corpus, questi sono i numeri che
+ci sono, e valgono per qualunque genere. Ma dove un corpus è stato aperto la
+scala misurata **vince su questa**, e un repertorio ce l'ha già: la **casella 6
+di [`repertori/jazz.md`](repertori/jazz.md)** porta mediana, quartili ed
+escursione per strumento della batteria jazz, con accanto quante esecuzioni e
+quanti batteristi sostengono ogni riga. Là i numeri, qui il ripiego — e sono
+**diversi**, in qualche riga di parecchio: chi scrive jazz usa quelli, non
+questi. **Non si ricopiano qui**, per la regola in cima a questa pagina.
 
 E di quanto varia un accento rispetto al colpo normale, per strumento: [WEB]
 
@@ -340,8 +392,8 @@ e la seconda non copre la prima.**
 
 **E il Deluge ha la grana per farlo.** Con la RESOLUTION di default sono
 **96 tick per movimento**; a 70 BPM un movimento dura 857 ms, quindi
-**1 tick ≈ 8,9 ms**. La finestra di microtiming che si sente è 20-40 ms, cioè
-**2-5 tick**: abbondantemente rappresentabile. Lo strumento esiste già ed è
+**1 tick ≈ 8,9 ms**. La finestra di microtiming che si sente è 20-40 ms `[WEB]`,
+cioè **2-5 tick**: abbondantemente rappresentabile. Lo strumento esiste già ed è
 `MU.sposta(doc, clip, tick=…)` (§6-quinquies).
 
 ⚠️ **Ma `sposta()` oggi non serve a questo, e va sistemata prima di usarla
@@ -355,6 +407,57 @@ uscire l'ultimo colpo invece di riportarlo in testa. Serve uno spostamento
 è aritmetica sulla RESOLUTION documentata, ma che 3 tick di ritardo sul basso
 si *sentano* come pocket e non come errore lo può dire solo l'ascolto. E qui
 ascoltare è la verifica giusta: l'affermazione riguarda ciò che si sente.
+
+⚠️ Il **24 agosto 2026** una parte di questo `[IPO]` è stata messa alla prova
+per la prima volta — qui sotto — e non su un basso ma su una batteria. Quel che
+si è sentito è la **separazione fra due voci**; che uno strato spostato *suoni*
+come pocket invece che come errore resta non ascoltato.
+
+##### Le due domande sono diverse, e la soglia dipende dal tempo — 24 agosto 2026
+
+⚠️ **Uno scarto scritto è in tick; la finestra dell'udibile è in
+millisecondi.** Un tick è una frazione del movimento — `60000/(BPM × 96)` ms —
+quindi **la stessa scrittura vale millisecondi diversi secondo il tempo a cui la
+si suona**, e la sua udibilità con essa. Chi posa un groove template senza
+guardare il BPM sta decidendo, senza saperlo, quanto grande sarà il proprio
+lavoro in millisecondi: lo stesso residuo che a tempo lento si sente, a tempo
+veloce ne vale pochi e può non arrivare a nessuno. **I residui si dicono in
+tick**, e i millisecondi si scrivono accanto **con il tempo che li produce**,
+mai da soli.
+
+⚠️ **E le domande sono due, non una.** La finestra 20-40 ms qui sopra qualifica
+**uno spostamento contro la griglia** — una parte che arriva prima o dopo il
+tempo, cioè una grandezza **assoluta**. Quanto due voci che suonano *insieme*
+debbano separarsi per essere sentite separate è **un'altra domanda**: sono due
+compiti percettivi diversi, la sensibilità dell'uno non si trasporta all'altro,
+e quella finestra risponde solo al primo.
+
+Il primo ascolto di questo progetto su note scritte fuori griglia — **un
+ascoltatore, un giro di due battute, metronomo acceso**, 24 agosto 2026 `[OSS]`
+— ha stabilito **due cose**, ed è utile scriverle piccole: che le due domande
+qui sopra vanno **poste separate**, e che **uno scarto scritto si sente, quando
+è abbastanza grande** — lo stesso spostamento di 3 tick, non distinto al tempo a
+cui era scritto, è stato sentito rallentando il tempo di quasi sette volte.
+
+⚠️ **Quei 3 tick sono la coppia del 24 agosto 2026**, costruita **prima** che la
+finestra di grazia fosse tolta da `GR.profilo_da_colpi()` (commit `18f26e5`). È
+il numero **di ciò che è stato ascoltato**, e come tale resta: rifacendo la
+stessa catena col codice di oggi la riga esce a **−4 tick** e altre otto
+posizioni su trentuno cambiano. I due file di quella coppia sono un **esemplare
+unico** e non vanno rigenerati — rieseguire lo script che li ha scritti li
+sovrascriverebbe, e con essi il materiale sia degli ascolti sia della casella 10.
+La casella 6 di [`repertori/jazz.md`](repertori/jazz.md) porta l'avvertenza per
+esteso.
+
+⚠️ **Quanto grande debba essere, invece, NON è stato stabilito, e non è un
+dettaglio mancante: è tutto il resto.** Da quegli ascolti non esce nessuna
+soglia — il perché sta nel metodo, «Un ascolto non è una misura di percezione» —
+e la finestra 20-40 ms qui sopra **resta esattamente dov'era**: non è stata
+confermata e non è stata contraddetta.
+
+I numeri, i tempi, la coppia di file e tutte le cautele stanno nella **casella 6
+di [`repertori/jazz.md`](repertori/jazz.md)**, che è dove sono stati osservati:
+qui la distinzione, là il caso.
 
 #### L'arco di densità
 
@@ -592,6 +695,201 @@ una scala, il display un'altra», da cui viene la formula qui sopra, e
 era arrivati sbagliando e cosa resta ignoto del sorgente
 (`song.SWING_SCARTO_SORGENTE`). Qui c'è come si usa, lì come si è stabilito.
 
+#### Il groove template: velocity e microtiming da un'esecuzione vera
+
+*Alimenta le caselle 6 e 10.*
+
+Un **groove template** è la velocity e la micro-tempistica di un groove suonato
+davvero, prese da un'esecuzione e posate su un pattern scritto. Non è un
+effetto del dispositivo e non è una funzione che «umanizza»: è **materiale**, e
+si legge da un corpus. Due funzioni, e la seconda è l'unica che scriva:
+
+- `GR.profilo(base, id)` costruisce il profilo da **una esecuzione nominata**
+  del Groove MIDI — per ogni passo e per ogni strumento: quanti colpi, con che
+  velocity, e con che scarto dalla griglia;
+- `MU.applica_groove(note, prof, dove=…)` lo posa su un pattern uscito da
+  `MU.passi()`. **Muta la lista** e ritorna il rapporto, non le note; e **non
+  inventa**: un passo su cui quel batterista non ha mai suonato lascia la nota
+  com'è e finisce in `senza_appoggio`, che va letto.
+
+⚠️ **L'esecuzione va nominata, sempre.** Quello che esce da un profilo è
+`[OSS]` **su un esecutore**, non `[MIS]` su un repertorio — e mediare il
+microtiming di batteristi diversi lo tirerebbe verso la griglia, cioè verso
+zero, perdendo esattamente ciò che si era andati a prendere. Quale esecuzione
+scegliere, e perché il nome GM di una riga non è il suo ruolo musicale, è di
+repertorio e sta nella casella 6 della scheda.
+
+⚠️ **E il template porta il SOLO residuo: lo swing lo fa la song.** Il rapporto
+fra le due crome lo mette `S.set_swing()`, che è un'impostazione **della song**
+e vale per tutte le tracce insieme, basso e armonia compresi. Un template che
+portasse anche lo swing lo farebbe applicare **due volte** — una dal firmware e
+una dalle posizioni scritte — e il risultato non sarebbe «più swingato», sarebbe
+sbagliato. Quale valore di swing, e su quale figura, sta nella casella 10 della
+scheda; quanto è grande il residuo che il template scrive, nella casella 6.
+
+##### Togliere lo swing e rimetterlo torna a zero — ma contro sé stesso — 24 agosto 2026
+
+La separazione qui sopra ha un punto in cui è facile sbagliare, ed è
+l'**astrazione**: `GR.profilo()` toglie lo swing dalle posizioni misurate
+(`_senza_swing()`), e `S.set_swing()` lo rimette a suonare. La domanda giusta è
+se il giro sia **neutro** — un pattern scritto con lo swing già dentro e swing 0
+nella song, e lo stesso pattern col solo residuo più `set_swing()`, dovrebbero
+suonare uguali. Se non lo fossero, tanto varrebbe lasciare lo swing a 0 quando
+si usa un template.
+
+**Questa sottosezione ha due metà, e sono due prove diverse:** l'aritmetica
+della libreria contro sé stessa, che è qui subito sotto, e — dallo stesso
+giorno — l'**ascolto** che mette il dispositivo in mezzo alle due formule, che
+è in fondo. È la seconda quella che decide.
+
+L'aritmetica è stata rifatta su `drummer1/session3/2` — che qui fa da materiale
+di prova, e il risultato non è di quel repertorio — togliendo lo swing e
+rimettendolo con la formula del firmware che sta nella docstring di
+`set_swing()`, quella da cui viene anche `display = 100 × BUR / (BUR + 1)`
+`[OSS]`:
+
+| | scarto medio | massimo |
+|---|---|---|
+| col levare **esatto** (0,5985) | **0,0000 tick** | **0,0000 tick** |
+| col levare **arrotondato al display intero** (60) | 0,0526 tick | **0,1433 tick** |
+
+Cioè la catena è **esattamente invertibile**, e l'unica perdita è
+l'arrotondamento del display a un intero: **meno di un quinto di tick**, che a
+100 BPM è meno di un millisecondo. Nessuna ragione aritmetica, quindi, per
+lasciare lo swing a 0 quando si posa un template.
+
+⚠️ **E qui la cautela, che è tutto il valore di questa nota: NON dimostra che
+l'astrazione sia giusta. Dimostra che è auto-consistente.** `_senza_swing()` e
+la formula usata per rimettere lo swing **sono la stessa formula**: si invertono
+per costruzione, e tornerebbero a zero anche se fossero tutt'e due sbagliate.
+Quel che resta non verificato è se **il firmware faccia davvero quella cosa** —
+e l'ignoranza è già dichiarata dove va, in `song.SWING_SCARTO_SORGENTE`: i
+«swung tick» del sorgente e i tick delle posizioni di nota differiscono di un
+**fattore 2**, e il punto in cui i due si convertono **non è stato trovato**.
+
+**L'esperimento che lo decide è stato fatto**, lo stesso giorno, ed è la metà
+che qui mancava. Le due metà vanno tenute separate, perché sono due cose
+diverse: qui sopra c'è l'**auto-consistenza** della libreria, che è aritmetica
+contro sé stessa e non poteva fallire; qui sotto c'è la **prova esterna**, che
+mette il dispositivo in mezzo alle due formule ed è la sola che possa portare
+un'informazione.
+
+**La coppia.** `SWINGA` e `SWINGB`: le stesse 22 note di un'esecuzione vera,
+quattro voci, due battute in loop a **102 BPM**. In A le posizioni portano lo
+swing **dentro** e la song sta a swing 50; in B le stesse note con lo swing
+tolto da `_senza_swing()`, più swing **62** su figura `1/8` — cioè lo swing lo
+fa il firmware. Fuori dalle note i due file differiscono per **una riga sola**,
+`swingAmount`: quel che si sente è attribuibile a una cosa sola. La previsione
+è stata scritta **prima** dell'ascolto e distingueva **sei** modelli di cosa il
+firmware faccia, perché muove «la seconda della coppia» e cosa faccia alle note
+che cadono **fra** le crome non è stabilito da nessuna parte. I sei modelli, e
+di quanto ciascuno divergerebbe nota per nota, si ristampano con
+`.venv/Scripts/python.exe tools/genera_swing.py`, che genera anche la coppia:
+lì c'è come si è costruita, qui cosa se ne ricava.
+
+**L'esito**, 24 agosto 2026 — un ascoltatore, una sessione, nessuna
+ripetizione, nessuna prova alla cieca `[OSS]`:
+
+*«Forse ci sono microscopiche differenze, ma direi che sono sufficientemente
+simili.»*
+
+**Quel che questo esclude, ed è l'affermazione forte.** Quattro dei sei modelli
+prevedevano differenze **da decine fino a oltre cento millisecondi a quel
+tempo**, e con effetti che hanno un nome: i levare del ride che tornano
+**dritti**, cioè B più rigido di A, oppure i movimenti stessi che si spostano,
+cioè il tempo che lurca. Sono cose che si sentono senza cercarle, e nessuna è
+stata riferita: **quei quattro modelli sono fuori.** L'inferenza regge proprio
+perché non chiede all'orecchio nessuna finezza — chiede solo che un ride
+raddrizzato si sarebbe notato.
+
+**Quel che invece NON dimostra.** Il modello che la libreria assume — il blocco
+di 96 tick che `_senza_swing()` inverte — prevedeva **identiche**: 22 note su
+22 sotto **0,56 tick, cioè 3,4 ms a 102 BPM**, che è sotto la griglia stessa
+dei tick. La risposta è «forse microscopiche differenze», non «identiche».
+Quindi il modello è **compatibile** con quel che si è sentito, non
+**confermato** da esso, e la distanza fra le due parole è tutta la cautela di
+«Un ascolto non è una misura di percezione».
+
+⚠️ **E un modello resta in piedi, indebolito ma non escluso.** È quello in cui
+il firmware **quantizza a una finestra** invece di deformare il tempo: sposta
+le note che cadono vicino alla croma e lascia dove sono tutte le altre. Su
+questo estratto divergeva dal blocco in **un punto solo** — tre colpi di
+rullante a un quarto di movimento, **6 tick, cioè 36,8 ms a 102 BPM** — e sotto
+un tick e mezzo ovunque altrove. All'ascoltatore quel rullante era stato
+indicato fra le tre cose da guardare, e non l'ha riportato come diverso: è
+evidenza contraria, e per questo il modello è indebolito. Ma 36,8 ms su tre
+colpi dentro un loop di due battute sono il genere di cosa che si perde, stanno
+**appena** dentro la finestra dell'udibile (vedi «Le due domande sono diverse,
+e la soglia dipende dal tempo»), e l'ascoltatore ha dichiarato imprecise le
+proprie valutazioni a questo livello di dettaglio. **Resta aperto.**
+
+**E si chiuderebbe così**, con una mossa che era già stata tenuta di riserva:
+una coppia **costruita** invece che presa da un'esecuzione, con le note messe
+apposta a fase 0,25 e 0,75 del movimento, cioè dove i due modelli divergono al
+massimo. Sui levare — dove cadono le note di un batterista vero — i due
+modelli quasi si toccano, ed è per questo che un estratto reale non basta a
+separarli: è il motivo per cui questa mossa era stata tenuta di riserva invece
+che fatta per prima.
+
+**La conseguenza pratica, che è la domanda da cui si era partiti:** l'ipotesi
+di riserva — *lasciare lo swing a 0 nella song quando si usa un groove
+template* — **non serve.** La spartizione «residuo al template, swing alla
+song» ha retto anche alla prova esterna, e si usa così. L'alternativa resta
+disponibile, e diventerebbe la scelta giusta solo se un giorno un modello a
+finestra venisse confermato: allora il template dovrebbe riportarsi dentro
+anche lo swing, e la song restare a 50.
+
+⚠️ **E `song.SWING_SCARTO_SORGENTE` resta esattamente com'era.** Il fattore 2
+fra i «swung tick» del sorgente e i tick delle posizioni di nota **non è stato
+spiegato** da questo esperimento. È stato solo reso **meno preoccupante**: uno
+dei quattro modelli esclusi era proprio quel fattore risolto dall'altra parte,
+cioè con un blocco di 192 tick, e quello è fuori. Il punto in cui i due si
+convertono resta non trovato, e la dichiarazione di ignoranza resta dov'è.
+
+#### Il quantize/humanize del dispositivo cancella il groove template
+
+*Alimenta la casella 10.*
+
+⚠️ `AUDITION` + `TEMPO`: **in senso orario quantizza, in senso antiorario
+umanizza**, e agisce **per riga e in modo distruttivo** — riscrive le posizioni
+di quella riga. `[MAN]`, dal manuale della community, e sul dispositivo **non
+è stato provato**. Il marcatore copre questa frase e **finisce qui**: tutto
+quello che segue è inferenza, e porta il suo.
+
+È il **concorrente diretto** del groove template. Toccano la stessa cosa — la
+posizione delle note rispetto alla griglia — quindi non si sommano: **chi passa
+per ultimo vince**, e chi ha appena posato un profilo con `MU.applica_groove()`
+e poi gira `TEMPO` su quella riga la sovrascrive. Le tre cose che vengono dopo
+sono invece tutte `[IPO]`, e vanno tenute distinte dalla riga qui sopra:
+
+- che l'umanizzazione lavori **randomizzando**, mentre il template **misura**,
+  è la lettura corrente della parola «humanize» `[IPO]`: il manuale non lo dice
+  e nessuno l'ha provato. È la differenza su cui poggia tutto il valore del
+  template, ed è la prima da verificare;
+- che quindi girare la manopola butti via una misura **nei due versi** — in
+  senso orario per riportare le note sulla griglia, in senso antiorario per
+  sostituirle con del rumore — segue dalla precedente `[IPO]`, non dal
+  manuale;
+- che il dispositivo **non lo segnali** è dedotto dal fatto che la manopola
+  agisce sulla riga corrente senza chiedere niente `[IPO]`, non osservato.
+
+Si verificano tutte e tre insieme, e con un gesto solo: girare quel comando su
+una riga che porta un template, e guardare cosa resta. Va fatto sul
+dispositivo, e scritto qui con la data quando arriva.
+
+⚠️ **Il primo giro sul dispositivo, il 24 agosto 2026, NON l'ha fatto — e
+apposta.** Quel giro serviva a sapere un'altra cosa: se il dispositivo
+**conservi** le posizioni scritte fuori griglia quando si carica e si risalva
+una song senza toccare niente. Le conserva `[OSS]`, ed è nella casella 10 di
+[`repertori/jazz.md`](repertori/jazz.md). Girare `TEMPO` su una di quelle righe
+avrebbe riscritto le posizioni proprio mentre si guardava se sopravvivevano: le
+tre `[IPO]` qui sopra restano quindi da verificare **dopo**, su una copia, e da
+sole.
+
+Sta qui e non in una scheda perché è meccanismo di macchina e vale per ogni
+repertorio — e perché una scheda che tace su un comando che cancella il proprio
+lavoro è peggio di una che lo ripete.
+
 #### Quattro inviluppi e quattro LFO, non due — correzione del 16 agosto 2026
 
 *Alimenta la casella 10, «Sul Deluge».*
@@ -615,7 +913,7 @@ casella della scheda corrispondente: la scheda è la fonte, questa matrice ne
 | repertorio | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | [reggae / dub](repertori/reggae-dub.md) | ◐ | ● | ● | ◐ | ● | ● | ◐ | ○ | ◐ | ◐ | ● |
-| [jazz](repertori/jazz.md) | ○ | ○ | ◐ | ● | ○ | ○ | ◐ | ○ | ○ | ◐ | ○ |
+| [jazz](repertori/jazz.md) | ○ | ○ | ◐ | ● | ○ | ● | ◐ | ○ | ◐ | ◐ | ○ |
 | classica · barocca · antica | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | elettronica · IDM · techno · hip hop · trip hop · DnB · jungle | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 

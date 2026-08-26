@@ -41,9 +41,27 @@ Sulle sole `beat` del jazz i batteristi si spartiscono così: `drummer1` 19,
 «il jazz», abbastanza per dire «cinque batteristi di studio», ed è quest'ultima
 la frase che va scritta accanto al numero.
 
-⚠️ **Il reggae del Groove MIDI è un batterista solo e dieci minuti di
-musica.** Quattro esecuzioni continue (78, 78, 141, 126 BPM) più sedici fill da
-meno di tre secondi. Chiamare `[MIS]` quello che ne uscirebbe sarebbe
+⚠️ **Il reggae del Groove MIDI sono due batteristi e dieci minuti di musica.**
+Quattro esecuzioni continue (78, **64**, 141, 126 BPM), **due di `drummer1` e
+due di `drummer5`**, più sedici fill di due-tre secondi, tutti di `drummer1`.
+
+> **Seconda correzione, 24 agosto 2026.** Questa riga diceva «78, 78, 141,
+> 126»: il secondo 78 era inventato, e la seconda esecuzione — `reggae/slow`,
+> `drummer1/session1/201` — sta a **64 BPM**. L'ha trovata l'implementatore del
+> Task 9 ricontando, ed è la seconda volta che questo paragrafo sbaglia un
+> numero mentre difende una tesi giusta. Qui il numero pesa: 64 è uno dei due
+> soli tempi che cadono nella fascia 50-100 BPM dichiarata dalla casella 3 del
+> reggae, quindi non era decorativo.
+
+> **Correzione del 18 agosto 2026, e vale come promemoria.** Questo paragrafo
+> diceva «un batterista solo», ed era falso: l'ha trovato l'implementatore del
+> Task 6, misurando invece di rileggere. La frase era una deduzione — `drummer1`
+> ha 18 righe su 20, quindi «praticamente uno» — e la deduzione ha mangiato il
+> dato. Il numero non cambia la conclusione, perché a renderla `[WEB]` sono le
+> **quattro** esecuzioni continue, non quanti le hanno suonate; ma una tesi
+> giusta difesa con un numero sbagliato resta un numero sbagliato.
+
+Chiamare `[MIS]` quello che ne uscirebbe sarebbe
 travestire un esecutore da repertorio — la stessa cosa che la casella 8 del
 jazz vieta in una riga («un assolo è un musicista, non un repertorio»). Quindi
 la casella 6 del reggae **resta `[WEB]`**, e ci si scrive il conteggio col
@@ -102,7 +120,21 @@ applicato due volte.
 | chi | cosa fa |
 |---|---|
 | `set_swing()` | lo swing, per tutta la song — batteria, basso e comping insieme |
-| il groove template | **solo il residuo**: il ride che spinge rispetto al rullante che tiene indietro |
+| il groove template | **solo il residuo**: di quanto ogni strumento arriva prima o dopo il resto del kit |
+
+⚠️ **Correzione del 19 agosto 2026 — questa riga era scritta al rovescio.**
+Diceva «il ride che spinge rispetto al rullante che tiene indietro», che
+invertiva la convenzione di segno **e** i fatti: nel Groove MIDI il ride è il
+**più tardi** dei quattro pad, e il charleston a pedale il più in anticipo. La
+convenzione vera si legge dal sito definitorio, `Passo.scarto` in
+[`../../../tools/delugexml/groove.py`](../../../tools/delugexml/groove.py), e
+si conferma da `musica.applica_groove()`, che fa `pos + scarto`: **positivo =
+il colpo cade dopo la griglia, cioè ritarda; negativo = prima, cioè anticipa.**
+La stessa frase invertita stava in **sei** punti del piano
+([`../plans/2026-08-18-groove-midi-dinamica.md`](../plans/2026-08-18-groove-midi-dinamica.md),
+Task 5 e Task 7) ed è corretta anche lì; è costata tre giri di revisione al
+Task 8, ed è per questo che viene sostituita invece che lasciata com'era — Task
+9 e Task 10 leggono da qui.
 
 Quindi `profilo()` misura il BUR dell'esecuzione e **lo toglie**. Quel BUR non
 è materiale di scarto: è il **controllo indipendente** sull'1,61 misurato sulla

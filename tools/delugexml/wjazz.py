@@ -54,6 +54,7 @@ from typing import NamedTuple
 
 from . import musica as MU
 from .midi import TICK_PER_MOVIMENTO_DELUGE, Conversione
+from .musica import in_bur                          # noqa: F401  (ri-esportato)
 from .notes import Note
 
 #: Le qualita' del dialetto, come mappa grado -> semitoni. Il prefisso e' uno
@@ -492,13 +493,6 @@ class Swing(NamedTuple):
         return (f'{self.assoli} assoli, {self.coppie} coppie: levare al '
                 f'{self.percento:.1f}% del movimento (BUR {self.bur:.2f}), '
                 f'quartili {self.q1 * 100:.1f}%-{self.q3 * 100:.1f}%')
-
-
-def in_bur(levare: float) -> float:
-    """Da posizione del levare a BUR. 0,5 -> 1 (dritto), 0,667 -> 2."""
-    if not 0 < levare < 1:
-        raise ValueError(f'il levare sta fra 0 e 1, non {levare}')
-    return levare / (1 - levare)
 
 
 def levare_da_dati(battiti, note, finestra=FINESTRA_LEVARE) -> list[float]:

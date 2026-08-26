@@ -189,6 +189,58 @@ def passi(pattern: str, *, velocity: int = VEL_COLPO,
     return out
 
 
+def applica_groove(note: list[Note], profilo, dove: str) -> dict[str, object]:
+    """Posa velocity e residuo misurati su un pattern uscito da `passi()`.
+
+    ⚠️ MUTA `note` IN POSTO E NON RITORNA NOTE. E' l'eccezione del modulo:
+    `passi()`, `melodia()`, `accordi()` e `armonia()` COSTRUISCONO e
+    RITORNANO `Note` nuove, questa invece scrive dentro le `Note` che le
+    vengono passate -- il ritorno e' solo il rapporto (vedi sotto), non le
+    note aggiornate. Chi chiama tiene il riferimento alla stessa lista
+    passata in ingresso; e' quella, mutata, il risultato musicale.
+
+    Il pattern resta la stringa leggibile che e'; il feel arriva da
+    un'esecuzione vera. `dove` e' il nome GM dello strumento nel profilo.
+
+    ⚠️ LO SWING NON E' QUI. Il profilo porta il solo RESIDUO -- di quanto
+    ogni strumento arriva prima o dopo il resto del kit -- perche' lo swing lo fa
+    `song.set_swing()`, che e' di song e vale anche per basso e comping. Un
+    template che portasse anche lo swing lo farebbe applicare due volte.
+
+    ⚠️ NON INVENTA. Se il pattern chiede un colpo su un passo dove quel
+    batterista non ha mai suonato, la nota resta com'e' e il passo finisce
+    in `senza_appoggio`. Riempire i buchi da se' sarebbe inventare con la
+    benedizione della funzione scritta per impedirlo.
+
+    Ritorna un rapporto (regola 4: un'operazione silenziosa non e'
+    correggibile).
+    """
+    if dove not in profilo.passi:
+        raise ValueError(
+            f'lo strumento {dove!r} non e\' nel profilo {profilo.id!r}: '
+            f'ci sono {sorted(profilo.passi)}')
+    per_passo = {p.passo: p for p in profilo.passi[dove]}
+
+    toccate = 0
+    senza = []
+    for n in note:
+        passo = (n.pos // TICK_PER_PASSO) % 16
+        misura = per_passo.get(passo)
+        if misura is None:
+            if passo not in senza:
+                senza.append(passo)
+            continue
+        # `Note` e' una dataclass MUTABILE: si scrivono i campi.
+        # `max(0, ...)` perche' un residuo negativo sul primo passo manderebbe
+        # la nota prima dell'inizio della clip, che il Deluge non sa leggere.
+        n.velocity = misura.velocity
+        n.pos = max(0, n.pos + int(round(misura.scarto)))
+        toccate += 1
+
+    return {'strumento': dove, 'da': profilo.id, 'toccate': toccate,
+            'senza_appoggio': sorted(senza)}
+
+
 def durata_in_tick(spec: str | int) -> int:
     """`'1/8'` -> 48 tick. Un intero passa invariato, gia' in tick."""
     if isinstance(spec, int):
@@ -319,6 +371,31 @@ def accordi(spec: str, *, durata: str | int = '1/4', da: int = 0,
             out.setdefault(y, []).append(
                 Note(pos=pos, length=lung, velocity=velocity))
     return out
+
+
+# ------------------------------------------------------------- lo swing
+#
+# Dove cade il LEVARE dentro il movimento, in frazione: 0,5 e' dritto,
+# 0,667 e' la terzina. Il rapporto fra le due meta' del movimento e' la BUR
+# (beat-upbeat ratio) della letteratura: 1 dritto, 2 terzina.
+#
+# Sta QUI e non in un lettore di corpus perche' la usano in due -- `wjazz`
+# sulla Weimar e `groove` sul Groove MIDI -- e un numero, o una formula,
+# vive in un posto solo.
+
+
+def in_bur(levare: float) -> float:
+    """Da posizione del levare a BUR. 0,5 -> 1 (dritto), 0,667 -> 2."""
+    if not 0 < levare < 1:
+        raise ValueError(f'il levare sta fra 0 e 1, non {levare}')
+    return levare / (1 - levare)
+
+
+def da_bur(bur: float) -> float:
+    """L'inverso: da BUR a posizione del levare. 2 -> 0,667."""
+    if bur <= 0:
+        raise ValueError(f'la BUR e\' positiva, non {bur}')
+    return bur / (1 + bur)
 
 
 # -------------------------------------------------- sigle di accordo e voicing

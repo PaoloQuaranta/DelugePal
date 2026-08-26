@@ -66,8 +66,31 @@ bubble non c'è altro che questa riga e il pattern della casella 6.
 
 ## 3. Tempo
 
-Tempo: **50-100 BPM**, con 70-78 al centro del roots. Quindi 70 BPM non è
+Tempo: **50-100 BPM**, con 70-78 al centro del roots. [WEB] Quindi 70 BPM non è
 "lento per il dub", è il posto giusto.
+
+**E cosa dice il corpus** — che è la domanda dei bordi, e ha due risposte
+diverse. Il Groove MIDI etichetta `reggae` **venti esecuzioni**: quattro
+continue (`beat`), ai tempi di **78, 64, 141 e 126 BPM**, e sedici fill **tutti a 78**
+`[OSS]`. Il conteggio per intero, e perché su questo corpus non si misuri, sono
+nella **casella 6**.
+
+- **Il centro tiene.** Il 78 della `beat` e il 78 di tutti e sedici i fill
+  cadono in mezzo al «70-78» che la riga qui sopra afferma senza marcatore, e
+  il 64 sta dentro il range. È **corroborazione, non misura**: tutte le
+  esecuzioni in fascia sono di `drummer1`, e un esecutore non è un repertorio.
+- **Il tetto no, e non basta a spostarlo.** Il 141 e il 126 stanno **26-41 BPM
+  sopra** i 100 dichiarati. Ma questo dice **cosa il corpus etichetta**, non
+  fin dove arriva il reggae: l'etichetta può essere larga, come lo è `jazz`,
+  che sotto di sé porta anche `jazz/funk` e `jazz/fusion`. La differenza è che
+  lì le sottoetichette **si vedono e si escludono**, mentre qui le due veloci
+  portano `reggae` nudo — l'unica sottoetichetta è `reggae/slow`, ed è il 64.
+  **Il corpus non offre niente per separarle**, quindi il range di questa
+  casella **non si muove** e resta `[WEB]`. Il primo posto dove guardare è la
+  ricerca che la **casella 1** già chiede: ska, rocksteady e dancehall
+  «condividono il levare e cambiano tempo», e finché quel confine non è
+  tracciato non si sa se due esecuzioni veloci etichettate `reggae` siano
+  reggae veloce o un vicino.
 
 ## 4. Feel
 
@@ -228,18 +251,58 @@ skank  = '..x...x...x...x.'   # accordi staccatissimi, TUTTI i levare
 bubble = '.oo..oo..oo..oo.'   # organo, i sedicesimi attorno al levare
 ```
 
-### L'agenda: qui i `[WEB]` si possono rimpiazzare con dei `[MIS]`
+### Perché qui i `[WEB]` NON si possono rimpiazzare con dei `[MIS]`
 
 Questa casella è piena, ma i suoi numeri vengono dal web e l'ascolto
-dell'utente li ha già corretti una volta. Il corpus che li rifarebbe misurati è
-il **Groove MIDI**, decompresso in `to-read/MIDI/groove-v1.0.0-midionly/`:
-`groove/info.csv` porta **20 esecuzioni reggae** — 19 con `style` esattamente
-`reggae`, una `reggae/slow` — contate il 17 agosto 2026 `[OSS]`, cioè velocity
-e microtiming di batteristi veri. Si contano **per prefisso**, e non per
-sottostringa: perché la sottostringa sia la regola sbagliata sta nella casella
-6 di [`jazz.md`](jazz.md), col controesempio. `to-read/` è in `.gitignore`,
-quindi chi clona non trova i file e quel numero è lo stato del disco di quel
-giorno. Il lettore c'è già: `MI.batteria()`.
+dell'utente li ha già corretti una volta. Una versione precedente di queste
+righe si intitolava «qui i `[WEB]` si possono rimpiazzare con dei `[MIS]`»:
+con questo corpus **non si può**, e il conteggio vero dice perché.
+
+Il corpus sarebbe il **Groove MIDI**, decompresso in
+`to-read/MIDI/groove-v1.0.0-midionly/`, che di reggae porta **20 esecuzioni** —
+19 con `style` esattamente `reggae`, una `reggae/slow`. Ma venti è il numero
+che non conta. Ricontate il 24 agosto 2026 con `GR.elenco(base,
+style='reggae')`, quelle venti si spartiscono così `[OSS]`:
+
+| | quante | chi le suona | quanto dura |
+|---|---|---|---|
+| `beat` | **4** — a 78, 64, 141 e 126 BPM | `drummer1` 2, `drummer5` 2 | dieci minuti in tutto |
+| `fill` | **16**, tutti a 78 BPM | `drummer1` 16 | 2,3-3,1 secondi l'uno, 43 secondi in tutto |
+
+Cioè: **due batteristi**, **due esecuzioni continue ciascuno**, e undici minuti
+di musica contando anche i fill. E dei quattro `beat` soltanto **due** — il 78
+e il 64 — cadono nella fascia di tempo che la **casella 3** dichiara per questo
+repertorio; il 141 e il 126 stanno molto sopra. Dentro il perimetro che questa
+scheda descrive il corpus ha quindi **due esecuzioni di un batterista solo**.
+
+Il criterio per fermarsi qui non è nuovo: lo enuncia in una riga la casella 8
+di [`jazz.md`](jazz.md) — *un assolo è un musicista, non un repertorio* — e qui
+vale moltiplicato, perché gli esecutori sono due e le esecuzioni quattro. Una
+tabella di velocity ricavata da lì descriverebbe `drummer1` e `drummer5`, e la
+firmerebbe «reggae». **La casella resta quindi `[WEB]`**, e non per pigrizia:
+il corpus c'è, è stato aperto, e non regge il peso che gli si voleva mettere
+addosso. Quanto ne serva perché regga si vede nella **casella 6 di
+[`jazz.md`](jazz.md)**, che la scala di velocity ce l'ha misurata e porta
+accanto a ogni riga le esecuzioni e i batteristi che la sostengono — i numeri
+stanno lì e non si ricopiano qui.
+
+*Quello che invece si può fare* è l'altra cosa, ed è legittima proprio perché
+non si traveste: da una di quelle quattro esecuzioni si costruisce un **groove
+template** con `GR.profilo()`, che è `[OSS]` **su quell'esecutore** e non
+`[MIS]` sul reggae. Come si posa su un pattern sta nel comune di
+[`../MUSICA.md`](../MUSICA.md), «La macchina». Al tempo di questo repertorio le
+esecuzioni sono due, e sono le sole due da nominare:
+**`drummer1/session1/184`** (78 BPM, 115 s) e **`drummer1/session1/201`**
+(`reggae/slow`, 64 BPM, 112 s) `[OSS]`. Le altre due sono di `drummer5` e
+stanno a 141 e 126 BPM, cioè fuori dalla casella 3.
+
+⚠️ Due avvertenze che restano valide comunque. Le etichette si contano **per
+prefisso**, e non per sottostringa — regola che nasce proprio qui, perché è
+`reggae` la parola che dentro altre etichette compare senza essere reggae:
+quali siano, e il conto che ne verrebbe, stanno nella casella 6 di
+[`jazz.md`](jazz.md), col controesempio. E `to-read/` è in `.gitignore`, quindi
+chi clona non trova i file: i conteggi qui sopra sono lo stato del disco di
+quel giorno, non una proprietà del progetto.
 
 ## 7. Armonia
 

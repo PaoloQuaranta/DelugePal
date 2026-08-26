@@ -5532,6 +5532,598 @@ def test_indice_repertori_coerente_con_le_schede():
               f'indice {indice.get(s.name)} vs scheda {vero}')
 
 
+def test_bur_in_comune():
+    """L'aritmetica del BUR sta in `musica`, e i due lettori la condividono.
+
+    Stava in `wjazz.py`. Serve anche a `groove.py`, e le alternative erano
+    duplicarla (vietato) o far dipendere un corpus dall'altro (assurdo).
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+    from delugexml import wjazz as WJ                       # noqa: PLC0415
+
+    check('dritto e BUR 1', MU.in_bur(0.5) == 1.0, str(MU.in_bur(0.5)))
+    check('la terzina e BUR 2', abs(MU.in_bur(2 / 3) - 2.0) < 1e-9,
+          str(MU.in_bur(2 / 3)))
+    check('il jazz misurato, 61,7%, da 1,61',
+          abs(MU.in_bur(0.617) - 1.61) < 0.01, f'{MU.in_bur(0.617):.3f}')
+
+    for bur in (1.0, 1.61, 2.0, 3.0):
+        check(f'da_bur e l inverso di in_bur, BUR {bur}',
+              abs(MU.in_bur(MU.da_bur(bur)) - bur) < 1e-9,
+              f'{MU.in_bur(MU.da_bur(bur))}')
+
+    check('un levare fuori da (0,1) e un errore',
+          _raises(lambda: MU.in_bur(1.0), ValueError))
+    check('e `wjazz` usa la stessa funzione, non una copia',
+          WJ.in_bur is MU.in_bur)
+
+
+def test_groove_prefisso():
+    """`reggae` prende `reggae/slow` e NON `latin/reggaeton`.
+
+    La sottostringa e' la regola sbagliata, ed e' scritta come controesempio
+    nella casella 6 di `docs/repertori/jazz.md`. Nucleo puro: nessun file.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    check('un prefisso prende se stesso', GR.per_prefisso('reggae', 'reggae'))
+    check('e prende la sottocategoria',
+          GR.per_prefisso('reggae/slow', 'reggae'))
+    check('ma NON una parola che lo contiene',
+          not GR.per_prefisso('latin/reggaeton', 'reggae'))
+    check('ne una che ci somiglia',
+          not GR.per_prefisso('latin/brazilian-sambareggae', 'reggae'))
+    check('jazz prende jazz/funk', GR.per_prefisso('jazz/funk', 'jazz'))
+    check('e non prende funk', not GR.per_prefisso('funk', 'jazz'))
+
+
+def test_groove_inventario():
+    """Lettura vera del dataset. SALTA se non c'e': non e' roba del repo.
+
+    I conteggi vengono dal dataset stesso, che qui e' l'artefatto in esame,
+    e sono lo stato del disco del 18 agosto 2026.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    base = ROOT / 'to-read' / 'MIDI' / 'groove-v1.0.0-midionly' / 'groove'
+    if not (base / GR.INVENTARIO).exists():
+        raise FileNotFoundError(str(base / GR.INVENTARIO))
+
+    tutte = GR.elenco(base)
+    check('il dataset ha 1150 esecuzioni', len(tutte) == 1150, str(len(tutte)))
+
+    jazz = GR.elenco(base, style='jazz')
+    check('101 esecuzioni jazz', len(jazz) == 101, str(len(jazz)))
+    beat = GR.elenco(base, style='jazz', beat_type='beat')
+    check('di cui 50 `beat`', len(beat) == 50, str(len(beat)))
+    check('e 5 batteristi', len({e.drummer for e in jazz}) == 5,
+          str(sorted({e.drummer for e in jazz})))
+
+    reggae = GR.elenco(base, style='reggae')
+    check('20 esecuzioni reggae', len(reggae) == 20, str(len(reggae)))
+    # ⚠️ L'ETICHETTA DICEVA "UN batterista" e l'asserzione ne pretendeva DUE:
+    # stampava `PASS ma UN batterista...` fra i 943, cioe' rivendeva come
+    # verde proprio l'errore che il commit `3a0052e` di questo ramo esiste
+    # per correggere. Corretta l'etichetta, non l'asserzione: i batteristi
+    # reggae sono due (drummer1 e drummer5), misurati su `info.csv`.
+    check('ma DUE batteristi e sole quattro `beat`',
+          len({e.drummer for e in reggae}) == 2
+          and len([e for e in reggae if e.beat_type == 'beat']) == 4,
+          f'{sorted({e.drummer for e in reggae})}, '
+          f'{len([e for e in reggae if e.beat_type == "beat"])} beat')
+    check('e nessuna e reggaeton',
+          all(not e.style.startswith('latin') for e in reggae),
+          str(sorted({e.style for e in reggae})))
+
+
+def test_groove_id_sbagliato_dice_quante_ce_ne_sono():
+    """L'errore su un id inesistente dice quante esecuzioni ci sono in tutto.
+
+    Rilievo di revisione: la docstring di `_una()` prometteva "un errore che
+    dice quante ce ne sono", ma il messaggio diceva solo cosa mancava, non
+    cosa c'era -- lo stesso difetto che `valori()` evita gia' elencando le
+    colonne disponibili. Si passa da `racconta()`, l'entrata pubblica, non
+    dalla funzione privata.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    base = ROOT / 'to-read' / 'MIDI' / 'groove-v1.0.0-midionly' / 'groove'
+    if not (base / GR.INVENTARIO).exists():
+        raise FileNotFoundError(str(base / GR.INVENTARIO))
+
+    check('un id inesistente solleva ValueError',
+          _raises(lambda: GR.racconta(base, 'non-esiste-questo-id'),
+                  ValueError))
+
+    try:
+        GR.racconta(base, 'non-esiste-questo-id')
+        messaggio = ''
+    except ValueError as e:
+        messaggio = str(e)
+    check('il messaggio nomina l id sbagliato',
+          'non-esiste-questo-id' in messaggio, messaggio)
+    check('e dice quante esecuzioni ci sono in tutto (1150)',
+          '1150' in messaggio, messaggio)
+    veri = {e.id for e in GR.elenco(base)}
+    check('e mostra almeno un id vero come esempio',
+          any(vero in messaggio for vero in veri), messaggio)
+
+
+def test_groove_origine_della_griglia():
+    """Lo scarto comune si stima e si toglie, con la media CIRCOLARE.
+
+    E' il trabocchetto di questo corpus: il tick 0 del file non e' un
+    movimento del batterista, e misurare da li' darebbe un anticipo
+    sistematico del 5% per OGNI esecuzione. Stesso errore della Weimar,
+    nella stessa posizione: l'origine della misura.
+
+    Nucleo puro: liste di numeri, nessun file.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    passo = 24.0                                    # un 1/16 sul Deluge
+
+    dritte = [k * passo for k in range(32)]
+    check('senza scarto, l origine e zero',
+          abs(GR.origine(dritte, passo)) < 1e-9, str(GR.origine(dritte, passo)))
+
+    avanti = [k * passo + 3 for k in range(32)]
+    check('uno scarto di +3 tick si ritrova',
+          abs(GR.origine(avanti, passo) - 3) < 1e-9, str(GR.origine(avanti, passo)))
+
+    # il caso che la media aritmetica sbaglia: una fase appena PRIMA del
+    # passo successivo e' un anticipo, non un ritardo di quasi un passo.
+    indietro = [k * passo - 1 for k in range(1, 32)]
+    check('e uno di -1 torna NEGATIVO, non +23',
+          abs(GR.origine(indietro, passo) + 1) < 1e-9,
+          str(GR.origine(indietro, passo)))
+
+    misto = [k * passo - 1 for k in range(1, 16)] + [k * passo + 1
+                                                     for k in range(16, 32)]
+    check('scarti opposti si annullano',
+          abs(GR.origine(misto, passo)) < 0.1, str(GR.origine(misto, passo)))
+
+    check('senza colpi, l origine e zero e non un errore',
+          GR.origine([], passo) == 0.0)
+
+    # i levare swingati NON devono entrare nella stima: stanno a 2/3 di
+    # movimento, cioe' a 2,67 passi, e la loro fase e' swing, non origine.
+    swingate = [k * passo for k in range(32)] + [
+        k * 96 + 64 for k in range(8)]
+    check('un levare swingato non sporca l origine',
+          abs(GR.origine(swingate, passo)) < 1e-9,
+          str(GR.origine(swingate, passo)))
+
+    # il bordo ESATTO della finestra: con passo=24 e finestra di default
+    # 0.25, il bordo sta a 6.0 tick. Un colpo li' deve restare ESCLUSO:
+    # e' il confronto stretto (< non <=) a deciderlo, ed e' l'unico caso
+    # in cui i due operatori danno risultati diversi -- non il levare
+    # swingato di sopra, che sta a 8 tick, ben oltre il bordo. Verificato
+    # sostituendo < con <= in una copia della funzione: con < l origine
+    # resta 0.0 esatto, con <= diventa ~0.123 (il colpo di bordo entra
+    # nella media circolare e la sposta).
+    bordo = [k * passo for k in range(31)] + [31 * passo + 6.0]
+    check('un colpo esattamente sul bordo della finestra resta escluso',
+          abs(GR.origine(bordo, passo)) < 1e-9, str(GR.origine(bordo, passo)))
+
+
+def test_groove_bur_nucleo():
+    """Dove cade il levare, su colpi costruiti a mano.
+
+    Un movimento contribuisce solo se dentro la finestra c'e' ESATTAMENTE un
+    colpo: due colpi vogliono dire semicrome, e li' una coppia di crome non
+    c'e'. Parentela di intento con `WJ.levare_da_dati()`, non identita': la
+    Weimar richiede DUE eventi totali nel movimento col primo su tatum 1,
+    garanzia piu' stretta di questa, che conta solo i colpi dentro la
+    finestra e ignora quanti ce ne siano fuori. Su una batteria -- polifonica,
+    a differenza degli assoli monofonici della Weimar -- la garanzia piu'
+    debole ammette qualche falso positivo in piu'.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    ppq = 96.0
+
+    dritto = []
+    for k in range(8):
+        dritto += [k * ppq, k * ppq + ppq / 2]
+    lev = GR.levare_da_posizioni(dritto, ppq)
+    check('crome dritte danno il levare a 0,5',
+          len(lev) == 8 and all(abs(v - 0.5) < 1e-9 for v in lev), str(lev[:3]))
+    check('e in BUR fa 1', abs(GR.bur_da_posizioni(dritto, ppq) - 1.0) < 1e-9,
+          str(GR.bur_da_posizioni(dritto, ppq)))
+
+    terzina = []
+    for k in range(8):
+        terzina += [k * ppq, k * ppq + ppq * 2 / 3]
+    check('la terzina da BUR 2',
+          abs(GR.bur_da_posizioni(terzina, ppq) - 2.0) < 0.01,
+          str(GR.bur_da_posizioni(terzina, ppq)))
+
+    jazz = []
+    for k in range(8):
+        jazz += [k * ppq, k * ppq + ppq * 0.617]
+    check('il levare del jazz misurato da 1,61',
+          abs(GR.bur_da_posizioni(jazz, ppq) - 1.61) < 0.02,
+          str(GR.bur_da_posizioni(jazz, ppq)))
+
+    semicrome = []
+    for k in range(8):
+        semicrome += [k * ppq, k * ppq + ppq / 4, k * ppq + ppq / 2,
+                      k * ppq + ppq * 3 / 4]
+    check('con DUE colpi in finestra il movimento si scarta',
+          GR.levare_da_posizioni(semicrome, ppq) == [],
+          str(GR.levare_da_posizioni(semicrome, ppq)))
+
+    check('senza coppie il BUR e None',
+          GR.bur_da_posizioni([0.0, 96.0, 192.0], ppq) is None)
+
+    # posizioni negative e non a partire da zero: e' la forma esatta in cui
+    # il Task 5 le passera' (gia' traslate). Il raggruppamento per movimento
+    # usa floor-division (`p // ppq`): con il troncamento (`int(p / ppq)`)
+    # un movimento su due perderebbe il proprio levare, che finirebbe
+    # accorpato nel movimento accanto -- vedi la nota nel codice.
+    negativo = []
+    for k in range(1, 9):               # movimenti -8..-1, mai zero
+        negativo += [-k * ppq, -k * ppq + ppq / 2]
+    lev_neg = GR.levare_da_posizioni(negativo, ppq)
+    check('posizioni negative danno lo stesso levare a 0,5 e nel movimento giusto',
+          len(lev_neg) == 8 and all(abs(v - 0.5) < 1e-9 for v in lev_neg),
+          str(lev_neg))
+    check('e in BUR fa 1 anche sul negativo',
+          abs(GR.bur_da_posizioni(negativo, ppq) - 1.0) < 1e-9,
+          str(GR.bur_da_posizioni(negativo, ppq)))
+
+    # il bordo superiore ESATTO della finestra (0,75): e' la semicroma che
+    # FINESTRA_LEVARE dichiara di voler escludere, e un colpo isolato li'
+    # non deve MAI passare per levare, anche da solo in finestra.
+    bordo_esatto = [0.0, 0.75 * ppq]
+    check('un colpo isolato esattamente sul bordo (0,75) non e il levare',
+          GR.levare_da_posizioni(bordo_esatto, ppq) == [],
+          str(GR.levare_da_posizioni(bordo_esatto, ppq)))
+
+
+def test_groove_profilo_nucleo():
+    """La catena: origine, poi BUR, poi il RESIDUO. In quest'ordine.
+
+    Su un'esecuzione costruita a mano che swinga a BUR 2 e ha un ride
+    spostato di +2 tick rispetto a tutto il resto: il template deve portare
+    quel +2 e NON lo swing, che sul Deluge lo fa `set_swing()`. Se portasse
+    anche lo swing, lo swing verrebbe applicato due volte.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    ppq = 96.0
+
+    # ---- fixture A: swing. Tutti i colpi SULLA griglia hanno lo stesso
+    # scarto (+2), cosi' l'origine e' esattamente 2 e il BUR viene esatto.
+    a = {'kick': [], 'ride': []}
+    for b in range(16):                             # 16 movimenti = 4 battute
+        a['kick'].append((b * ppq + 2, 100))
+        a['ride'].append((b * ppq + 2, 90))
+        a['ride'].append((b * ppq + 2 + ppq * 2 / 3, 70))
+
+    pa = GR.profilo_da_colpi(a, ppq)
+    check('il BUR misurato e 2', abs(pa.bur - 2.0) < 0.02, str(pa.bur))
+    check('quattro battute', pa.battute == 4, str(pa.battute))
+
+    # ⚠️ IL TEST CHE CONTA. Il levare swingato sta a 2,67 passi: senza
+    # togliere lo swing finirebbe arrotondato al passo 3. Se e' sul 2, lo
+    # swing e' stato tolto -- ed e' giusto che lo sia, perche' sul Deluge lo
+    # rimette `set_swing()`, e due volte sarebbe una volta di troppo.
+    ride = {s.passo for s in pa.passi['ride']}
+    check('il levare swingato cade sul passo 2, non sul 3',
+          2 in ride and 3 not in ride, str(sorted(ride)))
+
+    r2 = [s for s in pa.passi['ride'] if s.passo == 2][0]
+    check('e senza residuo, perche lo swing era tutto lo scarto',
+          abs(r2.scarto) < 0.6, str(r2.scarto))
+    check('con la sua velocity piu bassa', r2.velocity == 70, str(r2.velocity))
+
+    k0 = [s for s in pa.passi['kick'] if s.passo == 0][0]
+    check('il kick porta la sua velocity', k0.velocity == 100, str(k0.velocity))
+    check('e quante volte e stato colpito', k0.colpi == 4, str(k0.colpi))
+    check('uno strumento assente non compare', 'rullante' not in pa.passi,
+          str(sorted(pa.passi)))
+
+    # ---- fixture B: il residuo RELATIVO, senza swing di mezzo.
+    #
+    # ⚠️ Si misura la DIFFERENZA fra strumenti, non il valore assoluto: se
+    # il kick sta a 0 e il ride a +2, non esiste un'origine "vera" che dica
+    # quale dei due e' spostato. E' la ragione per cui la scheda dichiara
+    # sempre un DIVARIO fra due pad -- il charleston a pedale che anticipa il
+    # ride -- e mai un anticipo assoluto.
+    #
+    # ⚠️ IL SEGNO. `Passo.scarto` POSITIVO = il colpo cade DOPO la griglia
+    # (ritarda), NEGATIVO = prima (anticipa); il sito definitorio e'
+    # `groove.Passo.scarto`. Qui il ride sta a `b*ppq + 2`, cioe' DUE TICK
+    # PIU' TARDI del kick: quindi TRATTIENE, non spinge. Fino al 19 agosto
+    # 2026 queste due etichette dicevano il rovescio.
+    b_ = {'kick': [], 'ride': []}
+    for b in range(16):
+        b_['kick'].append((b * ppq, 100))
+        b_['ride'].append((b * ppq + 2, 90))
+
+    pb = GR.profilo_da_colpi(b_, ppq)
+    dk = [s for s in pb.passi['kick'] if s.passo == 0][0].scarto
+    dr = [s for s in pb.passi['ride'] if s.passo == 0][0].scarto
+    check('il ride TRATTIENE di 2 tick RISPETTO al kick',
+          abs((dr - dk) - 2) < 0.6, f'{dr:.2f} - {dk:.2f}')
+
+
+def test_groove_senza_grazia():
+    """La catena e' l'INVERSA ESATTA della mappa dello swing, anche in fondo.
+
+    ⚠️ IL DIFETTO CHE QUESTO TEST BLINDA, e come si rifa'. Fino al 24 agosto
+    2026 `profilo_da_colpi()` calcolava il movimento con mezzo passo di
+    grazia:
+
+        movimento = math.floor(p / ppq + 0.125)
+
+    Una nota nell'ultimo ottavo di movimento usciva allora con fase
+    NEGATIVA, e `_senza_swing()` le applicava il ramo della PRIMA meta'
+    (dilatata) mentre la nota sta nella SECONDA (compressa): non l'inversa
+    di niente che il firmware faccia. Sul corpus jazz del Groove MIDI
+    toccava un colpo su tre.
+
+    La fixture costruisce le posizioni applicando la mappa IN AVANTI a
+    posizioni dritte note, e chiede indietro quelle. E' l'unico modo per cui
+    il test non sia la stessa formula contro se' stessa: il valore atteso
+    non viene da `_senza_swing()`, viene da `con_swing()`.
+
+    ⚠️ I tre anticipi sono scelti perche' cadono nell'ultimo ottavo (dove
+    stava il difetto) e insieme abbastanza lontano dal battere da restare
+    FUORI dalla finestra di `origine()` (piu' di 6 tick swingati): se no
+    l'origine si sposterebbe e il valore atteso non sarebbe piu' esatto.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    ppq = 96.0
+    lev = 2.0 / 3.0                     # BUR 2, la terzina: numeri esatti
+
+    def con_swing(u, levare):
+        """La mappa del firmware IN AVANTI: da fase dritta a fase swingata."""
+        if u < 0.5:
+            return u * 2 * levare
+        return levare + (u - 0.5) * 2 * (1 - levare)
+
+    campione = [k / 100 for k in range(100)]
+    check('_senza_swing e l inversa della mappa in avanti su tutto [0,1)',
+          all(abs(GR._senza_swing(con_swing(u, lev), lev) - u) < 1e-12
+              for u in campione),
+          str(max(abs(GR._senza_swing(con_swing(u, lev), lev) - u)
+                  for u in campione)))
+
+    def fixture(anticipo):
+        """Kick e ride sulla griglia swingata, piu' un pad che ANTICIPA.
+
+        Il pad suona `anticipo` tick DRITTI prima del battere seguente: e'
+        una posizione dritta nota, portata avanti dalla mappa dello swing.
+        """
+        c = {'kick': [], 'ride': [], 'charleston a pedale': []}
+        for b in range(16):
+            c['kick'].append((b * ppq, 100))
+            c['ride'].append((b * ppq, 90))
+            c['ride'].append((b * ppq + con_swing(0.5, lev) * ppq, 70))
+            u = 1.0 - anticipo / ppq
+            c['charleston a pedale'].append(
+                (b * ppq + con_swing(u, lev) * ppq, 80))
+        return c
+
+    p10 = GR.profilo_da_colpi(fixture(10.0), ppq)
+    check('la fixture dichiara la terzina, e l origine non la sposta',
+          abs(p10.bur - 2.0) < 1e-9, str(p10.bur))
+
+    # ---- il CONTROLLO: fuori dall'ultimo ottavo la catena era gia' esatta.
+    # Il ride sta sul battere e sul levare swingato, e li' i due conti --
+    # con la grazia e senza -- coincidono. Se questo controllo fallisse, a
+    # essere rotta sarebbe la fixture, non il difetto.
+    ride = {s.passo: s.scarto for s in p10.passi['ride']}
+    check('il ride sul battere e sul levare non porta residuo',
+          sorted(ride) == [0, 2, 4, 6, 8, 10, 12, 14]
+          and all(abs(v) < 1e-9 for v in ride.values()),
+          str({k: round(v, 4) for k, v in ride.items()}))
+
+    # ---- 10 tick dritti di anticipo: il passo resta il battere, il residuo
+    # deve essere -10 ESATTI. Con la grazia usciva -5,0: meta'.
+    ped = {s.passo: s.scarto for s in p10.passi['charleston a pedale']}
+    check('10 tick dritti di anticipo restano sul battere',
+          sorted(ped) == [0, 4, 8, 12], str(sorted(ped)))
+    check('e il residuo e -10 tick esatti, non la meta',
+          all(abs(v + 10.0) < 1e-9 for v in ped.values()),
+          str({k: round(v, 4) for k, v in ped.items()}))
+
+    # ---- 14 e 17 tick: qui cambia anche il PASSO. Un colpo a 14 tick dritti
+    # dal battere e' piu' vicino alla semicroma precedente (a 24) che al
+    # battere, e la sedicesima e' dove va. La grazia lo attaccava al battere
+    # con un residuo di -7: un residuo che nessun batterista ha suonato.
+    for anticipo, passi_attesi, atteso in ((14.0, [3, 7, 11, 15], +10.0),
+                                           (17.0, [3, 7, 11, 15], +7.0)):
+        pr = GR.profilo_da_colpi(fixture(anticipo), ppq)
+        d = {s.passo: s.scarto for s in pr.passi['charleston a pedale']}
+        check(f'{anticipo:.0f} tick dritti di anticipo cadono sulla semicroma '
+              f'precedente', sorted(d) == passi_attesi, str(sorted(d)))
+        check(f'e il residuo e {atteso:+.0f} tick esatti',
+              all(abs(v - atteso) < 1e-9 for v in d.values()),
+              str({k: round(v, 4) for k, v in d.items()}))
+
+    # ⚠️ LA GIUSTIFICAZIONE CHE LA GRAZIA SI DAVA, FALSIFICATA. Il commento
+    # diceva che senza di essa "il residuo uscirebbe grande quanto un
+    # movimento intero". Non puo': `passo = round(dritta / passo_tick)`
+    # sceglie il passo PIU' VICINO, quindi |residuo| <= mezzo passo per
+    # costruzione, con la grazia e senza. Misurato anche sul corpus jazz:
+    # 0 residui oltre mezzo passo su 28 604 colpi.
+    for anticipo in (10.0, 14.0, 17.0):
+        pr = GR.profilo_da_colpi(fixture(anticipo), ppq)
+        peggio = max(abs(s.scarto)
+                     for v in pr.passi.values() for s in v)
+        check(f'con anticipo {anticipo:.0f} nessun residuo supera mezzo passo',
+              peggio <= ppq / 8 + 1e-9, str(peggio))
+
+
+def test_groove_profilo_corpus():
+    """Il profilo di un'esecuzione vera. SALTA senza il dataset.
+
+    L'esecuzione e' nominata apposta: un profilo viene da UN batterista, e
+    dichiararlo e' cio' che tiene onesto il marcatore [OSS].
+    """
+    import statistics                                      # noqa: PLC0415
+
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    base = ROOT / 'to-read' / 'MIDI' / 'groove-v1.0.0-midionly' / 'groove'
+    if not (base / GR.INVENTARIO).exists():
+        raise FileNotFoundError(str(base / GR.INVENTARIO))
+
+    p = GR.profilo(base, 'drummer1/session3/2')
+    check('e drummer1 in jazz/swing a 185',
+          p.drummer == 'drummer1' and p.style == 'jazz/swing' and p.bpm == 185,
+          f'{p.drummer} {p.style} {p.bpm}')
+    check('il BUR e fra 1 e 2,5', p.bur is not None and 1.0 < p.bur < 2.5,
+          str(p.bur))
+    check('c e il ride', 'ride' in p.passi, str(sorted(p.passi))[:120])
+    check('ogni passo sta fra 0 e 15',
+          all(0 <= s.passo <= 15 for v in p.passi.values() for s in v))
+    # ⚠️ QUI C'ERA UNA SOGLIA CHE ERA UN TEOREMA, e va detto perche' non c'e'
+    # piu': `abs(s.scarto) <= 12` NON POTEVA FALLIRE. `profilo_da_colpi()`
+    # sceglie il passo con `round(dritta / passo_tick)`, cioe' il passo PIU'
+    # VICINO, quindi |residuo| <= mezzo passo = 12 tick per costruzione --
+    # con la grazia di mezzo passo e senza. Contato sul corpus: 0 residui
+    # oltre 12 tick su 28 604 colpi in entrambi i casi. Il registro di
+    # sessione la dichiarava "stretta, il 98% del budget": era il rovescio
+    # del vero, ed e' il genere di riga che invita ad allargare in futuro una
+    # soglia che non si puo' violare.
+    #
+    # Al suo posto la cosa che il residuo DEVE avere se lo swing e' stato
+    # tolto davvero. Lo swing vive sui passi di LEVARE -- 2, 6, 10, 14 -- e
+    # li' sposta la nota di `(levare - 0,5) * 96` tick: 9,46 su questa
+    # esecuzione. Se `_senza_swing()` fa il suo mestiere quello spostamento
+    # sparisce e resta il solo residuo; se non lo facesse resterebbe tutto.
+    # VERIFICATO PER INVERSIONE: neutralizzando `_senza_swing()` all'identita'
+    # la mediana pesata sui colpi sale da 2,00 a 5,86 tick e questo check
+    # diventa rosso.
+    levare = GR.da_bur(p.bur)
+    meta_swing = (levare - 0.5) * 96 / 2
+    sui_levare = [abs(s.scarto) for v in p.passi.values() for s in v
+                  if s.passo in (2, 6, 10, 14) for _ in range(s.colpi)]
+    mediana = statistics.median(sui_levare)
+    check('e sui passi di levare il residuo e meno di meta dello swing tolto',
+          mediana < meta_swing,
+          f'{mediana:.2f} tick contro {meta_swing:.2f} '
+          f'(levare {levare:.4f}, {len(sui_levare)} colpi)')
+
+
+def test_groove_scala():
+    """La scala di velocity, aggregata. SALTA senza il dataset.
+
+    ⚠️ Ogni riga porta quanti BATTERISTI la sostengono, e non e' un dettaglio
+    di rendicontazione: e' cio' che decide fra [MIS] e [OSS].
+
+    Il brief originale di questo task diceva che sul reggae del Groove MIDI
+    il batterista fosse UNO. Misurato con queste stesse funzioni (`elenco()`
+    con `style='reggae'`, `beat_type='beat'`, cioe' il default di `scala()`)
+    risultano invece QUATTRO esecuzioni di DUE batteristi (drummer1 e
+    drummer5) -- si veda `info.csv`. Il numero giusto e' due, non uno, ma il
+    punto resta: contro i cinque del jazz, due non bastano per chiamare
+    [MIS] quel che ne esce, e infatti la tabella reggae resta [WEB].
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    base = ROOT / 'to-read' / 'MIDI' / 'groove-v1.0.0-midionly' / 'groove'
+    if not (base / GR.INVENTARIO).exists():
+        raise FileNotFoundError(str(base / GR.INVENTARIO))
+
+    jazz = GR.scala(base, style='jazz')
+    check('il jazz ha il ride', 'ride' in jazz, str(sorted(jazz))[:120])
+    r = jazz['ride']
+    check('le velocity stanno fra 1 e 127',
+          1 <= r.minimo <= r.mediana <= r.massimo <= 127,
+          f'{r.minimo}/{r.mediana}/{r.massimo}')
+    check('i quartili sono in ordine', r.q1 <= r.mediana <= r.q3,
+          f'{r.q1}/{r.mediana}/{r.q3}')
+    check('e la riga dichiara 5 batteristi', r.batteristi == 5,
+          str(r.batteristi))
+
+    reggae = GR.scala(base, style='reggae')
+    check('il reggae ne dichiara al piu due, non cinque come il jazz -- '
+          'per questo resta [WEB]',
+          max(v.batteristi for v in reggae.values()) == 2,
+          str({k: v.batteristi for k, v in reggae.items()}))
+
+    # l'invariante q1 <= mediana <= q3 su jazz['ride'] (sopra) non prova
+    # niente sul ramo dei campioni piccoli: 7422 colpi non toccano mai il
+    # ripiego sotto i 4. Il reggae si', e ci sta apposta 'crash' con SOLI
+    # DUE colpi -- e' il caso che il rilievo di revisione ha trovato rotto.
+    rotte = {k: (v.q1, v.mediana, v.q3) for k, v in reggae.items()
+             if not (v.q1 <= v.mediana <= v.q3)}
+    check('i quartili sono in ordine su OGNI riga del reggae, comprese '
+          'quelle con pochissimi colpi (es. crash, 2 colpi)',
+          not rotte, str(rotte))
+    check('e il reggae ha davvero una riga sotto i 4 colpi, altrimenti il '
+          'check sopra non proverebbe niente',
+          any(v.colpi < 4 for v in reggae.values()),
+          str({k: v.colpi for k, v in reggae.items() if v.colpi < 4}))
+
+
+def test_applica_groove():
+    """Il template posato su un pattern di `passi()`.
+
+    ⚠️ E il RIFIUTO che lo fa valere: su un passo dove quel batterista non ha
+    mai suonato, la funzione NON inventa una velocity. E' lo stesso cancello
+    della sigla sconosciuta in `MU.armonia()`, e serve alla stessa cosa --
+    un template che riempie i buchi da se' sarebbe di nuovo inventare con la
+    benedizione della riga scritta per impedirlo.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    prof = GR.Profilo(
+        id='finto/1', drummer='drummerX', style='jazz', bpm=120, bur=1.6,
+        battute=1,
+        passi={'ride': [GR.Passo(passo=0, velocity=104, scarto=2.0, colpi=8),
+                        GR.Passo(passo=4, velocity=78, scarto=-1.0, colpi=8)]})
+
+    note = MU.passi('x...x...........')
+    rapporto = MU.applica_groove(note, prof, dove='ride')
+
+    check('due note toccate', rapporto['toccate'] == 2, str(rapporto))
+    check('la prima prende velocity e scarto',
+          note[0].velocity == 104 and note[0].pos == 2,
+          f'{note[0].velocity} {note[0].pos}')
+    # scarto -1 = un tick PRIMA della griglia (vedi `groove.Passo.scarto`):
+    # questa nota anticipa, non ritarda.
+    check('la seconda ANTICIPA di un tick',
+          note[1].velocity == 78 and note[1].pos == MU.TICK_PER_PASSO * 4 - 1,
+          f'{note[1].velocity} {note[1].pos}')
+    check('e nessun passo e rimasto senza appoggio',
+          rapporto['senza_appoggio'] == [], str(rapporto['senza_appoggio']))
+
+    orfane = MU.passi('x.x.x...........')
+    r2 = MU.applica_groove(orfane, prof, dove='ride')
+    check('il passo 2 non ha appoggio e lo DICE',
+          r2['senza_appoggio'] == [2], str(r2['senza_appoggio']))
+    check('e quella nota resta com era, non inventata',
+          orfane[1].velocity == 90 and orfane[1].pos == MU.TICK_PER_PASSO * 2,
+          f'{orfane[1].velocity} {orfane[1].pos}')
+
+    check('uno strumento assente dal profilo e un errore che elenca',
+          _raises(lambda: MU.applica_groove(MU.passi('x...'), prof,
+                                            dove='rullante'), ValueError))
+
+    # ⚠️ il residuo negativo sul PRIMO passo manderebbe la nota prima
+    # dell'inizio della clip, che il Deluge non sa leggere: va fermata a 0.
+    presto = GR.Profilo(
+        id='finto/2', drummer='drummerX', style='jazz', bpm=120, bur=1.6,
+        battute=1,
+        passi={'kick': [GR.Passo(passo=0, velocity=100, scarto=-5.0,
+                                 colpi=8)]})
+    bordo = MU.passi('x...............')
+    MU.applica_groove(bordo, presto, dove='kick')
+    check('un residuo negativo sul primo passo si ferma a zero',
+          bordo[0].pos == 0, str(bordo[0].pos))
+    check('ma la velocity la prende lo stesso', bordo[0].velocity == 100,
+          str(bordo[0].velocity))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
