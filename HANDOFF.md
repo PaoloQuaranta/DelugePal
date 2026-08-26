@@ -17,10 +17,15 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > generato il suo primo pezzo vero — un dub in sol minore, tre versioni,
 > ciascuna corretta dall'ascolto dell'utente. Verdetto sull'ultima: *«va
 > meglio, ma musicalmente ci sarebbe ancora moltissimo da dire»*.
-> **859 test.** Il progetto è **pubblicato su GitHub** senza il corpus.
+> **943 test.** Il progetto è **pubblicato su GitHub** senza il corpus.
 > Il 17-18 agosto `docs/MUSICA.md` è stato **rifondato sullo schema neutro**
 > (§6-duodecies): il reggae non è più la forma del documento ma un caso
 > compilato fra molti, e l'**indice** dice cosa manca a quale repertorio.
+> Dal 18 al 25 agosto il ramo `groove-midi` ha **chiuso la casella 6 del
+> jazz** — la dinamica, misurata su cinque batteristi veri invece che presa
+> dal web — e ha costruito il **groove template** (§6-terdecies). È il primo
+> lavoro di questo progetto il cui risultato non è una funzione che passa i
+> test ma **un'affermazione sul mondo**, e si vede da quanto è costato.
 >
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
@@ -45,12 +50,33 @@ ascoltato il terzo tentativo di dub:
 **Da dove si comincia, adesso che lo schema esiste: dall'indice in fondo a
 `docs/MUSICA.md`.** Non serve una lista di cose da fare a parte — ogni casella
 vuota dichiara *cosa servirebbe per riempirla*, quindi l'agenda si legge dalla
-matrice. Le due più vicine a chiudersi hanno il materiale **già sul disco**:
+matrice.
+
+⚠️ **Questa tabella dava due caselle per vicine a chiudersi, e il 25 agosto
+2026 ne resta una.** La riga che c'era prometteva che il Groove MIDI avrebbe
+chiuso «la 6 del jazz e i `[WEB]` della 6 del reggae»: **per il jazz è andata
+così, per il reggae era falsa**, e il perché sta due righe più giù. È corretta
+invece che lasciata perché è dall'agenda che la prossima sessione decide dove
+mettere le mani, e un'agenda ottimista la rimanderebbe esattamente lì.
 
 | casella | cosa la chiude, e dov'è |
 |---|---|
-| **jazz 6** (dinamica), e i `[WEB]` della **6 del reggae** | il **Groove MIDI**, `to-read/MIDI/groove-v1.0.0-midionly/`: 1150 esecuzioni con velocity e microtiming di batteristi veri, **101 jazz e 20 reggae**. Rimpiazzerebbe con `[MIS]` i numeri di velocity presi dal web, che l'ascolto ha già dovuto correggere una volta |
+| ~~**jazz 6** (dinamica)~~ | **chiusa il 25 agosto 2026**, dal ramo `groove-midi`: velocity, profilo posizionale e microtiming residuo di **cinque batteristi** del Groove MIDI, con la scheda che porta accanto a ogni numero quante esecuzioni e quanti batteristi lo reggono. Vedi §6-terdecies |
 | **jazz 8** (melodia e ornamentazione) | `wjazzd.db`, già leggibile con `WJ.melodia()`/`WJ.armonia()`: 456 assoli con **gli accordi allineati alla linea**, guardati finora solo per lo swing |
+
+⚠️ **La 6 del reggae il Groove MIDI NON la chiude, e non è una questione di
+sforzo.** Di reggae quel dataset porta **venti esecuzioni**, che sono **quattro
+`beat` continue** — a 78, 64, 141 e 126 BPM, **due di `drummer1` e due di
+`drummer5`**, **dieci minuti in tutto** — più sedici fill di due-tre secondi
+l'uno, tutti di `drummer1`, che valgono altri 43 secondi. **Due batteristi.** E
+dentro la fascia di tempo che la casella 3 del reggae dichiara ci cadono **due
+sole** di quelle quattro, la 78 e la 64, **entrambe di `drummer1`**.
+Firmare quei numeri `[MIS]` col nome del genere sarebbe travestire un esecutore
+da repertorio, che è precisamente ciò che la casella 8 del jazz vieta in una
+riga: *un assolo è un musicista, non un repertorio*. La 6 del reggae **resta
+`[WEB]`**, e adesso ci sta scritto il conteggio col motivo. Il jazz, per
+confronto, ne ha **101** (50 `beat` e 51 `fill`) e **cinque** batteristi — ed è
+già il minimo per cui valga la pena.
 
 Cosa c'è già in mano:
 
@@ -58,6 +84,7 @@ Cosa c'è già in mano:
 |---|---|
 | `docs/MUSICA.md` | non è più vuoto: uno schema neutro di **undici caselle**, pensato per reggere da Josquin alla jungle, più **il comune** a ogni repertorio e **l'indice** — la matrice repertorio × casella che è anche l'**agenda**: dice cosa manca a quale repertorio senza aprire niente. I repertori compilati sono schede a sé in `docs/repertori/`: oggi reggae/dub e jazz, stato di ciascuna nell'indice |
 | `tools/delugexml/midi.py` | il ponte per far entrare il materiale: legge Standard MIDI File **senza dipendenze**, validato nota per nota contro `mido` |
+| `tools/delugexml/groove.py` | il lettore del **Groove MIDI**, sopra `midi.py`: cerca per stile, batterista e metro, e ne cava la scala di velocity e il **groove template**. §6-terdecies |
 | `to-read/` | 112 000 file e 4,8 GB di libri, paper e librerie MIDI già raccolti dall'utente. **Fuori dal versionamento** |
 
 ### Il perimetro vero, detto dall'utente il 17 agosto 2026
@@ -154,6 +181,15 @@ versionato, quindi vale solo su questa macchina (§9).
   guidebook, mai il corpus.
 - **non dire «verificato sul dispositivo» avendo ascoltato**, se
   l'affermazione riguarda ciò che si vede. E viceversa.
+- **non scrivere un file con `pathlib.write_text()` nudo.** Su Windows traduce
+  `\n` in `\r\n`, e un documento che era a LF esce tutto riscritto: due agenti
+  diversi ci sono cascati nella stessa sessione del 24-25 agosto, gonfiando un
+  diff da **260/92 righe a 1773/1293** — l'85% non era contenuto. Non corrompe
+  niente e non rompe nessun test: rende **illeggibile la revisione**, che è il
+  meccanismo su cui poggia tutto quello che è scritto qui. Si usa
+  `write_bytes()`, oppure `open(..., newline='')`, e **prima di committare** si
+  controlla che `git diff --stat` e `git diff --stat --ignore-cr-at-eol` diano
+  lo stesso numero.
 
 ---
 
@@ -343,36 +379,44 @@ sul dispositivo, si caricano.
 | **Suoni progettati da zero** | `DUBPAL01`: kit **sintetizzato** (nessun campione), basso wobble, pad, sirena — tutti costruiti dal synth vuoto. Si sente. Vedi §6-septies |
 | **Patch cable** | `lfo1 → lpfFrequency` (wobble), `lfo1 → pitch` (sirena), `envelope2 → oscAPitch` (pitch drop del kick): si sentono sul dispositivo |
 | **Sintesi FM da un preset subtractive** | `structure.set_synth_mode(inst, 'fm')` crea i `<modulator1/2>` che il synth vuoto non ha e toglie il `type` dagli oscillatori, come fa il dispositivo |
+| **Le posizioni fuori griglia sopravvivono al salvataggio** | `GROOVE1`, 31 note con scarti da −6 a +2 tick, aperta sul Deluge, **nessuna nota toccata**, risalvata dal dispositivo e riscaricata: **31 posizioni su 31 conservate**. Il Deluge **non riquantizza**. È meccanico, si legge nei byte. §6-terdecies |
 
 La tabella qui sopra si è fermata all'11 agosto. Da allora sono arrivate le
 fasi 6 e 7 — arranger, MIDI/CV, audio, e lo strato in linguaggio naturale —
 tutte verificate sul dispositivo: vedi §6-ter e `docs/FINDINGS.md`.
 
-**859 test** in `tests/test_all.py`, tutti verdi. I nove aggiunti il 17-18
-agosto sono quelli dello schema neutro (6-duodecies): leggono file
-versionati, quindi girano sempre, corpus o no.
+**943 test** in `tests/test_all.py`, tutti verdi. Gli **84** aggiunti dal 18 al
+25 agosto sono quelli del Groove MIDI e del groove template (§6-terdecies): una
+parte legge il dataset e quindi salta senza `to-read/`, un'altra gira su **file
+MIDI sintetici costruiti apposta**, così che gli invarianti veri — che l'origine
+della griglia si tolga per intero, che il residuo torni zero quando lo swing è
+noto, che `applica_groove()` non inventi su un passo senza appoggio — siano
+verificabili anche da chi il corpus non ce l'ha.
 
-⚠️ **Con il corpus sul disco sono 859 su 859; senza `refs/`, sono 399 su 401
-con 71 SALTATI** (derivato: i nove test nuovi non toccano `refs/`; non
-rimisurato spostando il corpus). I salti non sono un guasto: `refs/` e `corpus_versions/`
-non sono più versionati (§9), e `salta()` distingue "manca materiale che non è
-del repo" da "il codice è rotto". Un clone che non abbia nemmeno `to-read/`
-salta in più i due test che leggono `wjazzd.db` (§6-nonies); i test del
-dialetto di Weimar sono funzioni pure e girano sempre.
+⚠️ **Con il corpus sul disco sono 943 su 943 e zero saltati. In un clone —
+niente `refs/` tranne `TEMPL.XML`, niente `corpus_versions/`, niente
+`to-read/` — sono 460 su 460 con 82 SALTATI e ZERO fallimenti.** Questa cifra
+è **misurata, non derivata**, il 25 agosto 2026: `git archive HEAD` in una
+cartella vuota, che dà per costruzione esattamente i file versionati, e la
+suite lanciata da lì con lo stesso `.venv`. I salti non sono un guasto:
+`refs/` e `corpus_versions/` non sono più versionati (§9), e `salta()`
+distingue "manca materiale che non è del repo" da "il codice è rotto".
 
-**I due che FALLISCONO senza corpus, invece, sono un difetto piccolo e reale**
-— misurato il 17 agosto 2026, e la cifra scritta qui prima ("284 passano e 73
-saltano", cioè zero fallimenti) era già superata:
+⚠️ **E cade quello che questo documento diceva prima**, cioè che due test
+*falliscono* senza corpus. **In un clone non fallisce niente**, e le ragioni
+sono due, tutt'e due verificate rieseguendo:
 
-| test | perché fallisce invece di saltare |
+| test dato per rotto | com'è davvero |
 |---|---|
-| `corpus di riferimento presente` | asserisce che `refs/` esista: senza, è un FAIL per costruzione |
-| `COPPIE_OSSERVATE coincide con quella ri-derivata dal corpus` | ri-deriva dal corpus e ne trova 86 contro le 141 in tabella |
+| `corpus di riferimento presente` | non scatta: `refs/synths/TEMPL.XML` **è pubblicato** (§9), quindi `refs/` non è mai vuota in un clone e il round-trip gira su quell'unico file |
+| `COPPIE_OSSERVATE coincide con quella ri-derivata dal corpus` | **salta**, non fallisce: sopra di lui c'è già un `salta()` che scatta sotto le 50 coppie, ed era lì anche prima di questo ramo |
 
-Nessuno dei due indica codice rotto: dicono solo che il materiale non c'è.
-Andrebbero passati a `salta()` come gli altri 71 — è il motivo per cui
-`salta()` esiste. Non è stato fatto per non toccare la semantica dei test in
-una sessione che stava lavorando ad altro.
+Quindi la riga vecchia era sbagliata su tutti e due i punti, e non per colpa
+di questo ramo: era sbagliata anche su `main`. **L'unico modo di farne fallire
+uno è togliere `refs/` per intero** — cosa che nessun clone fa — e allora è
+uno solo: 428 su 429 con 84 saltati, e il rosso è `corpus di riferimento
+presente`, che asserisce l'esistenza di una cartella. Misurato lo stesso
+giorno, con lo stesso metodo, cancellando `refs/` dalla copia.
 
 > **Euristica guadagnata sul campo, quattro volte.** Se un contenuto scritto
 > correttamente non compare sul dispositivo, **cercare lo stato di vista prima
@@ -510,8 +554,17 @@ D:\DelugePal\
       sound.py           parametri E patch cable (`set_patch_cable`)
       structure.py       forme d'onda, modi di sintesi, modulatori FM
       midi.py            lettore Standard MIDI File, SENZA dipendenze
+      wjazz.py           lettore della Weimar Jazz Database (solo sqlite3)
+      groove.py          lettore del Groove MIDI: elenco, scala di velocity,
+                         groove template. Non tocca mai un Document
       musica.py          lo strato in lingua musicale
     dsong.py             CLI: info, notes, tempo, note-add, clip-dup, row-add
+    misura_groove.py     le misure delle caselle 4, 6 e 9 del jazz: si esegue,
+                         si legge, i numeri si scrivono a mano nella scheda
+    genera_groove.py     la coppia GROOVE0/GROOVE1 del cancello. NON e' un
+                         pulsante da premere: rigenerarla sovrascriverebbe
+                         l'unico esemplare ascoltato (§6-terdecies)
+    genera_swing.py      la coppia SWINGA/SWINGB dell'astrazione dello swing
     dsysex.py            client SysEx: ping, dir, get, put — tutto funzionante
     …                    una ventina di strumenti di analisi, vedi README
   to-read\               112 000 file, 4,8 GB di libri e librerie MIDI raccolti
@@ -543,7 +596,7 @@ D:\DelugePal\
   out\                   tabella di formato, inventari, file generati. L'unico
                          versionato e' `format_table.json`: e' un artefatto
                          DERIVATO e non contiene musica
-  tests\test_all.py      859 test (399/401 + 71 salti senza corpus)
+  tests\test_all.py      943 test (460/460 + 82 salti in un clone, misurato)
   .venv\                 mido + python-rtmidi, per il SysEx
 ```
 
@@ -959,10 +1012,13 @@ altezze e quella sbagliata per estrarre un prefisso.
 **Il materiale che resta in `to-read/MIDI/`**, ora che il primo è aperto:
 `groove-v1.0.0-midionly/` — non uno zip da decomprimere, è già una cartella
 decompressa; il suo `groove/info.csv` etichetta ogni file con stile e BPM, e
-**quante esecuzioni jazz e reggae porti sta nella casella 6 di
-`docs/repertori/jazz.md`**, che è dove quel conteggio serve a decidere — poi
-`POP909`, `maestro`, `The_Magic_of_MIDI`, le librerie per genere e
-`(aq) Dub Beat Builder`.
+**quante esecuzioni porti a ciascun repertorio sta nella casella 6 della sua
+scheda** — il jazz in `docs/repertori/jazz.md`, il reggae in
+`docs/repertori/reggae-dub.md` — perché è lì che quel conteggio serve a
+decidere se il numero è `[MIS]` o `[WEB]`, e per i due repertori ha deciso in
+modo opposto (§6-terdecies). Dal 18 agosto quel dataset si legge con
+`groove.py` e non a mano. Poi restano `POP909`, `maestro`,
+`The_Magic_of_MIDI`, le librerie per genere e `(aq) Dub Beat Builder`.
 
 ---
 
@@ -1231,6 +1287,395 @@ appoggiato in un file temporaneo. Si toglie in tre righe — `leggi()` fa già
 
 ---
 
+## 6-terdecies. Il Groove MIDI e il groove template — 18-25 agosto 2026
+
+Chiude la casella **6 del jazz**, che era vuota, e costruisce la cosa che
+`SKILL.md` nominava da sempre senza che nessuno l'avesse mai fatta: il **groove
+template**, cioè la velocity e la micro-tempistica di un batterista vero posate
+su un pattern scritto da noi.
+
+⚠️ **È l'unico lavoro di questo progetto il cui risultato non è una funzione
+che passa i test ma un'affermazione sul mondo.** *«Il charleston a pedale
+anticipa il ride»* non è vera o falsa per come gira il codice, e **nessun test
+verde può dirne il segno**. È la ragione per cui questa sezione racconta gli
+errori quanto i risultati, e per cui un task solo — quello che scrive i numeri
+nella scheda — è costato **cinque giri di correzione**.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `tools/delugexml/groove.py` | il **lettore del Groove MIDI Dataset**: 1150 esecuzioni di batteria di dieci batteristi, ognuna etichettata per stile, BPM, metro e `beat_type`. Riceve la radice del dataset come argomento — esattamente come `wjazz.py` riceve il percorso del `.db` — e **non tocca mai un `Document`**: è quello il confine, non l'elenco degli import. Riusa `MI.leggi()` e `MI.GM_PERCUSSIONI` invece di farsi un secondo vocabolario di percussioni. `elenco`, `valori`, `racconta`, `scala`, `profilo`, più `per_prefisso`, `origine`, `levare_da_posizioni`, `bur_da_posizioni` |
+| `MU.applica_groove(note, prof, dove=…)` | **il verbo che posa il template** su ciò che esce da `MU.passi()`. Sta in `musica.py` e non in `groove.py` per lo stesso confine: `GR` legge, `MU` scrive. **Muta la lista** — è l'unica del modulo a farlo, mentre `passi()`, `melodia()`, `accordi()` e `armonia()` costruiscono e ritornano — e il docstring lo dichiara in cima, perché in un commento interno era invisibile a `help()` |
+| `MU.in_bur()` / `MU.da_bur()` | l'aritmetica del BUR, **promossa** da `wjazz.py` al vocabolario comune. Serviva a due lettori di corpora diversi: duplicarla era vietato e far dipendere un lettore dall'altro assurdo. Primo compito del piano proprio perché tocca codice che funziona, quando i test esistenti possono ancora dire se si è rotto |
+| `tools/misura_groove.py` | lo **strumento di misura** da cui escono i numeri delle schede: si esegue, si legge, i numeri si scrivono a mano col loro marcatore. Ogni sezione stampa **quante esecuzioni e quanti batteristi** la sostengono — non è rendicontazione, è il numero che decide fra `[MIS]` e `[OSS]` |
+| `tools/genera_groove.py`, `tools/genera_swing.py` | i due generatori di **coppia controllata**: `GROOVE0`/`GROOVE1` per il cancello sul dispositivo, `SWINGA`/`SWINGB` per l'astrazione dello swing |
+| `docs/repertori/jazz.md` | le caselle **4** (un secondo BUR, su un altro corpus e con un altro metodo), **6** (**da vuota a piena**), **9** (**da vuota a parziale**: i fill sì, la forma no) e **10** (come si scrive un template, e il giro sul dispositivo) |
+
+⚠️ **`to-read/` è in `.gitignore`.** Chi clona non trova né il dataset né il
+modo di rifare i conteggi: ogni numero di quelle caselle è **lo stato del disco
+del giorno in cui è stato misurato**, e le schede lo dicono accanto ai numeri
+invece di lasciarlo supporre.
+
+### Il groove template: cos'è, e soprattutto cosa NON porta
+
+Tre decisioni di progetto, e ognuna chiude un modo di sbagliare che il resto
+del documento ha già pagato altrove.
+
+**Viene da UNA esecuzione nominata, non da una media.** `GR.profilo(base, id)`
+legge un solo file — `drummer1/session3/2`, cioè batterista, stile, BPM e
+durata dichiarati ogni volta che se ne cita un numero. Mediare il microtiming
+di batteristi diversi lo tira verso zero, cioè **verso la griglia**: si
+perderebbe esattamente ciò che si era andati a prendere. Ne segue che un
+profilo è `[OSS]` **su un esecutore**, mentre la scala di velocity di
+`GR.scala()` è `[MIS]` **sull'aggregato** — due marcatori diversi perché sono
+due affermazioni diverse, ed è il motivo per cui `scala()` restituisce
+`esecuzioni` e `batteristi` accanto a ogni mediana invece della sola mediana.
+
+**Porta solo il residuo: lo swing lo fa la song.** Se il template portasse
+anche lo swing, e `S.set_swing(doc, 62, figura='1/8')` è **di song** e vale per
+basso e comping insieme alla batteria, lo swing finirebbe applicato due volte.
+Quindi `profilo()` misura il BUR dell'esecuzione e **lo toglie**; quello che
+resta — di quanto ogni strumento arriva prima o dopo il resto del kit — è il
+template. E quel BUR tolto non è materiale di scarto: è il **controllo
+indipendente** sull'1,61 misurato sulla Weimar (§6-decies). Due corpora, due
+metodi, due strumenti — la linea solista trascritta contro un kit intero — e le
+mediane cadono a due punti di levare di distanza: **59,7% contro 61,7%**, cioè
+BUR 1,48 contro 1,61, su 41 esecuzioni e 5 batteristi. La casella 4 le porta
+tutt'e due, coi rispettivi metodi, e dice che **la delimitazione decide il
+numero**: dalla stessa etichetta `jazz` escono 1,26 o 1,60 a seconda di cosa ci
+si include.
+
+**Non inventa.** Se il pattern chiede un colpo su un passo dove quel batterista
+non ha mai suonato, `applica_groove()` **lascia la nota com'è** e mette il
+passo in `senza_appoggio`, che va letto. È lo stesso cancello della sigla
+sconosciuta in `MU.armonia()`, e per la stessa ragione: un template che si
+riempie i buchi da sé sarebbe di nuovo **inventare con la benedizione della
+riga scritta per impedirlo**, che è il difetto raccontato in §6-duodecies a
+proposito delle righe «nel frattempo».
+
+⚠️ **E una trappola che il nome nasconde: il nome GM non è il ruolo musicale.**
+Su `drummer1/session3/2` il disegno continuo di crome swingate — il ride,
+musicalmente — sta per otto decimi dell'esecuzione sulla nota **43**, che la
+mappa GM chiama `tom basso` (805 colpi), e solo nel quinto centrale sulla nota
+**51**, `ride` (238 colpi). Chi scrive `dove='ride'` prende il profilo di un
+quinto di esecuzione. **La voce si sceglie dal numero di colpi e dalla
+posizione** che `GR.profilo()` riferisce, mai dal nome.
+
+### Cosa è verificato sul dispositivo, e cosa è stato ascoltato
+
+Sono due affermazioni diverse e stanno in due caselle diverse, ed è la regola
+della §8 applicata a un caso in cui era facilissimo confonderle.
+
+**Quello che si VEDE, ed è meccanico.** `GROOVE1` — 31 note su quattro righe,
+con scarti da **−6 a +2 tick** rispetto ai passi — è stata caricata sul Deluge,
+**nessuna nota è stata toccata**, ed è stata risalvata dal dispositivo.
+Riscaricata e confrontata nota per nota: **31 posizioni su 31 conservate,
+nessuna spostata.** Il Deluge **non riquantizza al salvataggio**, e questa era
+la scommessa su cui poggiava tutto il template. Si legge nei byte di due file, e
+nessuna riserva sull'orecchio di chi ascolta la tocca. Il file risalvato è
+36 545 byte contro i 35 226 scritti — il firmware aggiunge roba sua — e conserva
+**entrambi** gli attributi `noteDataWithSplitProb` e `noteDataWithLift`.
+
+⚠️ **Il sub-slot, che va saputo prima di risalire un giro del genere:** il
+Deluge l'ha salvata come **`GROOVE1 2`**, col numero dopo uno spazio, nella
+stessa cartella. **Non sovrascrive: si fa un posto suo accanto.** Il percorso
+costruito con `MU.destinazione()` non è quello da cui la song torna indietro —
+si legge il nome sul display, e `MU.origine()` legge ovunque proprio per
+questo.
+
+**Quello che si SENTE, ed è un ascoltatore solo.** Quattro ascolti sulla stessa
+coppia, `[OSS]`, con le domande poste **prima** di dire all'utente cosa ci si
+aspettava — la previsione era scritta nel rapporto e non gli è stata mostrata,
+per non guidare l'ascolto:
+
+| ascolto | la grandezza | esito |
+|---|---|---|
+| il giro intero, `GROOVE0` poi `GROOVE1` | tutto insieme | sente **e vede** sia le variazioni di velocity sia quelle di timing |
+| cassa contro linea di ride | 4 tick = 25 ms a 100 BPM | *«la cassa sul levare è anticipata rispetto al ride»* — **sentito**, e attribuito allo strumento giusto |
+| riga del pedale contro il metronomo | 3 tick = 18,75 ms a 100 BPM | *«cadono sul click»* — **non distinto** |
+| lo stesso, rifatto dall'utente a tempo lentissimo | 3 tick = 125 ms a 15 BPM | **sentito** |
+
+Delle tre previsioni sull'ascolto **due non sono andate così**, e vale più che
+averle azzeccate: chi aveva previsto che il residuo di posizione non si
+sarebbe distinto sul giro intero aveva **i numeri giusti e la conclusione
+sbagliata**. Se fosse andata come previsto, oggi la casella 6 concluderebbe che
+`applica_groove()` vale per metà — la sola velocity — e che la posizione è
+rappresentabile ma non percepibile.
+
+⚠️ **E un difetto di metodo che va registrato perché non si ripeta: le tre
+domande erano binarie e portavano dentro le parole della risposta** — «volume o
+dove cadono?», «prima del ride o insieme?», «sul click o appena prima?».
+Chiedere così suggerisce, e un ascoltatore compiacente direbbe sempre di sì.
+Quel che le rende comunque informative è che **non ha detto sempre di sì**: due
+volte «c'è» e una volta «no», e la volta del «no» è andato a rifare
+l'esperimento da sé. Le domande andavano fatte **aperte**.
+
+⚠️ **Le grandezze si dicono in tick, e i millisecondi sono una conversione a un
+tempo nominato.** Un tick vale `60000/(BPM × 96)` ms — 6,25 a 100 BPM, 3,38 a
+185. Presentare i millisecondi come *la* grandezza fa sembrare fisso qualcosa
+che si muove col tempo, ed è precisamente l'errore che l'ascolto a 15 BPM ha
+smascherato.
+
+### Il reggae, che l'agenda dava per chiudibile e non lo è
+
+L'agenda in testa a questo documento diceva che il Groove MIDI avrebbe chiuso
+«la 6 del jazz e i `[WEB]` della 6 del reggae». Per il jazz è andata così. Per
+il reggae il progetto ha **corretto l'agenda invece di eseguirla**, ed è la
+correzione in testa al documento.
+
+Il conteggio, ricontato due volte perché due volte è stato sbagliato: **venti
+esecuzioni reggae**, di cui **quattro `beat` continue** — a 78, 64, 141 e 126
+BPM, **due di `drummer1` e due di `drummer5`**, **dieci minuti in tutto** —
+più sedici fill di due-tre secondi l'uno, tutti di `drummer1`, che ne fanno
+altri 43 secondi. **Due batteristi.** E dei quattro `beat` soltanto due cadono
+nella fascia di tempo che la casella 3 del reggae dichiara: dentro il perimetro
+della scheda il corpus ha **due esecuzioni di un batterista solo**. La 6 del
+reggae resta `[WEB]`, e adesso ci sta scritto il conteggio col motivo.
+
+⚠️ **Quel paragrafo ha sbagliato un numero due volte mentre difendeva una tesi
+giusta**, ed è la parte istruttiva. La prima versione diceva «un batterista
+solo» — era una deduzione (`drummer1` ha 18 righe su 20, quindi «praticamente
+uno») e **la deduzione aveva mangiato il dato**. La seconda diceva «78, 78,
+141, 126»: il secondo 78 era inventato, e quell'esecuzione sta a **64 BPM**.
+Trovate tutt'e due dagli implementatori **ricontando invece di rileggere**, e
+la seconda pesa: 64 è uno dei due soli tempi che cadono nella fascia
+dichiarata, quindi non era decorativo. Le due correzioni stanno **datate** nel
+progetto, non sostituite in silenzio.
+
+### Il difetto della finestra di grazia — la lezione più cara del ramo
+
+⚠️ **Una correzione di mezzo passo, messa per una ragione scritta nel commento
+e falsa, falsava un terzo dei colpi del corpus e fabbricava la conclusione
+portante della casella 6.**
+
+`profilo_da_colpi()` calcolava il movimento con `math.floor(p/ppq + 0.125)` —
+mezzo passo di grazia — perché un colpo appena prima del battere fosse
+attribuito al movimento seguente. Ne usciva una **fase negativa**, e su una
+fase negativa `_senza_swing()` prendeva il ramo della prima metà del movimento
+— quella che il firmware **dilata** — per una nota che sta nella seconda,
+quella che il firmware **comprime**. Non era l'inversa di niente, e la catena
+si credeva esattamente invertibile.
+
+La giustificazione scritta nel commento diceva che senza la grazia «il residuo
+uscirebbe grande quanto un movimento intero». **Non può**: il passo si sceglie
+con `round(dritta / passo_tick)`, cioè si prende il **più vicino**, quindi il
+residuo non supera mezzo passo — 12 tick — **per costruzione**. Contati sul
+corpus: **0 residui oltre 12 tick su 28 604, con la grazia e senza.** Non c'era
+nessun fondo di verità da salvare.
+
+Quanto pesava, misurato su **42 esecuzioni e 28 604 colpi**:
+
+| | |
+|---|---|
+| colpi che prendevano una fase negativa | **9 535 (33,3%)** |
+| errore mediano sulla loro posizione | 1,25 tick (q1-q3 0,20-2,94), massimo 12,15 |
+| colpi che ne uscivano **su un passo diverso** | **956 (3,3%)** |
+
+E non cadeva a caso: il difetto vive nell'**ultimo ottavo di movimento**, cioè
+esattamente dove sta chi anticipa un battere. Il charleston a pedale — che nel
+jazz suona il 2 e il 4 e li anticipa — ne aveva **il 50,4% dei suoi colpi**, il
+ride il 36,1%, la cassa il 37,0%, il rullante il 22,4%.
+
+⚠️ **E così è caduto il «15 su 15», che era il risultato portante della casella
+6.** Il charleston contro il ride passa a **12 su 15**, col divario mediano
+**cresciuto** da 2,59 a 3,21 tick. Le due cose vanno insieme e hanno una causa
+sola: con la grazia i colpi sul battere non potevano passare al passo
+precedente in **38 esecuzioni su 42**, quindi **quell'unanimità era in parte
+garantita dal difetto, non dai batteristi.**
+
+Cosa regge e cosa no, detto stretto:
+
+- **regge, ed è più solido:** la controprova **sulle fasi grezze** — nessuna
+  origine tolta, nessuno swing, quindi nessuna grazia possibile — dice **15 su
+  15** e non è cambiata di un decimo. È quella da citare d'ora in poi;
+- **regge la stratificazione come livello:** il charleston resta il più
+  anticipato di tutti, e il divario contro il ride è più grande di prima;
+- **si indebolisce** il rifiuto della latenza fissa, da «~4 sigma su tutte e
+  tre le coppie» a 4,2 / 2,7 / 2,4 sigma: l'ipotesi del pedale è ora stretta da
+  **una** coppia su tre, non da due;
+- **cambiano segno due coppie**, e una era già scritta: il rullante non sta più
+  dietro alla cassa nemmeno come segno;
+- **non cambia niente** di BUR, scala di velocity, fill, massimo spostamento
+  (+11,80 tick) ed escursione (22,83) — verificato eseguendo il tool col codice
+  vecchio e col nuovo. Quindi il valore di `set_swing()` non si muove e
+  **l'A/B già ascoltato dall'utente non va riletto.**
+
+⚠️ **Non l'ha trovato un test, e nemmeno una revisione: l'ha trovato una
+domanda dell'utente su un'altra cosa.** Aveva chiesto una prova A/B
+sull'astrazione dello swing — *«è un punto dove è molto facile sbagliare»* — e
+costruendola è venuto fuori questo. La correzione ha poi aggiunto **12 check**,
+verificati **per inversione**: rimettendo la grazia la suite scende a 938 su
+943 con 5 rossi.
+
+⚠️ **E due punti del capitolato che ordinava la correzione erano falsi**:
+togliere la grazia cambia **anche** l'assegnazione dei passi (il 3,3%) e il
+profilo posizionale (le quote del charleston scendono di quasi tre punti).
+Nessuno dei due era previsto.
+
+### Quattro errori di direzione in quattro giri, e un quinto alla fine
+
+⚠️ **I valori erano sempre giusti e il verso no**, e nessun test verde può
+accorgersene. Quattro giri di correzione consecutivi sul task che scrive i
+numeri, un errore di direzione per giro:
+
+| | l'errore |
+|---|---|
+| **1** | **una legge fisica enunciata al contrario.** Un tick dura `60000/(BPM×96)` ms, quindi una latenza fissa di D ms vale `D×BPM×96/60000` tick: **cresce** col BPM. La scheda scriveva «cala». La conclusione sopravviveva, l'argomento era falso |
+| **2** | **il segno del residuo invertito in tutta la prosa.** `Passo.scarto` è positivo quando il colpo cade **dopo** la griglia — lo conferma `applica_groove()`, che fa `pos + scarto` — quindi il charleston, che ha il residuo più negativo, **anticipa**. La prosa diceva «sta dietro». Trovato **dall'implementatore stesso**, e la frase invertita stava in **sette** posti fra codice, test, piano e spec |
+| **3** | **una regressione fatta sulla grandezza sbagliata.** Era sui livelli assoluti, che dopo `origine()` hanno **zero arbitrario** — cosa che la scheda stessa dichiarava tre paragrafi sopra e poi violava. Rifatta sulla grandezza **appaiata** dà 0,8 sigma da costante-in-tick e 4,0 da latenza fissa: sostiene la lettura musicale molto meglio delle tre mediane |
+| **4** | **un meccanismo che spiegava un anticipo con un ritardo.** Il paragrafo sul pedale nella casella 6: la conclusione reggeva, l'argomento con cui ci si arrivava era rovesciato |
+| **+1** | alla **revisione finale**, il pronome: *«il rullante dietro alla cassa succede in 12 casi su 21»* citava **il numero giusto della cosa sbagliata** — dietro è 9 su 21, davanti 12. Riscritto senza pronome e con tutt'e due i conteggi |
+
+⚠️ **E i quattro non sono tutti la stessa cosa**, che è la parte che serve a
+chi riprende. **Due sono sopravvissuti a una revisione**: il segno del residuo
+per due giri, il verso della prosa sul pedale per tutti e tre. **Due li ha
+introdotti la correzione stessa** — la fisica invertita è entrata **col diff
+che chiudeva il giro 1**, la regressione sulla grandezza sbagliata **col diff
+del giro 2** — e li ha presi la revisione di quel giro, subito. Dei cinque giri
+che il task è costato, quindi, **due sono serviti a riparare danni fatti
+riparando**: è per questo che qui una correzione va rivista come se fosse
+codice nuovo, e non spuntata come se fosse la chiusura di un rilievo.
+
+**E l'escalation a occhi freschi ha pagato in modo misurabile.** Dopo tre giri
+di errori di direzione consecutivi il quarto è stato affidato a un
+implementatore **che non aveva scritto quel testo**, e ha trovato due cose che
+i tre giri precedenti non avevano visto: un **settimo** posto con la frase
+invertita, e l'errore di verso nella prosa della casella 6. Le due passate di
+direzione successive non hanno trovato più niente. La regola operativa:
+
+> Quando tre revisioni di fila trovano errori della **stessa famiglia** nello
+> stesso testo, il problema non è il testo — è che chi lo rilegge non vede più
+> il proprio verso. Si cambia lettore, non si rilegge meglio.
+
+### L'utente, la sesta volta — e la prima in cui ha progettato la misura
+
+⚠️ **L'utente ha declassato i propri stessi dati d'ascolto, e aveva ragione.**
+Delle tre risposte date sulla coppia non esce **nessuna soglia**, per due
+ragioni e la prima è la più forte: **gli ascolti 2 e 3 non sono lo stesso
+compito percettivo** — il 2 confronta due voci fra loro, il 3 confronta una
+voce con un riferimento esterno, e la sensibilità dell'una non si trasporta
+all'altra. Metterle in fila per dedurne un punto di passaggio non era valido
+**nemmeno prima**. La seconda ragione l'ha detta lui:
+
+> *«Considera che variazioni di pochi ms sono difficili da percepire
+> consapevolmente da un umano, soprattutto con un orecchio poco allenato come
+> il mio. Non credo che la differenza tra le mie risposte a 2 e 3 sia una
+> "soglia". A questo livello di dettaglio tutte le mie valutazioni sono
+> imprecise.»*
+
+E prima ancora aveva **rifatto l'esperimento di sua iniziativa**, a tempo
+lentissimo, ribaltando una conclusione già scritta: a 15 BPM quei 3 tick valgono
+125 ms invece di 18,75, e l'anticipo si sente. Quindi l'ascolto a 100 BPM non
+aveva misurato l'assenza dello scarto ma **il limite della percezione a quel
+tempo** — e cadeva anche l'argomento con cui la conclusione era stata difesa
+(«ascoltata nella condizione più favorevole possibile»): mancava il tempo. Un
+ascolto che vuole sapere se uno scarto è percepibile ha **due** manopole,
+l'isolamento e il tempo, e quel giorno la seconda non era stata girata.
+
+**È la sesta volta che l'utente ha ragione contro qualcosa di già scritto** —
+le prime cinque sono in §8 — **ed è la prima in cui non ha obiettato a parole
+ma ha progettato la misura che decide.** Che è esattamente la regola operativa
+che quell'elenco prescrive: quando dice che non torna, si smette di argomentare
+e si costruisce l'esperimento.
+
+Quel che ne resta stabilito non è poco: che le due domande — sfasamento fra
+voci e spostamento contro un riferimento — sono **diverse e vanno poste
+separate**, e che un residuo scritto **si sente quando è abbastanza grande**.
+**Quanto** grande è precisamente ciò che non è stato stabilito, e **non lo
+chiuderà un ascolto in più**: servirebbe un protocollo di psicoacustica —
+ripetizioni, ordine casuale, prova alla cieca. È scritto come ciò che manca,
+non come una lacuna da colmare in fretta: si può comporre benissimo senza
+saperlo, purché non si finga di saperlo.
+
+### Il dato più onesto della sessione: il piano aveva torto cinque volte
+
+⚠️ **Il capitolato scritto dal controllore conteneva difetti veri in cinque
+task**, e ogni volta li ha trovati **chi ha rifatto i conti invece di fidarsi
+del testo**:
+
+| task | cosa il piano sbagliava |
+|---|---|
+| **4** | un suggerimento del controllore che l'implementatore ha **rifiutato**, e aveva ragione: applicare `f < finestra[1]` dentro `dentro` avrebbe fatto scendere il conteggio da due a uno sulle semicrome, e un pattern di sedicesimi puro sarebbe uscito con **un levare misurato in tutti e otto i movimenti** — `[0.5]*8` invece di `[]`, cioè una coppia di crome dichiarata dove non ce n'è nessuna. Un **falso positivo** nella misura dello swing. Verificato con calcolo indipendente dal ri-revisore, **non accettato sulla parola** |
+| **5** | il codice campione passava le posizioni MIDI col ppq nativo (480) invece di riscalarle ai 96 tick del Deluge. Senza riscalatura il residuo massimo su dati reali è **59,01**, con **11,80** — rapporto esattamente 5,0 = 480/96. L'implementatore l'ha aggiunta di sua iniziativa |
+| **6** | il brief asseriva **un** batterista reggae e ne sono **due**; e il ripiego sui quartili per campioni sotto i 4 colpi collassava q1 e q3 sul minimo, così che la mediana cadeva **fuori** da `[q1,q3]`. Difetto ereditato dal brief |
+| **7** | il test previsto dal piano interrogava `MU.passi()` invece di `applica_groove()` e **passava per costruzione**; e un avvertimento nel dispaccio era infondato, perché il controllore aveva **ricordato** il testo del piano invece di rileggerlo |
+| **9** | le quattro esecuzioni `beat` del reggae non sono a «78, 78, 141, 126» ma a **78, 64, 141, 126** |
+
+> **Il metodo che ha funzionato non è stato «il piano era buono».** È stato che
+> **ogni affermazione è stata ricontrollata da qualcuno che non l'aveva
+> scritta**, e che chi implementava aveva il permesso di dire di no al
+> capitolato — cosa che al Task 4 ha impedito un falso positivo. Un piano
+> approvato è un'ipotesi con una data, non un'autorità.
+
+### Due incidenti identici di terminatori di riga
+
+⚠️ **`pathlib.write_text()` su Windows traduce `\n` in `\r\n`.** Due agenti
+diversi ci sono cascati nella stessa sessione: la prima volta due file passati
+da LF a CRLF hanno gonfiato un diff a **1410 e 958 righe**, la seconda
+`jazz.md` dichiarava **1773/1293** mentre ignorando i terminatori erano
+**260/92** — **l'85% del diff non era contenuto**.
+
+Non corrompe niente e non rompe nessun test. Rende **illeggibile la
+revisione**, che in questo progetto è il meccanismo su cui poggia tutto il
+resto: le cinque correzioni di verso raccontate qui sopra sono state trovate
+tutte in revisione, e una revisione si fa leggendo diff. Riparato con
+`write_bytes()` in tutt'e due i casi, e la regola sta in testa al documento
+sotto «Cosa NON rifare», dove la legge chi genera file.
+
+### Cosa resta aperto, e cosa NON rifare
+
+Punti aperti che questo lavoro lascia. I due di macchina — il limite dello
+stimatore e cosa faccia il firmware fra le crome — sono anche in §7, insieme
+alla soglia percettiva che gli ascolti non hanno stabilito:
+
+- **la stratificazione misurata non è mai stata messa davanti a un orecchio.**
+  I 13,5 ms di divario ride/charleston sono la parte **ben misurata**, e
+  l'ascolto è stato fatto su `drummer1/session3/2`, che di stratificazione ne
+  ha **−0,25 tick**: su quel file non c'era, quindi l'ascolto non poteva né
+  confermarla né smentirla. La coppia da fare è su **`drummer10/session1/1`**
+  (`jazz/swing`, 124 BPM, 164 s, BUR 1,82), dove sui passi 4 e 12 il divario è
+  di **5,64 e 5,93 tick** e il ride **è** davvero `ride`;
+- **il limite dello stimatore, che la correzione ha smesso di nascondere.** Un
+  template è per definizione **per passo**, e un batterista che anticipa di
+  mezza semicroma non ci sta dentro: esce sul passo precedente col segno
+  rovesciato. Su alcune esecuzioni la semicroma *prima* del movimento porta più
+  colpi del movimento stesso — «battere in minoranza». Pesa sul charleston
+  perché mette il 43,7% dei suoi colpi su due soli passi. Chiuderlo vuol dire
+  cambiare **come si aggrega**, ed è una decisione di disegno che la casella 6
+  dichiara e non prende;
+- **se il firmware faccia davvero quello che `_senza_swing()` modella.** L'A/B
+  assolve il **modello dello swing** — quattro modelli a differenza grossa
+  esclusi, l'utente ha risposto *«sufficientemente simili»* — ma non la
+  **catena che scrive i template**, e resta aperto cosa faccia il firmware a
+  una nota che cade **fra** le crome, che il template ne scrive. La
+  dichiarazione di ignoranza esiste già: `song.SWING_SCARTO_SORGENTE`;
+- **il ramo `groove-midi` non è ancora stato fuso.** La revisione finale — 30
+  commit rivisti insieme, nessun Critical, quattro Important tutti chiusi — lo
+  ha dichiarato **fondibile**. La decisione resta da prendere.
+
+⚠️ **Cosa NON rifare, e vale come divieto operativo:**
+
+- **non rigenerare `out/GROOVE0.XML` e `out/GROOVE1.XML`.**
+  `tools/genera_groove.py` non è un pulsante da premere: eseguirlo
+  **sovrascriverebbe l'unico esemplare** dei due file su cui poggiano i quattro
+  ascolti e il giro sul dispositivo (31 posizioni su 31), e l'unica traccia che
+  ne resterebbe sono gli hash nel registro di sessione — `853bcdec…` per
+  `GROOVE0`, `d781262c…` per `GROOVE1`. La coppia è stata costruita **prima**
+  che la grazia fosse tolta: rifacendo oggi la catena la riga del pedale esce a
+  **−4 tick** invece di −3, e cambiano **altre otto posizioni su 31**. Chi
+  rivuole la coppia col codice di oggi **la scriva altrove e la confronti**.
+  `out/SWINGA.XML` e `out/SWINGB.XML` hanno lo stesso rischio e nessuno
+  finora l'aveva scritto;
+- **non citare più il «15 su 15» del residuo lavorato.** È 12 su 15. Il 15 su
+  15 che regge è quello delle **fasi grezze**, che non passa da nessuna catena;
+- **non convertire in millisecondi i livelli della tabella del residuo.** Dopo
+  `GR.origine()` ogni esecuzione ha uno **zero arbitrario**: «−3,42 tick» non
+  dice *rispetto a che cosa*, e un millisecondo ricavato da lì non ha un
+  referente. Lì i tick servono a una cosa sola, a dire che il residuo è piccolo.
+
+---
+
 ## 7. Punti aperti
 
 > Le **lacune funzionali** — cosa il sistema non sa ancora fare — stanno in
@@ -1333,6 +1778,30 @@ appoggiato in un file temporaneo. Si toglie in tre righe — `leggi()` fa già
   > valori di allora. Le statistiche sul corpus non possono datare i singoli
   > valori. L'unica prova valida è muovere **un** parametro e guardare cosa
   > cambia.
+- **cosa fa il firmware a una nota che cade FRA le crome**, quando lo swing di
+  song è attivo. `song.set_swing()` con `swingInterval` a 1/8 muove la seconda
+  di ogni coppia di **crome**; `GR._senza_swing()` modella lo swing come mappa
+  lineare a tratti su **tutto** il movimento, e un groove template scrive note
+  fra le crome. L'A/B del 24 agosto 2026 (§6-terdecies) **assolve il modello**
+  — quattro modelli alternativi a differenza grossa sono esclusi — ma non
+  risponde a questa domanda, e la divergenza fra le due letture è massima
+  proprio a fase 0,25 e 0,75. Si chiuderebbe con una coppia controllata
+  **costruita** a quelle fasi. Il buco noto adiacente è già dichiarato in
+  `song.SWING_SCARTO_SORGENTE`
+- **quanto grande debba essere un residuo di posizione perché si senta.** Non è
+  una lacuna del Deluge ma del protocollo: gli ascolti del 24 agosto 2026 sono
+  **un ascoltatore, nessuna ripetizione, nessuna prova alla cieca**, e
+  l'ascoltatore stesso ha dichiarato imprecise le proprie valutazioni. Da lì
+  non esce nessuna soglia, e non la darà un ascolto in più — servirebbe un
+  esperimento di psicoacustica. Vale la pena saperlo perché la finestra
+  **20-40 ms** che `MUSICA.md` dichiara resta `[WEB]` e non è stata né
+  confermata né contraddetta
+- **l'aggregazione per passo del groove template.** Un template è per passo, e
+  un colpo che anticipa il suo passo di più di mezza semicroma esce sul passo
+  **precedente col segno rovesciato**: su alcune esecuzioni la semicroma prima
+  del movimento porta più colpi del movimento stesso. È un limite dello
+  stimatore, non un difetto, e chiuderlo vuol dire cambiare come si aggrega.
+  Dichiarato in `docs/repertori/jazz.md`, «Il bordo fra due passi»
 - byte 10 delle note: i valori fra 21 e 127 non spiegati dai 20 gradini di
   probabilità — probabilmente il LATCHING descritto nel manuale
 - perché 24 `<section>` quando il manuale ne descrive 12
@@ -1371,8 +1840,8 @@ E tre regole guadagnate sul campo, ognuna pagata:
   i drum MIDI mancano dal corpus solo perché non li ha mai usati, e che
   l'ordine delle righe di un kit lo decide chi suona. Nessuna delle tre era
   ricavabile dai file — la prima è nel manuale, le altre due no. **Quando dice
-  che qualcosa non torna, ha ragione lui**: è successo **cinque volte su
-  cinque**, e ogni volta stavo per chiudere dichiarando fatto.
+  che qualcosa non torna, ha ragione lui**: è successo **sei volte su sei**, e
+  ogni volta stavo per chiudere dichiarando fatto.
 
   La quinta, il 17 agosto, è la più istruttiva perché non l'ho corretta
   subito: avevo appena difeso la mia tabella dell'intervallo di swing con
@@ -1381,6 +1850,15 @@ E tre regole guadagnate sul campo, ognuna pagata:
   aveva ragione. **La sua incredulità vale più della mia derivazione**, e la
   regola operativa che ne discende è: quando dice che non torna, si smette di
   argomentare e si progetta l'esperimento che decide.
+
+  **La sesta, il 24 agosto, è la prima in cui quella regola l'ha eseguita
+  lui.** Non ha obiettato a parole: ha **rifatto l'esperimento** — lo stesso
+  ascolto a tempo lentissimo — e ha ribaltato una conclusione già scritta,
+  perché a 15 BPM lo stesso scarto di 3 tick vale 125 ms invece di 18,75. Poi
+  ha **declassato i propri stessi risultati**, dicendo che con un orecchio non
+  allenato e senza prove alla cieca da lì non esce nessuna soglia — e aveva
+  ragione anche in questo, perché i due ascolti che si stavano confrontando non
+  erano nemmeno lo stesso compito percettivo. §6-terdecies.
 
 ---
 
