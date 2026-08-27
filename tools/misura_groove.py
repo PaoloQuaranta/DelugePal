@@ -651,68 +651,76 @@ def il_bordo_del_passo():
 
     Stampa due cose: quante celle stanno al bordo, e -- per le esecuzioni che
     la scheda NOMINA -- i passi del battere con quello che li precede.
+
+    ⚠️ GIRA SUI TRE TAGLI, dal Task 6 del 26 agosto 2026: il default sta per
+    cambiare da `'vicino'` a `'voce'`, e questi sono i numeri che la scheda
+    deve confrontare fra il vecchio e il nuovo -- non solo il nuovo da solo.
     """
     print('\n=== il bordo fra due passi: dove il residuo si rovescia ===')
     print(f'    una cella e "al bordo" se |scarto| >= {BORDO:.0f} tick '
           f'(mezzo passo = {PPQ/8:.0f}) e porta almeno 10 colpi')
-    al_bordo: dict[str, int] = {}
-    spezzate: dict[str, int] = {}
-    quante: dict[str, int] = {}
-    chi: dict[str, set] = {}
-    for e in GR.elenco(BASE, style=STILE, beat_type='beat',
-                       time_signature='4-4'):
-        if e.style in FUORI_DALLO_SWING:
-            continue
-        p = GR.profilo(BASE, e.id)
-        for nome, passi in p.passi.items():
-            if sum(s.colpi for s in passi) < 40:
+    for taglio in GR.TAGLI:
+        print(f'\n--- taglio={taglio} ---')
+        al_bordo: dict[str, int] = {}
+        spezzate: dict[str, int] = {}
+        quante: dict[str, int] = {}
+        chi: dict[str, set] = {}
+        for e in GR.elenco(BASE, style=STILE, beat_type='beat',
+                           time_signature='4-4'):
+            if e.style in FUORI_DALLO_SWING:
                 continue
-            quante[nome] = quante.get(nome, 0) + 1
-            chi.setdefault(nome, set()).add(e.drummer)
-            forti = {s.passo: s for s in passi if s.colpi >= 10}
-            if any(abs(s.scarto) >= BORDO for s in forti.values()):
-                al_bordo[nome] = al_bordo.get(nome, 0) + 1
-            # ⚠️ LA FIRMA DI UN COLPO MUSICALE CONTATO IN DUE POSTI, e il
-            # criterio e' il CONTEGGIO, non lo scarto: se la semicroma PRIMA
-            # del battere porta piu' colpi del battere stesso, e i due scarti
-            # hanno segni opposti, quei colpi non sono un secondo disegno --
-            # sono lo stesso gesto, la cui dispersione ha passato il confine.
-            # E' anche la condizione che fa RIBALTARE la mediana pesata sui
-            # colpi, perche' la meta' piu' numerosa decide il segno.
-            # ⚠️ Un criterio precedente guardava lo scarto (<=-6 contro
-            # >=+6) e sbagliava bersaglio: prendeva esecuzioni che non si
-            # ribaltano e mancava quelle che si ribaltano.
-            if any(k in forti and k - 1 in forti
-                   and forti[k - 1].colpi > forti[k].colpi
-                   and forti[k].scarto * forti[k - 1].scarto < 0
-                   for k in (0, 4, 8, 12)):
-                spezzate[nome] = spezzate.get(nome, 0) + 1
-    for nome in sorted(quante, key=lambda n: -quante[n]):
-        if quante[nome] < 8:
-            continue
-        print(f'    {nome:24s} {quante[nome]:2d} esecuzioni, '
-              f'{len(chi[nome])} batteristi   con una cella al bordo: '
-              f'{al_bordo.get(nome, 0):2d}   col BATTERE IN MINORANZA: '
-              f'{spezzate.get(nome, 0):2d}')
+            p = GR.profilo(BASE, e.id, taglio=taglio)
+            for nome, passi in p.passi.items():
+                if sum(s.colpi for s in passi) < 40:
+                    continue
+                quante[nome] = quante.get(nome, 0) + 1
+                chi.setdefault(nome, set()).add(e.drummer)
+                forti = {s.passo: s for s in passi if s.colpi >= 10}
+                if any(abs(s.scarto) >= BORDO for s in forti.values()):
+                    al_bordo[nome] = al_bordo.get(nome, 0) + 1
+                # ⚠️ LA FIRMA DI UN COLPO MUSICALE CONTATO IN DUE POSTI, e il
+                # criterio e' il CONTEGGIO, non lo scarto: se la semicroma
+                # PRIMA del battere porta piu' colpi del battere stesso, e i
+                # due scarti hanno segni opposti, quei colpi non sono un
+                # secondo disegno -- sono lo stesso gesto, la cui dispersione
+                # ha passato il confine. E' anche la condizione che fa
+                # RIBALTARE la mediana pesata sui colpi, perche' la meta'
+                # piu' numerosa decide il segno.
+                # ⚠️ Un criterio precedente guardava lo scarto (<=-6 contro
+                # >=+6) e sbagliava bersaglio: prendeva esecuzioni che non si
+                # ribaltano e mancava quelle che si ribaltano.
+                if any(k in forti and k - 1 in forti
+                       and forti[k - 1].colpi > forti[k].colpi
+                       and forti[k].scarto * forti[k - 1].scarto < 0
+                       for k in (0, 4, 8, 12)):
+                    spezzate[nome] = spezzate.get(nome, 0) + 1
+        for nome in sorted(quante, key=lambda n: -quante[n]):
+            if quante[nome] < 8:
+                continue
+            print(f'    {nome:24s} {quante[nome]:2d} esecuzioni, '
+                  f'{len(chi[nome])} batteristi   con una cella al bordo: '
+                  f'{al_bordo.get(nome, 0):2d}   col BATTERE IN MINORANZA: '
+                  f'{spezzate.get(nome, 0):2d}')
 
-    print('\n--- i passi del battere, sulle esecuzioni che la scheda NOMINA ---')
-    for quale in NOMINATE:
-        p = GR.profilo(BASE, quale)
-        print(f'  {quale}  ({p.bpm} BPM, BUR {p.bur:.2f}, '
-              f'{p.battute} battute)')
-        for nome in ('ride', PEDALE):
-            passi = {s.passo: s for s in p.passi.get(nome, [])}
-            tot = sum(s.colpi for s in passi.values())
-            righe = '  '.join(
-                f'{k:2d}:{passi[k].scarto:+5.1f}/{passi[k].colpi:3d}'
-                for k in (3, 4, 11, 12) if k in passi)
-            print(f'    {nome:22s} ({tot:3d} colpi)  {righe}')
-        for a, b in ((4, 4), (12, 12)):
-            r = {s.passo: s for s in p.passi.get('ride', [])}.get(a)
-            c = {s.passo: s for s in p.passi.get(PEDALE, [])}.get(b)
-            if r and c:
-                print(f'      passo {a}: ride - charleston '
-                      f'{r.scarto - c.scarto:+5.2f} tick')
+        print('\n    --- i passi del battere, sulle esecuzioni che la '
+              'scheda NOMINA ---')
+        for quale in NOMINATE:
+            p = GR.profilo(BASE, quale, taglio=taglio)
+            print(f'      {quale}  ({p.bpm} BPM, BUR {p.bur:.2f}, '
+                  f'{p.battute} battute)')
+            for nome in ('ride', PEDALE):
+                passi = {s.passo: s for s in p.passi.get(nome, [])}
+                tot = sum(s.colpi for s in passi.values())
+                righe = '  '.join(
+                    f'{k:2d}:{passi[k].scarto:+5.1f}/{passi[k].colpi:3d}'
+                    for k in (3, 4, 11, 12) if k in passi)
+                print(f'        {nome:22s} ({tot:3d} colpi)  {righe}')
+            for a, b in ((4, 4), (12, 12)):
+                r = {s.passo: s for s in p.passi.get('ride', [])}.get(a)
+                c = {s.passo: s for s in p.passi.get(PEDALE, [])}.get(b)
+                if r and c:
+                    print(f'          passo {a}: ride - charleston '
+                          f'{r.scarto - c.scarto:+5.2f} tick')
 
 
 def _dritte_della_voce(e, nome, colpi=None) -> list[float]:

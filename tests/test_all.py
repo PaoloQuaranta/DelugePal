@@ -6144,10 +6144,13 @@ def test_groove_taglio_neutro():
         'ride': [(float(b * 384 + m * 96 + d), 80) for b in range(4)
                  for m in range(4) for d in (0, 64)],
     }
-    senza = GR.profilo_da_colpi(colpi, ppq, id='finto/1')
-    con = GR.profilo_da_colpi(colpi, ppq, id='finto/1', taglio='vicino')
-    check('taglio="vicino" da lo stesso Profilo di prima', senza == con,
-          f'{senza}\n{con}')
+    # scelto il 26 agosto 2026: 'voce' vince su scarto massimo mediano
+    # (1,47 contro 1,97) e ancoraggio (2 celle contro 5) -- vedi Task 6.
+    SCELTO = 'voce'
+    check('il default e il taglio scelto il 26 agosto 2026',
+          GR.profilo_da_colpi(colpi, ppq, id='finto/1')
+          == GR.profilo_da_colpi(colpi, ppq, id='finto/1', taglio=SCELTO),
+          SCELTO)
 
     check('un taglio sconosciuto e un errore che elenca i modi',
           _raises(lambda: GR.profilo_da_colpi(colpi, ppq, taglio='pippo'),
@@ -6175,10 +6178,13 @@ def test_groove_taglio_neutro_sul_corpus():
     if not (base / GR.INVENTARIO).exists():
         raise FileNotFoundError(str(base / GR.INVENTARIO))
 
+    # scelto il 26 agosto 2026: 'voce' vince su scarto massimo mediano
+    # (1,47 contro 1,97) e ancoraggio (2 celle contro 5) -- vedi Task 6.
+    SCELTO = 'voce'
     for quale in ('drummer1/session3/2', 'drummer10/session1/1'):
-        p = GR.profilo(base, quale)
-        v = GR.profilo(base, quale, taglio='vicino')
-        check(f'{quale}: il default e "vicino", identico', p == v,
+        check(f'{quale}: il default e il taglio scelto il 26 agosto 2026',
+              GR.profilo(base, quale)
+              == GR.profilo(base, quale, taglio=SCELTO),
               f'{quale}')
 
 

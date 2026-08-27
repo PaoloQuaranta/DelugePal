@@ -269,8 +269,12 @@ def bur_da_posizioni(posizioni, ppq: float, *,
 
 
 #: I modi di taglio: come si sceglie il passo su cui un colpo va contato.
-#: Il default resta `'vicino'` finche' la misura non ha scelto -- vedi
-#: `docs/superpowers/specs/2026-08-26-stimatore-per-passo-design.md`.
+#: Il default e' `'voce'` dal 26 agosto 2026 -- la scelta e le ragioni sono
+#: nello Step 3 di `.superpowers/sdd/2026-08-26-stimatore-per-passo/
+#: task-6-brief.md`: la misura chiude che `'vicino'` non e' uno stimatore
+#: (pendenza 0,808 contro 0,998), ma NON chiude fra `'voce'` e `'rado'` --
+#: la regola scritta prima selezionava `'rado'`, e la decisione fra i due
+#: l'ha presa il proprietario, per iscritto, contro quella regola.
 TAGLI = ('vicino', 'voce', 'rado')
 
 
@@ -430,9 +434,10 @@ def _senza_swing(fase: float, levare: float) -> float:
     return 0.5 + (fase - levare) * 0.5 / (1 - levare)
 
 
+# taglio='voce' e' il default dal 26 agosto 2026 -- vedi TAGLI, sopra.
 def profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float,
                      *, id: str = '', drummer: str = '', style: str = '',
-                     bpm: int = 0, taglio: str = 'vicino',
+                     bpm: int = 0, taglio: str = 'voce',
                      origine_fissa: float | None = None,
                      levare_fisso: float | None = None) -> Profilo:
     """Il profilo, da colpi gia' letti: strumento -> [(posizione, velocity)].
@@ -522,7 +527,8 @@ def profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float,
                    battute=ultimo // 16 + 1, passi=passi)
 
 
-def profilo(base: Path | str, id: str, *, taglio: str = 'vicino') -> Profilo:
+# taglio='voce' e' il default dal 26 agosto 2026 -- vedi TAGLI, sopra.
+def profilo(base: Path | str, id: str, *, taglio: str = 'voce') -> Profilo:
     """Il profilo di UNA esecuzione del dataset, nominata.
 
     Le posizioni del file MIDI sono nella risoluzione DEL FILE (nel Groove
