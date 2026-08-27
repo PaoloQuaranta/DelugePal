@@ -6125,12 +6125,15 @@ def test_applica_groove():
 
 
 def test_groove_taglio_neutro():
-    """Il parametro `taglio` esiste, e sul default non cambia NIENTE.
+    """Il parametro `taglio` esiste, e chiamare senza equivale a nominarlo.
 
-    ⚠️ E' il cancello di tutto il confronto fra stimatori: se `'vicino'` non
-    riproduce esattamente i numeri di prima, ogni differenza misurata fra i
-    tagli e' inattribuibile -- non si sa se l'ha mossa lo stimatore o la
-    ristrutturazione del ciclo.
+    ⚠️ FINO AL 26 AGOSTO 2026 questo era il cancello di tutto il confronto
+    fra stimatori: il default era `'vicino'`, e se non riproduceva
+    esattamente i numeri di prima ogni differenza misurata fra i tagli
+    sarebbe stata inattribuibile -- non si sarebbe saputo se l'aveva mossa
+    lo stimatore o la ristrutturazione del ciclo. Il Task 6 ha spostato il
+    default su `'voce'`; il check resta, ma ora confronta il default con
+    `SCELTO` invece che con `'vicino'` -- vedi il commento sopra `SCELTO`.
     """
     from delugexml import groove as GR                      # noqa: PLC0415
 
