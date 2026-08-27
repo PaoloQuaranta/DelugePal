@@ -6357,6 +6357,52 @@ def test_applica_groove_dice_le_collisioni():
           str(r2['collisioni']))
 
 
+def test_groove_congelare_origine_e_levare():
+    """`profilo_da_colpi()` sa accettare origine e levare dall'esterno.
+
+    ⚠️ Serve alla prova di traslazione per voce: traslando UNA voce si
+    muove anche l'origine del KIT, di circa delta per la quota di colpi di
+    quella voce. Chi non la congela misura anche quello.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    ppq = 96.0
+    colpi = {
+        'kick': [(float(b * 384 + m * 96), 100) for b in range(8)
+                 for m in (0, 2)],
+        'ride': [(float(b * 384 + m * 96), 80) for b in range(8)
+                 for m in range(4)],
+    }
+    base = GR.profilo_da_colpi(colpi, ppq)
+    check('senza congelare, il BUR resta None su colpi tutti sui battere',
+          base.bur is None, str(base.bur))
+
+    # tutto il kit spostato di +5: l'origine se lo mangia, il profilo non
+    # si muove.
+    spostato = {n: [(p + 5.0, v) for p, v in note] for n, note in colpi.items()}
+    check('una traslazione COMUNE la riassorbe origine()',
+          GR.profilo_da_colpi(spostato, ppq).passi == base.passi)
+
+    # una voce sola spostata di +5: l'origine si muove, ed e' l'artefatto.
+    una = dict(colpi)
+    una['ride'] = [(p + 5.0, v) for p, v in colpi['ride']]
+    libero = GR.profilo_da_colpi(una, ppq)
+    congelato = GR.profilo_da_colpi(una, ppq, origine_fissa=0.0,
+                                    levare_fisso=0.5)
+    k_libero = {p.passo: p.scarto for p in libero.passi['kick']}
+    k_congelato = {p.passo: p.scarto for p in congelato.passi['kick']}
+    check('senza congelare, il kick NON TRASLATO si muove lo stesso',
+          any(abs(k_libero[k]) > 0.01 for k in k_libero),
+          str({k: round(v, 2) for k, v in sorted(k_libero.items())}))
+    check('congelando, il kick non traslato resta fermo',
+          all(abs(v) < 1e-9 for v in k_congelato.values()),
+          str({k: round(v, 2) for k, v in sorted(k_congelato.items())}))
+    check('e il ride traslato si muove di esattamente +5',
+          all(abs(p.scarto - 5.0) < 1e-9
+              for p in congelato.passi['ride']),
+          str([round(p.scarto, 2) for p in congelato.passi['ride']]))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

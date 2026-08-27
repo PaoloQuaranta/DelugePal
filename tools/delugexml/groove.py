@@ -432,7 +432,9 @@ def _senza_swing(fase: float, levare: float) -> float:
 
 def profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float,
                      *, id: str = '', drummer: str = '', style: str = '',
-                     bpm: int = 0, taglio: str = 'vicino') -> Profilo:
+                     bpm: int = 0, taglio: str = 'vicino',
+                     origine_fissa: float | None = None,
+                     levare_fisso: float | None = None) -> Profilo:
     """Il profilo, da colpi gia' letti: strumento -> [(posizione, velocity)].
 
     LA CATENA, E L'ORDINE E' LA COSA CHE CONTA:
@@ -449,10 +451,21 @@ def profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float,
         raise ValueError(f'taglio {taglio!r} sconosciuto: ci sono {list(TAGLI)}')
     passo_tick = ppq / 4                            # un 1/16
     tutte = [p for note in colpi.values() for p, _ in note]
-    off = origine(tutte, passo_tick)
 
-    bur = bur_da_posizioni([p - off for p in tutte], ppq)
-    levare = da_bur(bur) if bur is not None else 0.5
+    # ⚠️ ORIGINE E LEVARE SI POSSONO CONGELARE, e serve a una cosa sola:
+    # la prova di traslazione per voce. Traslando UNA voce si muove anche
+    # l'origine del KIT, di circa delta per la quota di colpi di quella
+    # voce, e chi non la congela misura anche quell'artefatto invece dello
+    # stimatore. Fuori da quella prova NON si passano: una stima congelata
+    # e' una stima che non guarda i dati.
+    off = origine(tutte, passo_tick) if origine_fissa is None else origine_fissa
+
+    if levare_fisso is None:
+        bur = bur_da_posizioni([p - off for p in tutte], ppq)
+        levare = da_bur(bur) if bur is not None else 0.5
+    else:
+        bur = in_bur(levare_fisso)
+        levare = levare_fisso
 
     # PRIMA PASSATA: la posizione DRITTA di ogni colpo -- origine tolta,
     # swing tolto -- raggruppata per strumento. Il passo NON si sceglie

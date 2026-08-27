@@ -965,6 +965,95 @@ def il_template(per_es):
     print(f'    colpi esattamente simultanei: {len(set(p43) & set(p51))}')
 
 
+#: Di quanto si trasla una voce sola, in tick, nella prova di linearita'.
+#: Fino a 8 su un passo da 24: oltre un terzo di passo la domanda cambia --
+#: non e' piu' "lo stimatore segue?" ma "quale passo e' quello giusto?".
+DELTA = (-8, -6, -4, -2, 0, 2, 4, 6, 8)
+
+
+def la_prova_di_traslazione():
+    """Uno stimatore e' uno stimatore se la sua risposta SEGUE i dati.
+
+    ⚠️ E' LA MISURA CHE DECIDE il default di `GR.TAGLI`, ed e' scelta il 26
+    agosto 2026 CONTRO due criteri piu' ovvi. L'errore di ricostruzione per
+    inversione premia lo stimatore rotto -- spezzare un gesto in due celle
+    rende ciascuna delle due mediane piu' stretta, quindi l'errore SCENDE. E
+    la tenuta delle conclusioni della casella 6 come bersaglio sarebbe
+    fabbricare la conclusione, che e' il difetto della finestra di grazia.
+
+    ⚠️ ORIGINE E LEVARE SI CONGELANO ai valori di delta = 0: traslando una
+    voce sola si muove anche l'origine del kit, e chi non lo neutralizza
+    misura quell'artefatto e conclude che nessuno stimatore e' lineare.
+
+    ⚠️ LE CELLE SI APPAIANO PER POSIZIONE DICHIARATA, non per numero di
+    passo. E' il punto: uno stimatore che ripiega SPOSTA un gesto da una
+    cella all'altra, quindi `k` cambia mentre il gesto e' lo stesso.
+    Appaiare per `k` confronterebbe due popolazioni diverse sotto la stessa
+    etichetta.
+    """
+    print('\n=== la prova di traslazione per voce: lo stimatore segue? ===')
+    print(f'    delta provati: {DELTA} tick su un passo da {PPQ/4:.0f}')
+    esiti = {t: {'pendenze': [], 'salti': [], 'voci': 0} for t in GR.TAGLI}
+    esecuzioni, batteristi = 0, set()
+    for e in GR.elenco(BASE, style=STILE, beat_type='beat',
+                       time_signature='4-4'):
+        if e.style in FUORI_DALLO_SWING:
+            continue
+        c = _colpi(e)
+        tutte = [p for v in c.values() for p, _ in v]
+        off0 = GR.origine(tutte, PPQ / 4)
+        bur0 = GR.bur_da_posizioni([p - off0 for p in tutte], PPQ)
+        lev0 = da_bur(bur0) if bur0 is not None else 0.5
+        esecuzioni += 1
+        batteristi.add(e.drummer)
+        for nome in sorted(c):
+            if len(c[nome]) < 40:
+                continue
+            for taglio in GR.TAGLI:
+                dichiarate = {}
+                for d in DELTA:
+                    mosso = dict(c)
+                    mosso[nome] = [(p + d, v) for p, v in c[nome]]
+                    p = GR.profilo_da_colpi(
+                        mosso, PPQ, taglio=taglio,
+                        origine_fissa=off0, levare_fisso=lev0)
+                    dichiarate[d] = sorted(
+                        s.passo * PPQ / 4 + s.scarto
+                        for s in p.passi.get(nome, []) if s.colpi >= 10)
+                base = dichiarate[0]
+                if not base:
+                    continue
+                esiti[taglio]['voci'] += 1
+                # appaiamento per posizione dichiarata piu' vicina a delta=0
+                mosse = []
+                for d in DELTA:
+                    if d == 0:
+                        continue
+                    scarti = [min(dichiarate[d], key=lambda x: abs(x - b)) - b
+                              for b in base] if dichiarate[d] else []
+                    if scarti:
+                        mosse.append((d, statistics.median(scarti)))
+                if len(mosse) < 2:
+                    continue
+                # pendenza per minimi quadrati passanti per l'origine
+                num = sum(d * m for d, m in mosse)
+                den = sum(d * d for d, _ in mosse)
+                pend = num / den if den else 0.0
+                esiti[taglio]['pendenze'].append(pend)
+                esiti[taglio]['salti'].append(max(abs(m - d) for d, m in mosse))
+    print(f'    {esecuzioni} esecuzioni, {len(batteristi)} batteristi')
+    print(f'    {"taglio":10s} {"voci":>5s} {"pendenza mediana":>18s} '
+          f'{"scarto max mediano":>20s} {"voci con un salto >= 12 tick":>30s}')
+    for taglio in GR.TAGLI:
+        v = esiti[taglio]
+        if not v['pendenze']:
+            continue
+        print(f'    {taglio:10s} {v["voci"]:5d} '
+              f'{statistics.median(v["pendenze"]):18.3f} '
+              f'{statistics.median(v["salti"]):20.2f} '
+              f'{sum(1 for s in v["salti"] if s >= PPQ / 8):30d}')
+
+
 def main() -> None:
     la_delimitazione()
     la_scala()
@@ -973,6 +1062,7 @@ def main() -> None:
     il_difetto_della_grazia()
     il_bordo_del_passo()
     il_vuoto_delle_voci()
+    la_prova_di_traslazione()
     i_fill()
     il_template(per_es)
 
