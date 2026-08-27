@@ -1067,9 +1067,16 @@ def l_ancoraggio():
     un battere (0, 4, 8, 12), con scarto positivo oltre mezzo passo -- cioe'
     celle che dicono "molto in ritardo su un passo debole" dove la lettura
     musicale sarebbe "in anticipo sul battere".
+
+    ⚠️ IL DETTAGLIO STA QUI, non in uno script a parte. La sezione stampa
+    anche esecuzione, batterista, voce, passo, scarto e colpi di OGNI cella
+    contata: e' l'invariante di questo file (vedi `NOMINATE`, qui sopra) --
+    i numeri per cella escono da questa funzione, non da un conto a mano.
     """
     print('\n=== l ancoraggio: celle sul passo debole accanto a un battere ===')
     conta = {t: {} for t in GR.TAGLI}
+    dettaglio: dict[str, list[tuple[str, str, str, int, float, int]]] = {
+        t: [] for t in GR.TAGLI}
     esecuzioni, batteristi = 0, set()
     for e in GR.elenco(BASE, style=STILE, beat_type='beat',
                        time_signature='4-4'):
@@ -1086,12 +1093,34 @@ def l_ancoraggio():
                     if (s.colpi >= 10 and (s.passo + 1) % 16 in (0, 4, 8, 12)
                             and s.scarto > PPQ / 8):
                         conta[taglio][nome] = conta[taglio].get(nome, 0) + 1
+                        dettaglio[taglio].append(
+                            (e.id, e.drummer, nome, s.passo, s.scarto, s.colpi))
     print(f'    {esecuzioni} esecuzioni, {len(batteristi)} batteristi')
     for taglio in GR.TAGLI:
         tot = sum(conta[taglio].values())
         detta = '  '.join(f'{n}:{k}' for n, k in
                           sorted(conta[taglio].items(), key=lambda kv: -kv[1]))
         print(f'    {taglio:10s} celle mal ancorate: {tot:3d}   {detta}')
+
+    # ⚠️ IL DETTAGLIO PER CELLA, non solo il totale. Il totale non dice se
+    # le celle stanno su una voce sola o un batterista solo, e quella e' la
+    # domanda che decide se una regola serve e a chi si applicherebbe.
+    # Tetto stampato esplicitamente, non un troncamento silenzioso: se la
+    # lista crescesse, chi legge deve vedere QUANTE righe mancano.
+    TETTO = 20
+    print('\n    dettaglio per cella '
+          '(esecuzione, batterista, voce, passo, scarto, colpi):')
+    for taglio in GR.TAGLI:
+        righe = dettaglio[taglio]
+        if not righe:
+            continue
+        print(f'    --- {taglio} ---')
+        for e_id, drummer, nome, passo, scarto, colpi in righe[:TETTO]:
+            print(f'      {e_id:24s} {drummer:10s} {nome:22s} '
+                  f'passo {passo:2d}  scarto {scarto:+.2f}  colpi {colpi:3d}')
+        if len(righe) > TETTO:
+            print(f'      ... e altre {len(righe) - TETTO} celle non mostrate '
+                  f'(tetto di stampa {TETTO})')
 
 
 def main() -> None:
