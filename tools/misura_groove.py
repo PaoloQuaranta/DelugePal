@@ -1054,6 +1054,46 @@ def la_prova_di_traslazione():
               f'{sum(1 for s in v["salti"] if s >= PPQ / 8):30d}')
 
 
+def l_ancoraggio():
+    """Quante celle finiscono ancorate sul passo DEBOLE accanto a un battere.
+
+    ⚠️ PERCHE' ESISTE. `'voce'` e `'rado'` chiudono la spaccatura di un gesto
+    ma non decidono su QUALE passo ancorarlo: dai dati soli "14 tick prima
+    del passo 4" e "10 tick dopo il passo 3" sono la stessa cosa. Conta
+    perche' `applica_groove()` cerca la cella del passo che il PATTERN
+    chiede: ancorato sul 3, un pattern che chiede il 4 non trova niente.
+
+    Il conteggio: celle forti (>= 10 colpi) su un passo DISPARI adiacente a
+    un battere (0, 4, 8, 12), con scarto positivo oltre mezzo passo -- cioe'
+    celle che dicono "molto in ritardo su un passo debole" dove la lettura
+    musicale sarebbe "in anticipo sul battere".
+    """
+    print('\n=== l ancoraggio: celle sul passo debole accanto a un battere ===')
+    conta = {t: {} for t in GR.TAGLI}
+    esecuzioni, batteristi = 0, set()
+    for e in GR.elenco(BASE, style=STILE, beat_type='beat',
+                       time_signature='4-4'):
+        if e.style in FUORI_DALLO_SWING:
+            continue
+        esecuzioni += 1
+        batteristi.add(e.drummer)
+        for taglio in GR.TAGLI:
+            p = GR.profilo(BASE, e.id, taglio=taglio)
+            for nome, passi in p.passi.items():
+                if sum(s.colpi for s in passi) < 40:
+                    continue
+                for s in passi:
+                    if (s.colpi >= 10 and (s.passo + 1) % 16 in (0, 4, 8, 12)
+                            and s.scarto > PPQ / 8):
+                        conta[taglio][nome] = conta[taglio].get(nome, 0) + 1
+    print(f'    {esecuzioni} esecuzioni, {len(batteristi)} batteristi')
+    for taglio in GR.TAGLI:
+        tot = sum(conta[taglio].values())
+        detta = '  '.join(f'{n}:{k}' for n, k in
+                          sorted(conta[taglio].items(), key=lambda kv: -kv[1]))
+        print(f'    {taglio:10s} celle mal ancorate: {tot:3d}   {detta}')
+
+
 def main() -> None:
     la_delimitazione()
     la_scala()
@@ -1063,6 +1103,7 @@ def main() -> None:
     il_bordo_del_passo()
     il_vuoto_delle_voci()
     la_prova_di_traslazione()
+    l_ancoraggio()
     i_fill()
     il_template(per_es)
 
