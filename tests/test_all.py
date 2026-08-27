@@ -6248,6 +6248,115 @@ def test_groove_taglio_voce():
           f'origine {GR.origine(dritte, 24.0):.3f} contro voce {sp:.3f}')
 
 
+def test_groove_taglio_rado():
+    """`'rado'` taglia nel mezzo del vuoto, e sulle voci piene non taglia.
+
+    Quattro casi, e il quarto e' quello che conta: uno stimatore deve
+    SEGUIRE i dati. I valori attesi sono misurati, non dedotti.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    ppq = 96.0
+    # (a) lo stesso gesto del taglio "voce": anticipo di 14 tick sui passi
+    # 4 e 12, dispersione 3. Le fasi sono 7, 9, 11 e 13; il vuoto piu'
+    # largo va da 13 a 31, largo 18, e il suo centro cade a 22.
+    posizioni = [float(b * 384 + base + d)
+                 for b in range(12) for base in (82, 274)
+                 for d in (-3, -1, 1, 3)]
+    colpi = {'charleston a pedale': [(p, 90) for p in posizioni]}
+    rado = GR.profilo_da_colpi(colpi, ppq, taglio='rado')
+    celle = {p.passo: p for p in rado.passi['charleston a pedale']
+             if p.colpi >= 10}
+    check('con "rado" il gesto sta in due celle sole', len(celle) == 2,
+          str(sorted(celle)))
+    check('e ognuna porta tutti i colpi del suo gesto',
+          all(v.colpi == 48 for v in celle.values()),
+          str({k: v.colpi for k, v in sorted(celle.items())}))
+    sp = GR.spostamento_del_taglio(posizioni, 24.0, 'rado')
+    check('lo spostamento e il centro del vuoto meno mezzo passo: +10',
+          abs(sp - 10.0) < 1e-9, f'{sp:.3f}')
+
+    # (b) una voce di semicrome PIENE, tutte esattamente sulla griglia.
+    # ⚠️ NON e' il caso "densita' piatta": le fasi collassano tutte su
+    # ZERO, cioe' e' il caso piu' CONCENTRATO che esista. Il vuoto piu'
+    # largo e' allora l'intero passo, il suo centro cade a mezzo passo dai
+    # colpi, e lo spostamento esce zero -- che e' giusto, perche' su una
+    # voce gia' sulla griglia non c'e' niente da spostare.
+    piene = [float(b * 384 + k * 24) for b in range(12) for k in range(16)]
+    check('su semicrome sulla griglia "rado" non sposta niente',
+          GR.spostamento_del_taglio(piene, 24.0, 'rado') == 0.0,
+          str(GR.spostamento_del_taglio(piene, 24.0, 'rado')))
+    centro, largo, medio = GR._vuoto_piu_largo(piene, 24.0)
+    check('e il vuoto misurato e un passo intero', abs(largo - 24.0) < 1e-9,
+          f'centro {centro} largo {largo} medio {medio}')
+
+    # (c) le stesse semicrome con un jitter di +-2 tick: il vuoto resta
+    # largo 20 e centrato a 12, quindi ancora nessuno spostamento.
+    sporche = [float(b * 384 + k * 24 + (k % 5) - 2)
+               for b in range(12) for k in range(16)]
+    check('e nemmeno su semicrome con jitter di +-2 tick',
+          GR.spostamento_del_taglio(sporche, 24.0, 'rado') == 0.0,
+          str(GR.spostamento_del_taglio(sporche, 24.0, 'rado')))
+
+    # (d) ⚠️ LA COSA CHE UNO STIMATORE DEVE SAPER FARE: seguire i dati.
+    # Traslando la voce di delta, il taglio si sposta di delta. Avvolge a
+    # +-mezzo passo perche' una fase vive su un cerchio, e l'avvolgimento
+    # NON e' un salto: sposta anche il passo, quindi la posizione
+    # dichiarata resta continua (e' il motivo per cui il Task 4 appaia le
+    # celle per posizione dichiarata e non per numero di passo).
+    for d in (-8, -6, -4, -2, 2, 4, 6, 8):
+        atteso = ((10.0 + d + 12.0) % 24.0) - 12.0
+        ottenuto = GR.spostamento_del_taglio(
+            [p + d for p in posizioni], 24.0, 'rado')
+        check(f'traslando la voce di {d:+d} il taglio si sposta di {d:+d}',
+              abs(ottenuto - atteso) < 1e-9,
+              f'atteso {atteso:+.2f}, ottenuto {ottenuto:+.2f}')
+
+    # (e) il limite del residuo, che si e' allargato: con un taglio
+    # spostato il residuo non sta piu' dentro mezzo passo, ma resta dentro
+    # UN passo.
+    for taglio in GR.TAGLI:
+        p = GR.profilo_da_colpi(colpi, ppq, taglio=taglio)
+        peggio = max(abs(s.scarto) for v in p.passi.values() for s in v)
+        check(f'taglio {taglio!r}: |scarto| <= un passo intero',
+              peggio <= 24.0 + 1e-9, f'{peggio:.3f}')
+
+
+def test_applica_groove_dice_le_collisioni():
+    """Due note su passi adiacenti possono finire sullo stesso tick.
+
+    ⚠️ Diventato possibile il 26 agosto 2026, quando lo scarto ha smesso di
+    stare dentro mezzo passo. Non e' vietato -- il Deluge lo accetta -- ma
+    va DETTO: un'operazione silenziosa non e' correggibile.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    prof = GR.Profilo(
+        id='finto/3', drummer='drummerX', style='jazz', bpm=120, bur=1.6,
+        battute=1,
+        passi={'kick': [GR.Passo(passo=3, velocity=100, scarto=12.0, colpi=20),
+                        GR.Passo(passo=4, velocity=100, scarto=-12.0,
+                                 colpi=20)]})
+    note = MU.passi('...xx...........')
+    r = MU.applica_groove(note, prof, dove='kick')
+    check('le due note finiscono sullo stesso tick',
+          note[0].pos == note[1].pos, f'{note[0].pos} {note[1].pos}')
+    check('e il rapporto lo dice', r['collisioni'] == [note[0].pos],
+          str(r.get('collisioni')))
+
+    # e quando non c'e' collisione, la lista e' vuota: non si allarma a vuoto
+    prof2 = GR.Profilo(
+        id='finto/4', drummer='drummerX', style='jazz', bpm=120, bur=1.6,
+        battute=1,
+        passi={'kick': [GR.Passo(passo=3, velocity=100, scarto=0.0, colpi=20),
+                        GR.Passo(passo=4, velocity=100, scarto=0.0,
+                                 colpi=20)]})
+    r2 = MU.applica_groove(MU.passi('...xx...........'), prof2, dove='kick')
+    check('senza collisioni la lista e vuota', r2['collisioni'] == [],
+          str(r2['collisioni']))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

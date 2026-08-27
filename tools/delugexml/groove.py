@@ -314,6 +314,39 @@ def _media_circolare(posizioni, passo: float) -> float:
     return _media_versori(scarti, passo)
 
 
+def _vuoto_piu_largo(posizioni, passo: float) -> tuple[float, float, float]:
+    """L'arco di fase piu' VUOTO di una voce: (centro, larghezza, buco medio).
+
+    Il centro sta in [0, passo). La larghezza e' il buco piu' grande fra due
+    colpi consecutivi, CIRCOLARMENTE. Il buco medio e' `passo / n`, cioe'
+    quanto varrebbe ogni buco se i colpi fossero sparsi in modo piatto: non
+    serve a decidere niente qui, serve a `misura_groove.py` per dire se quel
+    vuoto e' un vuoto VERO o solo il piu' largo di tanti uguali.
+
+    ⚠️ IL CENTRO, NON IL PRIMO PUNTO VUOTO, e la ragione e' misurata il 26
+    agosto 2026. Una prima stesura cercava il minimo di densita' dentro una
+    finestra e ne prendeva l'argmin. Ma quel minimo e' un ALTOPIANO -- un
+    arco intero senza colpi -- e l'argmin ne prendeva il primo punto della
+    scansione, che sta sempre a fase 0. Ne usciva un taglio INCOLLATO:
+    traslando la voce di -4, -2, 0, +2, +4 tick lo spostamento restava
+    -12,00 tutte le volte. Il centro del vuoto invece trasla coi dati, e la
+    stessa prova da' una rampa di pendenza 1.
+
+    ⚠️ IL BUCO CHE GIRA VA CONTATO A PARTE. Con tutti i colpi sulla stessa
+    fase i buchi fra consecutivi sono zero, e `(fasi[0] - fasi[-1]) % passo`
+    darebbe zero anche per quello che avvolge: una voce perfettamente sulla
+    griglia uscirebbe con vuoto ZERO invece che con vuoto MASSIMO, cioe' il
+    rovescio esatto. Si calcola come `passo - (fasi[-1] - fasi[0])`.
+    """
+    fasi = sorted(p % passo for p in posizioni)
+    if not fasi:
+        return 0.0, 0.0, 0.0
+    buchi = [fasi[i + 1] - fasi[i] for i in range(len(fasi) - 1)]
+    buchi.append(passo - (fasi[-1] - fasi[0]))
+    i = max(range(len(fasi)), key=lambda k: buchi[k])
+    return (fasi[i] + buchi[i] / 2) % passo, buchi[i], passo / len(fasi)
+
+
 def spostamento_del_taglio(dritte, passo_tick: float,
                            modo: str = 'vicino') -> float:
     """Di quanto spostare il TAGLIO fra due passi, per questa voce, in tick.
@@ -332,7 +365,13 @@ def spostamento_del_taglio(dritte, passo_tick: float,
         return 0.0
     if modo == 'voce':
         return _media_circolare(dritte, passo_tick)
-    raise ValueError(f'taglio {modo!r} non ancora implementato')
+    if modo == 'rado':
+        centro, largo, _ = _vuoto_piu_largo(dritte, passo_tick)
+        if largo <= 0:
+            return 0.0                  # nessun colpo: niente da spostare
+        # il taglio di `round()` cade a meta' fra due passi: portarlo sul
+        # centro del vuoto vuol dire spostarlo di (centro - mezzo passo).
+        return centro - passo_tick / 2
 
 
 class Passo(NamedTuple):
@@ -347,6 +386,13 @@ class Passo(NamedTuple):
     #: trattiene', cioe' il rovescio, ed era copiata in altri tre posti:
     #: ha fatto concludere che il charleston a pedale del jazz stesse
     #: DIETRO agli altri mentre li ANTICIPA. Il segno si legge da qui.
+    #: ⚠️ IL LIMITE SI E' ALLARGATO, il 26 agosto 2026. Con `taglio='vicino'`
+    #: il passo e' il piu' VICINO, quindi |scarto| <= mezzo passo (12 tick)
+    #: per costruzione. Con un taglio spostato non e' piu' vero: uno scarto
+    #: puo' arrivare fino a UN PASSO INTERO, ed e' voluto -- e' l'unico modo
+    #: di dire "anticipa di mezza semicroma" invece di dire "e' in ritardo
+    #: sul passo prima". Ne segue che `applica_groove()` puo' posare una nota
+    #: nel territorio del passo accanto.
     scarto: float
     colpi: int          # quante volte quel passo e' stato colpito
 

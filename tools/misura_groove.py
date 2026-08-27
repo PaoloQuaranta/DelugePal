@@ -715,6 +715,77 @@ def il_bordo_del_passo():
                       f'{r.scarto - c.scarto:+5.2f} tick')
 
 
+def _dritte_della_voce(e, nome, colpi=None) -> list[float]:
+    """Le posizioni DRITTE di una voce: origine tolta, swing tolto.
+
+    Rifa' la prima passata di `GR.profilo_da_colpi()` per poter interrogare
+    i tagli senza passare da un `Profilo` gia' aggregato. `colpi` si passa
+    quando si interrogano piu' voci della stessa esecuzione, per non
+    rileggere il file MIDI una volta per voce.
+    """
+    c = _colpi(e) if colpi is None else colpi
+    tutte = [p for v in c.values() for p, _ in v]
+    off = GR.origine(tutte, PPQ / 4)
+    bur = GR.bur_da_posizioni([p - off for p in tutte], PPQ)
+    lev = da_bur(bur) if bur is not None else 0.5
+    fuori = []
+    for pos, _ in c.get(nome, []):
+        p = pos - off
+        mov, resto = divmod(p, PPQ)
+        fuori.append((mov + GR._senza_swing(resto / PPQ, lev)) * PPQ)
+    return fuori
+
+
+def il_vuoto_delle_voci():
+    """Quanto e' netto il vuoto su cui `'rado'` mette il taglio.
+
+    ⚠️ PERCHE' ESISTE, e cosa NON fa. `'rado'` non ha parametri: il centro
+    del vuoto piu' largo e' una grandezza geometrica, non una taratura.
+    Resta pero' una domanda che solo il corpus chiude: se il buco piu'
+    largo fosse largo quanto gli altri, il suo centro sarebbe arbitrario e
+    lo spostamento riassegnerebbe i passi in blocco.
+
+    Questa sezione misura il rapporto `largo / medio` -- quanto il buco piu'
+    largo supera quello che ci sarebbe se i colpi fossero sparsi piatti.
+    NON decide niente: se quel rapporto stesse vicino a 1 su molte voci,
+    servirebbe un ripiego, e sarebbe una decisione da prendere, non da
+    inventare qui.
+    """
+    print('\n=== il vuoto su cui "rado" taglia: e un vuoto vero? ===')
+    rapporti, spostamenti = [], []
+    esecuzioni, batteristi = 0, set()
+    for e in GR.elenco(BASE, style=STILE, beat_type='beat',
+                       time_signature='4-4'):
+        if e.style in FUORI_DALLO_SWING:
+            continue
+        c = _colpi(e)
+        esecuzioni += 1
+        batteristi.add(e.drummer)
+        for nome in sorted(c):
+            dritte = _dritte_della_voce(e, nome, colpi=c)
+            if len(dritte) < 40:
+                continue
+            centro, largo, medio = GR._vuoto_piu_largo(dritte, PPQ / 4)
+            if medio <= 0:
+                continue
+            rapporti.append(largo / medio)
+            spostamenti.append(abs(centro - PPQ / 8))
+    r = sorted(rapporti)
+    q = statistics.quantiles(r, n=4)
+    print(f'    {esecuzioni} esecuzioni, {len(batteristi)} batteristi, '
+          f'{len(r)} voci con almeno 40 colpi')
+    print(f'    largo/medio : min {r[0]:.1f}  q1 {q[0]:.1f}  '
+          f'mediana {statistics.median(r):.1f}  q3 {q[2]:.1f}  '
+          f'max {r[-1]:.1f}')
+    for soglia in (1.5, 2.0, 3.0, 5.0):
+        n = sum(1 for x in r if x < soglia)
+        print(f'    voci col vuoto meno di {soglia:.1f} volte il medio: '
+              f'{n:3d} su {len(r)}  ({100 * n / len(r):.1f}%)')
+    s = sorted(spostamenti)
+    print(f'    |spostamento| : mediana {statistics.median(s):.2f} tick, '
+          f'q3 {s[int(len(s) * 0.75)]:.2f}, massimo {max(s):.2f}')
+
+
 def i_fill():
     """I fill contro i beat: densita', durata, e quali strumenti."""
     print('\n=== i fill, contro i beat ===')
@@ -901,6 +972,7 @@ def main() -> None:
     per_es = il_profilo_aggregato()
     il_difetto_della_grazia()
     il_bordo_del_passo()
+    il_vuoto_delle_voci()
     i_fill()
     il_template(per_es)
 
