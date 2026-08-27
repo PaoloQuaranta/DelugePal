@@ -1157,17 +1157,35 @@ In `tools/misura_groove.py`, dentro `il_bordo_del_passo()`, avvolgere il ciclo e
 
 Run: `.venv/Scripts/python.exe tools/misura_groove.py > out/groove_jazz.txt 2>&1`
 
-- [ ] **Step 3: Scegliere il default con la regola scritta**
+- [ ] **Step 3: Il default è `'voce'`, e come ci si è arrivati**
 
-La regola, e vale **così com'è scritta**, senza aggiustarla dopo aver visto i numeri:
+⚠️ **La scelta è già stata presa, dal proprietario del progetto, il 26 agosto 2026, e questo Step la esegue invece di rifarla.** Sta scritta qui per intero — compreso il fatto che **la regola scritta prima selezionava l'altro** — perché una decisione presa contro la propria regola va registrata come decisione, non travestita da esito della regola.
 
-1. si scarta ogni taglio la cui **pendenza mediana** sotto traslazione si discosta da 1 più di quanto se ne discosti il migliore;
-2. fra i restanti vince quello con **meno voci che mostrano un salto ≥ mezzo passo**;
-3. a parità, vince il più semplice, cioè quello con **meno parametri**: `'voce'` non ne ha, `'rado'` ne ha due.
+I numeri sul tavolo quando è stata presa, tutti `[MIS]` su 42 esecuzioni, 5 batteristi, 111 voci:
 
-⚠️ **Il «battere in minoranza», il 43,7% e il 12 su 15 NON entrano in questa regola.** Sono conseguenze: si riportano al Task 7, non decidono.
+| | `vicino` (l'attuale) | `voce` | `rado` |
+|---|---:|---:|---:|
+| pendenza mediana sotto traslazione | 0,808 | **0,998** | **0,998** |
+| scarto massimo mediano (tick) | 3,28 | **1,47** | 1,97 |
+| voci con un salto ≥ mezzo passo | 16 / 111 | 4 / 111 | **3 / 111** |
+| celle mal ancorate | 0 *(impossibile per costruzione)* | **2** | 5 |
 
-Cambiare il default in `profilo_da_colpi()` e in `profilo()` al valore scelto.
+**Cosa la misura chiude da sola, senza bisogno di nessun giudizio:** `'vicino'` non è uno stimatore. La sua risposta segue i dati per lo 0,808, contro lo 0,998 di tutt'e due i candidati, e ha **16 voci su 111** che saltano di mezzo passo contro 3 e 4. Questo è il risultato del lavoro, ed è netto.
+
+**Cosa la misura NON chiude:** quale dei due candidati. La pendenza è pari a tre decimali.
+
+**La regola che era stata scritta prima** diceva: scartare per pendenza, poi vincere con meno salti, poi a parità vincere con meno parametri. Applicata alla lettera seleziona **`'rado'`** — 3 salti contro 4. Il proprietario ha scelto **`'voce'`**, e le ragioni, dette per intero:
+
+- il margine di `'rado'` è **una voce su 111**, cioè plausibilmente rumore, mentre `'voce'` vince su **due** grandezze e con margini più larghi: scarto massimo mediano 1,47 contro 1,97, e celle mal ancorate 2 contro 5;
+- il **terzo criterio della regola era diventato void**: diceva «a parità vince quello con meno parametri, `'voce'` non ne ha e `'rado'` ne ha due», ma dopo la riscrittura del Task 3 nemmeno `'rado'` ne ha;
+- la colonna **dell'ancoraggio non esisteva** quando la regola è stata scritta: la misura del Task 5 è nata dopo;
+- `'voce'` riusa macchinario già nel modulo e già rivisto — la media circolare di `_media_versori()` — invece di aggiungere una seconda idea geometrica.
+
+⚠️ **E la cosa che va scritta accanto, perché è il rischio che questo progetto ha già pagato una volta:** scavalcare una regola dopo aver visto i numeri è esattamente il meccanismo della finestra di grazia, dove un criterio messo per una ragione plausibile fabbricava la conclusione. Qui la differenza è che **la regola non viene riscritta per far vincere `'voce'`**: viene dichiarata insufficiente a decidere una parità che non aveva previsto, e la decisione la prende una persona, per iscritto, con tutte e quattro le colonne visibili. Chi rilegge può non essere d'accordo — e ha davanti i numeri per dirlo.
+
+⚠️ **Il «battere in minoranza», il 43,7% e il 12 su 15 NON sono entrati in questa scelta.** Sono conseguenze: si riportano al Task 7, non decidono.
+
+Cambiare il default a `'voce'` in `profilo_da_colpi()` e in `profilo()`, e scrivere accanto alla firma la data e il rimando a questa sezione.
 
 - [ ] **Step 4: Aggiornare il test di neutralità**
 
@@ -1180,7 +1198,7 @@ Cambiare il default in `profilo_da_colpi()` e in `profilo()` al valore scelto.
           SCELTO)
 ```
 
-dove `SCELTO` è la stringa del taglio deciso, e aggiungere sopra, nel test, il commento con la **data della scelta e la ragione in una riga**. Fare la stessa sostituzione in `test_groove_taglio_neutro_sul_corpus`.
+dove `SCELTO` è `'voce'`, e aggiungere sopra, nel test, il commento con la **data della scelta e la ragione in una riga**. Fare la stessa sostituzione in `test_groove_taglio_neutro_sul_corpus`.
 
 - [ ] **Step 5: Eseguire tutta la suite**
 
@@ -1192,11 +1210,17 @@ Expected: tutti PASS. ⚠️ **Se un test scritto prima di questo piano diventa 
 
 ```bash
 git add tools/delugexml/groove.py tools/misura_groove.py tests/test_all.py out/
-git commit -m "groove: il default e' <SCELTO>, e la regola era scritta prima
+git commit -m "groove: il default e' 'voce', e la regola scritta prima diceva 'rado'
 
-Scelto con la prova di traslazione per voce e con la regola dei tre criteri
-scritta al Task 6 del piano, non con la tenuta della casella 6. Il battere in
-minoranza e il 12 su 15 sono conseguenze, e stanno nella scheda.
+La misura chiude da sola la domanda vera: 'vicino' non e' uno stimatore,
+pendenza 0,808 contro 0,998, e 16 voci su 111 che saltano di mezzo passo
+contro 3 e 4. Quale dei due candidati non lo chiude: la pendenza e' pari a
+tre decimali.
+
+La regola scritta prima selezionava 'rado' per una voce su 111. Il
+proprietario ha scelto 'voce', che vince su scarto massimo mediano (1,47
+contro 1,97) e ancoraggio (2 celle contro 5). La sostituzione sta scritta
+nel piano come decisione, non travestita da esito della regola.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 ```
@@ -1219,6 +1243,12 @@ Nella sezione «Il bordo fra due passi», sostituire il paragrafo che dice *«è
 
 ⚠️ **I numeri vecchi non si cancellano.** In questo progetto una correzione sta datata accanto a ciò che correggeva, non al suo posto: è così che le due correzioni del conteggio reggae sono leggibili.
 
+⚠️ **E la casella deve dichiarare il limite che RESTA, che non è lo stesso di prima.** Il rovesciamento del segno è chiuso; al suo posto c'è l'**ancoraggio**, ed è un limite più piccolo e di natura diversa. Va scritto con questi elementi:
+
+- **cos'è:** chiuso lo spezzarsi di un gesto fra due celle, resta indeciso su **quale** dei due passi ancorarlo. Dai dati soli «14 tick prima del passo 4» e «10 tick dopo il passo 3» sono la stessa cosa, e il gesto è anzi **più vicino** al passo debole: nessun criterio di distanza può preferire il battere. A distinguerli c'è solo il **metro**;
+- **quanto pesa, misurato** il 26 agosto 2026 su 42 esecuzioni e 5 batteristi: **2 celle** col taglio scelto (kick di `drummer10/session1/8`, passi 7 e 15), contro 5 con `'rado'` e 0 con `'vicino'` — dove lo zero di `'vicino'` è **impossibile per costruzione**, non una virtù. Gli scarti stanno fra **+12,70 e +16,50** tick: sporgono di 1-4 tick oltre il punto in cui la distanza smette di decidere, cioè sono casi **genuinamente ambigui**, non collocazioni grossolanamente sbagliate;
+- **perché non si è scritta una regola**, deciso il 26 agosto 2026: `MU.applica_groove()` **già lo riferisce**. Se il pattern chiede un passo che il profilo non ha, la nota resta com'è e il passo finisce in `senza_appoggio`, che va letto. Il caso è **visibile e non silenzioso**, ed è lo stesso principio del «non inventa». Una regola avrebbe dovuto pesare il metro contro la distanza senza nessuna misura che dica quanto — cioè inventare un numero per 2 celle.
+
 - [ ] **Step 2: `jazz.md` — i numeri della casella 6 che si sono mossi**
 
 Rileggere `out/groove_jazz.txt` e aggiornare, ognuno **con la sua data**: il profilo posizionale (il 43,7%), il charleston contro il ride (**12 su 15**, e mai «15 su 15»: quello che regge è delle fasi grezze), la stratificazione, il massimo spostamento e l'escursione.
@@ -1232,6 +1262,8 @@ Nel § «Il groove template» di `docs/MUSICA.md` e nella riga di `applica_groov
 - [ ] **Step 4: `HANDOFF.md`**
 
 In **§7**, togliere il punto «l'aggregazione per passo del groove template» dall'elenco dei punti aperti. In **§6-terdecies**, sotto «Cosa resta aperto», sostituire il punto sul limite dello stimatore con due righe che dicono **che è stato chiuso, quando, e con quale criterio** — e che i due criteri più ovvi erano trappole.
+
+Nell'elenco dei punti aperti **entra l'ancoraggio**, con una riga che dice cos'è, quanto pesa (2 celle su 42 esecuzioni), perché non si è chiuso, e che `senza_appoggio` lo rende visibile. È un punto aperto **più piccolo** di quello che chiude, e va detto anche questo.
 
 ⚠️ Il punto **«la stratificazione misurata non è mai stata messa davanti a un orecchio»** resta aperto, e va aggiornato: la coppia da ascoltare è su `drummer10/session1/1`, passi 4 e 12, cioè **le celle che questo lavoro ha spostato**. I divari di 5,64 e 5,93 tick sono **da rimisurare** col taglio scelto prima di costruire quella coppia.
 
