@@ -1684,10 +1684,17 @@ gli ascolti non hanno stabilito:
   `'vicino'` — dove lo zero di `'vicino'` è **impossibile per costruzione**,
   non una virtù. Non si è scritta una regola perché avrebbe dovuto pesare il
   metro contro la distanza **senza nessuna misura che dica quanto**, cioè
-  inventare un numero per due celle; e perché `MU.applica_groove()` **già lo
-  riferisce**: il passo che il profilo non ha finisce in `senza_appoggio`, che
-  va letto. Il caso è **visibile, non silenzioso**. Vedi
-  `docs/repertori/jazz.md`, «Il limite che resta: l'ancoraggio»;
+  inventare un numero per due celle. Il caso resta **visibile, non
+  silenzioso**, perché **la cella stessa lo dichiara**: porta il gesto quasi
+  intero (14 colpi) mentre il battere accanto è quasi vuoto (1), e ha
+  `|scarto|` oltre mezzo passo, che con `'vicino'` era impossibile per
+  costruzione. Sono `Passo.colpi` e `Passo.scarto`, che `GR.profilo()` già
+  riferisce. ⚠️ **Corretto il 28 agosto 2026:** fino a quel giorno qui c'era
+  scritto che a renderlo visibile fosse `MU.applica_groove()`, «il passo che il
+  profilo non ha finisce in `senza_appoggio`». **Non è vero:**
+  `senza_appoggio` elenca i passi **mancanti**, mentre una cella mal ancorata
+  c'è ed è sbagliata — su entrambe le celle misurate `senza_appoggio` resta
+  vuoto. Vedi `docs/repertori/jazz.md`, «Il limite che resta: l'ancoraggio»;
 - **se il firmware faccia davvero quello che `_senza_swing()` modella.** L'A/B
   assolve il **modello dello swing** — quattro modelli a differenza grossa
   esclusi, l'utente ha risposto *«sufficientemente simili»* — ma non la
@@ -1729,7 +1736,12 @@ gli ascolti non hanno stabilito:
   versioni — 15 su 15 garantito dal difetto della grazia, 12 su 15 dopo la
   correzione, 15 su 15 col nuovo stimatore — e il divario mediano sotto è
   cresciuto a ogni passaggio, **2,59 → 3,21 → 4,60 tick**, cioè non è la
-  vecchia misura che torna. La casella 6 porta il conto per intero, compreso
+  vecchia misura che torna. ⚠️ **E l'unanimità *esatta* dipende dal taglio:**
+  con `'rado'` — l'altro candidato, quello che la regola scritta prima
+  selezionava — la stessa grandezza dà **14 su 15 e +4,25 tick** `[MIS]`. La
+  **direzione** no: entrambi i candidati muovono il divario dallo stesso verso
+  e quasi della stessa quantità (4,25 e 4,60 contro 3,21). Chi cita il
+  conteggio citi anche questo. La casella 6 porta il conto per intero, compreso
   perché il criterio non poteva essere piegato per ottenerlo. Il 15 su 15
   delle **fasi grezze** resta quello che non passa da nessuna catena, e non si
   è mosso di un decimo in nessuna delle due correzioni;
@@ -1878,10 +1890,14 @@ gli ascolti non hanno stabilito:
   **2 celle su 42 esecuzioni** col modo scelto (contro 5 e 0 con gli altri due,
   dove lo zero è impossibile per costruzione). Non si è scritta una regola
   perché avrebbe dovuto pesare il metro contro la distanza senza nessuna
-  misura che dica quanto, e perché `MU.applica_groove()` lo **riferisce già**:
-  il passo che il profilo non ha finisce in `senza_appoggio`, quindi il caso è
-  visibile e non silenzioso. Dichiarato in `docs/repertori/jazz.md`, «Il limite
-  che resta: l'ancoraggio»
+  misura che dica quanto. Il caso è visibile e non silenzioso perché **la cella
+  lo dichiara da sé**: porta il gesto (14 colpi) mentre il battere accanto è
+  quasi vuoto (1), e ha `|scarto|` oltre mezzo passo — impossibile per
+  costruzione con `'vicino'`. ⚠️ **Corretto il 28 agosto 2026:** qui c'era
+  scritto che a renderlo visibile fosse `senza_appoggio`. Quello elenca i passi
+  che il profilo **non ha**; una cella mal ancorata invece c'è, ed è il suo
+  contenuto a essere spostato. Dichiarato in `docs/repertori/jazz.md`, «Il
+  limite che resta: l'ancoraggio»
 - byte 10 delle note: i valori fra 21 e 127 non spiegati dai 20 gradini di
   probabilità — probabilmente il LATCHING descritto nel manuale
 - perché 24 `<section>` quando il manuale ne descrive 12

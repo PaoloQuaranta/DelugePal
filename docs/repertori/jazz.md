@@ -688,7 +688,9 @@ la firma una persona con tutte e quattro le colonne visibili. Chi rilegge può
 non essere d'accordo — e ha davanti i numeri per dirlo.
 
 ⚠️ **E il «battere in minoranza», il 43,7% e il «12 su 15» NON sono entrati
-nella scelta.** Era scritto nel piano **prima** della misura, e non è un
+nella scelta.** Era scritto nel piano **prima** della misura — il testo esatto,
+col commit da cui si rilegge, è citato più sotto in «C'è una stratificazione, e
+il piede anticipa tutto il resto» — e non è un
 dettaglio di procedura: è la ragione per cui le sezioni qui sotto, dove
 qualche conclusione di questa casella si rafforza, possono essere lette senza
 sospettare che lo stimatore sia stato scelto per farle tornare. Sono
@@ -726,15 +728,39 @@ mezzo passo — che è la soglia con cui la misura definisce «mal ancorata» �
 su tutt'e tre i modi le celle contate stanno fra **+12,70 e +16,50**: sono
 casi **genuinamente ambigui**, non collocazioni grossolanamente sbagliate.
 
-**Perché non si è scritta una regola**, deciso lo stesso giorno:
-`MU.applica_groove()` **già lo riferisce**. Se il pattern chiede un passo che
-il profilo non ha, la nota resta com'è e il passo finisce in `senza_appoggio`,
-che va letto — il caso è **visibile e non silenzioso**, ed è lo stesso
-principio del «non inventa». Una regola avrebbe invece dovuto pesare il metro
-contro la distanza **senza nessuna misura che dica quanto**, cioè inventare un
-numero per due celle su 42 esecuzioni. Questo progetto ha già pagato una volta
-il prezzo di un criterio plausibile messo senza misura, e si chiamava finestra
-di grazia.
+**Perché non si è scritta una regola**, deciso lo stesso giorno: una regola
+avrebbe dovuto pesare il metro contro la distanza **senza nessuna misura che
+dica quanto**, cioè inventare un numero per due celle su 42 esecuzioni. Questo
+progetto ha già pagato una volta il prezzo di un criterio plausibile messo
+senza misura, e si chiamava finestra di grazia.
+
+**E il caso, quando capita, si riconosce dalla cella stessa** — è questo che lo
+rende visibile invece che silenzioso. Una cella mal ancorata ha **due marchi
+insieme**, e li porta scritti in ciò che `GR.profilo()` già riferisce:
+
+- **porta il gesto quasi intero mentre il battere accanto è quasi vuoto.** Sul
+  kick di `drummer10/session1/8` `[OSS]`: passo 7 con **14 colpi** contro il
+  passo 8 con **1**; passo 15 con **13** contro il passo 0 con **1**. È
+  `Passo.colpi`, e il rapporto è di quattordici a uno e di tredici a uno;
+- **ha `|scarto| > mezzo passo`**, cioè oltre 12 tick, che con `'vicino'` era
+  **impossibile per costruzione**. È `Passo.scarto`, ed è il marchio che dice
+  «qui il taglio è stato spostato», non «questo batterista è in ritardo».
+
+⚠️ **Correzione del 28 agosto 2026: la ragione scritta il 26 era falsa.**
+Diceva: «`MU.applica_groove()` già lo riferisce. Se il pattern chiede un passo
+che il profilo non ha, la nota resta com'è e il passo finisce in
+`senza_appoggio`, che va letto — il caso è visibile e non silenzioso, ed è lo
+stesso principio del "non inventa"». **`senza_appoggio` non copre questo
+caso**, e non lo copre per costruzione: scatta solo quando la cella **manca**
+(`tools/delugexml/musica.py`, `per_passo.get(passo)` che torna `None`), mentre
+una cella mal ancorata **c'è, ed è sbagliata**. Sulle due celle misurate resta
+**vuoto in tutt'e due i modi di sbagliare**: un pattern che chiede il passo 8
+trova la cella da **un colpo solo** e ci si appoggia; un pattern che chiede il
+passo 7 si prende i **+13,04 tick** e posa la nota a **181** tick, dove il
+confine fra i due passi sta a **180** e il passo 8 comincia a **192** — cioè
+**oltre il confine, nel territorio del passo accanto**. La decisione non
+cambia: nessuna regola. Cambia la ragione, ed è quella dei due marchi qui
+sopra.
 
 ⚠️ **Ma questi sono livelli, e un livello in millisecondi non vuol dire
 niente.** Convertirli e confrontarli con la finestra dell'udibile sarebbe la
@@ -823,18 +849,62 @@ ed è per questo che tutto il necessario a smontarlo è scritto e datato:
   ricostruzione premia lo stimatore rotto, e la tenuta delle conclusioni di
   questa casella sarebbe stata la conclusione fabbricata da sé. Sta nella
   docstring di `la_prova_di_traslazione()`, non solo qui;
-- **la stratificazione era esclusa dalla regola per iscritto.** Il piano dice,
-  prima della misura, che «il battere in minoranza, il 43,7% e il 12 su 15 NON
-  entrano in questa scelta»;
-- **il default è stato scelto su altre quattro colonne** — pendenza 0,998
-  contro 0,808, scarto massimo mediano 1,47 contro 3,28, voci con un salto di
-  mezzo passo 4 su 111 contro 16, celle mal ancorate 2 contro 5 — e la tabella
-  sta per intero in «La decisione: il taglio si sposta per voce»;
+- **la stratificazione era esclusa dalla regola per iscritto.** Il piano al
+  **punto di partenza del ramo** — `docs/superpowers/plans/2026-08-26-stimatore-per-passo.md`
+  al commit `193ee8e`, cioè prima che esistesse una sola misura — dice
+  testualmente, e si controlla con
+  `git show 193ee8e:docs/superpowers/plans/2026-08-26-stimatore-per-passo.md`:
+
+  > ⚠️ **Il «battere in minoranza», il 43,7% e il 12 su 15 NON entrano in
+  > questa regola.** Sono conseguenze: si riportano al Task 7, non decidono.
+
+  ⚠️ **Nel piano di oggi quella frase è diversa** — «NON **sono entrati** in
+  questa **scelta**» — riscritta al commit `a61d51e`, cioè **dopo** la misura
+  che ha deciso. Chi la cerchi nel piano di oggi trova un passato scritto a
+  posteriori, e ha ragione a diffidarne: la citazione che vale è quella del
+  punto di partenza, qui sopra. ⚠️ **Fino al 28 agosto 2026 questa riga ne
+  citava una terza forma**, che non è né dell'una né dell'altra versione — «NON
+  entrano in questa scelta», il verbo della prima col sostantivo della seconda
+  — e senza nome di file né commit, cioè proprio la citazione che avrebbe
+  dovuto essere la più verificabile della casella;
+- **il default è stato scelto su altre quattro colonne**, e sulla quarta **il
+  termine di paragone cambia**: pendenza 0,998 contro **0,808 di `'vicino'`**,
+  scarto massimo mediano 1,47 contro **3,28 di `'vicino'`**, voci con un salto
+  di mezzo passo 4 su 111 contro **16 di `'vicino'`** — e celle mal ancorate 2
+  contro **5 di `'rado'`**, perché contro `'vicino'` la stessa colonna direbbe
+  **2 contro 0**, cioè il verso sfavorevole. ⚠️ Quello zero però è
+  **impossibile per costruzione** — `'vicino'` il taglio non lo sposta mai, e
+  il suo residuo non può uscire da mezzo passo — quindi non è una colonna su
+  cui `'vicino'` possa perdere o vincere: è una colonna che esiste solo **fra i
+  due candidati**. La tabella sta per intero in «La decisione: il taglio si
+  sposta per voce». ⚠️ **Fino al 28 agosto 2026 questa riga non nominava
+  nessuno dei termini di paragone**, e la quarta colonna cambiava comparatore
+  in silenzio, nel verso favorevole;
 - **il divario continua a crescere invece di tornare indietro.** Se lo
   stimatore fosse stato piegato per far tornare il vecchio risultato, ci si
   aspetterebbe il vecchio *numero*: 2,59 tick. Il numero di oggi è **4,60**,
   cioè **quasi il doppio** — l'unanimità è la stessa parola, la misura sotto
   no;
+- ⚠️ **il 15 su 15 ESATTO è però contingente al taglio scelto: con `'rado'` la
+  stessa grandezza dà 14 su 15 e +4,25 tick** `[MIS]`. Sta scritto qui perché
+  **regge** questa difesa invece di indebolirla, e tacerlo sarebbe stato il
+  modo più rapido di meritare il sospetto. **La direzione non è contingente:**
+  i due candidati muovono il divario nello **stesso verso** e quasi della
+  stessa quantità — 3,21 con `'vicino'`, **4,25 con `'rado'`, 4,60 con
+  `'voce'`** — quindi «il charleston anticipa il ride, e più di prima» non
+  dipende da quale dei due si scelga. Contingente è **solo l'unanimità
+  esatta**, e dipende dall'unica scelta di tutto il ramo presa *dopo* i numeri
+  e *contro* la regola scritta prima, che selezionava `'rado'`. Il dissenso
+  unico sotto `'rado'` è `drummer1/session1/78`, a **−10,82 tick**, dove la
+  **stessa** esecuzione sta a **+8,70** sotto `'voce'`: uno sbalzo di **19,5
+  tick** su una sola esecuzione a **290 BPM** — che è per l'appunto un caso
+  concreto della colonna «scarto massimo mediano» (1,47 contro 1,97) su cui
+  `'voce'` è stato scelto. Anche il controllo sui soli passi 4 e 12 si muove:
+  `'rado'` dà **4,31 e 13 su 14**, contro 4,73 e 14 su 14 di `'voce'`. Tutti
+  questi numeri escono da `tools/misura_groove.py`, sezione «ride contro
+  charleston, sui SOLI passi 4 e 12», che **dal 28 agosto 2026 misura tutti e
+  tre i tagli** e stampa nominate le esecuzioni che dissentono: non vengono da
+  una revisione, si rifanno rieseguendo lo strumento;
 - **e il 15 su 15 che non è mai passato da nessuna catena non si è mosso di un
   decimo**: quello delle **fasi grezze**, qui sotto. È ancora quello da citare
   a chi chiede la cosa più solida di questa casella, e la ragione non è
@@ -1501,8 +1571,18 @@ voce, quindi il residuo non è più limitato a mezzo passo: su una voce rada pu�
 posare una nota nel **territorio del passo accanto**. Sul template
 raccomandato il caso estremo vale **−19,11 tick su 24**, e sta su una voce da
 meno di venti colpi. Quanto pesa, e perché non si è scritta una regola per
-chiuderlo, stanno in «Il limite che resta: l'ancoraggio»; `senza_appoggio` è
-ciò che lo rende visibile invece che silenzioso.
+chiuderlo, stanno in «Il limite che resta: l'ancoraggio». A renderlo visibile è
+la **cella stessa**: `GR.profilo()` riferisce `Passo.scarto` e `Passo.colpi`, e
+uno scarto oltre mezzo passo — impossibile prima del 26 agosto 2026 — su una
+cella che porta il gesto mentre il battere accanto è quasi vuoto è la firma del
+caso.
+
+⚠️ **Correzione del 28 agosto 2026.** Fino a quel giorno questa riga diceva che
+«`senza_appoggio` è ciò che lo rende visibile invece che silenzioso». È falso:
+`senza_appoggio` elenca i passi che il profilo **non ha**, e qui la cella c'è —
+è il suo **contenuto** a essere spostato. Il paragrafo del «non inventa», due
+capoversi più su, resta vero: parla dell'**altro** caso, quello della cella
+**mancante**, che è l'unico che `senza_appoggio` sappia riferire.
 
 L'esecuzione da cui il template esce va **nominata**, perché quello che ne
 viene è `[OSS]` su un esecutore e non `[MIS]` su un repertorio: mediare il
