@@ -753,14 +753,14 @@ che il profilo non ha, la nota resta com'è e il passo finisce in
 stesso principio del "non inventa"». **`senza_appoggio` non copre questo
 caso**, e non lo copre per costruzione: scatta solo quando la cella **manca**
 (`tools/delugexml/musica.py`, `per_passo.get(passo)` che torna `None`), mentre
-una cella mal ancorata **c'è, ed è sbagliata**. Sulle due celle misurate resta
-**vuoto in tutt'e due i modi di sbagliare**: un pattern che chiede il passo 8
-trova la cella da **un colpo solo** e ci si appoggia; un pattern che chiede il
-passo 7 si prende i **+13,04 tick** e posa la nota a **181** tick, dove il
-confine fra i due passi sta a **180** e il passo 8 comincia a **192** — cioè
-**oltre il confine, nel territorio del passo accanto**. La decisione non
-cambia: nessuna regola. Cambia la ragione, ed è quella dei due marchi qui
-sopra.
+una cella mal ancorata **c'è, ed è sbagliata**. Su queste celle
+`senza_appoggio` resta **vuoto comunque vada**, e i modi di andar male sono
+due: un pattern che chiede il passo 8 trova la cella da **un colpo solo** e ci
+si appoggia; un pattern che chiede il passo 7 si prende i **+13,04 tick** e
+posa la nota a **181** tick, mentre il confine fra i due passi sta a **180** e
+il passo 8 comincia a **192** — cioè **oltre il confine, nel territorio del
+passo accanto**. La decisione non cambia: nessuna regola. Cambia la ragione, ed
+è quella dei due marchi qui sopra.
 
 ⚠️ **Ma questi sono livelli, e un livello in millisecondi non vuol dire
 niente.** Convertirli e confrontarli con la finestra dell'udibile sarebbe la
@@ -872,7 +872,8 @@ ed è per questo che tutto il necessario a smontarlo è scritto e datato:
   scarto massimo mediano 1,47 contro **3,28 di `'vicino'`**, voci con un salto
   di mezzo passo 4 su 111 contro **16 di `'vicino'`** — e celle mal ancorate 2
   contro **5 di `'rado'`**, perché contro `'vicino'` la stessa colonna direbbe
-  **2 contro 0**, cioè il verso sfavorevole. ⚠️ Quello zero però è
+  **2 contro 0**, cioè il verso sfavorevole al taglio scelto. ⚠️ Quello zero
+  però è
   **impossibile per costruzione** — `'vicino'` il taglio non lo sposta mai, e
   il suo residuo non può uscire da mezzo passo — quindi non è una colonna su
   cui `'vicino'` possa perdere o vincere: è una colonna che esiste solo **fra i

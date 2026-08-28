@@ -318,11 +318,14 @@ def _media_circolare(posizioni, passo: float) -> float:
     L'USCITA STA IN `(-passo/2, +passo/2]`, come quella di `origine()` e
     per la stessa ragione: e' l'immagine di `atan2()` riscalata sul passo.
     ⚠️ NON e' un dettaglio: e' meta' della dimostrazione del limite che
-    `Passo.scarto` dichiara. Il passo si sceglie con `round((dritta - sp) /
-    passo_tick)`, quindi `|dritta - sp - passo * passo_tick| <= passo/2`;
-    sommandoci `|sp| <= passo/2` si ottiene `|scarto| <= passo_tick`, cioe'
-    UN passo intero e non di piu'. L'altra meta' e' il `centro` di
-    `_vuoto_piu_largo()`, che sta in `[0, passo)`.
+    `Passo.scarto` dichiara. Il passo si sceglie con
+    `k = round((dritta - sp) / passo_tick)`, quindi per definizione di
+    `round()` vale `|dritta - sp - k * passo_tick| <= passo_tick / 2`. Il
+    residuo che si riporta e' pero' `dritta - k * passo_tick`, cioe' quella
+    quantita' PIU' `sp`: sommando `|sp| <= passo_tick / 2` si ottiene
+    `|scarto| <= passo_tick`, cioe' un passo intero e non di piu'. L'altra
+    meta' e' il `centro` di `_vuoto_piu_largo()`, che sta in `[0, passo)` e
+    da' lo stesso limite al ramo `'rado'`.
 
     IL LIMITE, DICHIARATO: la media circolare di una voce sparsa e' un
     numero debole. Sul charleston di quell'esecuzione la concentrazione

@@ -1739,7 +1739,7 @@ gli ascolti non hanno stabilito:
   vecchia misura che torna. ⚠️ **E l'unanimità *esatta* dipende dal taglio:**
   con `'rado'` — l'altro candidato, quello che la regola scritta prima
   selezionava — la stessa grandezza dà **14 su 15 e +4,25 tick** `[MIS]`. La
-  **direzione** no: entrambi i candidati muovono il divario dallo stesso verso
+  **direzione** no: entrambi i candidati muovono il divario nello stesso verso
   e quasi della stessa quantità (4,25 e 4,60 contro 3,21). Chi cita il
   conteggio citi anche questo. La casella 6 porta il conto per intero, compreso
   perché il criterio non poteva essere piegato per ottenerlo. Il 15 su 15
