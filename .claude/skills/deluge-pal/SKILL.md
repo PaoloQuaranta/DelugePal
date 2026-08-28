@@ -127,6 +127,9 @@ from delugexml.writer import FormatTable
   note sono giuste, il *collegamento* fra un accordo e il successivo no —
   i voicing alternati A/B del ii-V-I sono un passo successivo, non
   implementato. `racconta_armonia()` lo dichiara ogni volta.
+
+| per | usare |
+|---|---|
 | nuova traccia da preset | `C.add_track(doc, preset, name=…, folder=…, playing=True)` — ⚠️ **`playing` vale `False` di default**: senza, la clip esce con `isPlaying="0"` e sul dispositivo **premere play non fa partire niente**. Il file passa ogni controllo ed è inservibile: è costato un blocco del Deluge il 17 agosto 2026. Ora lo segnala `avvertenze()` |
 | **scrivere note** | `MU.scrivi(doc, clip, note, dove=…)` — **una sola chiamata per kit e synth.** Non dichiarare il tipo di clip: lo deduce, e la forma delle note fa il resto. Un **dict** (da `MU.melodia()` o `MU.accordi()`) diventa una riga per altezza, solo su synth. Una **lista** (da `MU.passi()`) va su una riga sola e vuole `dove=`: il **nome del drum** su un kit, l'**altezza** su un synth. Su synth chiama da sé `fit_clip_scroll_to_notes()`, quindi le note non restano invisibili |
 | **togliere qualcosa** | `MU.togli(doc, bersaglio, quando=…)` — riconosce da sé il bersaglio: **strumento** (via lui e le sue clip), **clip** (via lei, e rinumera i `clipCode`), **noteRow di kit** (la svuota, perché una riga per drum deve esserci sempre), **noteRow di synth** (la toglie). `quando=(da, a)` in tick su uno strumento toglie **solo le istanze d'arranger in quel tratto** e lascia stare tutto il resto: è la differenza fra *«togli il basso»* e *«leva il basso nella seconda metà»* |
