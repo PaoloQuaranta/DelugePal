@@ -358,7 +358,7 @@ materiale già letto.
 | vedere cosa c'è | `GR.racconta(base, id)` → una riga: batterista, stile, BPM, `beat`/`fill`, metro, durata |
 | **la scala di velocity** | `GR.scala(base, style='jazz')` → strumento → `Livelli(strumento, mediana, q1, q3, minimo, massimo, colpi, esecuzioni, batteristi)`. Il default `beat_type='beat'` è voluto: i `fill` sono un altro animale e si chiedono a parte |
 | **il groove template** | `GR.profilo(base, id)` → `Profilo(id, drummer, style, bpm, bur, battute, passi)`, con `passi[strumento] = [Passo(passo, velocity, scarto, colpi)]`. `scarto` è in **tick Deluge** e **positivo vuol dire DOPO la griglia**. La voce si sceglie da `colpi` e dalla posizione, **mai dal nome GM**, che non è il ruolo musicale |
-| **posarlo su un pattern** | `MU.applica_groove(note, prof, dove=…)` — sta in `musica` e non qui: `GR` legge e non scrive mai. **Muta la lista**, e i passi senza appoggio li riferisce invece di inventarli |
+| **posarlo su un pattern** | `MU.applica_groove(note, prof, dove=…)` — sta in `musica` e non qui: `GR` legge e non scrive mai. **Muta la lista**, e i passi senza appoggio li riferisce invece di inventarli. ⚠️ Uno scarto può valere **quasi un passo intero**, cioè posare una nota nel territorio del passo accanto: succede sulle voci rade, dove lo stimatore per passo determina male il confine. Vedi `docs/repertori/jazz.md`, casella 6, «Il limite che resta: l'ancoraggio» |
 | quanto è swingato | `GR.bur_da_posizioni(posizioni, ppq)` → la BUR mediana, `None` se non ci sono coppie di crome. I numeri già misurati stanno in `docs/repertori/jazz.md`, casella 4 |
 
 ⚠️ **Si filtra per PREFISSO, mai per sottostringa.** È la regola di

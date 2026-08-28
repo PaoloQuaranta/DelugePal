@@ -1625,25 +1625,53 @@ sotto «Cosa NON rifare», dove la legge chi genera file.
 
 ### Cosa resta aperto, e cosa NON rifare
 
-Punti aperti che questo lavoro lascia. I due di macchina — il limite dello
-stimatore e cosa faccia il firmware fra le crome — sono anche in §7, insieme
-alla soglia percettiva che gli ascolti non hanno stabilito:
+Punti aperti che questo lavoro lascia. I due di macchina — l'ancoraggio, che
+il 26 agosto 2026 è subentrato al limite dello stimatore, e cosa faccia il
+firmware fra le crome — sono anche in §7, insieme alla soglia percettiva che
+gli ascolti non hanno stabilito:
 
 - **la stratificazione misurata non è mai stata messa davanti a un orecchio.**
-  I 13,5 ms di divario ride/charleston sono la parte **ben misurata**, e
-  l'ascolto è stato fatto su `drummer1/session3/2`, che di stratificazione ne
-  ha **−0,25 tick**: su quel file non c'era, quindi l'ascolto non poteva né
-  confermarla né smentirla. La coppia da fare è su **`drummer10/session1/1`**
-  (`jazz/swing`, 124 BPM, 164 s, BUR 1,82), dove sui passi 4 e 12 il divario è
-  di **5,64 e 5,93 tick** e il ride **è** davvero `ride`;
-- **il limite dello stimatore, che la correzione ha smesso di nascondere.** Un
-  template è per definizione **per passo**, e un batterista che anticipa di
-  mezza semicroma non ci sta dentro: esce sul passo precedente col segno
-  rovesciato. Su alcune esecuzioni la semicroma *prima* del movimento porta più
-  colpi del movimento stesso — «battere in minoranza». Pesa sul charleston
-  perché mette il 43,7% dei suoi colpi su due soli passi. Chiuderlo vuol dire
-  cambiare **come si aggrega**, ed è una decisione di disegno che la casella 6
-  dichiara e non prende;
+  Il divario ride/charleston è la parte **ben misurata**, e l'ascolto è stato
+  fatto su `drummer1/session3/2`, che di stratificazione ne ha quasi zero:
+  l'ascolto non poteva né confermarla né smentirla. La coppia da fare è su
+  **`drummer10/session1/1`** (`jazz/swing`, 124 BPM, 164 s, BUR 1,82), sui
+  passi 4 e 12, e il ride lì **è** davvero `ride`. ⚠️ **I divari su cui
+  poggiava questa riga sono stati rimisurati il 26 agosto 2026** — erano 5,64
+  e 5,93 tick, e sono proprio le celle che il nuovo stimatore ha spostato: i
+  numeri da usare per costruire la coppia stanno nella casella 6, «Cosa resta
+  aperto», e vanno presi da lì e non da qui;
+- ~~il limite dello stimatore, che la correzione ha smesso di nascondere~~ —
+  **chiuso il 26 agosto 2026**, e la casella 6 lo racconta in «La decisione: il
+  taglio si sposta per voce». `GR.profilo()` non prende più il passo **più
+  vicino**: sposta il **confine** fra due passi sulla **fase media di quella
+  voce**, così il gesto non si spezza più in due celle. Il criterio che ha
+  deciso era fissato **prima** che le misure esistessero — la **linearità
+  sotto traslazione per voce**: traslata una voce di δ tick, la posizione
+  dichiarata deve muoversi di δ. Il vecchio modo la segue per lo 0,808, il
+  nuovo per lo 0,998. Il «battere in minoranza» sul charleston passa da 3
+  esecuzioni su 23 a **0**;
+- ⚠️ **e i due criteri più ovvi erano trappole**, il che è la parte da non
+  perdere. L'**errore di ricostruzione per inversione** premia lo stimatore
+  rotto — spezzare un gesto in due celle stringe entrambe le mediane, quindi
+  l'errore *scende* dove lo stimatore sbaglia di più. E prendere per bersaglio
+  **la tenuta delle conclusioni della casella 6** avrebbe fabbricato la
+  conclusione, che è il difetto della finestra di grazia rifatto uguale. Sta
+  scritto nella docstring di `la_prova_di_traslazione()`, non solo nel piano;
+- **l'ancoraggio: su quale dei due passi mettere un gesto ambiguo.** È il
+  punto aperto che **subentra** a quello chiuso qui sopra, ed è **più
+  piccolo**. Chiuso lo spezzarsi del gesto, resta indeciso *quale* passo debba
+  ospitarlo: per i dati soli «14 tick prima del passo 4» e «10 tick dopo il
+  passo 3» sono la stessa cosa, e il gesto è anzi **più vicino** al passo
+  debole — nessun criterio di distanza può preferire il battere, a
+  distinguerli c'è solo il metro. Misurato il 26 agosto 2026 su 42 esecuzioni
+  e 5 batteristi: **2 celle** col modo scelto, contro 5 con `'rado'` e 0 con
+  `'vicino'` — dove lo zero di `'vicino'` è **impossibile per costruzione**,
+  non una virtù. Non si è scritta una regola perché avrebbe dovuto pesare il
+  metro contro la distanza **senza nessuna misura che dica quanto**, cioè
+  inventare un numero per due celle; e perché `MU.applica_groove()` **già lo
+  riferisce**: il passo che il profilo non ha finisce in `senza_appoggio`, che
+  va letto. Il caso è **visibile, non silenzioso**. Vedi
+  `docs/repertori/jazz.md`, «Il limite che resta: l'ancoraggio»;
 - **se il firmware faccia davvero quello che `_senza_swing()` modella.** L'A/B
   assolve il **modello dello swing** — quattro modelli a differenza grossa
   esclusi, l'utente ha risposto *«sufficientemente simili»* — ma non la
@@ -1665,14 +1693,35 @@ alla soglia percettiva che gli ascolti non hanno stabilito:
   che la grazia fosse tolta: rifacendo oggi la catena la riga del pedale esce a
   **−4 tick** invece di −3, e cambiano **altre otto posizioni su 31**. Chi
   rivuole la coppia col codice di oggi **la scriva altrove e la confronti**.
-  `out/SWINGA.XML` e `out/SWINGB.XML` hanno lo stesso rischio e nessuno
-  finora l'aveva scritto;
-- **non citare più il «15 su 15» del residuo lavorato.** È 12 su 15. Il 15 su
-  15 che regge è quello delle **fasi grezze**, che non passa da nessuna catena;
+  ⚠️ **Dal 26 agosto 2026 le ragioni sono due, non una:** `genera_groove.py`
+  chiama `GR.profilo()` **senza passare `taglio`**, quindi segue in silenzio il
+  default del modulo, che è cambiato. Il divieto **non si allenta perché i
+  numeri si sono mossi — è quando si sono mossi che serve.** `out/SWINGA.XML` e
+  `out/SWINGB.XML` hanno lo stesso rischio di sovrascrittura, e nessuno finora
+  l'aveva scritto;
+- ⚠️ **ma l'A/B dello swing NON è toccato dal cambio di default, e la
+  distinzione va tenuta ferma.** `genera_swing.py` non chiama mai
+  `GR.profilo()`: usa `GR.origine()` e `GR.bur_da_posizioni()` sulle posizioni
+  MIDI grezze, e il BUR è calcolato **prima** che un passo venga assegnato,
+  senza mai vedere `taglio` — resta 1,48 su 41 esecuzioni, levare 59,7%,
+  identico nei tre modi. Il valore che `S.set_swing()` scrive è intatto e
+  **l'A/B di `SWINGA`/`SWINGB` sta in piedi**. La coppia costruita sotto il
+  vecchio default è `GROOVE0`/`GROOVE1`;
+- ~~non citare più il «15 su 15» del residuo lavorato: è 12 su 15~~ — **il
+  conteggio è tornato 15 su 15 il 26 agosto 2026**, col cambio di stimatore, e
+  il divieto va letto oggi così: **non citarlo senza la sua storia.** Sono tre
+  versioni — 15 su 15 garantito dal difetto della grazia, 12 su 15 dopo la
+  correzione, 15 su 15 col nuovo stimatore — e il divario mediano sotto è
+  cresciuto a ogni passaggio, **2,59 → 3,21 → 4,60 tick**, cioè non è la
+  vecchia misura che torna. La casella 6 porta il conto per intero, compreso
+  perché il criterio non poteva essere piegato per ottenerlo. Il 15 su 15
+  delle **fasi grezze** resta quello che non passa da nessuna catena, e non si
+  è mosso di un decimo in nessuna delle due correzioni;
 - **non convertire in millisecondi i livelli della tabella del residuo.** Dopo
-  `GR.origine()` ogni esecuzione ha uno **zero arbitrario**: «−3,42 tick» non
-  dice *rispetto a che cosa*, e un millisecondo ricavato da lì non ha un
-  referente. Lì i tick servono a una cosa sola, a dire che il residuo è piccolo.
+  `GR.origine()` ogni esecuzione ha uno **zero arbitrario**: il livello del
+  charleston non dice *rispetto a che cosa*, e un millisecondo ricavato da lì
+  non ha un referente. Lì i tick servono a una cosa sola, a dire che il residuo
+  è piccolo.
 
 ---
 
@@ -1796,12 +1845,27 @@ alla soglia percettiva che gli ascolti non hanno stabilito:
   esperimento di psicoacustica. Vale la pena saperlo perché la finestra
   **20-40 ms** che `MUSICA.md` dichiara resta `[WEB]` e non è stata né
   confermata né contraddetta
-- **l'aggregazione per passo del groove template.** Un template è per passo, e
-  un colpo che anticipa il suo passo di più di mezza semicroma esce sul passo
-  **precedente col segno rovesciato**: su alcune esecuzioni la semicroma prima
-  del movimento porta più colpi del movimento stesso. È un limite dello
-  stimatore, non un difetto, e chiuderlo vuol dire cambiare come si aggrega.
-  Dichiarato in `docs/repertori/jazz.md`, «Il bordo fra due passi»
+- ~~l'aggregazione per passo del groove template~~ — **chiusa il 26 agosto
+  2026** (§6-terdecies). `GR.profilo()` non prende più il passo più vicino:
+  sposta il **confine** fra due passi sulla **fase media della voce**, e il
+  gesto smette di spezzarsi fra due celle. Il criterio era fissato prima delle
+  misure — la linearità sotto traslazione per voce, 0,998 contro 0,808 — e il
+  «battere in minoranza» sul charleston passa da 3 esecuzioni su 23 a 0. La
+  decisione, i numeri e il fatto che la regola scritta prima selezionasse
+  l'altro candidato stanno in `docs/repertori/jazz.md`, «La decisione: il
+  taglio si sposta per voce»
+- **l'ancoraggio di un gesto ambiguo fra un passo debole e il battere
+  accanto.** È il punto che subentra a quello qui sopra, ed è **più piccolo**:
+  chiuso lo spezzarsi del gesto, resta indeciso su **quale** dei due passi
+  metterlo, perché dai dati soli le due letture sono la stessa cosa e il gesto
+  è anzi più vicino al passo debole. A distinguerli c'è solo il metro. Pesa
+  **2 celle su 42 esecuzioni** col modo scelto (contro 5 e 0 con gli altri due,
+  dove lo zero è impossibile per costruzione). Non si è scritta una regola
+  perché avrebbe dovuto pesare il metro contro la distanza senza nessuna
+  misura che dica quanto, e perché `MU.applica_groove()` lo **riferisce già**:
+  il passo che il profilo non ha finisce in `senza_appoggio`, quindi il caso è
+  visibile e non silenzioso. Dichiarato in `docs/repertori/jazz.md`, «Il limite
+  che resta: l'ancoraggio»
 - byte 10 delle note: i valori fra 21 e 127 non spiegati dai 20 gradini di
   probabilità — probabilmente il LATCHING descritto nel manuale
 - perché 24 `<section>` quando il manuale ne descrive 12

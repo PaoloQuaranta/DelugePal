@@ -712,6 +712,19 @@ si legge da un corpus. Due funzioni, e la seconda è l'unica che scriva:
   inventa**: un passo su cui quel batterista non ha mai suonato lascia la nota
   com'è e finisce in `senza_appoggio`, che va letto.
 
+⚠️ **Uno scarto può valere quasi un passo intero, e il template può posare una
+nota nel territorio del passo accanto.** Dal 26 agosto 2026 `GR.profilo()`
+sceglie il passo di un colpo spostando il **confine** fra due passi sulla fase
+media di quella voce, invece di prendere sempre il passo più vicino: è quel
+che serve perché lo stimatore **segua** i dati, ma toglie il limite di mezzo
+passo che il `round()` garantiva. Su una voce rada — poche decine di colpi in
+tutta l'esecuzione — la fase media è determinata male, e lo scarto che ne esce
+può arrivare vicino a un passo. Sulle voci portanti non succede. Quanto pesa,
+su quali celle, e perché non si è scritta una regola per chiuderlo sta nella
+**casella 6** della scheda del jazz, «Il limite che resta: l'ancoraggio»: qui
+non si ripetono i numeri. La contromisura pratica è quella di sempre —
+**guardare i colpi prima dello scarto**, che `GR.profilo()` riferisce.
+
 ⚠️ **L'esecuzione va nominata, sempre.** Quello che esce da un profilo è
 `[OSS]` **su un esecutore**, non `[MIS]` su un repertorio — e mediare il
 microtiming di batteristi diversi lo tirerebbe verso la griglia, cioè verso

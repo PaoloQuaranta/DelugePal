@@ -381,10 +381,10 @@ crome, e quel che manca al 100% sta sui passi dispari, cioè sulle semicrome
 
 | strumento (esecuzioni, batteristi) | 1 | lev 1 | 2 | lev 2 | 3 | lev 3 | 4 | lev 4 |
 |---|---|---|---|---|---|---|---|---|
-| **ride** (18, 4) | 13,4% v71 | 3,4% v64 | **15,1% v86** | 12,3% v67 | 15,0% v72 | 3,0% v69 | **13,5% v88** | 10,7% v66 |
-| **charleston a pedale** (23, 3) | 6,8% v48 | 4,3% v64 | **22,9% v65** | 2,7% v68 | 7,0% v55 | 6,8% v60 | **20,8% v70** | 1,9% v61 |
-| **rullante** (28, 5) | 5,2% v72 | 7,0% v47 | 10,8% v62 | 7,8% v54 | 4,9% v54 | 8,2% v56 | 10,0% v63 | 8,5% v59 |
-| **kick** (23, 4) | **17,2% v65** | 5,4% v54 | 9,4% v54 | 7,2% v58 | 12,6% v62 | 9,3% v53 | 10,2% v58 | 6,5% v52 |
+| **ride** (18, 4) | 13,8% v70 | 3,4% v64 | **15,3% v86** | 11,8% v67 | 15,2% v72 | 3,0% v68 | **13,6% v88** | 10,5% v66 |
+| **charleston a pedale** (23, 3) | 8,2% v48 | 4,1% v62 | **26,1% v68** | 2,9% v64 | 8,5% v46 | 6,5% v58 | **23,9% v71** | 2,2% v61 |
+| **rullante** (28, 5) | 5,3% v83 | 7,1% v47 | 11,8% v63 | 7,5% v54 | 5,1% v59 | 8,2% v48 | 10,8% v63 | 8,7% v58 |
+| **kick** (23, 4) | **17,2% v65** | 5,7% v54 | 9,4% v54 | 6,6% v54 | 12,0% v59 | 8,9% v56 | 10,4% v58 | 6,4% v55 |
 
 ⚠️ **Questa tabella è stata rimisurata il 24 agosto 2026**, e le quote dei
 movimenti sono **scese**: di mezzo punto per ride, rullante e cassa, di quasi
@@ -394,6 +394,18 @@ un colpo che anticipa un movimento di più di mezza semicroma ora viene contato
 sulla semicroma **precedente**, dov'è, invece che sul movimento. Si vede di
 più sul charleston perché è la voce che di quei colpi ne ha di più.
 
+⚠️ **E rimisurata una seconda volta il 26 agosto 2026**, quando lo stimatore
+per passo è cambiato — «La decisione: il taglio si sposta per voce». Stavolta
+le quote dei movimenti sono **risalite**, e il charleston più di tutti: **22,9
+→ 26,1** sul 2 e **20,8 → 23,9** sul 4. I numeri di prima restano leggibili
+qui sopra e nel resto di questa casella, con la loro data. ⚠️ **E non è il
+ritorno del numero della grazia**, che sarebbe la lettura comoda: i valori
+nuovi stanno **sopra** anche quelli di prima del 24 agosto (25,7 e 23,7), e
+soprattutto ci arrivano per un'altra strada. La grazia teneva quei colpi sul
+movimento **schiacciandone il residuo** dentro mezzo passo; `'voce'` ce li
+riporta **conservandolo** intero. Le due cose danno quote simili e residui
+molto diversi, ed è il residuo la ragione per cui questa casella esiste.
+
 Quello che ne esce è il jazz che ci si aspetta, e nessuno gliel'ha imposto:
 
 - **il ride fa lo *spang-a-lang*.** Colpisce i quattro movimenti in parti quasi
@@ -402,17 +414,24 @@ Quello che ne esce è il jazz che ci si aspetta, e nessuno gliel'ha imposto:
   **accenta il 2 e il 4 di 15-16 punti** di velocity — v86 e v88 contro v71 e
   v72 `[MIS]`. Se un pattern di ride jazz va scritto a mano, questa riga è la
   risposta;
-- **il charleston a pedale è il 2 e il 4, e quasi nient'altro:** **43,7%** dei
-  suoi colpi (22,9 + 20,8) cade lì, con la velocity più alta dei quattro
-  movimenti (65 e 70 contro 48 e 55 sull'1 e sul 3). È anche la **verifica che
+- **il charleston a pedale è il 2 e il 4, e quasi nient'altro:** **50,0%** dei
+  suoi colpi (26,1 + 23,9) cade lì, con la velocity più alta dei quattro
+  movimenti (68 e 71 contro 48 e 46 sull'1 e sul 3). È anche la **verifica che
   la griglia è allineata**: il piede sul 2 e sul 4 è un fatto noto del
   repertorio, e ritrovarlo sui passi 4 e 12 dice che l'origine della battuta
-  nei file è davvero una stanghetta. ⚠️ **Ma altri 17,5% stanno sui passi 3 e
-  11** (9,4 e 8,1%), cioè sulle semicrome che **precedono** il 2 e il 4, e non
+  nei file è davvero una stanghetta. ⚠️ **Ma altri 11,6% stanno sui passi 3 e
+  11** (6,4 e 5,2%), cioè sulle semicrome che **precedono** il 2 e il 4, e non
   è un secondo disegno: è lo **stesso** piede, che anticipa tanto da finire
   oltre il confine del passo. Chi legge questa riga come «il charleston suona
-  anche in levare di semicroma» legge un artefatto della griglia. La sezione
-  «La catena non era invertibile» lo misura;
+  anche in levare di semicroma» legge un artefatto della griglia. ⚠️ **I due
+  numeri di questa riga si sono mossi il 26 agosto 2026**: erano **43,7%** sui
+  movimenti (22,9 e 20,8) e **17,5%** sui passi 3 e 11 (9,4 e 8,1). Lo
+  stimatore nuovo riporta sul battere circa **un terzo** dei colpi che stavano
+  sulla semicroma precedente, e i due movimenti si compensano quasi: −5,9
+  punti sui passi 3 e 11, +6,3 sui movimenti. La sezione «La catena non era
+  invertibile» misura il primo
+  movimento, «Il bordo fra due passi» e la decisione che la chiude il
+  secondo;
 - **il rullante non ha un posto: ha due livelli.** È l'unico strumento sparso
   su tutti e sedici i passi — **oltre un terzo dei suoi colpi sta sulle
   semicrome** — e a separarlo non è la posizione ma la velocity: passi pari
@@ -430,14 +449,30 @@ che resta è il **residuo**, in tick Deluge (96 per movimento) `[MIS]`:
 
 | strumento | esecuzioni | batteristi | mediana | q1-q3 |
 |---|---|---|---|---|
-| charleston a pedale | 23 | 3 | −3,42 | −4,92 … −1,93 |
-| rullante | 26 | 4 | −1,78 | −3,42 … −0,15 |
-| kick | 22 | 4 | −1,12 | −2,83 … −0,16 |
-| ride | 18 | 4 | −1,00 | −2,94 … +0,21 |
+| charleston a pedale | 23 | 3 | −5,66 | −7,10 … −3,34 |
+| rullante | 26 | 4 | −3,23 | −4,97 … −0,81 |
+| kick | 22 | 4 | −1,15 | −3,87 … +0,37 |
+| ride | 18 | 4 | −1,10 | −3,16 … +0,23 |
 
-**Le mediane stanno tutte entro 3,5 tick**: poche unità su 96 per movimento, e
+**Le mediane stanno tutte entro 5,7 tick**: poche unità su 96 per movimento, e
 tutte dalla stessa parte — **prima** della griglia. Per la scala, e per i
 numeri che vengono dopo: un tick vale 6,25 ms a 100 BPM e 3,38 ms a 185.
+
+⚠️ **Questa tabella è del 26 agosto 2026, e l'ordine delle quattro voci non è
+cambiato: sono le prime due a staccarsi dalle altre.** Fino a quel giorno
+diceva
+charleston **−3,42** (q1-q3 −4,92 … −1,93), rullante **−1,78** (−3,42 …
+−0,15), kick **−1,12** (−2,83 … −0,16), ride **−1,00** (−2,94 … +0,21), e la
+riga qui sopra diceva «entro 3,5 tick». Le mediane sono diventate **più
+negative**, cioè più anticipate, e proprio sulle due voci che anticipano di
+più: il charleston di 2,2 tick, il rullante di 1,5, mentre kick e ride si
+muovono di un decimo di tick o meno. ⚠️ **Il verso è quello giusto, e la
+ragione è aritmetica**: col vecchio stimatore un colpo che anticipava troppo veniva
+contato sul passo **precedente**, dove il suo residuo diventava **positivo e
+grande**; ora viene contato sul passo che il gesto descrive, col suo residuo
+**negativo e vero**. Togliere dei grandi positivi e rimetterli come grandi
+negativi **abbassa** la mediana della voce, e la abbassa di più dove quei
+colpi sono di più. Vedi «Il bordo fra due passi».
 
 #### La catena non era invertibile, e ora lo è — 24 agosto 2026
 
@@ -477,6 +512,14 @@ il passo **più vicino**, quindi il residuo non supera **mezzo passo — 12 tick
 — per costruzione**, con la grazia e senza. Sul corpus: **0 residui** oltre i
 12 tick su 28 604, con o senza. La grazia non stava difendendo da niente.
 
+⚠️ **Quel «per costruzione» è vero di `round()`, e dal 26 agosto 2026 non è
+più vero del default.** Lo stimatore nuovo sposta il **confine** fra due
+passi, quindi il residuo non è più limitato a mezzo passo: può arrivare vicino
+a un passo intero, e sul template ci arriva. È il limite che resta, ed è
+scritto in «Il limite che resta: l'ancoraggio». La riga qui sopra continua a
+valere per quello che smentiva — la giustificazione della grazia — e per il
+modo `'vicino'`.
+
 **Cosa non è cambiato, ed è misurato e non supposto.** Il **BUR** passa da
 `GR.levare_da_posizioni()`, che la fase la calcola già con la divisione
 intera per difetto, e la **scala di velocity** non legge le posizioni: le
@@ -484,6 +527,9 @@ sezioni «La delimitazione», «La scala di velocity» e tutta la **casella 4**
 escono **identiche riga per riga** dal confronto fra il prima e il dopo, e
 così i **fill** della casella 9. Anche il **massimo spostamento singolo** del
 template (+11,80 tick) e la sua **escursione** (22,83 tick) non si muovono.
+⚠️ **Questi due si sono poi mossi il 26 agosto 2026**, per un'altra ragione e
+in due versi opposti: vedi «Due grandezze diverse». Che non si fossero mossi
+**il 24 agosto** resta vero, ed è quello che questa riga afferma.
 
 ⚠️ **Quello che invece è cambiato, e non era previsto, è l'assegnazione dei
 passi.** Si supponeva che togliere la grazia cambiasse solo il residuo; cambia
@@ -514,35 +560,169 @@ sui battere: **la sua unanimità era in parte garantita dal difetto**, non dai
 batteristi.
 
 Ora i battere si comportano come tutti gli altri confini, e il rovesciamento
-si vede. Quanto spesso, misurato `[MIS]`:
+si vede. Quanto spesso, misurato `[MIS]` — la colonna in **grassetto** è lo
+stimatore scelto il 26 agosto 2026 (`'voce'`), quella in *corsivo* accanto è
+il `'vicino'` di prima, tenuto perché è la differenza fra le due ad aver
+deciso:
 
-| strumento | esecuzioni | con una cella oltre 9 tick | col **battere in minoranza** |
-|---|---|---|---|
-| rullante | 28 | 2 | 3 |
-| charleston a pedale | 23 | 4 | 3 |
-| kick | 23 | 2 | 2 |
-| ride | 18 | 4 | 1 |
+| strumento | esecuzioni | con una cella oltre 9 tick | *(prima)* | col **battere in minoranza** | *(prima)* |
+|---|---|---|---|---|---|
+| rullante | 28 | **7** | *2* | **1** | *3* |
+| charleston a pedale | 23 | **9** | *4* | **0** | *3* |
+| kick | 23 | **6** | *2* | **2** | *2* |
+| ride | 18 | **3** | *4* | **1** | *1* |
 
 «Battere in minoranza» vuol dire che la semicroma **prima** di un movimento
 porta **più colpi del movimento stesso**, con lo scarto di segno opposto: non
-è un secondo disegno, è **lo stesso gesto** contato in due posti. Su
-`drummer10/session1/1` il charleston porta **41 e 42 colpi sui passi 3 e 11**
-(+3,8 e +0,7 tick) contro **29 e 19 sui passi 4 e 12** (−8,3 e −9,8) `[OSS]`.
+è un secondo disegno, è **lo stesso gesto** contato in due posti.
+
+⚠️ **Le due colonne si muovono in versi opposti, e non è una contraddizione:
+è il meccanismo.** Spostare il taglio per voce smette di **spezzare** il gesto
+— i colpi tornano sul battere, e il battere torna in maggioranza — ma proprio
+perché non li ripiega più sul passo accanto, ciascuno **conserva la sua
+distanza vera dalla griglia**, che è grande. Le celle oltre i 9 tick perciò
+**crescono** (2 → 7, 4 → 9, 2 → 6; solo il ride cala, 4 → 3) mentre il battere
+in minoranza **cala** (3 → 1 sul rullante, 3 → 0 sul charleston, e resta fermo
+su kick e ride). Chi legge la prima colonna da sola conclude che lo stimatore
+è peggiorato; chi legge la seconda da sola conclude che ha risolto tutto.
+Nessuna delle due letture è quella giusta.
+
+Su `drummer10/session1/1` si legge nei conteggi `[OSS]`. Col vecchio
+stimatore il charleston portava **41 e 42 colpi sui passi 3 e 11** (+3,8 e
++0,7 tick) contro **29 e 19 sui passi 4 e 12** (−8,3 e −9,8): il piede sul 2 e
+sul 4 era in minoranza sul 2 e sul 4. Col nuovo porta **20 e 32 sui passi 3 e
+11** (−3,1 e −3,1) contro **50 e 34 sui passi 4 e 12** (−10,7 e −11,2). Il
+gesto non si è spostato di un tick: ha smesso di essere contato due volte, e
+il residuo che se ne legge è quello che il batterista ha davvero suonato.
 
 ⚠️ **Succede a tutte le voci, ma pesa solo sul charleston**, e la ragione è la
-tabella del profilo posizionale: il charleston mette **il 43,7% dei suoi colpi
-su due soli passi**, quindi basta che uno dei due vada in minoranza perché la
-sua mediana pesata sui colpi cambi segno; rullante, cassa e ride spargono i
-colpi su otto passi o più, e una cella ribaltata non li muove. È per questo
-che la voce su cui questa casella poggia la conclusione più forte è anche
-quella più esposta allo stimatore.
+tabella del profilo posizionale: il charleston mette **la metà dei suoi colpi
+su due soli passi** (il 43,7% col vecchio stimatore, il 50,0% col nuovo),
+quindi basta che uno dei due vada in minoranza perché la sua mediana pesata
+sui colpi cambi segno; rullante, cassa e ride spargono i colpi su otto passi o
+più, e una cella ribaltata non li muove. È per questo che la voce su cui
+questa casella poggia la conclusione più forte è anche quella più esposta allo
+stimatore.
 
-⚠️ **Non è un difetto della correzione: è un limite dello stimatore**, che la
+**Non era un difetto della correzione: era un limite dello stimatore**, che la
 correzione ha smesso di nascondere. Un template è per definizione **per
-passo**, e un batterista che anticipa di mezza semicroma non ci sta dentro.
-Chiuderlo vorrebbe dire cambiare **come si aggrega** — non come si toglie lo
-swing — ed è una decisione di disegno che questa casella **non prende**: la
-dichiara, e la lascia a chi verrà.
+passo**, e un batterista che anticipa di mezza semicroma non ci stava dentro.
+Chiuderlo voleva dire cambiare **come si aggrega** — non come si toglie lo
+swing.
+
+##### La decisione: il taglio si sposta per voce — 26 agosto 2026
+
+⚠️ **Fino al 26 agosto 2026 qui c'era scritto che chiudere questo limite «è
+una decisione di disegno che questa casella non prende: la dichiara, e la
+lascia a chi verrà».** È stata presa quel giorno, ed è questa sezione. Il
+rovesciamento del segno sui battere è **chiuso**. Il limite che resta è un
+altro, più piccolo e di natura diversa, ed è la sezione dopo.
+
+**Cosa è cambiato, in una riga.** Il passo su cui un colpo viene contato non
+si sceglie più col `round()` puro — il passo **più vicino** — ma spostando il
+**confine** fra due passi sulla **fase media di quella voce** dentro il passo.
+Il taglio si sposta, la griglia no: il residuo resta misurato dalla griglia
+vera. `GR.TAGLI` tiene i tre modi — `'vicino'` (il vecchio), `'voce'` (il
+nuovo default) e `'rado'` — e ognuno resta chiamabile per nome, così che
+qualunque numero di questa casella si possa rifare con l'altro.
+
+**La misura che ha deciso, ed era scelta prima che i numeri esistessero.** Uno
+stimatore è uno stimatore se la sua risposta **segue** la cosa che misura:
+traslata una voce sola di δ tick, la posizione che dichiara deve muoversi di
+δ. Provata su nove δ da −8 a +8 tick dentro un passo da 24, su **42
+esecuzioni, 5 batteristi, 111 voci** `[MIS]`:
+
+| | `'vicino'` (il vecchio) | `'voce'` (scelto) | `'rado'` |
+|---|---:|---:|---:|
+| pendenza mediana sotto traslazione | 0,808 | **0,998** | **0,998** |
+| scarto massimo mediano (tick) | 3,28 | **1,47** | 1,97 |
+| voci con un salto ≥ mezzo passo | 16 / 111 | 4 / 111 | **3 / 111** |
+| celle mal ancorate | 0 *(impossibile per costruzione)* | **2** | 5 |
+
+⚠️ **Perché questa misura e non due più ovvie**, ed è la parte da leggere
+prima di tutte le altre. L'**errore di ricostruzione per inversione** premia
+lo stimatore rotto: spezzare un gesto in due celle rende ciascuna delle due
+mediane **più stretta**, quindi l'errore **scende** proprio dove lo stimatore
+sbaglia di più. E prendere per bersaglio **la tenuta delle conclusioni di
+questa casella** sarebbe fabbricare la conclusione, che è esattamente il
+difetto della finestra di grazia. La linearità sotto traslazione non guarda
+nessuna conclusione: guarda se lo stimatore segue.
+
+**Cosa la misura chiude da sola, senza bisogno di nessun giudizio:**
+`'vicino'` non è uno stimatore. Segue i dati per lo **0,808** contro lo
+**0,998** di tutt'e due i candidati, e ha **16 voci su 111** che saltano di
+mezzo passo contro 3 e 4. Questo è il risultato del lavoro, ed è netto.
+
+⚠️ **Cosa la misura NON chiude — e la regola scritta prima selezionava
+l'altro.** Fra `'voce'` e `'rado'` la pendenza è pari a tre decimali. La regola
+scritta prima diceva: scartare per pendenza, poi vincere con **meno salti**, e
+alla lettera seleziona **`'rado'`** — 3 contro 4. Il proprietario ha scelto
+`'voce'`, per iscritto, **contro la propria regola**, e le ragioni stanno
+tutte sul tavolo: il margine di `'rado'` è **una voce su 111**, cioè
+plausibilmente rumore, mentre `'voce'` vince su **due** grandezze e con
+margini più larghi — scarto massimo mediano 1,47 contro 1,97, celle mal
+ancorate 2 contro 5; il **terzo criterio** della regola, «a parità vince
+quello con meno parametri», era diventato **void**, perché dopo la riscrittura
+nemmeno `'rado'` ne ha; e la **colonna dell'ancoraggio non esisteva** quando
+la regola è stata scritta.
+
+⚠️ **Questo fatto sta scritto perché è ciò che rende la decisione
+verificabile.** Scavalcare una regola dopo aver visto i numeri è esattamente
+il meccanismo della finestra di grazia, dove un criterio messo per una ragione
+plausibile fabbricava la conclusione. L'unica difesa è che la regola **non sia
+stata riscritta per far vincere il vincitore**, e qui non lo è: è dichiarata
+**insufficiente** a decidere una parità che non aveva previsto, e la decisione
+la firma una persona con tutte e quattro le colonne visibili. Chi rilegge può
+non essere d'accordo — e ha davanti i numeri per dirlo.
+
+⚠️ **E il «battere in minoranza», il 43,7% e il «12 su 15» NON sono entrati
+nella scelta.** Era scritto nel piano **prima** della misura, e non è un
+dettaglio di procedura: è la ragione per cui le sezioni qui sotto, dove
+qualche conclusione di questa casella si rafforza, possono essere lette senza
+sospettare che lo stimatore sia stato scelto per farle tornare. Sono
+conseguenze: si riportano, non decidono.
+
+**Cosa non si è mosso, ed è misurato e non supposto.** Il **BUR** e il levare
+escono da `bur_da_posizioni()` su **tutte** le posizioni, prima che un passo
+venga assegnato e senza mai vedere il taglio: restano **1,48 su 41 esecuzioni,
+levare 59,7%**, e sulle esecuzioni nominate qui sotto vengono identici nei tre
+modi. Tutta la **casella 4** è quindi intatta, e con lei il valore che
+`S.set_swing()` scrive: **l'A/B dello swing già ascoltato sta in piedi così
+com'è.** Non si muovono nemmeno la **delimitazione**, la **scala di velocity**
+per strumento — che le posizioni non le legge — né i **fill** della casella 9.
+⚠️ Le velocity **per passo** del profilo posizionale invece si muovono,
+perché cambia quali colpi cadono in quale cella: è un'altra grandezza dalla
+scala, e non va confusa con essa.
+
+##### Il limite che resta: l'ancoraggio — 26 agosto 2026
+
+⚠️ **Non è lo stesso limite di prima, ed è più piccolo.** Chiuso lo spezzarsi
+di un gesto fra due celle, resta indeciso **su quale** dei due passi ancorarlo.
+Per i dati soli, «14 tick prima del passo 4» e «10 tick dopo il passo 3» sono
+**la stessa cosa** — e il gesto è anzi **più vicino** al passo debole, 10
+contro 14. Nessun criterio di **distanza** può quindi preferire il battere: a
+distinguerli c'è solo il **metro**, che è musica e non misura.
+
+**Quanto pesa, misurato** il 26 agosto 2026 su **42 esecuzioni e 5
+batteristi** `[MIS]`: **2 celle** col taglio scelto — il kick di
+`drummer10/session1/8`, passi **7 e 15**, scarti **+13,04 e +13,93** tick su
+14 e 13 colpi — contro **5** con `'rado'` e **0** con `'vicino'`. ⚠️ **Lo zero
+di `'vicino'` non è una virtù: è impossibile per costruzione**, perché quel
+modo il taglio non lo sposta mai e il suo residuo non può uscire da mezzo
+passo. Le due celle di `'voce'` sporgono di **1,0 e 1,9 tick** oltre i 12 di
+mezzo passo — che è la soglia con cui la misura definisce «mal ancorata» — e
+su tutt'e tre i modi le celle contate stanno fra **+12,70 e +16,50**: sono
+casi **genuinamente ambigui**, non collocazioni grossolanamente sbagliate.
+
+**Perché non si è scritta una regola**, deciso lo stesso giorno:
+`MU.applica_groove()` **già lo riferisce**. Se il pattern chiede un passo che
+il profilo non ha, la nota resta com'è e il passo finisce in `senza_appoggio`,
+che va letto — il caso è **visibile e non silenzioso**, ed è lo stesso
+principio del «non inventa». Una regola avrebbe invece dovuto pesare il metro
+contro la distanza **senza nessuna misura che dica quanto**, cioè inventare un
+numero per due celle su 42 esecuzioni. Questo progetto ha già pagato una volta
+il prezzo di un criterio plausibile messo senza misura, e si chiamava finestra
+di grazia.
 
 ⚠️ **Ma questi sono livelli, e un livello in millisecondi non vuol dire
 niente.** Convertirli e confrontarli con la finestra dell'udibile sarebbe la
@@ -558,8 +738,8 @@ delle due sia sbagliata:
 
 | grandezza | quanto | contro la finestra 20-40 ms | dove sta |
 |---|---|---|---|
-| **divario fra due pad** (ride − charleston) `[MIS]` | 13,5 ms | **sotto** | «E prima di tutto: 13,5 ms» |
-| **singolo spostamento** che un template scrive `[OSS]` | 39,9 ms | al **bordo superiore** | «Due grandezze diverse» |
+| **divario fra due pad** (ride − charleston) `[MIS]` | 21,2 ms *(13,5 fino al 26 agosto 2026)* | appena **dentro** | «E prima di tutto: 21,2 ms» |
+| **singolo spostamento** che un template scrive `[OSS]` | 64,6 ms *(39,9 fino al 26 agosto 2026)* | **oltre** il bordo superiore | «Due grandezze diverse» |
 
 La prima sta su decine di esecuzioni ed è la stratificazione misurata; la
 seconda sta su **una** esecuzione e poggia su **un colpo solo**. Il divario è
@@ -569,6 +749,14 @@ cautele di ciascuna sono scritte nella sua sezione, e **nessuna delle due è il
 livello della tabella qui sopra** — che infatti in millisecondi non viene
 convertito.
 
+⚠️ **Le due sono cresciute il 26 agosto 2026, col cambio di stimatore, e
+hanno attraversato la finestra in due punti diversi.** Il divario è passato
+**da sotto a dentro** (13,5 → 21,2 ms) e il singolo spostamento **da dentro a
+oltre** (39,9 → 64,6 ms). Nessuna delle due è quindi più dove la riga
+descriveva, e l'argomento «tanto il divario sta sotto la finestra» **non è più
+disponibile**. La seconda però continua a poggiare su **un colpo solo**, e su
+questo il cambio di stimatore non ha migliorato niente.
+
 #### C'è una stratificazione, e il piede anticipa tutto il resto
 
 Le mediane qui sopra vengono da esecuzioni diverse, e un'esecuzione intera può
@@ -577,53 +765,99 @@ domanda va fatta **dentro la stessa esecuzione**, e a **tutte** le coppie —
 sceglierne una dopo aver visto le mediane sarebbe scegliere il risultato.
 Esecuzioni `beat` 4/4 senza funk e fusion `[MIS]`:
 
-| coppia | esecuzioni | batteristi | il primo arriva | in |
-|---|---|---|---|---|
-| charleston a pedale − ride | 15 | 3 | **3,21 tick PRIMA** | **12 su 15** |
-| charleston a pedale − rullante | 22 | 3 | 2,09 tick prima | 17 su 22 |
-| charleston a pedale − kick | 18 | 2 | 1,91 tick prima | 15 su 18 |
-| rullante − ride | 14 | 3 | 0,46 tick dopo | 8 su 14 |
-| rullante − kick | 21 | 3 | 0,21 tick prima | 12 su 21 |
-| kick − ride | 12 | 3 | 0,16 tick prima | 6 su 12 |
+| coppia | esecuzioni | batteristi | il primo arriva | in | *(fino al 26 agosto 2026)* |
+|---|---|---|---|---|---|
+| charleston a pedale − ride | 15 | 3 | **4,60 tick PRIMA** | **15 su 15** | *3,21 tick prima, 12 su 15* |
+| charleston a pedale − rullante | 22 | 3 | 2,64 tick prima | 20 su 22 | *2,09 tick prima, 17 su 22* |
+| charleston a pedale − kick | 18 | 2 | 4,83 tick prima | 17 su 18 | *1,91 tick prima, 15 su 18* |
+| rullante − ride | 14 | 3 | 0,26 tick dopo | 7 su 14 | *0,46 tick dopo, 8 su 14* |
+| rullante − kick | 21 | 3 | 0,69 tick prima | 12 su 21 | *0,21 tick prima, 12 su 21* |
+| kick − ride | 12 | 3 | 0,66 tick prima | 8 su 12 | *0,16 tick prima, 6 su 12* |
 
 Il disegno sta tutto in una riga: **il charleston a pedale anticipa tutto il
 resto**, in tutte e tre le coppie che lo riguardano — e contro il ride di
-**3,21 tick in 12 esecuzioni su 15**, con scarti da 4,10 tick *dall'altra
-parte* a 5,97 dalla sua. Fra ride, cassa e rullante invece non c'è ordine:
-mediane sotto il mezzo tick e conteggi da testa o croce.
+**4,60 tick in 15 esecuzioni su 15**, con scarti che vanno da **0,37 a 8,70
+tick**, tutti dalla sua parte. Fra ride, cassa e rullante invece non c'è
+ordine: mediane **sotto il tick** e conteggi fra 7 su 14 e 8 su 12.
 
-⚠️ **Quel «12 su 15» era «15 su 15» fino al 24 agosto 2026, e la differenza
-non è rumore: è la correzione.** Il divario mediano è **cresciuto** — da 2,59
-a 3,21 tick — mentre l'unanimità è **caduta**. Le due cose vanno insieme e
-hanno una causa sola: tolta la grazia, i colpi che anticipano un battere di
-più di mezza semicroma finiscono sul passo precedente col segno rovesciato, e
-questo succede al charleston in **tre esecuzioni su ventitré** — che sono
-esattamente le tre che ora contraddicono. Sono `drummer10/session1/1` (−4,10
-tick), `drummer10/session1/3` (−3,84) e il template `drummer1/session3/2`
-(−0,25) `[OSS]` — le prime due col **battere in minoranza**, la terza già a
-zero prima della correzione (+0,08). La sezione «Il bordo fra due passi» lo
-misura, e dice perché sui battere prima non poteva succedere.
+⚠️ **Questa riga ha tre versioni, e vanno lette tutte e tre insieme.** Il
+conteggio è stato **15 su 15** fino al 24 agosto 2026, **12 su 15** dal 24 al
+26, e di nuovo **15 su 15** dal 26. Il divario mediano nel frattempo è
+**cresciuto a ogni passaggio**: **2,59 → 3,21 → 4,60** tick.
+
+- **il primo 15 su 15 era garantito da un difetto.** Con la finestra di
+  grazia, sui battere il segno non poteva rovesciarsi: i colpi dell'ultimo
+  ottavo di movimento finivano schiacciati dentro mezzo passo, e il charleston
+  del jazz suona quasi solo sui battere. Non era l'accordo dei batteristi: era
+  il parafango;
+- **il 12 su 15 era la correzione, e il divario crebbe con lei.** Tolta la
+  grazia, i colpi che anticipano un battere di più di mezza semicroma
+  finivano sul passo precedente **col segno rovesciato**, e questo succedeva
+  al charleston in **tre esecuzioni su ventitré** — esattamente le tre che
+  allora contraddicevano: `drummer10/session1/1` (−4,10 tick),
+  `drummer10/session1/3` (−3,84) e il template `drummer1/session3/2` (−0,25)
+  `[OSS]`, le prime due col **battere in minoranza**, la terza già a zero
+  prima della correzione (+0,08);
+- **il secondo 15 su 15 è del 26 agosto 2026, e quelle tre esecuzioni stanno
+  ora a +6,77, +4,02 e +0,37** `[OSS]`, cioè tutte dalla parte del disegno.
+
+⚠️ **Un lettore ha ogni ragione di sospettare che lo stimatore sia stato
+cambiato finché la vecchia conclusione non è tornata.** È il sospetto giusto,
+ed è per questo che tutto il necessario a smontarlo è scritto e datato:
+
+- **il criterio era la linearità sotto traslazione per voce**, fissato nel
+  piano **prima** che le misure esistessero, e scelto **contro** due criteri
+  più ovvi proprio perché quei due si sarebbero potuti piegare — l'errore di
+  ricostruzione premia lo stimatore rotto, e la tenuta delle conclusioni di
+  questa casella sarebbe stata la conclusione fabbricata da sé. Sta nella
+  docstring di `la_prova_di_traslazione()`, non solo qui;
+- **la stratificazione era esclusa dalla regola per iscritto.** Il piano dice,
+  prima della misura, che «il battere in minoranza, il 43,7% e il 12 su 15 NON
+  entrano in questa scelta»;
+- **il default è stato scelto su altre quattro colonne** — pendenza 0,998
+  contro 0,808, scarto massimo mediano 1,47 contro 3,28, voci con un salto di
+  mezzo passo 4 su 111 contro 16, celle mal ancorate 2 contro 5 — e la tabella
+  sta per intero in «La decisione: il taglio si sposta per voce»;
+- **il divario continua a crescere invece di tornare indietro.** Se lo
+  stimatore fosse stato piegato per far tornare il vecchio risultato, ci si
+  aspetterebbe il vecchio *numero*: 2,59 tick. Il numero di oggi è **4,60**,
+  cioè **quasi il doppio** — l'unanimità è la stessa parola, la misura sotto
+  no;
+- **e il 15 su 15 che non è mai passato da nessuna catena non si è mosso di un
+  decimo**: quello delle **fasi grezze**, qui sotto. È ancora quello da citare
+  a chi chiede la cosa più solida di questa casella, e la ragione non è
+  cambiata — non attraversa né origine, né swing, né stimatore per passo.
+
+Quel che il 26 agosto **non** ha chiuso, e va detto qui perché il ritorno
+dell'unanimità invita a crederlo: lo stimatore nuovo **non** è esente da celle
+oltre mezzo passo — ne fa **di più**, non di meno — e lascia aperte due celle
+mal ancorate. Vedi le due sezioni della «decisione» e dell'«ancoraggio».
 
 **Cosa regge e cosa cade**, detto stretto:
 
-- **regge la stratificazione come livello**: il charleston resta il più
-  anticipato di tutti nella tabella del residuo, e il divario mediano contro
-  il ride è più grande di prima, non più piccolo;
+- **regge la stratificazione come livello**, e a ogni giro più di prima: il
+  charleston resta il più anticipato di tutti nella tabella del residuo, e il
+  divario mediano contro il ride è cresciuto due volte su due — 2,59, poi
+  3,21, poi 4,60 tick;
 - **regge la controprova senza niente tolto**: sulle fasi grezze — nessuna
-  origine, nessuno swing, quindi nessuna grazia possibile — il charleston
-  anticipa il ride in **15 su 15**, ed è la riga qui sotto. Quella misura non
-  è cambiata di un decimo;
-- **cade l'unanimità sul residuo lavorato**, e con lei la frase «in tutte e
-  quindici». Chi la citava come la cosa più solida della casella deve ora
-  citare **il 15 su 15 delle fasi grezze**, che dice la stessa cosa e non
-  passa da nessuna catena.
+  origine, nessuno swing, quindi né grazia né stimatore per passo possibili —
+  il charleston anticipa il ride in **15 su 15**, ed è la riga qui sotto.
+  Quella misura non è cambiata di un decimo **in nessuna delle due
+  correzioni**, e resta quella da citare a chi chiede la cosa più solida di
+  questa casella: è l'unica delle due che non attraversi nessuna catena;
+- **l'unanimità sul residuo lavorato è caduta il 24 agosto 2026 ed è tornata
+  il 26** — 15 su 15, poi 12, poi di nuovo 15 — e non è la stessa misura che
+  torna: il divario sotto è **quasi il doppio** di quello del primo 15 su 15.
+  Il paragrafo qui sopra dice perché, e cosa si può controllare per non
+  crederci sulla parola.
 
 ⚠️ **Il segno, perché è facile invertirlo.** `Passo.scarto` è il residuo
 rispetto al passo: **positivo = il colpo cade dopo la griglia**, negativo =
 prima. Lo conferma `MU.applica_groove()`, che fa `pos + scarto`. Il charleston
-a pedale ha il residuo **più negativo** di tutti (−3,42), quindi è il **più in
-anticipo**. E la stessa cosa si vede **senza togliere niente** — né origine né
-swing — sulle fasi grezze dentro il movimento, contando i soli colpi entro un
+a pedale ha il residuo **più negativo** di tutti (−5,66 dal 26 agosto 2026,
+−3,42 prima), quindi è il **più in anticipo**. E la stessa cosa si vede
+**senza togliere niente** — né origine né swing — sulle fasi grezze dentro il
+movimento, contando i soli colpi entro un
 quarto di movimento dal battere e i soli strumenti che ne hanno almeno venti:
 charleston **−6,85** tick (24 esecuzioni, 4 batteristi) contro ride **−2,35**
 (18 esecuzioni, 4 batteristi), con rullante a **−4,10** (29 esecuzioni, 5
@@ -640,33 +874,48 @@ stessa cosa che dice il conteggio da testa o croce di quella coppia.
 i due strumenti non suonano sugli stessi: il charleston concentra i colpi sul 4
 e sul 12 molto più del ride, quindi la differenza poteva essere «chi suona
 dove» e non «chi anticipa». Rimisurata sui **soli passi 4 e 12**, dove suonano
-entrambi, la stratificazione **cresce** e torna unanime: **3,57 tick e 14 su
-14** (14 esecuzioni, 3 batteristi), contro 3,21 e 12 su 15 a passi liberi
-`[MIS]`.
+entrambi, la stratificazione **cresce** ancora: **4,73 tick e 14 su 14** (14
+esecuzioni, 3 batteristi), contro 4,60 e 15 su 15 a passi liberi `[MIS]`. Fino
+al 26 agosto 2026 i quattro numeri erano **3,57 e 14 su 14** contro **3,21 e
+12 su 15**.
 
-⚠️ **Ma questo controllo non è più innocente come sembrava**, e va detto qui
+⚠️ **Ma questo controllo non è innocente come sembrava**, e va detto qui
 invece che lasciarlo dedurre. Restringersi ai passi 4 e 12 **esclude per
 costruzione** i colpi che, tolto lo swing, sono finiti sui passi 3 e 11 — cioè
-proprio quelli che anticipano di più. L'unanimità che il controllo ritrova è
-quindi in parte l'unanimità di un campione **potato dalla parte giusta**: dice
-ancora che il confondimento posizionale non spiega la stratificazione, ma non
-può più essere citato come «e sui passi dove suonano entrambi è comunque
-quindici su quindici». La sezione «Il bordo fra due passi» spiega perché.
+proprio quelli che anticipano di più — quindi è un campione **potato dalla
+parte giusta**. ⚠️ **Dal 26 agosto 2026 la potatura è più piccola, non
+sparita:** lo stimatore nuovo riporta sul battere gran parte di quei colpi, e
+la quota del charleston sui passi 3 e 11 scende da 17,5% a **11,6%** — ma più
+di un decimo dei suoi colpi resta fuori dal controllo. E il controllo ha smesso di
+essere quello che *ritrova* l'unanimità, visto che a passi liberi non è più
+persa: oggi dice solo che il confondimento posizionale non spiega la
+stratificazione. Restava, e resta, da non citare come «e sui passi dove
+suonano entrambi è comunque quindici su quindici»: sui passi 4 e 12 le
+esecuzioni appaiate sono **quattordici**.
 
-⚠️ **E il template è il caso estremo, come lo era prima.**
+⚠️ **E il template resta il caso estremo, come lo era prima.**
 `drummer1/session3/2` — l'esecuzione che questa casella raccomanda più sotto
-come groove template — sta a **−0,25 tick**, cioè **0,8 ms** a 185 BPM, terzo
-dal fondo della fila e appena **dalla parte sbagliata** `[OSS]`. Prima della
-correzione stava a +0,08, cioè appena dall'altra: su quel file la
-stratificazione **non c'è**, e non c'era nemmeno prima. Con uno stimatore
-appena diverso il segno cambia ancora: la mediana sui **colpi**, ristretta ai
-passi con almeno dieci, dà −0,25, mentre la mediana sui **passi** non pesata dà
-**−4,60** — perché i valori positivi grossi del charleston stanno su passi da 1
-a 41 colpi, mentre i suoi due passi dominanti (4 e 12, **162 e 148** colpi)
-sono negativi. **La conclusione aggregata non dipende da lui** — togliendolo
-restano **12 su 14** con mediana **+3,33**, su **14 esecuzioni e 3 batteristi**
-`[MIS]` — ma chi usa quel file come template sappia che su di lui la
-stratificazione non c'è.
+come groove template — sta a **+0,37 tick**, cioè **1,3 ms** a 185 BPM:
+**ultimo della fila**, cioè il meno stratificato dei quindici, ma dalla parte
+del disegno `[OSS]`. Le tre versioni di questo numero, tutte sullo stesso
+file: **+0,08** con la grazia, **−0,25** dal 24 agosto 2026 — terzo dal fondo
+e appena dalla parte sbagliata — **+0,37** dal 26. Su quel file la
+stratificazione, comunque la si misuri, è **la più piccola del campione**: un
+terzo di tick, cioè poco più di un millisecondo, non è un pocket a strati.
+
+⚠️ **Una cosa però è cambiata di verso, e va scritta.** Fino al 26 agosto
+2026 questa riga diceva che «con uno stimatore appena diverso il segno cambia
+ancora», perché la mediana sui **colpi** dava −0,25 e quella sui **passi** non
+pesata dava **−4,60**. Oggi le due **concordano nel segno**: sui colpi
+**+0,38** — che è il +0,37 della fila, arrotondato dall'altra parte — e sui
+passi **+1,62** `[MIS]`. La ragione della vecchia divergenza
+era che i positivi grossi del charleston stavano su celle rade mentre i suoi
+due passi dominanti erano negativi; ora quelle celle rade si sono
+ricompattate. Resta vero che le due letture **non danno lo stesso numero** — è
+sempre un file su cui la stratificazione è troppo piccola per essere robusta —
+ma non danno più due segni. **La conclusione aggregata non dipende da lui**:
+togliendolo restano **14 su 14** con mediana **+4,66**, su **14 esecuzioni e 3
+batteristi** `[MIS]` (erano 12 su 14 e +3,33 fino al 26 agosto).
 
 ⚠️ **E questo CONFERMA metà dell'`[IPO]` del comune, non lo smentisce.** «Ma
 swing e laid-back non sono la stessa cosa» riporta da `music-composition` un
@@ -676,15 +925,17 @@ che questa casella misuri.
 
 Quello che **non** si trova è il resto — e va detto con precisione, perché il
 numero e il verbo qui vanno letti insieme. Il **rullante dietro alla cassa**
-non c'è nemmeno **come segno**: dal 24 agosto 2026 la mediana è **−0,21 tick**,
-e negativo vuol dire *prima*. E non c'è **come sistematicità**, che è quel che
-servirebbe per chiamarlo uno strato: **il rullante sta dietro alla cassa in 9
-esecuzioni su 21, e davanti nelle altre 12** `[MIS]` — è la riga «rullante −
-kick» della tabella qui sopra, letta dal capo che qui interessa — cioè testa o
-croce, e il divario vale un **quinto di tick** contro i 3,21 che separano il
-piede dal ride. Un segno rovesciato e un conteggio da testa o croce non fanno
-uno strato. Fra i tre strumenti battuti, insomma, non c'è ordine, e il pocket a
-strati del jazz è **un solo strato**: il piede.
+non c'è nemmeno **come segno**: la mediana è **−0,69 tick** dal 26 agosto 2026
+(−0,21 dal 24), e negativo vuol dire *prima*. E non c'è **come
+sistematicità**, che è quel che servirebbe per chiamarlo uno strato: **il
+rullante sta dietro alla cassa in 9 esecuzioni su 21, e davanti nelle altre
+12** `[MIS]` — è la riga «rullante − kick» della tabella qui sopra, letta dal
+capo che qui interessa, e il conteggio **non si è mosso in nessuna delle due
+correzioni** — cioè testa o croce, e il divario vale **due terzi di tick**
+contro i 4,60 che separano il piede dal ride. Un segno rovesciato e un
+conteggio da testa o croce non fanno uno strato. Fra i tre strumenti battuti,
+insomma, non c'è ordine, e il pocket a strati del jazz è **un solo strato**:
+il piede.
 
 #### Cosa esclude il test del tempo — e cosa no
 
@@ -712,8 +963,8 @@ costruzione, ed è l'unica grandezza definita.
 ⚠️ **E la tabella qui sotto è scritta al contrario di quella delle coppie**,
 perché il charleston fa da riferimento: si legge **pad meno charleston**,
 quindi il segno **positivo** dice che quel pad arriva **dopo** il piede. È lo
-stesso fatto letto dall'altro capo — «ride − charleston = +3,21» e «charleston
-− ride = 3,21 tick prima» sono la stessa riga, non due misure.
+stesso fatto letto dall'altro capo — «ride − charleston = +4,60» e «charleston
+− ride = 4,60 tick prima» sono la stessa riga, non due misure.
 
 Le due ipotesi fanno previsioni **opposte** sul divario: se è una frazione del
 movimento la pendenza è **zero**; se è una latenza fissa in millisecondi la
@@ -722,28 +973,53 @@ positiva. Su `beat` 4/4 senza funk e fusion `[MIS]`:
 
 | divario | esec. | batt. | mediana | pendenza misurata | da costante-in-tick | da latenza fissa |
 |---|---|---|---|---|---|---|
-| ride − charleston | 15 | 3 | +3,21 tick (+13,5 ms) | **−0,0156 ± 0,0140** | **1,1 σ** | +0,0216 → **2,7 σ** |
-| kick − charleston | 18 | 2 | +1,91 tick (+8,5 ms) | −0,0120 ± 0,0106 | **1,1 σ** | +0,0136 → 2,4 σ |
-| rullante − charleston | 22 | 3 | +2,09 tick (+12,1 ms) | −0,0345 ± 0,0128 | 2,7 σ | +0,0194 → **4,2 σ** |
+| ride − charleston | 15 | 3 | +4,60 tick (+21,2 ms) | **+0,0033 ± 0,0110** | **0,3 σ** | +0,0340 → **2,8 σ** |
+| kick − charleston | 18 | 2 | +4,83 tick (+16,9 ms) | +0,0135 ± 0,0136 | **1,0 σ** | +0,0270 → 1,0 σ |
+| rullante − charleston | 22 | 3 | +2,64 tick (+13,0 ms) | −0,0475 ± 0,0179 | 2,6 σ | +0,0208 → **3,8 σ** |
 
-**La latenza fissa in millisecondi è rifiutata su tutte e tre le coppie**, e la
-pendenza misurata ha il **segno opposto** a quella prevista. Ma la forza del
-rifiuto **non è la stessa su tutte e tre**, e dal 24 agosto 2026 va scritta
-per intero: **4,2 σ** sul rullante, **2,7** sul ride, **2,4** sulla cassa.
-Solo la prima è un rifiuto netto; le altre due sono un'indicazione, e chi
-citava «circa 4 σ su tutte e tre» citava un numero che la correzione della
-catena ha portato via.
+⚠️ **Questa tabella è del 26 agosto 2026, e va letta diversamente da come
+questa casella la leggeva il giorno prima.** Fino ad allora diceva: ride
++3,21 tick (+13,5 ms), pendenza −0,0156 ± 0,0140, 1,1 σ e 2,7 σ; cassa +1,91
+(+8,5 ms), −0,0120 ± 0,0106, 1,1 σ e 2,4 σ; rullante +2,09 (+12,1 ms), −0,0345
+± 0,0128, 2,7 σ e 4,2 σ. Due cose sono cambiate di **verso**, e nessuna delle
+due si vede guardando solo i divari.
 
-**Due divari su tre sono invece indistinguibili da costante in tick** — ride e
-cassa, a 1,1 σ ciascuno — che è la firma di una grandezza proporzionale al
-movimento. Per il terzo, il rullante, non regge nessuna delle due ipotesi
-pure: il divario si **restringe** al salire del tempo (2,7 σ da zero).
+**La latenza fissa in millisecondi non è più fuori su tutte e tre**, e la
+forza va detta coppia per coppia con lo stesso metro di prima — un rifiuto
+netto sopra i 3 σ, un'indicazione sotto: **3,8 σ** sul rullante, che è il
+rifiuto netto; **2,8 σ** sul ride, che è un'indicazione forte; e ⚠️ **1,0 σ
+sulla cassa, dove non c'è più nessun rifiuto.** La pendenza della cassa
+(+0,0135) cade **esattamente a metà** fra le due previsioni, a un sigma da
+ciascuna: quella coppia, oggi, non distingue niente. Chi citava «rifiutata su
+tutte e tre» cita un numero che il cambio di stimatore ha portato via, come la
+correzione della catena aveva portato via il «circa 4 σ su tutte e tre» due
+giorni prima.
 
-⚠️ **Prima della correzione questa sezione diceva quasi il contrario**, ed è
-onesto metterlo accanto: dava la latenza fissa fuori a ~4 σ su tutte e tre e
-la costante-in-tick compatibile con **una sola** coppia. Ora le due letture si
-sono scambiate il peso — la costante-in-tick ne regge **due**, il rifiuto
-netto ne resta **una**. La direzione non è cambiata; la sua nettezza sì.
+⚠️ **E il segno della pendenza non è più opposto su tutte e tre.** Fino al 26
+agosto 2026 lo era su tutte e tre; oggi lo è **solo sul rullante**
+(−0,0475). Su ride e cassa la
+pendenza è **positiva**, cioè dello stesso segno che la latenza fissa prevede
+— ma sul ride è **un decimo** della grandezza prevista (+0,0033 contro
++0,0340), che è il motivo per cui la rifiuta lo stesso. «Segno opposto» e
+«troppo piccola» sono due modi diversi di non essere una latenza fissa, e
+scriverli come se fossero lo stesso sarebbe scrivere il contrario di quel che
+c'è.
+
+**Due divari su tre restano indistinguibili da costante in tick** — ride e
+cassa — che è la firma di una grandezza proporzionale al movimento, e sul ride
+la compatibilità si è **stretta**, da 1,1 σ a **0,3 σ**. Per il terzo, il
+rullante, non regge nessuna delle due ipotesi pure: il divario si
+**restringe** al salire del tempo (2,6 σ da zero). Cioè **una sola coppia
+oggi discrimina davvero**, ed è il ride: 0,3 σ da costante-in-tick contro 2,8
+dalla latenza fissa.
+
+⚠️ **Prima della correzione del 24 agosto questa sezione diceva quasi il
+contrario**, ed è onesto tenerlo accanto: dava la latenza fissa fuori a ~4 σ
+su tutte e tre e la costante-in-tick compatibile con **una sola** coppia. Il
+24 agosto le due letture si sono scambiate il peso — la costante-in-tick ne
+reggeva **due**, il rifiuto netto **una**. Il 26 agosto la direzione **non si
+è invertita di nuovo**: è la stessa, e più marcata sul ride, più debole sulla
+cassa.
 
 ⚠️ **Qui sotto la grandezza CAMBIA, e il segno con lei.** La tabella per fascia
 di tempo non porta un divario: porta il **livello del solo charleston a
@@ -758,33 +1034,37 @@ mancavano `[MIS]`:
 
 | fascia | esecuzioni | batteristi | charleston, tick (mediana) | (media) | dev. standard | errore standard |
 |---|---|---|---|---|---|---|
-| ≤ 110 BPM | 6 | 3 | −4,06 | −4,26 | 1,70 | 0,70 |
-| 110-130 BPM | 8 | 3 | −3,44 | −3,35 | 2,18 | 0,77 |
-| > 130 BPM | 9 | **2** | −2,11 | −2,33 | 2,46 | 0,82 |
+| ≤ 110 BPM | 6 | 3 | −5,17 | −5,30 | 1,76 | 0,72 |
+| 110-130 BPM | 8 | 3 | −6,50 | −6,17 | 3,44 | 1,22 |
+| > 130 BPM | 9 | **2** | −5,65 | −4,87 | 4,39 | 1,46 |
 
 ⚠️ **E si guarda, non si conclude.** Un livello ha lo zero arbitrario detto
 qui sopra, quindi da questa tabella non esce nessuna prova: la conclusione la
 porta la regressione appaiata, che è sul divario. Questa tabella sta qui per
 mostrare il **rumore** che c'è sotto, ed è tutto quello che le si può chiedere
-— **le tre mediane vanno lette per quello che sono.** Dal 24 agosto 2026 non
-coincidono più: vanno da −4,06 a −2,11, quasi due tick, e nella direzione che
-una latenza fissa prevede. Ma l'errore standard è **0,70-0,82 tick**, cioè lo
-scarto vale poco più di **due errori standard** su tre punti scelti a mano, e
-la fascia che porta la discriminazione sono **due batteristi**. Fino al giorno
-prima le stesse tre mediane coincidevano a 0,07 tick e questa casella lo
-chiamava «una coincidenza, non una precisione»: valeva allora e vale adesso al
-contrario — **un livello non decide niente**, né quando è piatto né quando
-pende. È la
-regressione appaiata a reggere la conclusione, non questa tabella. E la
-colonna in millisecondi che compariva qui in una versione precedente **non era
-un secondo riscontro**: è `tick × 60000/(BPM × 96)`, aritmetica sugli stessi
+— **le tre mediane vanno lette per quello che sono.** Dal 26 agosto 2026 non
+sono ordinate affatto: −5,17, poi **−6,50**, poi −5,65, cioè è la fascia di
+**mezzo** la più anticipata e le due esterne stanno quasi assieme. Fra la più
+e la meno anticipata ci sono **1,33 tick**, con errori standard di
+**0,72-1,46**: nessun andamento, in nessuno dei due versi. ⚠️ **E le tre
+versioni di questa tabella dicono tre cose diverse, il che è precisamente il
+punto.** Fino al 24 agosto le tre mediane coincidevano a 0,07 tick e questa
+casella lo chiamava «una coincidenza, non una precisione». Dal 24 al 26
+andavano da −4,06 a −2,11 su errori standard di 0,70-0,82, cioè poco più di
+due errori standard su tre punti scelti a mano, con la fascia discriminante
+fatta di **due batteristi**. Dal 26 non vanno da nessuna parte. Tre letture
+diverse dalla stessa tabella in tre giorni sono la prova, non l'eccezione:
+**un livello non decide niente**, né quando è piatto, né quando pende, né
+quando fa la gobba. È la regressione appaiata a reggere la conclusione, non
+questa tabella. E la colonna in millisecondi che compariva qui in una versione
+precedente **non era un secondo riscontro**: è `tick × 60000/(BPM × 96)`, aritmetica sugli stessi
 numeri.
 
 **Cosa il test esclude, detto stretto:** che il divario fra il charleston e gli
 altri pad sia un ritardo **costante in millisecondi**. Nient'altro — e con la
-forza che la riga qui sopra dichiara, che è **4,2 σ su una coppia sola** e
-2,4-2,7 sulle altre due. Su una delle tre — il rullante — cade anche l'ipotesi
-opposta.
+forza che la riga qui sopra dichiara, che dal 26 agosto 2026 è **3,8 σ sul
+rullante, 2,8 sul ride e 1,0 sulla cassa**, dove quindi non esclude più
+niente. Su una delle tre — il rullante — cade anche l'ipotesi opposta.
 
 ⚠️ **E non esclude un pedale proporzionale al movimento** — quello sì, ma solo
 quello, e va detto **nel verso giusto**, perché è dove questa casella ha già
@@ -801,14 +1081,16 @@ non scalano. **Quel pedale non è mai stato misurato.**
 ⚠️ **E i numeri già scritti qui sopra lo stringono ancora.** Il charleston è il
 riferimento comune di tutte e tre le regressioni, quindi un effetto
 costante-in-tick dal **suo** lato prevede pendenza **zero su tutte e tre**: è
-**1,1 σ sul ride e 1,1 sulla cassa**, ma **2,7 σ sul rullante** — la coppia per
+**0,3 σ sul ride e 1,0 sulla cassa**, ma **2,6 σ sul rullante** — la coppia per
 cui, più sopra, «non regge nessuna delle due ipotesi pure». ⚠️ **E qui la
 correzione del 24 agosto 2026 ha rovesciato il conto**: prima erano *due su
-tre* a respingere questa versione, ora è **una su tre, e a 2,7 σ**. Il pedale
-proporzionale al movimento non è più la versione che i numeri stringono di
-più: è quella che ne regge due su tre. Resta però **supposta**, e per le due
-supposizioni che chiede — vedi il paragrafo qui sopra. Un pedale che scattasse
-presto di un numero **fisso di millisecondi** resta invece rifiutato dalla
+tre* a respingere questa versione, dopo è diventata **una su tre, e a 2,7 σ**.
+⚠️ **Il 26 agosto 2026 non l'ha rovesciato di nuovo, l'ha stretto nello stesso
+verso:** resta una su tre, a 2,6 σ, e sul ride l'accordo passa da 1,1 a **0,3
+σ**. Il pedale proporzionale al movimento non è più la versione che i numeri
+stringono di più: è quella che ne regge due su tre. Resta però **supposta**, e
+per le due supposizioni che chiede — vedi il paragrafo qui sopra. Un pedale
+che scattasse presto di un numero **fisso di millisecondi** resta invece rifiutato dalla
 stessa regressione, come i pad battuti. La domanda del titolo — mestiere o
 pedale — resta **senza risposta**; quel che è cambiato è che del pedale
 sopravvive una versione **meno stretta di quanto questa casella scrivesse**.
@@ -818,67 +1100,104 @@ scarto comune a tutto il kit, quindi qui si esclude una latenza **di quel pad
 rispetto agli altri** — mai una latenza di cattura della registrazione, che
 essendo comune a tutti è **invisibile per costruzione**.
 
-⚠️ **E prima di tutto: 13,5 ms.** Il divario ride/charleston, che è il più
-largo dei tre, in millisecondi vale **13,5 ms** — cioè **sotto** la finestra di
-20-40 ms che il comune dichiara udibile. È l'unica grandezza di questa sezione che
-con quella finestra si possa confrontare, per la ragione detta più in alto: gli
-altri numeri sono livelli, e un livello ha lo zero arbitrario. La
-stratificazione è **misurata bene e piccola**: che si senta è un'altra
-affermazione.
+⚠️ **E prima di tutto: 21,2 ms.** Il divario ride/charleston, che è il più
+largo dei tre, in millisecondi vale **21,2 ms** dal 26 agosto 2026 — cioè
+appena **dentro** la finestra di 20-40 ms che il comune dichiara udibile. È
+l'unica grandezza di questa sezione che con quella finestra si possa
+confrontare, per la ragione detta più in alto: gli altri numeri sono livelli, e
+un livello ha lo zero arbitrario. La stratificazione è **misurata bene e
+piccola**: che si senta è un'altra affermazione.
+
+⚠️ **E qui una frase di questa casella si è rovesciata, con una data.** Fino
+al 26 agosto 2026 il divario valeva **13,5 ms** e la riga qui sopra diceva
+**«sotto** la finestra». Non lo è più. Chi cercava in questa casella
+l'argomento «tanto la stratificazione sta sotto la soglia dichiarata» non lo
+trova più, e **non perché sia stato tolto: perché il numero l'ha attraversata**
+salendo. Il che non dice che si senta — dice che quell'argomento non è
+disponibile.
 
 ⚠️ **E dal 24 agosto 2026 quella finestra va maneggiata con due cautele.** La
-prima: i 13,5 ms sono un divario **fra due strumenti**, cioè una grandezza
+prima: i 21,2 ms sono un divario **fra due strumenti**, cioè una grandezza
 *relativa*, mentre la finestra qualifica **uno** spostamento contro la griglia.
 Sono due domande diverse, e il comune ora le tiene separate — «Le due domande
 sono diverse, e la soglia dipende dal tempo». Che la stratificazione si senta
-**non è stato provato**: i 13,5 ms non sono mai stati messi davanti a un
-orecchio, e gli ascolti del 24 agosto (qui sotto) non permettono di dedurlo,
-perché da lì **non esce nessuna soglia**.
+**non è stato provato**: quei millisecondi non sono mai stati messi davanti a
+un orecchio, e gli ascolti del 24 agosto (qui sotto) non permettono di
+dedurlo, perché da lì **non esce nessuna soglia**.
 
-La seconda, che è più insidiosa: **i 13,5 ms non sono un numero, sono 3,21 tick
-letti a un tempo.** Sono la conversione fatta col BPM di ciascuna esecuzione — è
-detto qui sopra — e la stessa quantità **scritta** in una song vale altri
-millisecondi: 3,21 tick sono 10,8 ms a 185 BPM, **20,1 a 100**, 33,4 a 60. Cioè
-**se la stratificazione misurata si senta dipende dal tempo a cui la si scrive**,
-non solo da quanto è grande; e a 185 BPM, il tempo dell'esecuzione da cui il
-template viene, sarebbe la metà. ⚠️ **A 100 BPM sono 20,1 ms, cioè il bordo
-inferiore della finestra del comune**: prima della correzione erano 16,2, cioè
-sotto. La stessa stratificazione, scritta al tempo della coppia già ascoltata,
-non è più *sotto* la finestra — ci arriva. Il che non dice che si senta: dice
-che l'argomento «tanto è sotto» non è più disponibile.
+La seconda, che è più insidiosa: **i 21,2 ms non sono un numero, sono 4,60
+tick letti a un tempo.** Sono la conversione fatta col BPM di ciascuna
+esecuzione — è detto qui sopra — e la stessa quantità **scritta** in una song
+vale altri millisecondi: 4,60 tick sono 15,5 ms a 185 BPM, **28,8 a 100**,
+47,9 a 60. Cioè **se la stratificazione misurata si senta dipende dal tempo a
+cui la si scrive**, non solo da quanto è grande; e a 185 BPM, il tempo
+dell'esecuzione da cui il template viene, sarebbe due terzi. ⚠️ **A 100 BPM
+sono 28,8 ms, cioè dentro la finestra del comune e non più al suo bordo.** La
+serie delle tre misure, alla stessa velocità di scrittura, è **16,2 → 20,1 →
+28,8 ms**: sotto la finestra, poi al suo bordo inferiore, poi dentro. Il che
+continua a non dire che si senta.
 
 #### Due grandezze diverse, e la domanda che resta aperta
 
 ⚠️ **Le mediane aggregate non sono quello che un template scrive**, e
-confonderle sarebbe comodo e falso. Le mediane qui sopra stanno entro 3,5 tick
+confonderle sarebbe comodo e falso. Le mediane qui sopra stanno entro 5,7 tick
 perché sono **mediane su decine di esecuzioni**; il profilo di **una**
 esecuzione porta invece uno scarto **per ogni passo e per ogni strumento**, e
 `MU.applica_groove()` li applica **tutti**, senza nessuna soglia.
 
-Sul template raccomandato, quindi `[OSS]`:
+Sul template raccomandato, quindi `[OSS]`, coi valori di prima del 26 agosto
+2026 in *corsivo* accanto:
 
-- il **massimo spostamento singolo** è **+11,80 tick = 39,9 ms** a 185 BPM
-  (ride, passo 13). Confrontato con la finestra 20-40 ms del comune — che
-  qualifica *uno* spostamento, ed è quindi la grandezza giusta da metterle
-  accanto — sta al suo **bordo superiore**: è quanto di più grande quella
-  finestra chiami ancora microtiming, non il minimo che chiami udibile;
+- il **massimo spostamento singolo** è **−19,11 tick = 64,6 ms** a 185 BPM
+  (splash, passo 12) — *era +11,80 tick = 39,9 ms, ride, passo 13*.
+  Confrontato con la finestra 20-40 ms del comune — che qualifica *uno*
+  spostamento, ed è quindi la grandezza giusta da metterle accanto — le sta
+  ora **oltre il bordo superiore**, dove prima ci stava dentro per un pelo. Ed
+  è cambiato anche il **segno**: quel colpo prima era in **ritardo** sul suo
+  passo, ora è in **anticipo**;
 - l'**escursione picco-picco** fra tutti i passi e tutti gli strumenti è
-  **22,83 tick = 77,1 ms**. Ma è la distanza fra il colpo più anticipato e il
-  più ritardato del kit, non uno spostamento: a nessuna nota viene applicata.
+  **27,36 tick = 92,4 ms** — *era 22,83 tick = 77,1 ms*. Ma è la distanza fra
+  il colpo più anticipato e il più ritardato del kit, non uno spostamento: a
+  nessuna nota viene applicata.
 
-⚠️ **E gli estremi poggiano su 1-3 colpi.** I cinque scarti più grandi vengono
-da passi colpiti **una volta sola** (ride passo 13, china passo 11, charleston
-passo 5, splash passo 15) o tre (rullante passo 1) su **193 battute** `[OSS]`.
-Non sono feel: sono il colpo isolato di un batterista che si sposta, misurato
-come se fosse una regola. Chi costruisce un template farebbe bene a **guardare
-i colpi prima dello scarto** — `GR.profilo()` li riferisce — perché
-`applica_groove()` non distingue fra un passo da 162 colpi e uno da 1.
+⚠️ **E qui i due numeri vanno in due versi opposti, il che è la cosa
+importante di questa sezione.** L'escursione su **tutti** i passi **sale**
+(22,83 → 27,36 tick), ma quella sui soli passi che la tabella del profilo
+tiene — almeno il 5% delle battute, cioè 10 colpi su 193 — **scende**: da
+**15,78 a 13,57 tick** `[OSS]`. Non è una contraddizione: le due misurano cose
+diverse, e la prima è dominata dalle celle con **un colpo solo**, che sono
+esattamente quelle che il cambio di stimatore ha ridistribuito. **Riportare
+solo la salita, o solo la discesa, sarebbe una mezza verità in tutt'e due i
+versi.** La lettura onesta è che **il grosso del template non si è mosso** —
+la riga sogliata, che è quella con dei colpi sotto, cala — mentre gli estremi
+rumorosi si sono ridistribuiti fra strumenti diversi.
+
+⚠️ **E gli estremi poggiano su 1-4 colpi, come prima.** I cinque scarti più
+grandi vengono da passi colpiti **una volta sola** (splash passo 12, kick
+passi 1 e 9, charleston passo 9) o quattro (tom basso passo 7) su **193
+battute** `[OSS]`. Fino al 26 agosto 2026 erano ride passo 13, china passo 11,
+charleston passo 5 e splash passo 15 con un colpo, rullante passo 1 con tre:
+**cambiano i nomi, non la natura**. Non sono feel: sono il colpo isolato di un
+batterista che si sposta, misurato come se fosse una regola. Chi costruisce un
+template farebbe bene a **guardare i colpi prima dello scarto** —
+`GR.profilo()` li riferisce — perché `applica_groove()` non distingue fra un
+passo da 174 colpi e uno da 1.
+
+⚠️ **E dal 26 agosto 2026 c'è una ragione in più per guardarli.** Il taglio si
+sposta sulla **fase media della voce**, e una voce rada quella fase media la
+determina male: lo splash che porta il massimo spostamento è così raro che la
+tabella qui sopra non lo stampa nemmeno, perché in tutta l'esecuzione ha meno
+di venti colpi. Su una voce così, lo scarto può arrivare **vicino a un passo
+intero** — i −19,11 tick su 24 di questo caso — cioè il template può posare
+una nota nel **territorio del passo accanto**. Sulle voci portanti, che di
+colpi ne hanno centinaia, non succede: le celle del charleston stanno fra
+−4,7 e +6,4.
 
 **E se non si sentisse affatto?** Era la domanda che questa casella non poteva
-chiudere. I 39,9 ms del colpo estremo sono nella finestra udibile, ma poggiano
-su un colpo solo; la stratificazione che è **misurata bene** vale 13,5 ms, cioè
-**sotto** quella finestra. «Rappresentabile» non è «percepibile». **Se
-all'ascolto il residuo non si fosse distinto**, il valore di
+chiudere. I 64,6 ms del colpo estremo sono oltre la finestra udibile, ma
+poggiano su un colpo solo; la stratificazione che è **misurata bene** vale
+21,2 ms, cioè appena **dentro** quella finestra. «Rappresentabile» non è
+«percepibile». **Se all'ascolto il residuo non si fosse distinto**, il valore di
 `MU.applica_groove()` sarebbe stato tutto nella **velocity** — la metà che non
 dipende dalla posizione, e che la scala e il profilo posizionale qui sopra
 sostengono da sole. Non è andata così, e la risposta arrivata il 24 agosto 2026
@@ -913,6 +1232,23 @@ registro di sessione conserva, `d781262c…` per `GROOVE1` e `853bcdec…` per
 `GROOVE0`. Chi volesse la coppia col codice di oggi la scriva **altrove**, e la
 confronti con questa invece di sostituirla.
 
+⚠️ **E dal 26 agosto 2026 le ragioni per non rigenerarla sono due, non una.**
+Alla finestra di grazia si aggiunge il **cambio di stimatore per passo**:
+`tools/genera_groove.py` chiama `GR.profilo()` **senza passare `taglio`**,
+quindi segue in silenzio il default del modulo, che oggi è `'voce'`. La coppia
+ascoltata è perciò costruita sotto il **vecchio** default, e i residui che
+porta non sono quelli che uscirebbero oggi. Il divieto **non si allenta perché
+i numeri si sono mossi: è esattamente quando si sono mossi che serve.**
+
+⚠️ **Questo NON tocca l'A/B dello swing**, e la distinzione va tenuta ferma
+perché è facile sbagliarla. `out/SWINGA.XML` e `out/SWINGB.XML` non passano da
+`GR.profilo()`: `tools/genera_swing.py` chiama `GR.origine()` e
+`GR.bur_da_posizioni()` direttamente sulle posizioni MIDI grezze, e il BUR è
+calcolato **prima** che un passo venga assegnato, senza mai vedere `taglio`.
+Il valore che `S.set_swing()` scrive è quindi **intatto** — 1,48 su 41
+esecuzioni, levare 59,7%, identico nei tre modi — e **l'A/B dello swing già
+ascoltato sta in piedi così com'è.** La coppia costruita sotto il vecchio
+default è `GROOVE0`/`GROOVE1`, non `SWINGA`/`SWINGB`.
 | ascolto | la grandezza, **in tick** | a 100 BPM | esito |
 |---|---|---|---|
 | il giro intero, `GROOVE0` poi `GROOVE1` | tutto insieme | — | *«sento e vedo variazioni di velocity tra le note e variazione di timing delle note (dove cadono)»* |
@@ -1089,29 +1425,40 @@ data, non si sostituiscono in silenzio.
   a 60 BPM 3 tick valgono 31,3 ms, a 47 ne valgono 39,9, cioè i due bordi della
   finestra del comune — ma la manopola da girare per prima è il **protocollo**,
   non il metronomo;
-- **se la stratificazione misurata si senta.** I **13,5 ms** del divario
+- **se la stratificazione misurata si senta.** I **21,2 ms** del divario
   ride/charleston non sono mai stati messi davanti a un orecchio, e per quanto
-  detto qui sopra non basterebbe metterceli una volta;
+  detto qui sopra non basterebbe metterceli una volta. ⚠️ Erano 13,5 ms fino
+  al 26 agosto 2026, cioè **sotto** la finestra dichiarata dal comune; ora ci
+  stanno **dentro**, il che rende la domanda più interessante e non meno;
 - **la stratificazione non è mai entrata in gioco.** Il template ascoltato è
-  `drummer1/session3/2`, che di stratificazione ne ha **−0,25 tick** — terzo
-  dal fondo della fila, come questa casella già dichiara più sopra: su
-  quel file la stratificazione non c'è, quindi l'ascolto non poteva né
-  confermarla né smentirla. La coppia da fare adesso è su
+  `drummer1/session3/2`, che di stratificazione ne ha **+0,37 tick** — ultimo
+  della fila, come questa casella già dichiara più sopra: su quel file la
+  stratificazione è la più piccola del campione, quindi l'ascolto non poteva
+  né confermarla né smentirla. La coppia da fare adesso è su
   **`drummer10/session1/1`** (`jazz/swing`, 124 BPM, 164 s, BUR 1,82): sui passi
-  4 e 12 il suo charleston a pedale sta a **−8,3 e −9,8** tick e il ride a
-  **−2,7 e −3,8**, cioè **5,64 e 5,93 tick di divario** sui due passi più
-  colpiti di ogni battuta, contro **+1,00 e −0,37** della stessa misura su
+  4 e 12 il suo charleston a pedale sta a **−10,7 e −11,2** tick e il ride a
+  **−2,7 e −4,0**, cioè **8,04 e 7,20 tick di divario** sui due passi più
+  colpiti di ogni battuta, contro **+1,62 e −0,50** della stessa misura su
   `drummer1/session3/2` `[OSS]` su due esecuzioni. E lì il ride **è** `ride`
   (219 colpi, spang-a-lang su 0-4-6-8-12-14): niente trappola del nome GM.
 
-  ⚠️ **Ma quella è anche l'esecuzione col battere in minoranza**, e chi
-  costruisce la coppia deve saperlo: su `drummer10/session1/1` il charleston
-  porta **41 e 42 colpi sui passi 3 e 11** contro **29 e 19 sui 4 e 12**, cioè
-  la maggioranza del suo piede sul 2 e sul 4 finisce, tolto lo swing, sulla
-  semicroma precedente. Il divario di 5,6-5,9 tick è misurato **sui colpi che
-  restano sul battere**, e una coppia costruita con `MU.applica_groove()` su un
-  pattern che chiede il piede sul 4 e sul 12 prenderebbe solo quelli. La
-  sezione «Il bordo fra due passi» dice perché.
+  ⚠️ **Questi quattro numeri sono stati rimisurati il 26 agosto 2026, ed è
+  proprio la coppia che questo lavoro ha spostato.** Fino a quel giorno il
+  divario era di **5,64 e 5,93** tick, coi passi 4 e 12 a −8,3 e −9,8 contro
+  −2,7 e −3,8, e su `drummer1/session3/2` valeva +1,00 e −0,37. Chi costruisce
+  la coppia deve usare i numeri nuovi: le celle su cui poggia sono
+  **esattamente** quelle che il cambio di stimatore ha ricompattato.
+
+  ⚠️ **E quella non è più l'esecuzione col battere in minoranza** — lo era
+  fino al 26 agosto 2026, ed è la ragione per cui questa riga esisteva. Il
+  charleston portava **41 e 42 colpi sui passi 3 e 11** contro **29 e 19 sui 4
+  e 12**; ora porta **20 e 32** contro **50 e 34**, cioè il piede sul 2 e sul 4
+  è tornato in maggioranza su tutt'e due i movimenti. Resta però da guardare
+  che sul **12** il margine è sottile (34 contro 32), e che il divario si
+  misura **sui colpi che stanno sul battere**: una coppia costruita con
+  `MU.applica_groove()` su un pattern che chiede il piede sul 4 e sul 12
+  prende solo quelli. Le sezioni «Il bordo fra due passi» e «La decisione: il
+  taglio si sposta per voce» dicono perché.
 
 ### Lo swing non sta in questa casella
 
@@ -1134,6 +1481,15 @@ MU.applica_groove(note, prof, dove='charleston a pedale')   # muta `note`
 **non inventa**: se il pattern chiede un colpo su un passo dove quel batterista
 non ha mai suonato, la nota resta com'è e il passo finisce in
 `senza_appoggio`, che va letto.
+
+⚠️ **E dal 26 agosto 2026 uno scarto può arrivare vicino a un passo intero.**
+Lo stimatore per passo sposta il confine fra due passi sulla fase media della
+voce, quindi il residuo non è più limitato a mezzo passo: su una voce rada può
+posare una nota nel **territorio del passo accanto**. Sul template
+raccomandato il caso estremo vale **−19,11 tick su 24**, e sta su una voce da
+meno di venti colpi. Quanto pesa, e perché non si è scritta una regola per
+chiuderlo, stanno in «Il limite che resta: l'ancoraggio»; `senza_appoggio` è
+ciò che lo rende visibile invece che silenzioso.
 
 L'esecuzione da cui il template esce va **nominata**, perché quello che ne
 viene è `[OSS]` su un esecutore e non `[MIS]` su un repertorio: mediare il
