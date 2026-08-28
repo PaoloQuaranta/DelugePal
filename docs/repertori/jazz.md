@@ -409,11 +409,15 @@ molto diversi, ed è il residuo la ragione per cui questa casella esiste.
 Quello che ne esce è il jazz che ci si aspetta, e nessuno gliel'ha imposto:
 
 - **il ride fa lo *spang-a-lang*.** Colpisce i quattro movimenti in parti quasi
-  uguali (13,4 · 15,1 · 15,0 · 13,5%), e il levare lo aggiunge **dopo il 2 e
-  dopo il 4** (12,3 e 10,7%) e quasi mai dopo l'1 e il 3 (3,4 e 3,0%). E
-  **accenta il 2 e il 4 di 15-16 punti** di velocity — v86 e v88 contro v71 e
+  uguali (13,8 · 15,3 · 15,2 · 13,6%), e il levare lo aggiunge **dopo il 2 e
+  dopo il 4** (11,8 e 10,5%) e quasi mai dopo l'1 e il 3 (3,4 e 3,0%). E
+  **accenta il 2 e il 4 di 16 punti** di velocity — v86 e v88 contro v70 e
   v72 `[MIS]`. Se un pattern di ride jazz va scritto a mano, questa riga è la
-  risposta;
+  risposta. ⚠️ **Rimisurata il 26 agosto 2026, e il ride si muove appena**,
+  com'era previsto: fino a quel giorno i quattro movimenti erano **13,4 ·
+  15,1 · 15,0 · 13,5%**, il levare dopo il 2 e il 4 **12,3 e 10,7%**, e la
+  velocity dell'1 **v71**. Il levare dopo l'1 e il 3 e le due velocity
+  accentate non si sono mosse di un decimo;
 - **il charleston a pedale è il 2 e il 4, e quasi nient'altro:** **50,0%** dei
   suoi colpi (26,1 + 23,9) cade lì, con la velocity più alta dei quattro
   movimenti (68 e 71 contro 48 e 46 sull'1 e sul 3). È anche la **verifica che
@@ -435,12 +439,20 @@ Quello che ne esce è il jazz che ci si aspetta, e nessuno gliel'ha imposto:
 - **il rullante non ha un posto: ha due livelli.** È l'unico strumento sparso
   su tutti e sedici i passi — **oltre un terzo dei suoi colpi sta sulle
   semicrome** — e a separarlo non è la posizione ma la velocity: passi pari
-  47-72, passi dispari 41-54. È la definizione operativa di fantasma;
-- **la cassa sta sull'1 e sul 3** (17,2 e 12,6%, contro 9,4 e 10,2 sul 2 e sul
-  4) e anche dove batte di più sta **piano**: v65 e v62 su 127, cioè dentro la
+  **47-83**, passi dispari **42-53**. È la definizione operativa di fantasma.
+  ⚠️ **Le due fasce sono del 26 agosto 2026**: erano **47-72** e **41-54**. La
+  fascia pari si allarga in alto **per un passo solo**, il primo della battuta
+  (v83); tolto quello, gli altri sette stanno fra 47 e 63, cioè dove stavano.
+  I due livelli restano separati — mediane **58,5 contro 45,5** — che è quel
+  che la riga afferma;
+- **la cassa sta sull'1 e sul 3** (17,2 e 12,0%, contro 9,4 e 10,4 sul 2 e sul
+  4) e anche dove batte di più sta **piano**: v65 e v59 su 127, cioè dentro la
   fascia che il comune chiama «riempimento». Non è il colpo che definisce la
   battuta — è il contrario di quello che fa in un repertorio a cassa in
-  quattro.
+  quattro. ⚠️ **Anche questi numeri sono del 26 agosto 2026**: erano **17,2 e
+  12,6%** contro **9,4 e 10,2%**, con **v65 e v62**. Il disegno non si è
+  mosso — la cassa sta sull'1 e sul 3 in tutt'e due le versioni — ma il
+  margine del 3 sul 4 si è assottigliato, da 2,4 a **1,6 punti**.
 
 ### Il microtiming che resta, e perché è poco
 
@@ -1249,6 +1261,7 @@ Il valore che `S.set_swing()` scrive è quindi **intatto** — 1,48 su 41
 esecuzioni, levare 59,7%, identico nei tre modi — e **l'A/B dello swing già
 ascoltato sta in piedi così com'è.** La coppia costruita sotto il vecchio
 default è `GROOVE0`/`GROOVE1`, non `SWINGA`/`SWINGB`.
+
 | ascolto | la grandezza, **in tick** | a 100 BPM | esito |
 |---|---|---|---|
 | il giro intero, `GROOVE0` poi `GROOVE1` | tutto insieme | — | *«sento e vedo variazioni di velocity tra le note e variazione di timing delle note (dove cadono)»* |

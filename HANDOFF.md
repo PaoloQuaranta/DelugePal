@@ -1493,13 +1493,29 @@ Cosa regge e cosa no, detto stretto:
   anticipato di tutti, e il divario contro il ride è più grande di prima;
 - **si indebolisce** il rifiuto della latenza fissa, da «~4 sigma su tutte e
   tre le coppie» a 4,2 / 2,7 / 2,4 sigma: l'ipotesi del pedale è ora stretta da
-  **una** coppia su tre, non da due;
+  **una** coppia su tre, non da due. ⚠️ **E il 26 agosto 2026, col cambio di
+  stimatore, quei tre sigma sono diventati 3,8 / 2,8 / 1,0** — ma non tutti
+  nello stesso verso: il rullante cala da 4,2 a 3,8, il ride sale appena da 2,7
+  a 2,8, e la **cassa crolla da 2,4 a 1,0, cioè non porta più nessun rifiuto**
+  (la sua pendenza cade a un sigma da tutt'e due le previsioni). Chi cita da qui
+  «rifiutata su tutte e tre a ≥ 2,4 sigma» cita un numero superato. L'ipotesi
+  del pedale resta stretta da una coppia su tre; i valori validi stanno nella
+  casella 6 di `docs/repertori/jazz.md`, «Cosa esclude il test del tempo»;
 - **cambiano segno due coppie**, e una era già scritta: il rullante non sta più
   dietro alla cassa nemmeno come segno;
 - **non cambia niente** di BUR, scala di velocity, fill, massimo spostamento
   (+11,80 tick) ed escursione (22,83) — verificato eseguendo il tool col codice
   vecchio e col nuovo. Quindi il valore di `set_swing()` non si muove e
-  **l'A/B già ascoltato dall'utente non va riletto.**
+  **l'A/B già ascoltato dall'utente non va riletto.** ⚠️ **Gli ultimi due si
+  sono poi mossi il 26 agosto 2026**, per un'altra ragione — il cambio di
+  stimatore — e in due versi opposti: il massimo spostamento singolo va a
+  **−19,11 tick**, cambiando anche segno, e l'escursione su tutti i passi sale
+  a **27,36**, mentre quella sui soli passi con abbastanza colpi **scende**.
+  Vedi la casella 6, «Due grandezze diverse». Che il 24-25 agosto non si
+  fossero mossi resta vero, ed è quello che questa riga afferma; e il resto
+  della riga — BUR, scala di velocity, fill, e quindi `set_swing()` e l'A/B
+  dello swing — **regge anche oggi**, per la ragione scritta più sotto in
+  «Cosa NON rifare».
 
 ⚠️ **Non l'ha trovato un test, e nemmeno una revisione: l'ha trovato una
 domanda dell'utente su un'altra cosa.** Aveva chiesto una prova A/B
