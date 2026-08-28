@@ -142,8 +142,20 @@ def _media_versori(scarti, passo: float) -> float:
     il taglio `'voce'` deve evitare (vedi il docstring di
     `_media_circolare()` per il perche').
 
+    ⚠️ NEMMENO L'AVVOLGIMENTO ENTRA QUI, e sembrerebbe la cosa piu' ovvia
+    da accentrare: le due chiamanti hanno lo stesso ciclo di tre righe che
+    riporta lo scarto dentro `(-passo/2, +passo/2]`. Non si puo', perche'
+    `origine()` FILTRA SUL VALORE AVVOLTO (`abs(scarto) < finestra *
+    passo`) prima di mediare: le serve avvolto e da guardare, non avvolto
+    e gia' dentro la media. Spostando l'avvolgimento qui, il filtro di
+    `origine()` resterebbe fuori a guardare valori non avvolti, e un
+    anticipo di 1 tick su 24 gli si presenterebbe come 23.
+
     Ritorna 0.0 se la lista e' vuota, o se le fasi sono cosi' sparse che
     il versore medio ha modulo trascurabile (nessuna fase comune).
+
+    L'uscita sta in `(-passo/2, +passo/2]`: e' l'immagine di `atan2()`,
+    che vive in `(-pi, pi]`, riscalata sul passo.
     """
     if not scarti:
         return 0.0
@@ -303,6 +315,15 @@ def _media_circolare(posizioni, passo: float) -> float:
     far ereditare a `'voce'` la finestra di `origine()`, cioe' esattamente
     la delegazione che questa funzione esiste per evitare.
 
+    L'USCITA STA IN `(-passo/2, +passo/2]`, come quella di `origine()` e
+    per la stessa ragione: e' l'immagine di `atan2()` riscalata sul passo.
+    ⚠️ NON e' un dettaglio: e' meta' della dimostrazione del limite che
+    `Passo.scarto` dichiara. Il passo si sceglie con `round((dritta - sp) /
+    passo_tick)`, quindi `|dritta - sp - passo * passo_tick| <= passo/2`;
+    sommandoci `|sp| <= passo/2` si ottiene `|scarto| <= passo_tick`, cioe'
+    UN passo intero e non di piu'. L'altra meta' e' il `centro` di
+    `_vuoto_piu_largo()`, che sta in `[0, passo)`.
+
     IL LIMITE, DICHIARATO: la media circolare di una voce sparsa e' un
     numero debole. Sul charleston di quell'esecuzione la concentrazione
     vale R = 0,16. E' il sospetto che la prova di traslazione per voce
@@ -321,7 +342,14 @@ def _media_circolare(posizioni, passo: float) -> float:
 def _vuoto_piu_largo(posizioni, passo: float) -> tuple[float, float, float]:
     """L'arco di fase piu' VUOTO di una voce: (centro, larghezza, buco medio).
 
-    Il centro sta in [0, passo). La larghezza e' il buco piu' grande fra due
+    Il centro sta in [0, passo) -- e' un `% passo` esplicito, l'ultima cosa
+    che questa funzione fa. ⚠️ Da li' viene meta' della dimostrazione del
+    limite che `Passo.scarto` dichiara: il ramo `'rado'` ritorna `centro -
+    passo/2`, quindi lo spostamento sta in `[-passo/2, +passo/2)` e il
+    residuo non puo' superare UN passo intero (il conto per esteso e' nel
+    docstring di `_media_circolare()`, che ha lo stesso limite per `'voce'`).
+
+    La larghezza e' il buco piu' grande fra due
     colpi consecutivi, CIRCOLARMENTE. Il buco medio e' `passo / n`, cioe'
     quanto varrebbe ogni buco se i colpi fossero sparsi in modo piatto: non
     serve a decidere niente qui, serve a `misura_groove.py` per dire se quel
@@ -351,8 +379,8 @@ def _vuoto_piu_largo(posizioni, passo: float) -> tuple[float, float, float]:
     return (fasi[i] + buchi[i] / 2) % passo, buchi[i], passo / len(fasi)
 
 
-def spostamento_del_taglio(dritte, passo_tick: float,
-                           modo: str = 'vicino') -> float:
+def spostamento_del_taglio(dritte: list[float], passo_tick: float,
+                           taglio: str) -> float:
     """Di quanto spostare il TAGLIO fra due passi, per questa voce, in tick.
 
     Il passo si sceglie poi con `round((dritta - spostamento) / passo_tick)`:
@@ -362,20 +390,36 @@ def spostamento_del_taglio(dritte, passo_tick: float,
 
     `'vicino'` e' l'assenza di spostamento, cioe' il `round()` di sempre:
     taglia a meta' fra due passi. E' il termine di paragone.
+
+    ⚠️ `taglio` NON HA UN DEFAULT, ed e' voluto dal 28 agosto 2026. Fino a
+    quel giorno valeva `modo: str = 'vicino'`, mentre `profilo_da_colpi()` e
+    `profilo()` erano gia' passati a `'voce'`: questa era l'ultima firma del
+    modulo a dichiarare il default vecchio, sotto un nome di parametro
+    diverso per giunta. `GR.spostamento_del_taglio(dritte, 24.0)` ritornava
+    quindi `0.0` e sembrava il comportamento del modulo, mentre era il
+    contrario. Chi vuole il taglio in vigore chiami `profilo()`, che il suo
+    default ce l'ha; qui il modo si nomina, sempre. Tutte le chiamate,
+    interne e nei test, lo passavano gia' esplicitamente.
     """
-    if modo not in TAGLI:
-        raise ValueError(f'taglio {modo!r} sconosciuto: ci sono {list(TAGLI)}')
-    if modo == 'vicino':
+    if taglio not in TAGLI:
+        raise ValueError(f'taglio {taglio!r} sconosciuto: ci sono {list(TAGLI)}')
+    if taglio == 'vicino':
         return 0.0
-    if modo == 'voce':
+    if taglio == 'voce':
         return _media_circolare(dritte, passo_tick)
-    if modo == 'rado':
+    if taglio == 'rado':
         centro, largo, _ = _vuoto_piu_largo(dritte, passo_tick)
         if largo <= 0:
             return 0.0                  # nessun colpo: niente da spostare
         # il taglio di `round()` cade a meta' fra due passi: portarlo sul
         # centro del vuoto vuol dire spostarlo di (centro - mezzo passo).
         return centro - passo_tick / 2
+    # ⚠️ IRRAGGIUNGIBILE OGGI, e va tenuta lo stesso: `TAGLI` e' una tupla
+    # fatta per crescere, e il controllo in testa fa passare qualunque nome
+    # ci si aggiunga. Senza questa riga la funzione cadrebbe in fondo e
+    # ritornerebbe None in silenzio; il chiamante fallirebbe piu' in la',
+    # sull'aritmetica, con un messaggio che non nomina il taglio.
+    raise ValueError(f'taglio {taglio!r} e in TAGLI ma non ha un ramo qui')
 
 
 class Passo(NamedTuple):
