@@ -127,6 +127,9 @@ from delugexml.writer import FormatTable
   note sono giuste, il *collegamento* fra un accordo e il successivo no —
   i voicing alternati A/B del ii-V-I sono un passo successivo, non
   implementato. `racconta_armonia()` lo dichiara ogni volta.
+
+| per | usare |
+|---|---|
 | nuova traccia da preset | `C.add_track(doc, preset, name=…, folder=…, playing=True)` — ⚠️ **`playing` vale `False` di default**: senza, la clip esce con `isPlaying="0"` e sul dispositivo **premere play non fa partire niente**. Il file passa ogni controllo ed è inservibile: è costato un blocco del Deluge il 17 agosto 2026. Ora lo segnala `avvertenze()` |
 | **scrivere note** | `MU.scrivi(doc, clip, note, dove=…)` — **una sola chiamata per kit e synth.** Non dichiarare il tipo di clip: lo deduce, e la forma delle note fa il resto. Un **dict** (da `MU.melodia()` o `MU.accordi()`) diventa una riga per altezza, solo su synth. Una **lista** (da `MU.passi()`) va su una riga sola e vuole `dove=`: il **nome del drum** su un kit, l'**altezza** su un synth. Su synth chiama da sé `fit_clip_scroll_to_notes()`, quindi le note non restano invisibili |
 | **togliere qualcosa** | `MU.togli(doc, bersaglio, quando=…)` — riconosce da sé il bersaglio: **strumento** (via lui e le sue clip), **clip** (via lei, e rinumera i `clipCode`), **noteRow di kit** (la svuota, perché una riga per drum deve esserci sempre), **noteRow di synth** (la toglie). `quando=(da, a)` in tick su uno strumento toglie **solo le istanze d'arranger in quel tratto** e lascia stare tutto il resto: è la differenza fra *«togli il basso»* e *«leva il basso nella seconda metà»* |
@@ -358,7 +361,7 @@ materiale già letto.
 | vedere cosa c'è | `GR.racconta(base, id)` → una riga: batterista, stile, BPM, `beat`/`fill`, metro, durata |
 | **la scala di velocity** | `GR.scala(base, style='jazz')` → strumento → `Livelli(strumento, mediana, q1, q3, minimo, massimo, colpi, esecuzioni, batteristi)`. Il default `beat_type='beat'` è voluto: i `fill` sono un altro animale e si chiedono a parte |
 | **il groove template** | `GR.profilo(base, id)` → `Profilo(id, drummer, style, bpm, bur, battute, passi)`, con `passi[strumento] = [Passo(passo, velocity, scarto, colpi)]`. `scarto` è in **tick Deluge** e **positivo vuol dire DOPO la griglia**. La voce si sceglie da `colpi` e dalla posizione, **mai dal nome GM**, che non è il ruolo musicale |
-| **posarlo su un pattern** | `MU.applica_groove(note, prof, dove=…)` — sta in `musica` e non qui: `GR` legge e non scrive mai. **Muta la lista**, e i passi senza appoggio li riferisce invece di inventarli |
+| **posarlo su un pattern** | `MU.applica_groove(note, prof, dove=…)` — sta in `musica` e non qui: `GR` legge e non scrive mai. **Muta la lista**, e i passi senza appoggio li riferisce invece di inventarli. ⚠️ Uno scarto può valere **quasi un passo intero**, cioè posare una nota nel territorio del passo accanto: succede sulle voci rade, dove lo stimatore per passo determina male il confine. Vedi `docs/repertori/jazz.md`, casella 6, «Il limite che resta: l'ancoraggio» |
 | quanto è swingato | `GR.bur_da_posizioni(posizioni, ppq)` → la BUR mediana, `None` se non ci sono coppie di crome. I numeri già misurati stanno in `docs/repertori/jazz.md`, casella 4 |
 
 ⚠️ **Si filtra per PREFISSO, mai per sottostringa.** È la regola di

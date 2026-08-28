@@ -1493,13 +1493,29 @@ Cosa regge e cosa no, detto stretto:
   anticipato di tutti, e il divario contro il ride è più grande di prima;
 - **si indebolisce** il rifiuto della latenza fissa, da «~4 sigma su tutte e
   tre le coppie» a 4,2 / 2,7 / 2,4 sigma: l'ipotesi del pedale è ora stretta da
-  **una** coppia su tre, non da due;
+  **una** coppia su tre, non da due. ⚠️ **E il 26 agosto 2026, col cambio di
+  stimatore, quei tre sigma sono diventati 3,8 / 2,8 / 1,0** — ma non tutti
+  nello stesso verso: il rullante cala da 4,2 a 3,8, il ride sale appena da 2,7
+  a 2,8, e la **cassa crolla da 2,4 a 1,0, cioè non porta più nessun rifiuto**
+  (la sua pendenza cade a un sigma da tutt'e due le previsioni). Chi cita da qui
+  «rifiutata su tutte e tre a ≥ 2,4 sigma» cita un numero superato. L'ipotesi
+  del pedale resta stretta da una coppia su tre; i valori validi stanno nella
+  casella 6 di `docs/repertori/jazz.md`, «Cosa esclude il test del tempo»;
 - **cambiano segno due coppie**, e una era già scritta: il rullante non sta più
   dietro alla cassa nemmeno come segno;
 - **non cambia niente** di BUR, scala di velocity, fill, massimo spostamento
   (+11,80 tick) ed escursione (22,83) — verificato eseguendo il tool col codice
   vecchio e col nuovo. Quindi il valore di `set_swing()` non si muove e
-  **l'A/B già ascoltato dall'utente non va riletto.**
+  **l'A/B già ascoltato dall'utente non va riletto.** ⚠️ **Gli ultimi due si
+  sono poi mossi il 26 agosto 2026**, per un'altra ragione — il cambio di
+  stimatore — e in due versi opposti: il massimo spostamento singolo va a
+  **−19,11 tick**, cambiando anche segno, e l'escursione su tutti i passi sale
+  a **27,36**, mentre quella sui soli passi con abbastanza colpi **scende**.
+  Vedi la casella 6, «Due grandezze diverse». Che il 24-25 agosto non si
+  fossero mossi resta vero, ed è quello che questa riga afferma; e il resto
+  della riga — BUR, scala di velocity, fill, e quindi `set_swing()` e l'A/B
+  dello swing — **regge anche oggi**, per la ragione scritta più sotto in
+  «Cosa NON rifare».
 
 ⚠️ **Non l'ha trovato un test, e nemmeno una revisione: l'ha trovato una
 domanda dell'utente su un'altra cosa.** Aveva chiesto una prova A/B
@@ -1625,25 +1641,60 @@ sotto «Cosa NON rifare», dove la legge chi genera file.
 
 ### Cosa resta aperto, e cosa NON rifare
 
-Punti aperti che questo lavoro lascia. I due di macchina — il limite dello
-stimatore e cosa faccia il firmware fra le crome — sono anche in §7, insieme
-alla soglia percettiva che gli ascolti non hanno stabilito:
+Punti aperti che questo lavoro lascia. I due di macchina — l'ancoraggio, che
+il 26 agosto 2026 è subentrato al limite dello stimatore, e cosa faccia il
+firmware fra le crome — sono anche in §7, insieme alla soglia percettiva che
+gli ascolti non hanno stabilito:
 
 - **la stratificazione misurata non è mai stata messa davanti a un orecchio.**
-  I 13,5 ms di divario ride/charleston sono la parte **ben misurata**, e
-  l'ascolto è stato fatto su `drummer1/session3/2`, che di stratificazione ne
-  ha **−0,25 tick**: su quel file non c'era, quindi l'ascolto non poteva né
-  confermarla né smentirla. La coppia da fare è su **`drummer10/session1/1`**
-  (`jazz/swing`, 124 BPM, 164 s, BUR 1,82), dove sui passi 4 e 12 il divario è
-  di **5,64 e 5,93 tick** e il ride **è** davvero `ride`;
-- **il limite dello stimatore, che la correzione ha smesso di nascondere.** Un
-  template è per definizione **per passo**, e un batterista che anticipa di
-  mezza semicroma non ci sta dentro: esce sul passo precedente col segno
-  rovesciato. Su alcune esecuzioni la semicroma *prima* del movimento porta più
-  colpi del movimento stesso — «battere in minoranza». Pesa sul charleston
-  perché mette il 43,7% dei suoi colpi su due soli passi. Chiuderlo vuol dire
-  cambiare **come si aggrega**, ed è una decisione di disegno che la casella 6
-  dichiara e non prende;
+  Il divario ride/charleston è la parte **ben misurata**, e l'ascolto è stato
+  fatto su `drummer1/session3/2`, che di stratificazione ne ha quasi zero:
+  l'ascolto non poteva né confermarla né smentirla. La coppia da fare è su
+  **`drummer10/session1/1`** (`jazz/swing`, 124 BPM, 164 s, BUR 1,82), sui
+  passi 4 e 12, e il ride lì **è** davvero `ride`. ⚠️ **I divari su cui
+  poggiava questa riga sono stati rimisurati il 26 agosto 2026** — erano 5,64
+  e 5,93 tick, e sono proprio le celle che il nuovo stimatore ha spostato: i
+  numeri da usare per costruire la coppia stanno nella casella 6, «Cosa resta
+  aperto», e vanno presi da lì e non da qui;
+- ~~il limite dello stimatore, che la correzione ha smesso di nascondere~~ —
+  **chiuso il 26 agosto 2026**, e la casella 6 lo racconta in «La decisione: il
+  taglio si sposta per voce». `GR.profilo()` non prende più il passo **più
+  vicino**: sposta il **confine** fra due passi sulla **fase media di quella
+  voce**, così il gesto non si spezza più in due celle. Il criterio che ha
+  deciso era fissato **prima** che le misure esistessero — la **linearità
+  sotto traslazione per voce**: traslata una voce di δ tick, la posizione
+  dichiarata deve muoversi di δ. Il vecchio modo la segue per lo 0,808, il
+  nuovo per lo 0,998. Il «battere in minoranza» sul charleston passa da 3
+  esecuzioni su 23 a **0**;
+- ⚠️ **e i due criteri più ovvi erano trappole**, il che è la parte da non
+  perdere. L'**errore di ricostruzione per inversione** premia lo stimatore
+  rotto — spezzare un gesto in due celle stringe entrambe le mediane, quindi
+  l'errore *scende* dove lo stimatore sbaglia di più. E prendere per bersaglio
+  **la tenuta delle conclusioni della casella 6** avrebbe fabbricato la
+  conclusione, che è il difetto della finestra di grazia rifatto uguale. Sta
+  scritto nella docstring di `la_prova_di_traslazione()`, non solo nel piano;
+- **l'ancoraggio: su quale dei due passi mettere un gesto ambiguo.** È il
+  punto aperto che **subentra** a quello chiuso qui sopra, ed è **più
+  piccolo**. Chiuso lo spezzarsi del gesto, resta indeciso *quale* passo debba
+  ospitarlo: per i dati soli «14 tick prima del passo 4» e «10 tick dopo il
+  passo 3» sono la stessa cosa, e il gesto è anzi **più vicino** al passo
+  debole — nessun criterio di distanza può preferire il battere, a
+  distinguerli c'è solo il metro. Misurato il 26 agosto 2026 su 42 esecuzioni
+  e 5 batteristi: **2 celle** col modo scelto, contro 5 con `'rado'` e 0 con
+  `'vicino'` — dove lo zero di `'vicino'` è **impossibile per costruzione**,
+  non una virtù. Non si è scritta una regola perché avrebbe dovuto pesare il
+  metro contro la distanza **senza nessuna misura che dica quanto**, cioè
+  inventare un numero per due celle. Il caso resta **visibile, non
+  silenzioso**, perché **la cella stessa lo dichiara**: porta il gesto quasi
+  intero (14 colpi) mentre il battere accanto è quasi vuoto (1), e ha
+  `|scarto|` oltre mezzo passo, che con `'vicino'` era impossibile per
+  costruzione. Sono `Passo.colpi` e `Passo.scarto`, che `GR.profilo()` già
+  riferisce. ⚠️ **Corretto il 28 agosto 2026:** fino a quel giorno qui c'era
+  scritto che a renderlo visibile fosse `MU.applica_groove()`, «il passo che il
+  profilo non ha finisce in `senza_appoggio`». **Non è vero:**
+  `senza_appoggio` elenca i passi **mancanti**, mentre una cella mal ancorata
+  c'è ed è sbagliata — su entrambe le celle misurate `senza_appoggio` resta
+  vuoto. Vedi `docs/repertori/jazz.md`, «Il limite che resta: l'ancoraggio»;
 - **se il firmware faccia davvero quello che `_senza_swing()` modella.** L'A/B
   assolve il **modello dello swing** — quattro modelli a differenza grossa
   esclusi, l'utente ha risposto *«sufficientemente simili»* — ma non la
@@ -1665,14 +1716,40 @@ alla soglia percettiva che gli ascolti non hanno stabilito:
   che la grazia fosse tolta: rifacendo oggi la catena la riga del pedale esce a
   **−4 tick** invece di −3, e cambiano **altre otto posizioni su 31**. Chi
   rivuole la coppia col codice di oggi **la scriva altrove e la confronti**.
-  `out/SWINGA.XML` e `out/SWINGB.XML` hanno lo stesso rischio e nessuno
-  finora l'aveva scritto;
-- **non citare più il «15 su 15» del residuo lavorato.** È 12 su 15. Il 15 su
-  15 che regge è quello delle **fasi grezze**, che non passa da nessuna catena;
+  ⚠️ **Dal 26 agosto 2026 le ragioni sono due, non una:** `genera_groove.py`
+  chiama `GR.profilo()` **senza passare `taglio`**, quindi segue in silenzio il
+  default del modulo, che è cambiato. Il divieto **non si allenta perché i
+  numeri si sono mossi — è quando si sono mossi che serve.** `out/SWINGA.XML` e
+  `out/SWINGB.XML` hanno lo stesso rischio di sovrascrittura, e nessuno finora
+  l'aveva scritto;
+- ⚠️ **ma l'A/B dello swing NON è toccato dal cambio di default, e la
+  distinzione va tenuta ferma.** `genera_swing.py` non chiama mai
+  `GR.profilo()`: usa `GR.origine()` e `GR.bur_da_posizioni()` sulle posizioni
+  MIDI grezze, e il BUR è calcolato **prima** che un passo venga assegnato,
+  senza mai vedere `taglio` — resta 1,48 su 41 esecuzioni, levare 59,7%,
+  identico nei tre modi. Il valore che `S.set_swing()` scrive è intatto e
+  **l'A/B di `SWINGA`/`SWINGB` sta in piedi**. La coppia costruita sotto il
+  vecchio default è `GROOVE0`/`GROOVE1`;
+- ~~non citare più il «15 su 15» del residuo lavorato: è 12 su 15~~ — **il
+  conteggio è tornato 15 su 15 il 26 agosto 2026**, col cambio di stimatore, e
+  il divieto va letto oggi così: **non citarlo senza la sua storia.** Sono tre
+  versioni — 15 su 15 garantito dal difetto della grazia, 12 su 15 dopo la
+  correzione, 15 su 15 col nuovo stimatore — e il divario mediano sotto è
+  cresciuto a ogni passaggio, **2,59 → 3,21 → 4,60 tick**, cioè non è la
+  vecchia misura che torna. ⚠️ **E l'unanimità *esatta* dipende dal taglio:**
+  con `'rado'` — l'altro candidato, quello che la regola scritta prima
+  selezionava — la stessa grandezza dà **14 su 15 e +4,25 tick** `[MIS]`. La
+  **direzione** no: entrambi i candidati muovono il divario nello stesso verso
+  e quasi della stessa quantità (4,25 e 4,60 contro 3,21). Chi cita il
+  conteggio citi anche questo. La casella 6 porta il conto per intero, compreso
+  perché il criterio non poteva essere piegato per ottenerlo. Il 15 su 15
+  delle **fasi grezze** resta quello che non passa da nessuna catena, e non si
+  è mosso di un decimo in nessuna delle due correzioni;
 - **non convertire in millisecondi i livelli della tabella del residuo.** Dopo
-  `GR.origine()` ogni esecuzione ha uno **zero arbitrario**: «−3,42 tick» non
-  dice *rispetto a che cosa*, e un millisecondo ricavato da lì non ha un
-  referente. Lì i tick servono a una cosa sola, a dire che il residuo è piccolo.
+  `GR.origine()` ogni esecuzione ha uno **zero arbitrario**: il livello del
+  charleston non dice *rispetto a che cosa*, e un millisecondo ricavato da lì
+  non ha un referente. Lì i tick servono a una cosa sola, a dire che il residuo
+  è piccolo.
 
 ---
 
@@ -1796,12 +1873,31 @@ alla soglia percettiva che gli ascolti non hanno stabilito:
   esperimento di psicoacustica. Vale la pena saperlo perché la finestra
   **20-40 ms** che `MUSICA.md` dichiara resta `[WEB]` e non è stata né
   confermata né contraddetta
-- **l'aggregazione per passo del groove template.** Un template è per passo, e
-  un colpo che anticipa il suo passo di più di mezza semicroma esce sul passo
-  **precedente col segno rovesciato**: su alcune esecuzioni la semicroma prima
-  del movimento porta più colpi del movimento stesso. È un limite dello
-  stimatore, non un difetto, e chiuderlo vuol dire cambiare come si aggrega.
-  Dichiarato in `docs/repertori/jazz.md`, «Il bordo fra due passi»
+- ~~l'aggregazione per passo del groove template~~ — **chiusa il 26 agosto
+  2026** (§6-terdecies). `GR.profilo()` non prende più il passo più vicino:
+  sposta il **confine** fra due passi sulla **fase media della voce**, e il
+  gesto smette di spezzarsi fra due celle. Il criterio era fissato prima delle
+  misure — la linearità sotto traslazione per voce, 0,998 contro 0,808 — e il
+  «battere in minoranza» sul charleston passa da 3 esecuzioni su 23 a 0. La
+  decisione, i numeri e il fatto che la regola scritta prima selezionasse
+  l'altro candidato stanno in `docs/repertori/jazz.md`, «La decisione: il
+  taglio si sposta per voce»
+- **l'ancoraggio di un gesto ambiguo fra un passo debole e il battere
+  accanto.** È il punto che subentra a quello qui sopra, ed è **più piccolo**:
+  chiuso lo spezzarsi del gesto, resta indeciso su **quale** dei due passi
+  metterlo, perché dai dati soli le due letture sono la stessa cosa e il gesto
+  è anzi più vicino al passo debole. A distinguerli c'è solo il metro. Pesa
+  **2 celle su 42 esecuzioni** col modo scelto (contro 5 e 0 con gli altri due,
+  dove lo zero è impossibile per costruzione). Non si è scritta una regola
+  perché avrebbe dovuto pesare il metro contro la distanza senza nessuna
+  misura che dica quanto. Il caso è visibile e non silenzioso perché **la cella
+  lo dichiara da sé**: porta il gesto (14 colpi) mentre il battere accanto è
+  quasi vuoto (1), e ha `|scarto|` oltre mezzo passo — impossibile per
+  costruzione con `'vicino'`. ⚠️ **Corretto il 28 agosto 2026:** qui c'era
+  scritto che a renderlo visibile fosse `senza_appoggio`. Quello elenca i passi
+  che il profilo **non ha**; una cella mal ancorata invece c'è, ed è il suo
+  contenuto a essere spostato. Dichiarato in `docs/repertori/jazz.md`, «Il
+  limite che resta: l'ancoraggio»
 - byte 10 delle note: i valori fra 21 e 127 non spiegati dai 20 gradini di
   probabilità — probabilmente il LATCHING descritto nel manuale
 - perché 24 `<section>` quando il manuale ne descrive 12

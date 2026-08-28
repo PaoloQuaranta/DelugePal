@@ -75,7 +75,7 @@ poi `passo = round((dritta − spostamento) / passo_tick)`.
 |---|---|---|
 | `'vicino'` | `0` | l'attuale `round()`, il termine di paragone |
 | `'voce'` | la media circolare delle fasi della voce sulla griglia dei passi, **su tutti i suoi colpi** | stessa aritmetica di `GR.origine()`, **senza la sua finestra** — vedi sotto |
-| `'rado'` | il punto di fase dove la voce ha meno colpi, meno mezzo passo | «non tagliare attraverso un gesto», con **ripiego dichiarato** a `0` |
+| `'rado'` | il **centro dell'arco vuoto più largo** della voce, meno mezzo passo | «non tagliare attraverso un gesto». Nessun parametro — vedi la correzione sotto |
 
 ⚠️ **`'voce'` NON può chiamare `GR.origine()`, e questa correzione è del 26
 agosto 2026.** Una prima stesura di questa spec diceva «riuso letterale».
@@ -102,12 +102,32 @@ decidere il passo** e non viene sottratto dal residuo riportato: il numero che
 esce resta `dritta − passo·passo_tick`, cioè misurato rispetto alla griglia
 vera. Confondere le due cose toglierebbe il feel invece di collocarlo.
 
-⚠️ **I due parametri di `'rado'` sono aperti, e vanno chiusi con una misura.**
-La larghezza della finestra e la condizione di ripiego non hanno oggi nessuna
-giustificazione: nella sonda del 26 agosto 2026 la larghezza era **4 tick**
-perché bisognava usare qualcosa. Il piano deve fissarle misurando la
-sensibilità del risultato (almeno 2, 3, 4 e 6 tick) e scrivendo quanto il
-risultato si muove, non ereditare il 4.
+⚠️ **CORREZIONE DEL 26 AGOSTO 2026, in attuazione: `'rado'` non ha parametri.**
+Questo paragrafo diceva che `'rado'` ha **due parametri aperti** — la larghezza
+della finestra di densità e la condizione di ripiego — da chiudere con una
+misura di sensibilità. Attuato, quel criterio ha prodotto tre difetti, tutti
+misurati sul corpus e sui casi sintetici:
+
+1. **il taglio si incollava.** Il minimo di densità è un **altopiano** — un
+   arco intero senza colpi — e l'argmin ne prendeva il primo punto della
+   scansione, che sta sempre a fase 0. Traslando la voce di −4, −2, 0, +2, +4
+   tick lo spostamento restava **−12,00 tutte le volte**. Sotto il criterio del
+   §4, `'rado'` sarebbe stato bocciato per un difetto di contabilità invece che
+   per la sua idea: **un fantoccio**;
+2. **il ripiego non poteva scattare.** Il caso «semicrome piene» e la
+   condizione `minimo >= ripiego · medio` si contraddicono: dati esatti sulla
+   griglia collassano tutti su una fase sola, quindi il minimo è 0 comunque;
+3. **la regola che doveva fissare la larghezza non decideva.** Su 118 voci del
+   corpus jazz, «voci che si muovono oltre 1 tick» fa **35 → 25 → 36** per
+   larghezze 2 → 3 → 4: non-monotona, nessun pianoro.
+
+Il criterio corretto — **il centro dell'arco vuoto più largo** — li chiude
+tutti e tre: trasla coi dati (rampa di pendenza 1, misurata), dà spostamento
+**esattamente 0** sulle voci già sulla griglia per costruzione, e **non ha
+nessun parametro da tarare**. Resta una domanda, e la misura il piano: se quel
+vuoto sia sempre un vuoto *vero*, cioè quanto il buco più largo superi il buco
+medio. Se non lo superasse, il centro sarebbe arbitrario — ma è una cosa da
+misurare, non da presumere.
 
 ### 3.1 La conseguenza da accettare, e il limite che si sposta
 

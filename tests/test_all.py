@@ -6124,6 +6124,315 @@ def test_applica_groove():
           str(bordo[0].velocity))
 
 
+def test_groove_taglio_default():
+    """Il default di `profilo_da_colpi()` e' il taglio SCELTO, e nient'altro.
+
+    ⚠️ FINO AL 28 AGOSTO 2026 questa funzione si chiamava
+    `test_groove_taglio_neutro`, ed e' il nome con cui la citano il piano e
+    i rapporti dei Task 1 e 6. Quel nome diceva il vero solo finche' il
+    default era `'vicino'`: allora questo era il CANCELLO DI NEUTRALITA' di
+    tutto il confronto fra stimatori -- la ristrutturazione del ciclo in
+    due passate non doveva muovere un solo numero, se no ogni differenza
+    misurata fra i tagli sarebbe stata inattribuibile: non si sarebbe
+    saputo se l'aveva mossa lo stimatore o il refactoring. Il Task 6 ha
+    spostato il default su `'voce'`, e da allora il confronto e' col taglio
+    SCELTO. Di neutralita' non se ne misura piu': si inchioda il default, e
+    il nome ora lo dice.
+
+    Cosa asserisce, in tre punti: che il default sia `SCELTO`; che un
+    taglio sconosciuto sollevi nominando i tre modi; e che `'vicino'` non
+    sposti il taglio, cioe' che il termine di paragone sia davvero il
+    `round()` di sempre.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    ppq = 96.0
+    # due voci, posizioni scelte a mano: un kick sui battere e un ride sulle
+    # crome swingate. Nessun colpo al bordo: qui non si misura il bordo, si
+    # misura che il refactoring non abbia mosso niente.
+    colpi = {
+        'kick': [(float(b * 384 + m * 96), 100) for b in range(4)
+                 for m in (0, 2)],
+        'ride': [(float(b * 384 + m * 96 + d), 80) for b in range(4)
+                 for m in range(4) for d in (0, 64)],
+    }
+    # scelto il 26 agosto 2026: 'voce' vince su scarto massimo mediano
+    # (1,47 contro 1,97) e ancoraggio (2 celle contro 5) -- vedi Task 6.
+    SCELTO = 'voce'
+    check('il default e il taglio scelto il 26 agosto 2026',
+          GR.profilo_da_colpi(colpi, ppq, id='finto/1')
+          == GR.profilo_da_colpi(colpi, ppq, id='finto/1', taglio=SCELTO),
+          SCELTO)
+
+    check('un taglio sconosciuto e un errore che elenca i modi',
+          _raises(lambda: GR.profilo_da_colpi(colpi, ppq, taglio='pippo'),
+                  ValueError))
+    try:
+        GR.profilo_da_colpi(colpi, ppq, taglio='pippo')
+    except ValueError as e:
+        check('e il messaggio nomina i tre modi',
+              all(m in str(e) for m in GR.TAGLI), str(e))
+
+    check('lo spostamento di "vicino" e zero',
+          GR.spostamento_del_taglio([1.0, 2.0, 3.0], 24.0, 'vicino') == 0.0,
+          str(GR.spostamento_del_taglio([1.0, 2.0, 3.0], 24.0, 'vicino')))
+
+
+def test_groove_taglio_default_sul_corpus():
+    """Lo stesso default, all'ALTRO ingresso e sul dataset vero.
+
+    SALTA se il dataset non c'e', come gli altri test del corpus.
+
+    ⚠️ FINO AL 28 AGOSTO 2026 si chiamava
+    `test_groove_taglio_neutro_sul_corpus`, e il docstring diceva «se la
+    ristrutturazione avesse cambiato qualcosa, e' qui che si vede»: vero
+    quando il default era `'vicino'` e il confronto valeva come cancello di
+    neutralita'. Non lo e' piu'.
+
+    Due cose lo distinguono dal test qui sopra, e non e' una ripetizione.
+    La prima: `profilo()` ha un default TUTTO SUO, scritto nella sua firma,
+    che potrebbe scostarsi da quello di `profilo_da_colpi()` senza che
+    nessun altro test se ne accorga -- ed e' `profilo()` l'ingresso che
+    usano `misura_groove.py` e `genera_groove.py`. La seconda: il caso
+    sintetico non ha colpi al bordo, il corpus ne ha.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    base = ROOT / 'to-read' / 'MIDI' / 'groove-v1.0.0-midionly' / 'groove'
+    if not (base / GR.INVENTARIO).exists():
+        raise FileNotFoundError(str(base / GR.INVENTARIO))
+
+    # scelto il 26 agosto 2026: 'voce' vince su scarto massimo mediano
+    # (1,47 contro 1,97) e ancoraggio (2 celle contro 5) -- vedi Task 6.
+    SCELTO = 'voce'
+    for quale in ('drummer1/session3/2', 'drummer10/session1/1'):
+        check(f'{quale}: il default e il taglio scelto il 26 agosto 2026',
+              GR.profilo(base, quale)
+              == GR.profilo(base, quale, taglio=SCELTO),
+              f'{quale}')
+
+
+def test_groove_taglio_voce():
+    """`'voce'` chiude la spaccatura di un gesto a cavallo del confine.
+
+    Il caso: una voce che anticipa di 14 tick i passi 4 e 12 -- cioe' il 2 e
+    il 4, come il charleston a pedale del jazz -- con dispersione di 3 tick.
+    Anticipare di piu' di mezzo passo (12 tick) e' esattamente il caso che
+    `round()` non sa rappresentare.
+
+    ⚠️ Questo test NON asserisce su QUALE passo il gesto finisca ancorato.
+    L'ancoraggio e' una domanda a se' -- i dati soli non distinguono "14 tick
+    prima del passo 4" da "10 tick dopo il passo 3", e il gesto e' pure piu'
+    VICINO al passo 3 -- e la MISURA il Task 5. Qui si misura una cosa sola:
+    che il gesto smetta di stare in DUE celle con segni opposti.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    ppq = 96.0
+    # 12 battute, il gesto sul passo 4 e sul passo 12, anticipato di 14 tick
+    # con dispersione fissa (non casuale: un test deve dare sempre lo stesso
+    # numero). 96-14 = 82 e 288-14 = 274, piu' gli scarti.
+    posizioni = [float(b * 384 + base + d)
+                 for b in range(12) for base in (82, 274)
+                 for d in (-3, -1, 1, 3)]
+    colpi = {'charleston a pedale': [(p, 90) for p in posizioni]}
+
+    vicino = GR.profilo_da_colpi(colpi, ppq, taglio='vicino')
+    voce = GR.profilo_da_colpi(colpi, ppq, taglio='voce')
+
+    def celle(prof):
+        return {p.passo: p for p in prof.passi['charleston a pedale']
+                if p.colpi >= 10}
+
+    cv, cc = celle(vicino), celle(voce)
+
+    check('con "vicino" il gesto sta in quattro celle (due per battere)',
+          len(cv) == 4, str(sorted(cv)))
+    coppie = [(k, k + 1) for k in (3, 11) if k in cv and k + 1 in cv]
+    check('e sono coppie adiacenti di segno opposto',
+          len(coppie) == 2
+          and all(cv[a].scarto * cv[b].scarto < 0 for a, b in coppie),
+          str({k: round(v.scarto, 2) for k, v in sorted(cv.items())}))
+    check('col BATTERE IN MINORANZA: la semicroma prima porta piu colpi',
+          all(cv[a].colpi > cv[b].colpi for a, b in coppie),
+          str({k: v.colpi for k, v in sorted(cv.items())}))
+
+    check('con "voce" il gesto sta in due celle sole, una per battere',
+          len(cc) == 2, str(sorted(cc)))
+    check('e ognuna porta tutti i colpi del suo gesto',
+          all(v.colpi == 48 for v in cc.values()),
+          str({k: v.colpi for k, v in sorted(cc.items())}))
+
+    # lo spostamento e' quello che ci si aspetta da quelle fasi: le fasi
+    # sono 7, 9, 11 e -11 tick, la cui media circolare vale +10.
+    dritte = [p for p in posizioni]
+    sp = GR.spostamento_del_taglio(dritte, 24.0, 'voce')
+    check('lo spostamento della voce vale +10 tick',
+          abs(sp - 10.0) < 0.01, f'{sp:.3f}')
+
+    # ⚠️ la funzione col cancello sbagliato: GR.origine() ha una finestra
+    # che scarta proprio gli anticipati, e qui darebbe zero.
+    check('GR.origine() su questa voce da un numero DIVERSO, ed e per questo '
+          'che "voce" non la chiama',
+          abs(GR.origine(dritte, 24.0) - sp) > 1.0,
+          f'origine {GR.origine(dritte, 24.0):.3f} contro voce {sp:.3f}')
+
+
+def test_groove_taglio_rado():
+    """`'rado'` taglia nel mezzo del vuoto, e sulle voci piene non taglia.
+
+    Quattro casi, e il quarto e' quello che conta: uno stimatore deve
+    SEGUIRE i dati. I valori attesi sono misurati, non dedotti.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    ppq = 96.0
+    # (a) lo stesso gesto del taglio "voce": anticipo di 14 tick sui passi
+    # 4 e 12, dispersione 3. Le fasi sono 7, 9, 11 e 13; il vuoto piu'
+    # largo va da 13 a 31, largo 18, e il suo centro cade a 22.
+    posizioni = [float(b * 384 + base + d)
+                 for b in range(12) for base in (82, 274)
+                 for d in (-3, -1, 1, 3)]
+    colpi = {'charleston a pedale': [(p, 90) for p in posizioni]}
+    rado = GR.profilo_da_colpi(colpi, ppq, taglio='rado')
+    celle = {p.passo: p for p in rado.passi['charleston a pedale']
+             if p.colpi >= 10}
+    check('con "rado" il gesto sta in due celle sole', len(celle) == 2,
+          str(sorted(celle)))
+    check('e ognuna porta tutti i colpi del suo gesto',
+          all(v.colpi == 48 for v in celle.values()),
+          str({k: v.colpi for k, v in sorted(celle.items())}))
+    sp = GR.spostamento_del_taglio(posizioni, 24.0, 'rado')
+    check('lo spostamento e il centro del vuoto meno mezzo passo: +10',
+          abs(sp - 10.0) < 1e-9, f'{sp:.3f}')
+
+    # (b) una voce di semicrome PIENE, tutte esattamente sulla griglia.
+    # ⚠️ NON e' il caso "densita' piatta": le fasi collassano tutte su
+    # ZERO, cioe' e' il caso piu' CONCENTRATO che esista. Il vuoto piu'
+    # largo e' allora l'intero passo, il suo centro cade a mezzo passo dai
+    # colpi, e lo spostamento esce zero -- che e' giusto, perche' su una
+    # voce gia' sulla griglia non c'e' niente da spostare.
+    piene = [float(b * 384 + k * 24) for b in range(12) for k in range(16)]
+    check('su semicrome sulla griglia "rado" non sposta niente',
+          GR.spostamento_del_taglio(piene, 24.0, 'rado') == 0.0,
+          str(GR.spostamento_del_taglio(piene, 24.0, 'rado')))
+    centro, largo, medio = GR._vuoto_piu_largo(piene, 24.0)
+    check('e il vuoto misurato e un passo intero', abs(largo - 24.0) < 1e-9,
+          f'centro {centro} largo {largo} medio {medio}')
+
+    # (c) le stesse semicrome con un jitter di +-2 tick: il vuoto resta
+    # largo 20 e centrato a 12, quindi ancora nessuno spostamento.
+    sporche = [float(b * 384 + k * 24 + (k % 5) - 2)
+               for b in range(12) for k in range(16)]
+    check('e nemmeno su semicrome con jitter di +-2 tick',
+          GR.spostamento_del_taglio(sporche, 24.0, 'rado') == 0.0,
+          str(GR.spostamento_del_taglio(sporche, 24.0, 'rado')))
+
+    # (d) ⚠️ LA COSA CHE UNO STIMATORE DEVE SAPER FARE: seguire i dati.
+    # Traslando la voce di delta, il taglio si sposta di delta. Avvolge a
+    # +-mezzo passo perche' una fase vive su un cerchio, e l'avvolgimento
+    # NON e' un salto: sposta anche il passo, quindi la posizione
+    # dichiarata resta continua (e' il motivo per cui il Task 4 appaia le
+    # celle per posizione dichiarata e non per numero di passo).
+    for d in (-8, -6, -4, -2, 2, 4, 6, 8):
+        atteso = ((10.0 + d + 12.0) % 24.0) - 12.0
+        ottenuto = GR.spostamento_del_taglio(
+            [p + d for p in posizioni], 24.0, 'rado')
+        check(f'traslando la voce di {d:+d} il taglio si sposta di {d:+d}',
+              abs(ottenuto - atteso) < 1e-9,
+              f'atteso {atteso:+.2f}, ottenuto {ottenuto:+.2f}')
+
+    # (e) il limite del residuo, che si e' allargato: con un taglio
+    # spostato il residuo non sta piu' dentro mezzo passo, ma resta dentro
+    # UN passo.
+    for taglio in GR.TAGLI:
+        p = GR.profilo_da_colpi(colpi, ppq, taglio=taglio)
+        peggio = max(abs(s.scarto) for v in p.passi.values() for s in v)
+        check(f'taglio {taglio!r}: |scarto| <= un passo intero',
+              peggio <= 24.0 + 1e-9, f'{peggio:.3f}')
+
+
+def test_applica_groove_dice_le_collisioni():
+    """Due note su passi adiacenti possono finire sullo stesso tick.
+
+    ⚠️ Diventato possibile il 26 agosto 2026, quando lo scarto ha smesso di
+    stare dentro mezzo passo. Non e' vietato -- il Deluge lo accetta -- ma
+    va DETTO: un'operazione silenziosa non e' correggibile.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    prof = GR.Profilo(
+        id='finto/3', drummer='drummerX', style='jazz', bpm=120, bur=1.6,
+        battute=1,
+        passi={'kick': [GR.Passo(passo=3, velocity=100, scarto=12.0, colpi=20),
+                        GR.Passo(passo=4, velocity=100, scarto=-12.0,
+                                 colpi=20)]})
+    note = MU.passi('...xx...........')
+    r = MU.applica_groove(note, prof, dove='kick')
+    check('le due note finiscono sullo stesso tick',
+          note[0].pos == note[1].pos, f'{note[0].pos} {note[1].pos}')
+    check('e il rapporto lo dice', r['collisioni'] == [note[0].pos],
+          str(r.get('collisioni')))
+
+    # e quando non c'e' collisione, la lista e' vuota: non si allarma a vuoto
+    prof2 = GR.Profilo(
+        id='finto/4', drummer='drummerX', style='jazz', bpm=120, bur=1.6,
+        battute=1,
+        passi={'kick': [GR.Passo(passo=3, velocity=100, scarto=0.0, colpi=20),
+                        GR.Passo(passo=4, velocity=100, scarto=0.0,
+                                 colpi=20)]})
+    r2 = MU.applica_groove(MU.passi('...xx...........'), prof2, dove='kick')
+    check('senza collisioni la lista e vuota', r2['collisioni'] == [],
+          str(r2['collisioni']))
+
+
+def test_groove_congelare_origine_e_levare():
+    """`profilo_da_colpi()` sa accettare origine e levare dall'esterno.
+
+    ⚠️ Serve alla prova di traslazione per voce: traslando UNA voce si
+    muove anche l'origine del KIT, di circa delta per la quota di colpi di
+    quella voce. Chi non la congela misura anche quello.
+    """
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    ppq = 96.0
+    colpi = {
+        'kick': [(float(b * 384 + m * 96), 100) for b in range(8)
+                 for m in (0, 2)],
+        'ride': [(float(b * 384 + m * 96), 80) for b in range(8)
+                 for m in range(4)],
+    }
+    base = GR.profilo_da_colpi(colpi, ppq)
+    check('senza congelare, il BUR resta None su colpi tutti sui battere',
+          base.bur is None, str(base.bur))
+
+    # tutto il kit spostato di +5: l'origine se lo mangia, il profilo non
+    # si muove.
+    spostato = {n: [(p + 5.0, v) for p, v in note] for n, note in colpi.items()}
+    check('una traslazione COMUNE la riassorbe origine()',
+          GR.profilo_da_colpi(spostato, ppq).passi == base.passi)
+
+    # una voce sola spostata di +5: l'origine si muove, ed e' l'artefatto.
+    una = dict(colpi)
+    una['ride'] = [(p + 5.0, v) for p, v in colpi['ride']]
+    libero = GR.profilo_da_colpi(una, ppq)
+    congelato = GR.profilo_da_colpi(una, ppq, origine_fissa=0.0,
+                                    levare_fisso=0.5)
+    k_libero = {p.passo: p.scarto for p in libero.passi['kick']}
+    k_congelato = {p.passo: p.scarto for p in congelato.passi['kick']}
+    check('senza congelare, il kick NON TRASLATO si muove lo stesso',
+          any(abs(k_libero[k]) > 0.01 for k in k_libero),
+          str({k: round(v, 2) for k, v in sorted(k_libero.items())}))
+    check('congelando, il kick non traslato resta fermo',
+          all(abs(v) < 1e-9 for v in k_congelato.values()),
+          str({k: round(v, 2) for k, v in sorted(k_congelato.items())}))
+    check('e il ride traslato si muove di esattamente +5',
+          all(abs(p.scarto - 5.0) < 1e-9
+              for p in congelato.passi['ride']),
+          str([round(p.scarto, 2) for p in congelato.passi['ride']]))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

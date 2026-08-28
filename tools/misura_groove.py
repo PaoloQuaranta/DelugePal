@@ -13,6 +13,7 @@ OGNI SEZIONE STAMPA QUANTE ESECUZIONI E QUANTI BATTERISTI la sostengono. Non
 e' rendicontazione: e' il numero che decide se cio' che si scrive e' [MIS] su
 un repertorio o [OSS] su un esecutore.
 """
+import inspect
 import math
 import statistics
 import sys
@@ -38,6 +39,15 @@ RIDE = {'ride', 'ride 2', 'campana del ride'}
 PEDALE = 'charleston a pedale'
 
 PPQ = float(MI.TICK_PER_MOVIMENTO_DELUGE)
+
+#: Il taglio con cui misurano le sezioni che non ne provano piu' di uno.
+#:
+#: ⚠️ SI LEGGE DALLA FIRMA di `GR.profilo()` invece di ricopiarne il valore.
+#: Il 26 agosto 2026 il default del modulo e' passato da `'vicino'` a
+#: `'voce'`, e i numeri che ne dipendono si sono mossi tutti: una copia a
+#: mano qui avrebbe potuto restare indietro e ETICHETTARE MALE una tabella,
+#: che e' peggio del non etichettarla. Cosi' la stampa segue il modulo.
+TAGLIO = inspect.signature(GR.profilo).parameters['taglio'].default
 
 
 def _colpi(e):
@@ -230,7 +240,15 @@ def il_profilo_aggregato():
     perche' `il_template()` ne ha bisogno e ricostruirlo vorrebbe dire
     rileggere tutti i MIDI una seconda volta.
     """
-    print('\n=== profilo posizionale AGGREGATO (senza funk e fusion) ===')
+    # ⚠️ IL TAGLIO STA NEL TITOLO, dal 28 agosto 2026. Tutto quello che
+    # questa sezione stampa -- le quote per passo, le velocity per passo, la
+    # tabella del residuo, le coppie appaiate -- dipende da QUALE stimatore
+    # ha deciso su che passo contare ogni colpo, e il branch dello stimatore
+    # per passo ha appena dimostrato quanto: il divario ride/charleston
+    # passa da 12 su 15 a 15 su 15 solo cambiando taglio. Un numero letto da
+    # qui senza sapere quale taglio l'ha prodotto non e' un numero.
+    print(f'\n=== profilo posizionale AGGREGATO '
+          f'(senza funk e fusion, taglio={TAGLIO}) ===')
     quota: dict[str, dict[int, list[float]]] = {}
     vel: dict[str, dict[int, list[int]]] = {}
     chi: dict[str, set] = {}
@@ -281,7 +299,8 @@ def il_profilo_aggregato():
                       + ' '.join(celle))
         print()
 
-    print('--- il RESIDUO per strumento, in tick Deluge (96 per movimento) ---')
+    print(f'--- il RESIDUO per strumento, in tick Deluge (96 per movimento), '
+          f'taglio={TAGLIO} ---')
     print('    POSITIVO = dopo la griglia, NEGATIVO = prima. '
           'Origine e swing sono gia stati tolti.')
     for nome, vs in sorted(residuo.items(), key=lambda kv: -len(kv[1])):
@@ -309,7 +328,8 @@ def il_profilo_aggregato():
     # cioe' il confronto che aveva meno probabilita' di mostrare qualcosa.
     # Scegliere la coppia dopo aver visto le mediane e' scegliere il
     # risultato. Qui le coppie le decide il dataset, e si stampano tutte.
-    print('\n--- OGNI coppia di strumenti, DENTRO la stessa esecuzione ---')
+    print(f'\n--- OGNI coppia di strumenti, DENTRO la stessa esecuzione, '
+          f'taglio={TAGLIO} ---')
     per_es = []
     for e in GR.elenco(BASE, style=STILE, beat_type='beat',
                        time_signature='4-4'):
@@ -359,27 +379,63 @@ def il_profilo_aggregato():
     # ride. La differenza fra i due potrebbe quindi essere "chi suona dove" e
     # non "chi trattiene". Si rimisura sui SOLI passi 4 e 12, dove suonano
     # entrambi, e si guarda se regge.
+    # ⚠️ TUTTI E TRE I TAGLI, dal 28 agosto 2026, e la ragione e' che la
+    # scheda difende proprio questo numero davanti a un lettore ostile.
+    # L'unanimita' esatta -- 15 su 15 -- e' CONTINGENTE al taglio scelto:
+    # cambiandolo il conteggio si muove, mentre la DIREZIONE (il charleston
+    # anticipa il ride, il divario cresce rispetto a 'vicino') non si muove.
+    # Le due cose vanno distinte, e per distinguerle bisogna stamparle
+    # entrambe qui, dove il numero nasce, non in una revisione.
     print('\n--- ride contro charleston, sui SOLI passi 4 e 12 ---')
-    for quali, eti in (((4, 12), 'passi 4 e 12'), (tuple(range(16)), 'tutti i passi')):
-        v = []
-        for e, _ in per_es:
-            prof = GR.profilo(BASE, e.id)
-            d = {}
-            for nome in ('ride', PEDALE):
-                sel = [x for x in prof.passi.get(nome, [])
-                       if x.passo in quali and x.colpi >= 10]
-                if sum(x.colpi for x in prof.passi.get(nome, [])) < 40 or not sel:
-                    continue
-                d[nome] = statistics.median(
-                    [x.scarto for x in sel for _ in range(x.colpi)])
-            if len(d) == 2:
-                v.append((d['ride'] - d[PEDALE], e.drummer))
-        if v:
-            print(f'    {eti:16s} n={len(v):3d} '
-                  f'batt={len({dr for _, dr in v})}  ride - charleston '
-                  f'{statistics.median(x for x, _ in v):+5.2f} tick  '
+    print(f'    il taglio in vigore e {TAGLIO}; gli altri due stanno qui '
+          f'come termine di paragone')
+    liberi: dict[str, dict[str, float]] = {t: {} for t in GR.TAGLI}
+    for taglio in GR.TAGLI:
+        profili = {e.id: GR.profilo(BASE, e.id, taglio=taglio)
+                   for e, _ in per_es}
+        for quali, eti, tutti in (((4, 12), 'passi 4 e 12', False),
+                                  (tuple(range(16)), 'tutti i passi', True)):
+            v = []
+            for e, _ in per_es:
+                prof = profili[e.id]
+                d = {}
+                for nome in ('ride', PEDALE):
+                    sel = [x for x in prof.passi.get(nome, [])
+                           if x.passo in quali and x.colpi >= 10]
+                    if (sum(x.colpi for x in prof.passi.get(nome, [])) < 40
+                            or not sel):
+                        continue
+                    d[nome] = statistics.median(
+                        [x.scarto for x in sel for _ in range(x.colpi)])
+                if len(d) == 2:
+                    v.append((d['ride'] - d[PEDALE], e.drummer, e.id))
+            if not v:
+                continue
+            if tutti:
+                liberi[taglio] = {q: x for x, _, q in v}
+            print(f'    taglio={taglio:7s} {eti:16s} n={len(v):3d} '
+                  f'batt={len({dr for _, dr, _ in v})}  ride - charleston '
+                  f'{statistics.median(x for x, _, _ in v):+5.2f} tick  '
                   f'il ride e piu TARDI in '
-                  f'{sum(1 for x, _ in v if x > 0)}/{len(v)}')
+                  f'{sum(1 for x, _, _ in v if x > 0)}/{len(v)}')
+
+    # ⚠️ CHI DISSENTE, NOMINATO. Fra "15 su 15" e "14 su 15" c'e' UNA
+    # esecuzione, e la scheda la cita: va letta da qui, non ricostruita a
+    # mano. Si stampa il suo valore sotto TUTTI e tre i tagli, perche' la
+    # cosa da vedere e' di quanto la STESSA esecuzione si sposta al cambiare
+    # dello stimatore -- e' un caso concreto della colonna «scarto massimo
+    # mediano» della prova di traslazione.
+    ribelli = sorted({q for t in GR.TAGLI
+                      for q, x in liberi[t].items() if x <= 0})
+    print('    le esecuzioni in cui il ride NON arriva piu tardi, sotto '
+          'almeno un taglio, a passi liberi:')
+    if not ribelli:
+        print('      nessuna, sotto nessuno dei tre tagli')
+    for q in ribelli:
+        detta = '  '.join(
+            f'{t} {liberi[t][q]:+6.2f}' if q in liberi[t] else f'{t} --'
+            for t in GR.TAGLI)
+        print(f'      {q:24s} {detta}')
 
     # ⚠️ MESTIERE O LATENZA? E LA FISICA, SCRITTA GIUSTA.
     #
@@ -651,68 +707,147 @@ def il_bordo_del_passo():
 
     Stampa due cose: quante celle stanno al bordo, e -- per le esecuzioni che
     la scheda NOMINA -- i passi del battere con quello che li precede.
+
+    ⚠️ GIRA SUI TRE TAGLI, dal Task 6 del 26 agosto 2026: il default sta per
+    cambiare da `'vicino'` a `'voce'`, e questi sono i numeri che la scheda
+    deve confrontare fra il vecchio e il nuovo -- non solo il nuovo da solo.
     """
     print('\n=== il bordo fra due passi: dove il residuo si rovescia ===')
     print(f'    una cella e "al bordo" se |scarto| >= {BORDO:.0f} tick '
           f'(mezzo passo = {PPQ/8:.0f}) e porta almeno 10 colpi')
-    al_bordo: dict[str, int] = {}
-    spezzate: dict[str, int] = {}
-    quante: dict[str, int] = {}
-    chi: dict[str, set] = {}
+    for taglio in GR.TAGLI:
+        print(f'\n--- taglio={taglio} ---')
+        al_bordo: dict[str, int] = {}
+        spezzate: dict[str, int] = {}
+        quante: dict[str, int] = {}
+        chi: dict[str, set] = {}
+        for e in GR.elenco(BASE, style=STILE, beat_type='beat',
+                           time_signature='4-4'):
+            if e.style in FUORI_DALLO_SWING:
+                continue
+            p = GR.profilo(BASE, e.id, taglio=taglio)
+            for nome, passi in p.passi.items():
+                if sum(s.colpi for s in passi) < 40:
+                    continue
+                quante[nome] = quante.get(nome, 0) + 1
+                chi.setdefault(nome, set()).add(e.drummer)
+                forti = {s.passo: s for s in passi if s.colpi >= 10}
+                if any(abs(s.scarto) >= BORDO for s in forti.values()):
+                    al_bordo[nome] = al_bordo.get(nome, 0) + 1
+                # ⚠️ LA FIRMA DI UN COLPO MUSICALE CONTATO IN DUE POSTI, e il
+                # criterio e' il CONTEGGIO, non lo scarto: se la semicroma
+                # PRIMA del battere porta piu' colpi del battere stesso, e i
+                # due scarti hanno segni opposti, quei colpi non sono un
+                # secondo disegno -- sono lo stesso gesto, la cui dispersione
+                # ha passato il confine. E' anche la condizione che fa
+                # RIBALTARE la mediana pesata sui colpi, perche' la meta'
+                # piu' numerosa decide il segno.
+                # ⚠️ Un criterio precedente guardava lo scarto (<=-6 contro
+                # >=+6) e sbagliava bersaglio: prendeva esecuzioni che non si
+                # ribaltano e mancava quelle che si ribaltano.
+                if any(k in forti and k - 1 in forti
+                       and forti[k - 1].colpi > forti[k].colpi
+                       and forti[k].scarto * forti[k - 1].scarto < 0
+                       for k in (0, 4, 8, 12)):
+                    spezzate[nome] = spezzate.get(nome, 0) + 1
+        for nome in sorted(quante, key=lambda n: -quante[n]):
+            if quante[nome] < 8:
+                continue
+            print(f'    {nome:24s} {quante[nome]:2d} esecuzioni, '
+                  f'{len(chi[nome])} batteristi   con una cella al bordo: '
+                  f'{al_bordo.get(nome, 0):2d}   col BATTERE IN MINORANZA: '
+                  f'{spezzate.get(nome, 0):2d}')
+
+        print('\n    --- i passi del battere, sulle esecuzioni che la '
+              'scheda NOMINA ---')
+        for quale in NOMINATE:
+            p = GR.profilo(BASE, quale, taglio=taglio)
+            print(f'      {quale}  ({p.bpm} BPM, BUR {p.bur:.2f}, '
+                  f'{p.battute} battute)')
+            for nome in ('ride', PEDALE):
+                passi = {s.passo: s for s in p.passi.get(nome, [])}
+                tot = sum(s.colpi for s in passi.values())
+                righe = '  '.join(
+                    f'{k:2d}:{passi[k].scarto:+5.1f}/{passi[k].colpi:3d}'
+                    for k in (3, 4, 11, 12) if k in passi)
+                print(f'        {nome:22s} ({tot:3d} colpi)  {righe}')
+            for a, b in ((4, 4), (12, 12)):
+                r = {s.passo: s for s in p.passi.get('ride', [])}.get(a)
+                c = {s.passo: s for s in p.passi.get(PEDALE, [])}.get(b)
+                if r and c:
+                    print(f'          passo {a}: ride - charleston '
+                          f'{r.scarto - c.scarto:+5.2f} tick')
+
+
+def _dritte_della_voce(e, nome, colpi=None) -> list[float]:
+    """Le posizioni DRITTE di una voce: origine tolta, swing tolto.
+
+    Rifa' la prima passata di `GR.profilo_da_colpi()` per poter interrogare
+    i tagli senza passare da un `Profilo` gia' aggregato. `colpi` si passa
+    quando si interrogano piu' voci della stessa esecuzione, per non
+    rileggere il file MIDI una volta per voce.
+    """
+    c = _colpi(e) if colpi is None else colpi
+    tutte = [p for v in c.values() for p, _ in v]
+    off = GR.origine(tutte, PPQ / 4)
+    bur = GR.bur_da_posizioni([p - off for p in tutte], PPQ)
+    lev = da_bur(bur) if bur is not None else 0.5
+    fuori = []
+    for pos, _ in c.get(nome, []):
+        p = pos - off
+        mov, resto = divmod(p, PPQ)
+        fuori.append((mov + GR._senza_swing(resto / PPQ, lev)) * PPQ)
+    return fuori
+
+
+def il_vuoto_delle_voci():
+    """Quanto e' netto il vuoto su cui `'rado'` mette il taglio.
+
+    ⚠️ PERCHE' ESISTE, e cosa NON fa. `'rado'` non ha parametri: il centro
+    del vuoto piu' largo e' una grandezza geometrica, non una taratura.
+    Resta pero' una domanda che solo il corpus chiude: se il buco piu'
+    largo fosse largo quanto gli altri, il suo centro sarebbe arbitrario e
+    lo spostamento riassegnerebbe i passi in blocco.
+
+    Questa sezione misura il rapporto `largo / medio` -- quanto il buco piu'
+    largo supera quello che ci sarebbe se i colpi fossero sparsi piatti.
+    NON decide niente: se quel rapporto stesse vicino a 1 su molte voci,
+    servirebbe un ripiego, e sarebbe una decisione da prendere, non da
+    inventare qui.
+    """
+    print('\n=== il vuoto su cui "rado" taglia: e un vuoto vero? ===')
+    rapporti, spostamenti = [], []
+    esecuzioni, batteristi = 0, set()
     for e in GR.elenco(BASE, style=STILE, beat_type='beat',
                        time_signature='4-4'):
         if e.style in FUORI_DALLO_SWING:
             continue
-        p = GR.profilo(BASE, e.id)
-        for nome, passi in p.passi.items():
-            if sum(s.colpi for s in passi) < 40:
+        c = _colpi(e)
+        esecuzioni += 1
+        batteristi.add(e.drummer)
+        for nome in sorted(c):
+            dritte = _dritte_della_voce(e, nome, colpi=c)
+            if len(dritte) < 40:
                 continue
-            quante[nome] = quante.get(nome, 0) + 1
-            chi.setdefault(nome, set()).add(e.drummer)
-            forti = {s.passo: s for s in passi if s.colpi >= 10}
-            if any(abs(s.scarto) >= BORDO for s in forti.values()):
-                al_bordo[nome] = al_bordo.get(nome, 0) + 1
-            # ⚠️ LA FIRMA DI UN COLPO MUSICALE CONTATO IN DUE POSTI, e il
-            # criterio e' il CONTEGGIO, non lo scarto: se la semicroma PRIMA
-            # del battere porta piu' colpi del battere stesso, e i due scarti
-            # hanno segni opposti, quei colpi non sono un secondo disegno --
-            # sono lo stesso gesto, la cui dispersione ha passato il confine.
-            # E' anche la condizione che fa RIBALTARE la mediana pesata sui
-            # colpi, perche' la meta' piu' numerosa decide il segno.
-            # ⚠️ Un criterio precedente guardava lo scarto (<=-6 contro
-            # >=+6) e sbagliava bersaglio: prendeva esecuzioni che non si
-            # ribaltano e mancava quelle che si ribaltano.
-            if any(k in forti and k - 1 in forti
-                   and forti[k - 1].colpi > forti[k].colpi
-                   and forti[k].scarto * forti[k - 1].scarto < 0
-                   for k in (0, 4, 8, 12)):
-                spezzate[nome] = spezzate.get(nome, 0) + 1
-    for nome in sorted(quante, key=lambda n: -quante[n]):
-        if quante[nome] < 8:
-            continue
-        print(f'    {nome:24s} {quante[nome]:2d} esecuzioni, '
-              f'{len(chi[nome])} batteristi   con una cella al bordo: '
-              f'{al_bordo.get(nome, 0):2d}   col BATTERE IN MINORANZA: '
-              f'{spezzate.get(nome, 0):2d}')
-
-    print('\n--- i passi del battere, sulle esecuzioni che la scheda NOMINA ---')
-    for quale in NOMINATE:
-        p = GR.profilo(BASE, quale)
-        print(f'  {quale}  ({p.bpm} BPM, BUR {p.bur:.2f}, '
-              f'{p.battute} battute)')
-        for nome in ('ride', PEDALE):
-            passi = {s.passo: s for s in p.passi.get(nome, [])}
-            tot = sum(s.colpi for s in passi.values())
-            righe = '  '.join(
-                f'{k:2d}:{passi[k].scarto:+5.1f}/{passi[k].colpi:3d}'
-                for k in (3, 4, 11, 12) if k in passi)
-            print(f'    {nome:22s} ({tot:3d} colpi)  {righe}')
-        for a, b in ((4, 4), (12, 12)):
-            r = {s.passo: s for s in p.passi.get('ride', [])}.get(a)
-            c = {s.passo: s for s in p.passi.get(PEDALE, [])}.get(b)
-            if r and c:
-                print(f'      passo {a}: ride - charleston '
-                      f'{r.scarto - c.scarto:+5.2f} tick')
+            centro, largo, medio = GR._vuoto_piu_largo(dritte, PPQ / 4)
+            if medio <= 0:
+                continue
+            rapporti.append(largo / medio)
+            spostamenti.append(abs(centro - PPQ / 8))
+    r = sorted(rapporti)
+    q = statistics.quantiles(r, n=4)
+    print(f'    {esecuzioni} esecuzioni, {len(batteristi)} batteristi, '
+          f'{len(r)} voci con almeno 40 colpi')
+    print(f'    largo/medio : min {r[0]:.1f}  q1 {q[0]:.1f}  '
+          f'mediana {statistics.median(r):.1f}  q3 {q[2]:.1f}  '
+          f'max {r[-1]:.1f}')
+    for soglia in (1.5, 2.0, 3.0, 5.0):
+        n = sum(1 for x in r if x < soglia)
+        print(f'    voci col vuoto meno di {soglia:.1f} volte il medio: '
+              f'{n:3d} su {len(r)}  ({100 * n / len(r):.1f}%)')
+    s = sorted(spostamenti)
+    print(f'    |spostamento| : mediana {statistics.median(s):.2f} tick, '
+          f'q3 {s[int(len(s) * 0.75)]:.2f}, massimo {max(s):.2f}')
 
 
 def i_fill():
@@ -760,7 +895,12 @@ def il_template(per_es):
     `per_es` arriva da `il_profilo_aggregato()`: e' lo stesso campione
     appaiato, gia' calcolato.
     """
-    print('\n=== profilo del template ===')
+    # ⚠️ IL TAGLIO STA NEL TITOLO, dal 28 agosto 2026, e qui pesa piu' che
+    # altrove: gli scarti stampati qui sotto sono quelli che
+    # `applica_groove()` scrivera' davvero, e il massimo singolo (-19,11
+    # tick) esiste SOLO perche' un taglio spostato lascia il residuo uscire
+    # da mezzo passo. Con `taglio='vicino'` quel numero e' impossibile.
+    print(f'\n=== profilo del template (taglio={TAGLIO}) ===')
     scelte = GR.elenco(BASE, style='jazz/swing', beat_type='beat',
                        time_signature='4-4')
     for e in sorted(scelte, key=lambda e: -e.duration)[:3]:
@@ -894,13 +1034,188 @@ def il_template(per_es):
     print(f'    colpi esattamente simultanei: {len(set(p43) & set(p51))}')
 
 
+#: Di quanto si trasla una voce sola, in tick, nella prova di linearita'.
+#: Fino a 8 su un passo da 24: oltre un terzo di passo la domanda cambia --
+#: non e' piu' "lo stimatore segue?" ma "quale passo e' quello giusto?".
+DELTA = (-8, -6, -4, -2, 0, 2, 4, 6, 8)
+
+
+def la_prova_di_traslazione():
+    """Uno stimatore e' uno stimatore se la sua risposta SEGUE i dati.
+
+    ⚠️ E' LA MISURA CHE DECIDE il default di `GR.TAGLI`, ed e' scelta il 26
+    agosto 2026 CONTRO due criteri piu' ovvi. L'errore di ricostruzione per
+    inversione premia lo stimatore rotto -- spezzare un gesto in due celle
+    rende ciascuna delle due mediane piu' stretta, quindi l'errore SCENDE. E
+    la tenuta delle conclusioni della casella 6 come bersaglio sarebbe
+    fabbricare la conclusione, che e' il difetto della finestra di grazia.
+
+    ⚠️ ORIGINE E LEVARE SI CONGELANO ai valori di delta = 0: traslando una
+    voce sola si muove anche l'origine del kit, e chi non lo neutralizza
+    misura quell'artefatto e conclude che nessuno stimatore e' lineare.
+
+    ⚠️ LE CELLE SI APPAIANO PER POSIZIONE DICHIARATA, non per numero di
+    passo. E' il punto: uno stimatore che ripiega SPOSTA un gesto da una
+    cella all'altra, quindi `k` cambia mentre il gesto e' lo stesso.
+    Appaiare per `k` confronterebbe due popolazioni diverse sotto la stessa
+    etichetta.
+    """
+    print('\n=== la prova di traslazione per voce: lo stimatore segue? ===')
+    print(f'    delta provati: {DELTA} tick su un passo da {PPQ/4:.0f}')
+    esiti = {t: {'pendenze': [], 'salti': [], 'voci': 0} for t in GR.TAGLI}
+    esecuzioni, batteristi = 0, set()
+    for e in GR.elenco(BASE, style=STILE, beat_type='beat',
+                       time_signature='4-4'):
+        if e.style in FUORI_DALLO_SWING:
+            continue
+        c = _colpi(e)
+        tutte = [p for v in c.values() for p, _ in v]
+        off0 = GR.origine(tutte, PPQ / 4)
+        bur0 = GR.bur_da_posizioni([p - off0 for p in tutte], PPQ)
+        lev0 = da_bur(bur0) if bur0 is not None else 0.5
+        esecuzioni += 1
+        batteristi.add(e.drummer)
+        for nome in sorted(c):
+            if len(c[nome]) < 40:
+                continue
+            for taglio in GR.TAGLI:
+                dichiarate = {}
+                for d in DELTA:
+                    mosso = dict(c)
+                    mosso[nome] = [(p + d, v) for p, v in c[nome]]
+                    p = GR.profilo_da_colpi(
+                        mosso, PPQ, taglio=taglio,
+                        origine_fissa=off0, levare_fisso=lev0)
+                    dichiarate[d] = sorted(
+                        s.passo * PPQ / 4 + s.scarto
+                        for s in p.passi.get(nome, []) if s.colpi >= 10)
+                base = dichiarate[0]
+                if not base:
+                    continue
+                # appaiamento per posizione dichiarata piu' vicina a delta=0
+                mosse = []
+                for d in DELTA:
+                    if d == 0:
+                        continue
+                    scarti = [min(dichiarate[d], key=lambda x: abs(x - b)) - b
+                              for b in base] if dichiarate[d] else []
+                    if scarti:
+                        mosse.append((d, statistics.median(scarti)))
+                if len(mosse) < 2:
+                    continue
+                # ⚠️ SI CONTA QUI, DOPO IL FILTRO, dal 28 agosto 2026.
+                # Prima `voci` cresceva appena sopra, prima di questo
+                # `continue`: la `n` stampata poteva quindi essere piu'
+                # grande di quella su cui poggiano le mediane stampate
+                # accanto -- e quella `n` la scheda la pubblica come [MIS].
+                # Un `n` deve contare esattamente le voci che entrano nei
+                # numeri della sua riga.
+                esiti[taglio]['voci'] += 1
+                # pendenza per minimi quadrati passanti per l'origine
+                num = sum(d * m for d, m in mosse)
+                den = sum(d * d for d, _ in mosse)
+                pend = num / den if den else 0.0
+                esiti[taglio]['pendenze'].append(pend)
+                esiti[taglio]['salti'].append(max(abs(m - d) for d, m in mosse))
+    print(f'    {esecuzioni} esecuzioni, {len(batteristi)} batteristi')
+    print(f'    {"taglio":10s} {"voci":>5s} {"pendenza mediana":>18s} '
+          f'{"scarto max mediano":>20s} {"voci con un salto >= 12 tick":>30s}')
+    for taglio in GR.TAGLI:
+        v = esiti[taglio]
+        if not v['pendenze']:
+            continue
+        print(f'    {taglio:10s} {v["voci"]:5d} '
+              f'{statistics.median(v["pendenze"]):18.3f} '
+              f'{statistics.median(v["salti"]):20.2f} '
+              f'{sum(1 for s in v["salti"] if s >= PPQ / 8):30d}')
+
+
+def l_ancoraggio():
+    """Quante celle finiscono ancorate sul passo DEBOLE accanto a un battere.
+
+    ⚠️ PERCHE' ESISTE. `'voce'` e `'rado'` chiudono la spaccatura di un gesto
+    ma non decidono su QUALE passo ancorarlo: dai dati soli "14 tick prima
+    del passo 4" e "10 tick dopo il passo 3" sono la stessa cosa. Conta
+    perche' `applica_groove()` cerca la cella del passo che il PATTERN
+    chiede: ancorato sul 3, un pattern che chiede il 4 non trova niente.
+
+    Il conteggio: celle forti (>= 10 colpi) su un passo DISPARI adiacente a
+    un battere (0, 4, 8, 12), con scarto positivo oltre mezzo passo -- cioe'
+    celle che dicono "molto in ritardo su un passo debole" dove la lettura
+    musicale sarebbe "in anticipo sul battere".
+
+    ⚠️ IL DETTAGLIO STA QUI, non in uno script a parte. La sezione stampa
+    anche esecuzione, batterista, voce, passo, scarto e colpi di OGNI cella
+    contata: e' l'invariante di questo file (vedi `NOMINATE`, qui sopra) --
+    i numeri per cella escono da questa funzione, non da un conto a mano.
+    """
+    print('\n=== l ancoraggio: celle sul passo debole accanto a un battere ===')
+    conta = {t: {} for t in GR.TAGLI}
+    dettaglio: dict[str, list[tuple[str, str, str, int, float, int]]] = {
+        t: [] for t in GR.TAGLI}
+    esecuzioni, batteristi = 0, set()
+    for e in GR.elenco(BASE, style=STILE, beat_type='beat',
+                       time_signature='4-4'):
+        if e.style in FUORI_DALLO_SWING:
+            continue
+        esecuzioni += 1
+        batteristi.add(e.drummer)
+        for taglio in GR.TAGLI:
+            p = GR.profilo(BASE, e.id, taglio=taglio)
+            for nome, passi in p.passi.items():
+                if sum(s.colpi for s in passi) < 40:
+                    continue
+                for s in passi:
+                    if (s.colpi >= 10 and (s.passo + 1) % 16 in (0, 4, 8, 12)
+                            and s.scarto > PPQ / 8):
+                        conta[taglio][nome] = conta[taglio].get(nome, 0) + 1
+                        dettaglio[taglio].append(
+                            (e.id, e.drummer, nome, s.passo, s.scarto, s.colpi))
+    print(f'    {esecuzioni} esecuzioni, {len(batteristi)} batteristi')
+    for taglio in GR.TAGLI:
+        tot = sum(conta[taglio].values())
+        detta = '  '.join(f'{n}:{k}' for n, k in
+                          sorted(conta[taglio].items(), key=lambda kv: -kv[1]))
+        print(f'    {taglio:10s} celle mal ancorate: {tot:3d}   {detta}')
+
+    # ⚠️ IL DETTAGLIO PER CELLA, non solo il totale. Il totale non dice se
+    # le celle stanno su una voce sola o un batterista solo, e quella e' la
+    # domanda che decide se una regola serve e a chi si applicherebbe.
+    # Tetto stampato esplicitamente, non un troncamento silenzioso: se la
+    # lista crescesse, chi legge deve vedere QUANTE righe mancano.
+    TETTO = 20
+    print('\n    dettaglio per cella '
+          '(esecuzione, batterista, voce, passo, scarto, colpi):')
+    for taglio in GR.TAGLI:
+        righe = dettaglio[taglio]
+        if not righe:
+            continue
+        print(f'    --- {taglio} ---')
+        for e_id, drummer, nome, passo, scarto, colpi in righe[:TETTO]:
+            print(f'      {e_id:24s} {drummer:10s} {nome:22s} '
+                  f'passo {passo:2d}  scarto {scarto:+.2f}  colpi {colpi:3d}')
+        if len(righe) > TETTO:
+            print(f'      ... e altre {len(righe) - TETTO} celle non mostrate '
+                  f'(tetto di stampa {TETTO})')
+
+
 def main() -> None:
+    # ⚠️ PRIMA DI TUTTO, QUALE STIMATORE. Le sezioni che provano piu' di un
+    # taglio lo dicono riga per riga; tutte le altre misurano con questo, e
+    # senza saperlo un numero letto da qui non e' interpretabile -- il ramo
+    # dello stimatore per passo ha mostrato che le stesse esecuzioni danno
+    # 12 su 15 o 15 su 15 a seconda del taglio.
+    print(f'=== il taglio con cui si misura: {TAGLIO} '
+          f'(i tre modi sono {list(GR.TAGLI)}) ===')
     la_delimitazione()
     la_scala()
     lo_swing()
     per_es = il_profilo_aggregato()
     il_difetto_della_grazia()
     il_bordo_del_passo()
+    il_vuoto_delle_voci()
+    la_prova_di_traslazione()
+    l_ancoraggio()
     i_fill()
     il_template(per_es)
 

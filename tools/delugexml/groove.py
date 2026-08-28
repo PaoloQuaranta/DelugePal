@@ -123,6 +123,50 @@ def _una(base: Path | str, id: str) -> Esecuzione:
         f'esempio {esempi} -- vedi elenco() per la lista completa')
 
 
+def _media_versori(scarti, passo: float) -> float:
+    """Il nucleo comune a `origine()` e `_media_circolare()`, in tick.
+
+    Media i VERSORI di una lista di scarti gia' avvolti (dentro
+    `(-passo/2, +passo/2]`), perche' la fase GIRA: la media aritmetica di
+    1 e 23 tick su un passo di 24 darebbe 12, cioe' il contrario di zero.
+
+    NON FILTRA NIENTE: prende la lista che il chiamante ha gia' deciso di
+    includere. `origine()` ci passa solo gli scarti dentro la sua
+    `finestra`; `_media_circolare()` ci passa TUTTI gli scarti, senza
+    finestra. Questa funzione non sa quale delle due situazioni sta
+    vivendo, e non deve saperlo.
+
+    ⚠️ NON aggiungere qui un parametro `finestra` o un filtro. Se lo si
+    facesse, basterebbe una riga in `_media_circolare()` per farle
+    ereditare la finestra di `origine()` -- esattamente la delegazione che
+    il taglio `'voce'` deve evitare (vedi il docstring di
+    `_media_circolare()` per il perche').
+
+    ⚠️ NEMMENO L'AVVOLGIMENTO ENTRA QUI, e sembrerebbe la cosa piu' ovvia
+    da accentrare: le due chiamanti hanno lo stesso ciclo di tre righe che
+    riporta lo scarto dentro `(-passo/2, +passo/2]`. Non si puo', perche'
+    `origine()` FILTRA SUL VALORE AVVOLTO (`abs(scarto) < finestra *
+    passo`) prima di mediare: le serve avvolto e da guardare, non avvolto
+    e gia' dentro la media. Spostando l'avvolgimento qui, il filtro di
+    `origine()` resterebbe fuori a guardare valori non avvolti, e un
+    anticipo di 1 tick su 24 gli si presenterebbe come 23.
+
+    Ritorna 0.0 se la lista e' vuota, o se le fasi sono cosi' sparse che
+    il versore medio ha modulo trascurabile (nessuna fase comune).
+
+    L'uscita sta in `(-passo/2, +passo/2]`: e' l'immagine di `atan2()`,
+    che vive in `(-pi, pi]`, riscalata sul passo.
+    """
+    if not scarti:
+        return 0.0
+    fasi = [s / passo * 2 * math.pi for s in scarti]
+    x = sum(math.cos(a) for a in fasi) / len(fasi)
+    y = sum(math.sin(a) for a in fasi) / len(fasi)
+    if abs(x) < 1e-12 and abs(y) < 1e-12:
+        return 0.0                      # fasi sparse: nessuna fase comune
+    return math.atan2(y, x) / (2 * math.pi) * passo
+
+
 def origine(posizioni, passo: float, *, finestra: float = 0.25) -> float:
     """Lo scarto comune di tutti gli onset dalla griglia, in tick, CON SEGNO.
 
@@ -143,6 +187,14 @@ def origine(posizioni, passo: float, *, finestra: float = 0.25) -> float:
     misurato vale circa un tick su ventiquattro, quindi la finestra sta larga
     dieci volte il necessario -- ma se un giorno un corpus diverso desse
     origine zero su dati palesemente storti, e' il primo posto da guardare.
+
+    LA SORELLA: `_media_circolare()` usa lo stesso nucleo aritmetico
+    (`_media_versori()`, condiviso) ma SENZA la finestra, e serve al
+    taglio `'voce'`. Le due non si possono sostituire l'una all'altra:
+    QUESTA funzione filtra i colpi lontani dalla griglia e stima lo scarto
+    comune del KIT prima che lo swing sia tolto; l'altra non filtra niente
+    e stima la fase di UNA VOCE dopo. Condividere l'aritmetica non cambia
+    questo: il filtro resta qui, non li'.
 
     PERCHE' ESISTE. Misurato su `drummer1/session3/2_jazz-swing_185_beat_4-4`:
     ride, kick, rullante e charleston hanno TUTTI il picco a 0,958 del
@@ -167,14 +219,7 @@ def origine(posizioni, passo: float, *, finestra: float = 0.25) -> float:
         # groove template) si appoggiano a questa soglia.
         if abs(scarto) < finestra * passo:
             vicini.append(scarto)
-    if not vicini:
-        return 0.0
-    fasi = [s / passo * 2 * math.pi for s in vicini]
-    x = sum(math.cos(a) for a in fasi) / len(fasi)
-    y = sum(math.sin(a) for a in fasi) / len(fasi)
-    if abs(x) < 1e-12 and abs(y) < 1e-12:
-        return 0.0                      # fasi sparse: nessuna origine comune
-    return math.atan2(y, x) / (2 * math.pi) * passo
+    return _media_versori(vicini, passo)
 
 
 def racconta(base: Path | str, id: str) -> str:
@@ -235,6 +280,151 @@ def bur_da_posizioni(posizioni, ppq: float, *,
     return in_bur(statistics.median(lev))
 
 
+#: I modi di taglio: come si sceglie il passo su cui un colpo va contato.
+#: Il default e' `'voce'` dal 26 agosto 2026 -- la scelta e le ragioni sono
+#: nello Step 3 di `.superpowers/sdd/2026-08-26-stimatore-per-passo/
+#: task-6-brief.md`: la misura chiude che `'vicino'` non e' uno stimatore
+#: (pendenza 0,808 contro 0,998), ma NON chiude fra `'voce'` e `'rado'` --
+#: la regola scritta prima selezionava `'rado'`, e la decisione fra i due
+#: l'ha presa il proprietario, per iscritto, contro quella regola.
+TAGLI = ('vicino', 'voce', 'rado')
+
+
+def _media_circolare(posizioni, passo: float) -> float:
+    """La fase media della voce dentro il passo, in tick, CON SEGNO.
+
+    Stesso nucleo aritmetico di `origine()` -- condividono
+    `_media_versori()`, che media i versori perche' la fase GIRA e la
+    media aritmetica di 1 e 23 darebbe 12, cioe' il contrario di zero --
+    ma SENZA la sua finestra, ed e' una differenza che va capita prima di
+    "semplificare" chiamando `origine()`.
+
+    ⚠️ PERCHE' SENZA FINESTRA. `origine()` tiene solo i colpi dentro
+    0,25 passo per non far sporcare lo scarto comune del kit dai LEVARE
+    SWINGATI, che stanno a 8 tick su 24 dalla griglia dei passi. Qui lo
+    swing lo ha gia' tolto `_senza_swing()`, e un levare swingato e' ormai
+    SU un passo: la ragione della finestra non si trasporta. Se la si
+    tenesse, sul charleston a pedale di `drummer10/session1/1` questa
+    funzione vedrebbe 58 colpi su 143 -- scartando proprio gli anticipati,
+    che sono il fenomeno -- e darebbe -0,40 tick invece di -8,80 `[OSS]`,
+    cioe' non sposterebbe nessun passo.
+
+    ⚠️ Il nucleo condiviso, `_media_versori()`, non prende un parametro
+    `finestra` apposta: questa funzione gli passa TUTTI gli scarti, senza
+    filtrarli, e il filtro NON va aggiunto qui ne' li'. Farlo basterebbe a
+    far ereditare a `'voce'` la finestra di `origine()`, cioe' esattamente
+    la delegazione che questa funzione esiste per evitare.
+
+    L'USCITA STA IN `(-passo/2, +passo/2]`, come quella di `origine()` e
+    per la stessa ragione: e' l'immagine di `atan2()` riscalata sul passo.
+    ⚠️ NON e' un dettaglio: e' meta' della dimostrazione del limite che
+    `Passo.scarto` dichiara. Il passo si sceglie con
+    `k = round((dritta - sp) / passo_tick)`, quindi per definizione di
+    `round()` vale `|dritta - sp - k * passo_tick| <= passo_tick / 2`. Il
+    residuo che si riporta e' pero' `dritta - k * passo_tick`, cioe' quella
+    quantita' PIU' `sp`: sommando `|sp| <= passo_tick / 2` si ottiene
+    `|scarto| <= passo_tick`, cioe' un passo intero e non di piu'. L'altra
+    meta' e' il `centro` di `_vuoto_piu_largo()`, che sta in `[0, passo)` e
+    da' lo stesso limite al ramo `'rado'`.
+
+    IL LIMITE, DICHIARATO: la media circolare di una voce sparsa e' un
+    numero debole. Sul charleston di quell'esecuzione la concentrazione
+    vale R = 0,16. E' il sospetto che la prova di traslazione per voce
+    (`tools/misura_groove.py`, `la_prova_di_traslazione()`) deve mettere
+    alla prova, e la ragione per cui i candidati sono due.
+    """
+    scarti = []
+    for p in posizioni:
+        s = p % passo
+        if s > passo / 2:
+            s -= passo                  # la fase gira: 23 su 24 e' -1
+        scarti.append(s)
+    return _media_versori(scarti, passo)
+
+
+def _vuoto_piu_largo(posizioni, passo: float) -> tuple[float, float, float]:
+    """L'arco di fase piu' VUOTO di una voce: (centro, larghezza, buco medio).
+
+    Il centro sta in [0, passo) -- e' un `% passo` esplicito, l'ultima cosa
+    che questa funzione fa. ⚠️ Da li' viene meta' della dimostrazione del
+    limite che `Passo.scarto` dichiara: il ramo `'rado'` ritorna `centro -
+    passo/2`, quindi lo spostamento sta in `[-passo/2, +passo/2)` e il
+    residuo non puo' superare UN passo intero (il conto per esteso e' nel
+    docstring di `_media_circolare()`, che ha lo stesso limite per `'voce'`).
+
+    La larghezza e' il buco piu' grande fra due
+    colpi consecutivi, CIRCOLARMENTE. Il buco medio e' `passo / n`, cioe'
+    quanto varrebbe ogni buco se i colpi fossero sparsi in modo piatto: non
+    serve a decidere niente qui, serve a `misura_groove.py` per dire se quel
+    vuoto e' un vuoto VERO o solo il piu' largo di tanti uguali.
+
+    ⚠️ IL CENTRO, NON IL PRIMO PUNTO VUOTO, e la ragione e' misurata il 26
+    agosto 2026. Una prima stesura cercava il minimo di densita' dentro una
+    finestra e ne prendeva l'argmin. Ma quel minimo e' un ALTOPIANO -- un
+    arco intero senza colpi -- e l'argmin ne prendeva il primo punto della
+    scansione, che sta sempre a fase 0. Ne usciva un taglio INCOLLATO:
+    traslando la voce di -4, -2, 0, +2, +4 tick lo spostamento restava
+    -12,00 tutte le volte. Il centro del vuoto invece trasla coi dati, e la
+    stessa prova da' una rampa di pendenza 1.
+
+    ⚠️ IL BUCO CHE GIRA VA CONTATO A PARTE. Con tutti i colpi sulla stessa
+    fase i buchi fra consecutivi sono zero, e `(fasi[0] - fasi[-1]) % passo`
+    darebbe zero anche per quello che avvolge: una voce perfettamente sulla
+    griglia uscirebbe con vuoto ZERO invece che con vuoto MASSIMO, cioe' il
+    rovescio esatto. Si calcola come `passo - (fasi[-1] - fasi[0])`.
+    """
+    fasi = sorted(p % passo for p in posizioni)
+    if not fasi:
+        return 0.0, 0.0, 0.0
+    buchi = [fasi[i + 1] - fasi[i] for i in range(len(fasi) - 1)]
+    buchi.append(passo - (fasi[-1] - fasi[0]))
+    i = max(range(len(fasi)), key=lambda k: buchi[k])
+    return (fasi[i] + buchi[i] / 2) % passo, buchi[i], passo / len(fasi)
+
+
+def spostamento_del_taglio(dritte: list[float], passo_tick: float,
+                           taglio: str) -> float:
+    """Di quanto spostare il TAGLIO fra due passi, per questa voce, in tick.
+
+    Il passo si sceglie poi con `round((dritta - spostamento) / passo_tick)`:
+    spostare il taglio NON sposta la griglia, sposta solo il confine su cui
+    si decide a quale passo un colpo appartiene. Il residuo riportato resta
+    misurato dalla griglia vera.
+
+    `'vicino'` e' l'assenza di spostamento, cioe' il `round()` di sempre:
+    taglia a meta' fra due passi. E' il termine di paragone.
+
+    ⚠️ `taglio` NON HA UN DEFAULT, ed e' voluto dal 28 agosto 2026. Fino a
+    quel giorno valeva `modo: str = 'vicino'`, mentre `profilo_da_colpi()` e
+    `profilo()` erano gia' passati a `'voce'`: questa era l'ultima firma del
+    modulo a dichiarare il default vecchio, sotto un nome di parametro
+    diverso per giunta. `GR.spostamento_del_taglio(dritte, 24.0)` ritornava
+    quindi `0.0` e sembrava il comportamento del modulo, mentre era il
+    contrario. Chi vuole il taglio in vigore chiami `profilo()`, che il suo
+    default ce l'ha; qui il modo si nomina, sempre. Tutte le chiamate,
+    interne e nei test, lo passavano gia' esplicitamente.
+    """
+    if taglio not in TAGLI:
+        raise ValueError(f'taglio {taglio!r} sconosciuto: ci sono {list(TAGLI)}')
+    if taglio == 'vicino':
+        return 0.0
+    if taglio == 'voce':
+        return _media_circolare(dritte, passo_tick)
+    if taglio == 'rado':
+        centro, largo, _ = _vuoto_piu_largo(dritte, passo_tick)
+        if largo <= 0:
+            return 0.0                  # nessun colpo: niente da spostare
+        # il taglio di `round()` cade a meta' fra due passi: portarlo sul
+        # centro del vuoto vuol dire spostarlo di (centro - mezzo passo).
+        return centro - passo_tick / 2
+    # ⚠️ IRRAGGIUNGIBILE OGGI, e va tenuta lo stesso: `TAGLI` e' una tupla
+    # fatta per crescere, e il controllo in testa fa passare qualunque nome
+    # ci si aggiunga. Senza questa riga la funzione cadrebbe in fondo e
+    # ritornerebbe None in silenzio; il chiamante fallirebbe piu' in la',
+    # sull'aritmetica, con un messaggio che non nomina il taglio.
+    raise ValueError(f'taglio {taglio!r} e in TAGLI ma non ha un ramo qui')
+
+
 class Passo(NamedTuple):
     """Cosa fa uno strumento su un passo della battuta, misurato."""
 
@@ -247,6 +437,13 @@ class Passo(NamedTuple):
     #: trattiene', cioe' il rovescio, ed era copiata in altri tre posti:
     #: ha fatto concludere che il charleston a pedale del jazz stesse
     #: DIETRO agli altri mentre li ANTICIPA. Il segno si legge da qui.
+    #: ⚠️ IL LIMITE SI E' ALLARGATO, il 26 agosto 2026. Con `taglio='vicino'`
+    #: il passo e' il piu' VICINO, quindi |scarto| <= mezzo passo (12 tick)
+    #: per costruzione. Con un taglio spostato non e' piu' vero: uno scarto
+    #: puo' arrivare fino a UN PASSO INTERO, ed e' voluto -- e' l'unico modo
+    #: di dire "anticipa di mezza semicroma" invece di dire "e' in ritardo
+    #: sul passo prima". Ne segue che `applica_groove()` puo' posare una nota
+    #: nel territorio del passo accanto.
     scarto: float
     colpi: int          # quante volte quel passo e' stato colpito
 
@@ -284,9 +481,12 @@ def _senza_swing(fase: float, levare: float) -> float:
     return 0.5 + (fase - levare) * 0.5 / (1 - levare)
 
 
+# taglio='voce' e' il default dal 26 agosto 2026 -- vedi TAGLI, sopra.
 def profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float,
                      *, id: str = '', drummer: str = '', style: str = '',
-                     bpm: int = 0) -> Profilo:
+                     bpm: int = 0, taglio: str = 'voce',
+                     origine_fissa: float | None = None,
+                     levare_fisso: float | None = None) -> Profilo:
     """Il profilo, da colpi gia' letti: strumento -> [(posizione, velocity)].
 
     LA CATENA, E L'ORDINE E' LA COSA CHE CONTA:
@@ -299,15 +499,31 @@ def profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float,
        al resto del kit. E' il solo microtiming che il template porta;
     4. aggrega per strumento e per passo, sedici per battuta.
     """
+    if taglio not in TAGLI:
+        raise ValueError(f'taglio {taglio!r} sconosciuto: ci sono {list(TAGLI)}')
     passo_tick = ppq / 4                            # un 1/16
     tutte = [p for note in colpi.values() for p, _ in note]
-    off = origine(tutte, passo_tick)
 
-    bur = bur_da_posizioni([p - off for p in tutte], ppq)
-    levare = da_bur(bur) if bur is not None else 0.5
+    # ⚠️ ORIGINE E LEVARE SI POSSONO CONGELARE, e serve a una cosa sola:
+    # la prova di traslazione per voce. Traslando UNA voce si muove anche
+    # l'origine del KIT, di circa delta per la quota di colpi di quella
+    # voce, e chi non la congela misura anche quell'artefatto invece dello
+    # stimatore. Fuori da quella prova NON si passano: una stima congelata
+    # e' una stima che non guarda i dati.
+    off = origine(tutte, passo_tick) if origine_fissa is None else origine_fissa
 
-    per_passo: dict[str, dict[int, list[tuple[int, float]]]] = {}
-    ultimo = 0
+    if levare_fisso is None:
+        bur = bur_da_posizioni([p - off for p in tutte], ppq)
+        levare = da_bur(bur) if bur is not None else 0.5
+    else:
+        bur = in_bur(levare_fisso)
+        levare = levare_fisso
+
+    # PRIMA PASSATA: la posizione DRITTA di ogni colpo -- origine tolta,
+    # swing tolto -- raggruppata per strumento. Il passo NON si sceglie
+    # qui: uno spostamento del taglio dipende da TUTTI i colpi di una
+    # voce, e finche' non li abbiamo visti tutti non si puo' decidere.
+    dritte: dict[str, list[tuple[float, int]]] = {}
     for nome, note in colpi.items():
         for pos, vel in note:
             p = pos - off
@@ -318,28 +534,29 @@ def profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float,
             # ⚠️ LA FASE STA IN [0,1) E NON PUO' USCIRNE, perche' e' il
             # dominio su cui `_senza_swing()` e' l'inversa della mappa del
             # firmware. Fino al 24 agosto 2026 qui c'era mezzo passo di
-            # grazia -- `math.floor(p / ppq + 0.125)` -- per attribuire un
-            # colpo appena prima del battere al movimento seguente: una
-            # nota nell'ultimo ottavo usciva allora con fase NEGATIVA, e
-            # `_senza_swing()` le applicava il ramo della PRIMA meta'
-            # (dilatata) mentre la nota sta nella SECONDA (compressa). Non
-            # era l'inversa di niente. Sul corpus jazz toccava un colpo su
-            # tre e spostava il residuo fino a 12 tick.
-            #
-            # La tolleranza non serviva: il passo si sceglie qui sotto con
-            # `round()` sulla posizione ASSOLUTA, che gia' attribuisce al
-            # battere seguente qualunque colpo entro mezzo passo da esso.
-            # E la giustificazione scritta era falsa: `round()` sceglie il
-            # passo piu' vicino, quindi |residuo| <= mezzo passo per
-            # costruzione, e non puo' MAI uscire "grande quanto un
-            # movimento intero" -- ne' con la grazia ne' senza.
+            # grazia -- `math.floor(p / ppq + 0.125)` -- e una nota
+            # nell'ultimo ottavo usciva con fase NEGATIVA, su cui
+            # `_senza_swing()` applicava il ramo sbagliato. Non era
+            # l'inversa di niente.
             movimento, resto = divmod(p, ppq)
             fase = resto / ppq
-            dritta = (movimento + _senza_swing(fase, levare)) * ppq
+            dritte.setdefault(nome, []).append(
+                ((movimento + _senza_swing(fase, levare)) * ppq, vel))
+
+    # SECONDA PASSATA: una voce alla volta, col suo spostamento del taglio.
+    per_passo: dict[str, dict[int, list[tuple[int, float]]]] = {}
+    ultimo = 0
+    for nome, note in dritte.items():
+        sp = spostamento_del_taglio([d for d, _ in note], passo_tick, taglio)
+        for dritta, vel in note:
             # ⚠️ il passo si decide DOPO aver tolto lo swing: un levare
             # swingato sta a 2,67 passi e si arrotonderebbe al 3.
-            passo = round(dritta / passo_tick)
+            passo = round((dritta - sp) / passo_tick)
             ultimo = max(ultimo, passo)
+            # ⚠️ il residuo si misura dalla GRIGLIA, non dal taglio
+            # spostato: e' la posizione vera del colpo rispetto al passo su
+            # cui lo scriviamo. Sottrarre anche `sp` toglierebbe il feel
+            # invece di collocarlo.
             residuo = dritta - passo * passo_tick
             per_passo.setdefault(nome, {}).setdefault(
                 passo % 16, []).append((vel, residuo))
@@ -357,7 +574,8 @@ def profilo_da_colpi(colpi: dict[str, list[tuple[float, int]]], ppq: float,
                    battute=ultimo // 16 + 1, passi=passi)
 
 
-def profilo(base: Path | str, id: str) -> Profilo:
+# taglio='voce' e' il default dal 26 agosto 2026 -- vedi TAGLI, sopra.
+def profilo(base: Path | str, id: str, *, taglio: str = 'voce') -> Profilo:
     """Il profilo di UNA esecuzione del dataset, nominata.
 
     Le posizioni del file MIDI sono nella risoluzione DEL FILE (nel Groove
@@ -384,7 +602,7 @@ def profilo(base: Path | str, id: str) -> Profilo:
             colpi.setdefault(nome, []).append((n.pos * fattore, n.velocity))
     return profilo_da_colpi(colpi, float(MI.TICK_PER_MOVIMENTO_DELUGE),
                             id=e.id, drummer=e.drummer, style=e.style,
-                            bpm=e.bpm)
+                            bpm=e.bpm, taglio=taglio)
 
 
 class Livelli(NamedTuple):

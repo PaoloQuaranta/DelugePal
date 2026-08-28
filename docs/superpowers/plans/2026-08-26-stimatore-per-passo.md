@@ -30,7 +30,7 @@
 |---|---|
 | `tools/delugexml/groove.py` | **modifica**: `TAGLI`, `spostamento_del_taglio()`, le due passate di `profilo_da_colpi()`, il parametro `taglio` anche su `profilo()`, il limite nel docstring di `Passo` |
 | `tools/delugexml/musica.py` | **modifica**: `applica_groove()` riferisce le **collisioni** — due note su passi adiacenti che finiscono sullo stesso tick, cosa che il limite allargato rende possibile (Task 3) |
-| `tools/misura_groove.py` | **modifica**: `la_sensibilita_del_rado()` (Task 3), `la_prova_di_traslazione()` (Task 4), `l_ancoraggio()` (Task 5), e `il_bordo_del_passo()` che gira sui tre tagli (Task 6) |
+| `tools/misura_groove.py` | **modifica**: `il_vuoto_delle_voci()` (Task 3), `la_prova_di_traslazione()` (Task 4), `l_ancoraggio()` (Task 5), e `il_bordo_del_passo()` che gira sui tre tagli (Task 6) |
 | `tests/test_all.py` | **modifica**: i check nuovi in fondo, prima di `if __name__ == '__main__':` |
 | `docs/repertori/jazz.md` | **modifica**: «Il bordo fra due passi» prende la decisione; i numeri della casella 6 rifatti (Task 7) |
 | `docs/MUSICA.md` | **modifica**: «Il groove template», il limite dichiarato di `Passo.scarto` (Task 7) |
@@ -436,35 +436,44 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 
 ---
 
-## Task 3: `'rado'` — tagliare dove la voce ha meno colpi
+## Task 3: `'rado'` — tagliare nel mezzo del vuoto più largo
 
-L'idea in una riga: **non tagliare attraverso un gesto**. Invece di tagliare a metà fra due passi, si taglia nel punto di fase dove la voce ha meno colpi.
+L'idea in una riga: **non tagliare attraverso un gesto**. Invece di tagliare a metà fra due passi, si taglia dove la voce non ha colpi.
+
+> ⚠️ **Questa sezione è stata riscritta il 26 agosto 2026, e il perché va letto prima del codice.** La prima stesura cercava il **minimo di densità** con una finestra larga `LARGHEZZA_RADO`, e ne prendeva l'argmin. Eseguita alla lettera, ha prodotto tre difetti, tutti misurati:
+>
+> 1. **il taglio si incollava.** Il minimo di densità è un **altopiano** — un arco intero senza colpi — e l'argmin ne prendeva il primo punto della scansione, che sta sempre a fase 0. Traslando la voce di −4, −2, 0, +2, +4 tick lo spostamento restava **−12,00 tutte le volte**. Uno stimatore che non si muove quando i dati si muovono non è uno stimatore, ed è **esattamente ciò che la prova del Task 4 misura**: `'rado'` sarebbe stato bocciato per un difetto di contabilità invece che per la sua idea;
+> 2. **il ripiego non poteva scattare.** Il caso di prova «semicrome piene» e il criterio `minimo >= RIPIEGO_RADO * medio` si contraddicevano: dati esatti sulla griglia collassano tutti su una fase sola, quindi il minimo è 0 comunque e il ripiego non scatta mai;
+> 3. **la regola che doveva fissare `LARGHEZZA_RADO` non decideva.** Misurata su 118 voci del corpus jazz, la colonna «voci che si muovono oltre 1 tick» fa **35 → 25 → 36** per larghezze 2 → 3 → 4: non-monotona, nessun pianoro. L'implementatore ha fatto la cosa giusta e **non ha inventato uno spareggio**.
+>
+> Il criterio nuovo — **il centro dell'arco vuoto più largo** — li chiude tutti e tre insieme: trasla coi dati (rampa di pendenza 1, verificata), dà spostamento **esattamente 0** sulle semicrome piene per costruzione, e **non ha nessun parametro** da fissare.
 
 **Files:**
-- Modify: `tools/delugexml/groove.py` (`spostamento_del_taglio`, `_piu_rado`)
-- Modify: `tools/misura_groove.py` (`la_sensibilita_del_rado`, e la chiamata in `main()`)
+- Modify: `tools/delugexml/groove.py` (`_vuoto_piu_largo`, il ramo `'rado'` di `spostamento_del_taglio`, il limite nel docstring di `Passo`)
+- Modify: `tools/delugexml/musica.py` (`applica_groove()` riferisce le collisioni)
+- Modify: `tools/misura_groove.py` (`_dritte_della_voce`, `il_vuoto_delle_voci`, e la chiamata in `main()`)
 - Test: `tests/test_all.py`
 
 **Interfaces:**
-- Consumes: `groove.spostamento_del_taglio(dritte, passo_tick, modo)`.
-- Produces: `groove.LARGHEZZA_RADO: float`, `groove.RIPIEGO_RADO: float`, `groove._piu_rado(posizioni, passo, larghezza) -> tuple[float, int, float]` che ritorna `(fase del minimo, colpi nel minimo, colpi medi per finestra)`.
-
-⚠️ **I due parametri non si scelgono a occhio.** Nella sonda del 26 agosto 2026 la larghezza era 4 tick perché bisognava usare qualcosa, e non ha nessuna giustificazione. Lo Step 6 li fissa con una misura e una **regola di decisione scritta**, non con un'impressione.
+- Consumes: `groove.spostamento_del_taglio(dritte, passo_tick, modo)`, `groove.TAGLI`.
+- Produces: `groove._vuoto_piu_largo(posizioni, passo: float) -> tuple[float, float, float]` che ritorna `(centro del vuoto, sua larghezza, buco medio)`; il ramo `'rado'` di `spostamento_del_taglio()`; `musica.applica_groove()` che ritorna anche `'collisioni': list[int]`.
+- **Non produce nessuna costante.** `LARGHEZZA_RADO` e `RIPIEGO_RADO` non esistono: se sono già nel working tree da una stesura precedente, **vanno tolti**, insieme a `_piu_rado()` e a `la_sensibilita_del_rado()`.
 
 - [ ] **Step 1: Scrivere il test che fallisce**
 
 ```python
 def test_groove_taglio_rado():
-    """`'rado'` taglia dove la voce ha meno colpi, e si ritira dove non c'e.
+    """`'rado'` taglia nel mezzo del vuoto, e sulle voci piene non taglia.
 
-    Due casi opposti, ed e' il secondo quello che conta: uno stimatore che
-    trova sempre qualcosa e' uno stimatore che inventa.
+    Quattro casi, e il quarto e' quello che conta: uno stimatore deve
+    SEGUIRE i dati. I valori attesi sono misurati, non dedotti.
     """
     from delugexml import groove as GR                      # noqa: PLC0415
 
     ppq = 96.0
     # (a) lo stesso gesto del taglio "voce": anticipo di 14 tick sui passi
-    # 4 e 12, dispersione 3. Il punto rado sta dalla parte opposta.
+    # 4 e 12, dispersione 3. Le fasi sono 7, 9, 11 e 13; il vuoto piu'
+    # largo va da 13 a 31, largo 18, e il suo centro cade a 22.
     posizioni = [float(b * 384 + base + d)
                  for b in range(12) for base in (82, 274)
                  for d in (-3, -1, 1, 3)]
@@ -477,21 +486,49 @@ def test_groove_taglio_rado():
     check('e ognuna porta tutti i colpi del suo gesto',
           all(v.colpi == 48 for v in celle.values()),
           str({k: v.colpi for k, v in sorted(celle.items())}))
+    sp = GR.spostamento_del_taglio(posizioni, 24.0, 'rado')
+    check('lo spostamento e il centro del vuoto meno mezzo passo: +10',
+          abs(sp - 10.0) < 1e-9, f'{sp:.3f}')
 
-    # (b) una voce di semicrome PIENE: quattro colpi per movimento, tutti
-    # sulla griglia. Non c'e' nessun punto rado, e lo spostamento deve
-    # uscire ZERO -- non un numero inventato.
+    # (b) una voce di semicrome PIENE, tutte esattamente sulla griglia.
+    # ⚠️ NON e' il caso "densita' piatta": le fasi collassano tutte su
+    # ZERO, cioe' e' il caso piu' CONCENTRATO che esista. Il vuoto piu'
+    # largo e' allora l'intero passo, il suo centro cade a mezzo passo dai
+    # colpi, e lo spostamento esce zero -- che e' giusto, perche' su una
+    # voce gia' sulla griglia non c'e' niente da spostare.
     piene = [float(b * 384 + k * 24) for b in range(12) for k in range(16)]
-    sp = GR.spostamento_del_taglio(piene, 24.0, 'rado')
-    check('su semicrome piene "rado" si ritira a zero', sp == 0.0, str(sp))
+    check('su semicrome sulla griglia "rado" non sposta niente',
+          GR.spostamento_del_taglio(piene, 24.0, 'rado') == 0.0,
+          str(GR.spostamento_del_taglio(piene, 24.0, 'rado')))
+    centro, largo, medio = GR._vuoto_piu_largo(piene, 24.0)
+    check('e il vuoto misurato e un passo intero', abs(largo - 24.0) < 1e-9,
+          f'centro {centro} largo {largo} medio {medio}')
 
-    fase, minimo, medio = GR._piu_rado(piene, 24.0, GR.LARGHEZZA_RADO)
-    check('e il ripiego scatta perche il minimo non e un minimo',
-          minimo >= GR.RIPIEGO_RADO * medio,
-          f'minimo {minimo} contro {GR.RIPIEGO_RADO} * {medio:.2f}')
+    # (c) le stesse semicrome con un jitter di +-2 tick: il vuoto resta
+    # largo 20 e centrato a 12, quindi ancora nessuno spostamento.
+    sporche = [float(b * 384 + k * 24 + (k % 5) - 2)
+               for b in range(12) for k in range(16)]
+    check('e nemmeno su semicrome con jitter di +-2 tick',
+          GR.spostamento_del_taglio(sporche, 24.0, 'rado') == 0.0,
+          str(GR.spostamento_del_taglio(sporche, 24.0, 'rado')))
 
-    # (c) il limite del residuo, che si e' allargato: con un taglio spostato
-    # il residuo non sta piu' dentro mezzo passo, ma resta dentro UN passo.
+    # (d) ⚠️ LA COSA CHE UNO STIMATORE DEVE SAPER FARE: seguire i dati.
+    # Traslando la voce di delta, il taglio si sposta di delta. Avvolge a
+    # +-mezzo passo perche' una fase vive su un cerchio, e l'avvolgimento
+    # NON e' un salto: sposta anche il passo, quindi la posizione
+    # dichiarata resta continua (e' il motivo per cui il Task 4 appaia le
+    # celle per posizione dichiarata e non per numero di passo).
+    for d in (-8, -6, -4, -2, 2, 4, 6, 8):
+        atteso = ((10.0 + d + 12.0) % 24.0) - 12.0
+        ottenuto = GR.spostamento_del_taglio(
+            [p + d for p in posizioni], 24.0, 'rado')
+        check(f'traslando la voce di {d:+d} il taglio si sposta di {d:+d}',
+              abs(ottenuto - atteso) < 1e-9,
+              f'atteso {atteso:+.2f}, ottenuto {ottenuto:+.2f}')
+
+    # (e) il limite del residuo, che si e' allargato: con un taglio
+    # spostato il residuo non sta piu' dentro mezzo passo, ma resta dentro
+    # UN passo.
     for taglio in GR.TAGLI:
         p = GR.profilo_da_colpi(colpi, ppq, taglio=taglio)
         peggio = max(abs(s.scarto) for v in p.passi.values() for s in v)
@@ -503,62 +540,61 @@ def test_groove_taglio_rado():
 
 Run: `.venv/Scripts/python.exe tests/test_all.py 2>&1 | grep -E "rado|^[0-9]+/"`
 
-Expected: FAIL — `spostamento_del_taglio(..., 'rado')` solleva ancora `ValueError: taglio 'rado' non ancora implementato`, e `GR.LARGHEZZA_RADO` non esiste.
+Expected: FAIL — `GR._vuoto_piu_largo` non esiste, e il ramo `'rado'` di `spostamento_del_taglio()` o non c'è o è quello vecchio.
 
-- [ ] **Step 3: Implementare `_piu_rado()` e il modo `'rado'`**
+- [ ] **Step 3: Implementare `_vuoto_piu_largo()` e il ramo `'rado'`**
+
+⚠️ Se `LARGHEZZA_RADO`, `RIPIEGO_RADO` o `_piu_rado()` esistono già nel file da una stesura precedente, **si tolgono**: non sono più parte del disegno, e lasciarli sarebbe lasciare in giro un criterio che questa sezione documenta come sbagliato.
 
 Sopra `spostamento_del_taglio()`:
 
 ```python
-#: La larghezza della finestra con cui si cerca il punto piu' rado, in tick.
-#: FISSATA CON UNA MISURA, non a occhio: vedi
-#: `tools/misura_groove.py`, `la_sensibilita_del_rado()`.
-LARGHEZZA_RADO = 4.0
+def _vuoto_piu_largo(posizioni, passo: float) -> tuple[float, float, float]:
+    """L'arco di fase piu' VUOTO di una voce: (centro, larghezza, buco medio).
 
-#: Il ripiego: se il minimo dei colpi non scende sotto questa frazione
-#: della densita' media, non c'e' nessun punto rado e non si sposta niente.
-#: Una voce di semicrome piene non ha punti radi, e uno stimatore che ne
-#: trova uno lo sta inventando.
-RIPIEGO_RADO = 0.5
+    Il centro sta in [0, passo). La larghezza e' il buco piu' grande fra due
+    colpi consecutivi, CIRCOLARMENTE. Il buco medio e' `passo / n`, cioe'
+    quanto varrebbe ogni buco se i colpi fossero sparsi in modo piatto: non
+    serve a decidere niente qui, serve a `misura_groove.py` per dire se quel
+    vuoto e' un vuoto VERO o solo il piu' largo di tanti uguali.
 
+    ⚠️ IL CENTRO, NON IL PRIMO PUNTO VUOTO, e la ragione e' misurata il 26
+    agosto 2026. Una prima stesura cercava il minimo di densita' dentro una
+    finestra e ne prendeva l'argmin. Ma quel minimo e' un ALTOPIANO -- un
+    arco intero senza colpi -- e l'argmin ne prendeva il primo punto della
+    scansione, che sta sempre a fase 0. Ne usciva un taglio INCOLLATO:
+    traslando la voce di -4, -2, 0, +2, +4 tick lo spostamento restava
+    -12,00 tutte le volte. Il centro del vuoto invece trasla coi dati, e la
+    stessa prova da' una rampa di pendenza 1.
 
-def _piu_rado(posizioni, passo: float,
-              larghezza: float) -> tuple[float, int, float]:
-    """Dove la voce ha meno colpi: (fase del minimo, colpi li', colpi medi).
-
-    La fase e' in [0, passo). Si scandisce a quarti di tick, che su un passo
-    da 24 fa 96 candidati: abbastanza fitto da non saltare un minimo stretto,
-    abbastanza rado da restare istantaneo.
-
-    Il conteggio e' CIRCOLARE -- la fase gira -- quindi una finestra a
-    cavallo dello zero conta anche i colpi dall'altra parte.
+    ⚠️ IL BUCO CHE GIRA VA CONTATO A PARTE. Con tutti i colpi sulla stessa
+    fase i buchi fra consecutivi sono zero, e `(fasi[0] - fasi[-1]) % passo`
+    darebbe zero anche per quello che avvolge: una voce perfettamente sulla
+    griglia uscirebbe con vuoto ZERO invece che con vuoto MASSIMO, cioe' il
+    rovescio esatto. Si calcola come `passo - (fasi[-1] - fasi[0])`.
     """
-    fasi = [p % passo for p in posizioni]
+    fasi = sorted(p % passo for p in posizioni)
     if not fasi:
-        return 0.0, 0, 0.0
-    passi_di_scansione = int(passo * 4)
-    migliore, quanti = 0.0, None
-    for i in range(passi_di_scansione):
-        t = i / 4.0
-        n = sum(1 for f in fasi
-                if min((f - t) % passo, (t - f) % passo) < larghezza / 2)
-        if quanti is None or n < quanti:
-            quanti, migliore = n, t
-    medio = len(fasi) * larghezza / passo    # colpi attesi se fossero piatti
-    return migliore, quanti, medio
+        return 0.0, 0.0, 0.0
+    buchi = [fasi[i + 1] - fasi[i] for i in range(len(fasi) - 1)]
+    buchi.append(passo - (fasi[-1] - fasi[0]))
+    i = max(range(len(fasi)), key=lambda k: buchi[k])
+    return (fasi[i] + buchi[i] / 2) % passo, buchi[i], passo / len(fasi)
 ```
 
-e nel corpo di `spostamento_del_taglio()`, prima del `raise` finale:
+e nel corpo di `spostamento_del_taglio()`, al posto del `raise` finale:
 
 ```python
     if modo == 'rado':
-        fase, minimo, medio = _piu_rado(dritte, passo_tick, LARGHEZZA_RADO)
-        if medio <= 0 or minimo >= RIPIEGO_RADO * medio:
-            return 0.0                  # nessun punto rado: non si inventa
+        centro, largo, _ = _vuoto_piu_largo(dritte, passo_tick)
+        if largo <= 0:
+            return 0.0                  # nessun colpo: niente da spostare
         # il taglio di `round()` cade a meta' fra due passi: portarlo sul
-        # punto rado vuol dire spostarlo di (fase - mezzo passo).
-        return fase - passo_tick / 2
+        # centro del vuoto vuol dire spostarlo di (centro - mezzo passo).
+        return centro - passo_tick / 2
 ```
+
+⚠️ **Nessun ripiego, ed è una scelta dichiarata.** Il criterio non ha soglie da tarare. Se il vuoto più largo fosse largo quanto gli altri il suo centro sarebbe arbitrario — ma se serva un ripiego lo dice il corpus, non un'ipotesi: lo misura lo Step 6.
 
 - [ ] **Step 4: Allargare il limite nel docstring di `Passo`**
 
@@ -634,65 +670,24 @@ e aggiungere `'collisioni': collisioni` al dizionario ritornato. Aggiornare il d
 
 Rieseguire la suite: tutti PASS.
 
-- [ ] **Step 6: Fissare i due parametri con una misura**
+- [ ] **Step 6: Misurare se il vuoto è un vuoto vero**
 
-Aggiungere in `tools/misura_groove.py`, prima di `def main()`:
+⚠️ **Se `la_sensibilita_del_rado()` esiste già in `tools/misura_groove.py` da una stesura precedente, si toglie** — misurava la sensibilità a una finestra che non esiste più — e si toglie la sua chiamata da `main()`. `_dritte_della_voce()` invece **resta**: serve anche qui.
 
-```python
-def la_sensibilita_del_rado():
-    """Quanto il taglio 'rado' dipende dalla larghezza della sua finestra.
+`'rado'` non ha più nessun parametro da fissare. Resta una domanda che solo il corpus può chiudere: quel vuoto è sempre un vuoto **vero**? Su una voce i cui colpi fossero sparsi in modo piatto sulla fase, il buco più largo sarebbe largo quanto gli altri e il suo centro arbitrario — e uno spostamento arbitrario riassegnerebbe i passi in blocco.
 
-    ⚠️ PERCHE' ESISTE. La larghezza non ha nessuna giustificazione a priori:
-    nella sonda del 26 agosto 2026 valeva 4 tick perche' bisognava usare
-    qualcosa. La regola di decisione, scritta prima di guardare i numeri: si
-    prende la larghezza piu' PICCOLA a partire dalla quale il taglio scelto
-    non si muove piu' di 1 tick passando alla larghezza successiva -- cioe'
-    l'inizio del pianoro. Una larghezza sotto il pianoro insegue il rumore,
-    una sopra spiana anche i minimi veri.
-    """
-    print('\n=== il taglio "rado": quanto dipende dalla sua finestra ===')
-    larghezze = (2.0, 3.0, 4.0, 6.0)
-    print(f'    larghezze provate: {larghezze} tick su un passo da {PPQ/4:.0f}')
-    mosse: dict[float, list[float]] = {L: [] for L in larghezze}
-    quante = 0
-    for e in GR.elenco(BASE, style=STILE, beat_type='beat',
-                       time_signature='4-4'):
-        if e.style in FUORI_DALLO_SWING:
-            continue
-        p = GR.profilo(BASE, e.id)
-        for nome in p.passi:
-            dritte = _dritte_della_voce(e, nome)
-            if len(dritte) < 40:
-                continue
-            quante += 1
-            tagli = {}
-            for L in larghezze:
-                fase, minimo, medio = GR._piu_rado(dritte, PPQ / 4, L)
-                tagli[L] = (0.0 if medio <= 0 or minimo >= GR.RIPIEGO_RADO * medio
-                            else fase - PPQ / 8)
-            for a, b in zip(larghezze, larghezze[1:]):
-                mosse[a].append(abs(tagli[b] - tagli[a]))
-    print(f'    {quante} voci (>= 40 colpi) sulle esecuzioni jazz delimitate')
-    for L in larghezze[:-1]:
-        v = sorted(mosse[L])
-        if not v:
-            continue
-        print(f'    da {L:.0f} alla larghezza dopo: mediana {statistics.median(v):5.2f} '
-              f'tick, q3 {v[int(len(v) * 0.75)]:5.2f}, massimo {max(v):5.2f}, '
-              f'voci che si muovono oltre 1 tick: '
-              f'{sum(1 for x in v if x > 1.0)}')
-```
-
-e la funzione ausiliaria, sopra di essa:
+In `tools/misura_groove.py`, la funzione ausiliaria (se non c'è già):
 
 ```python
-def _dritte_della_voce(e, nome) -> list[float]:
+def _dritte_della_voce(e, nome, colpi=None) -> list[float]:
     """Le posizioni DRITTE di una voce: origine tolta, swing tolto.
 
     Rifa' la prima passata di `GR.profilo_da_colpi()` per poter interrogare
-    i tagli senza passare da un `Profilo` gia' aggregato.
+    i tagli senza passare da un `Profilo` gia' aggregato. `colpi` si passa
+    quando si interrogano piu' voci della stessa esecuzione, per non
+    rileggere il file MIDI una volta per voce.
     """
-    c = _colpi(e)
+    c = _colpi(e) if colpi is None else colpi
     tutte = [p for v in c.values() for p, _ in v]
     off = GR.origine(tutte, PPQ / 4)
     bur = GR.bur_da_posizioni([p - off for p in tutte], PPQ)
@@ -705,30 +700,84 @@ def _dritte_della_voce(e, nome) -> list[float]:
     return fuori
 ```
 
-Aggiungere `la_sensibilita_del_rado()` in `main()`, subito dopo `il_bordo_del_passo()`.
+e la misura:
 
-Run: `.venv/Scripts/python.exe tools/misura_groove.py > out/groove_jazz.txt 2>&1` poi leggere la sezione.
+```python
+def il_vuoto_delle_voci():
+    """Quanto e' netto il vuoto su cui `'rado'` mette il taglio.
 
-**Scrivere il valore scelto** in `LARGHEZZA_RADO` e **i numeri che l'hanno scelto** nel suo commento, con la data. Se il pianoro comincia a 4, si conferma 4 — ma allora è confermato da una misura, non ereditato.
+    ⚠️ PERCHE' ESISTE, e cosa NON fa. `'rado'` non ha parametri: il centro
+    del vuoto piu' largo e' una grandezza geometrica, non una taratura.
+    Resta pero' una domanda che solo il corpus chiude: se il buco piu'
+    largo fosse largo quanto gli altri, il suo centro sarebbe arbitrario e
+    lo spostamento riassegnerebbe i passi in blocco.
+
+    Questa sezione misura il rapporto `largo / medio` -- quanto il buco piu'
+    largo supera quello che ci sarebbe se i colpi fossero sparsi piatti.
+    NON decide niente: se quel rapporto stesse vicino a 1 su molte voci,
+    servirebbe un ripiego, e sarebbe una decisione da prendere, non da
+    inventare qui.
+    """
+    print('\n=== il vuoto su cui "rado" taglia: e un vuoto vero? ===')
+    rapporti, spostamenti = [], []
+    esecuzioni, batteristi = 0, set()
+    for e in GR.elenco(BASE, style=STILE, beat_type='beat',
+                       time_signature='4-4'):
+        if e.style in FUORI_DALLO_SWING:
+            continue
+        c = _colpi(e)
+        esecuzioni += 1
+        batteristi.add(e.drummer)
+        for nome in sorted(c):
+            dritte = _dritte_della_voce(e, nome, colpi=c)
+            if len(dritte) < 40:
+                continue
+            centro, largo, medio = GR._vuoto_piu_largo(dritte, PPQ / 4)
+            if medio <= 0:
+                continue
+            rapporti.append(largo / medio)
+            spostamenti.append(abs(centro - PPQ / 8))
+    r = sorted(rapporti)
+    q = statistics.quantiles(r, n=4)
+    print(f'    {esecuzioni} esecuzioni, {len(batteristi)} batteristi, '
+          f'{len(r)} voci con almeno 40 colpi')
+    print(f'    largo/medio : min {r[0]:.1f}  q1 {q[0]:.1f}  '
+          f'mediana {statistics.median(r):.1f}  q3 {q[2]:.1f}  '
+          f'max {r[-1]:.1f}')
+    for soglia in (1.5, 2.0, 3.0, 5.0):
+        n = sum(1 for x in r if x < soglia)
+        print(f'    voci col vuoto meno di {soglia:.1f} volte il medio: '
+              f'{n:3d} su {len(r)}  ({100 * n / len(r):.1f}%)')
+    s = sorted(spostamenti)
+    print(f'    |spostamento| : mediana {statistics.median(s):.2f} tick, '
+          f'q3 {s[int(len(s) * 0.75)]:.2f}, massimo {max(s):.2f}')
+```
+
+Aggiungere `il_vuoto_delle_voci()` in `main()`, subito dopo `il_bordo_del_passo()`.
+
+Run: `.venv/Scripts/python.exe tools/misura_groove.py > out/groove_jazz.txt 2>&1` e leggere la sezione. **La lettura si riporta nel rapporto**, non si agisce: se il rapporto mediano fosse basso (vicino a 1,5 o meno), è una cosa da riferire, non da riparare qui.
 
 - [ ] **Step 7: Eseguire tutta la suite**
 
 Run: `.venv/Scripts/python.exe tests/test_all.py 2>&1 | tail -5`
 
-Expected: tutti PASS, totale = quello del Task 2 + 9.
+Expected: tutti PASS, totale = quello del Task 2 (956) + 17.
 
 - [ ] **Step 8: Commit**
 
 ```bash
 git add tools/delugexml/groove.py tools/delugexml/musica.py tools/misura_groove.py tests/test_all.py
-git commit -m "groove: il taglio 'rado', col ripiego e la larghezza misurata
+git commit -m "groove: il taglio 'rado' taglia nel mezzo del vuoto, e segue i dati
 
-Taglia dove la voce ha meno colpi. Su semicrome piene non c'e' nessun punto
-rado e lo spostamento esce zero: uno stimatore che trova sempre qualcosa e'
-uno stimatore che inventa.
+Il criterio del minimo di densita' si incollava: il minimo e' un altopiano e
+l'argmin ne prendeva il primo punto della scansione, sempre a fase 0.
+Traslando la voce di -4, -2, 0, +2, +4 lo spostamento restava -12,00 tutte
+le volte -- uno stimatore che non si muove quando i dati si muovono.
 
-La larghezza della finestra non e' ereditata dalla sonda: la sceglie
-la_sensibilita_del_rado() con una regola scritta prima di guardare i numeri.
+Il centro del vuoto piu' largo trasla coi dati, da' spostamento zero sulle
+voci gia' sulla griglia per costruzione, e non ha nessun parametro da
+tarare: spariscono LARGHEZZA_RADO, RIPIEGO_RADO e la regola del pianoro che
+sui 118 voci del corpus non decideva (35 -> 25 -> 36, non-monotona).
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 ```
@@ -934,7 +983,7 @@ def la_prova_di_traslazione():
               f'{sum(1 for s in v["salti"] if s >= PPQ / 8):30d}')
 ```
 
-Aggiungere `la_prova_di_traslazione()` in `main()`, subito dopo `la_sensibilita_del_rado()`.
+Aggiungere `la_prova_di_traslazione()` in `main()`, subito dopo `il_vuoto_delle_voci()`.
 
 - [ ] **Step 5: Eseguire la misura e leggerla**
 
@@ -1108,17 +1157,35 @@ In `tools/misura_groove.py`, dentro `il_bordo_del_passo()`, avvolgere il ciclo e
 
 Run: `.venv/Scripts/python.exe tools/misura_groove.py > out/groove_jazz.txt 2>&1`
 
-- [ ] **Step 3: Scegliere il default con la regola scritta**
+- [ ] **Step 3: Il default è `'voce'`, e come ci si è arrivati**
 
-La regola, e vale **così com'è scritta**, senza aggiustarla dopo aver visto i numeri:
+⚠️ **La scelta è già stata presa, dal proprietario del progetto, il 26 agosto 2026, e questo Step la esegue invece di rifarla.** Sta scritta qui per intero — compreso il fatto che **la regola scritta prima selezionava l'altro** — perché una decisione presa contro la propria regola va registrata come decisione, non travestita da esito della regola.
 
-1. si scarta ogni taglio la cui **pendenza mediana** sotto traslazione si discosta da 1 più di quanto se ne discosti il migliore;
-2. fra i restanti vince quello con **meno voci che mostrano un salto ≥ mezzo passo**;
-3. a parità, vince il più semplice, cioè quello con **meno parametri**: `'voce'` non ne ha, `'rado'` ne ha due.
+I numeri sul tavolo quando è stata presa, tutti `[MIS]` su 42 esecuzioni, 5 batteristi, 111 voci:
 
-⚠️ **Il «battere in minoranza», il 43,7% e il 12 su 15 NON entrano in questa regola.** Sono conseguenze: si riportano al Task 7, non decidono.
+| | `vicino` (l'attuale) | `voce` | `rado` |
+|---|---:|---:|---:|
+| pendenza mediana sotto traslazione | 0,808 | **0,998** | **0,998** |
+| scarto massimo mediano (tick) | 3,28 | **1,47** | 1,97 |
+| voci con un salto ≥ mezzo passo | 16 / 111 | 4 / 111 | **3 / 111** |
+| celle mal ancorate | 0 *(impossibile per costruzione)* | **2** | 5 |
 
-Cambiare il default in `profilo_da_colpi()` e in `profilo()` al valore scelto.
+**Cosa la misura chiude da sola, senza bisogno di nessun giudizio:** `'vicino'` non è uno stimatore. La sua risposta segue i dati per lo 0,808, contro lo 0,998 di tutt'e due i candidati, e ha **16 voci su 111** che saltano di mezzo passo contro 3 e 4. Questo è il risultato del lavoro, ed è netto.
+
+**Cosa la misura NON chiude:** quale dei due candidati. La pendenza è pari a tre decimali.
+
+**La regola che era stata scritta prima** diceva: scartare per pendenza, poi vincere con meno salti, poi a parità vincere con meno parametri. Applicata alla lettera seleziona **`'rado'`** — 3 salti contro 4. Il proprietario ha scelto **`'voce'`**, e le ragioni, dette per intero:
+
+- il margine di `'rado'` è **una voce su 111**, cioè plausibilmente rumore, mentre `'voce'` vince su **due** grandezze e con margini più larghi: scarto massimo mediano 1,47 contro 1,97, e celle mal ancorate 2 contro 5;
+- il **terzo criterio della regola era diventato void**: diceva «a parità vince quello con meno parametri, `'voce'` non ne ha e `'rado'` ne ha due», ma dopo la riscrittura del Task 3 nemmeno `'rado'` ne ha;
+- la colonna **dell'ancoraggio non esisteva** quando la regola è stata scritta: la misura del Task 5 è nata dopo;
+- `'voce'` riusa macchinario già nel modulo e già rivisto — la media circolare di `_media_versori()` — invece di aggiungere una seconda idea geometrica.
+
+⚠️ **E la cosa che va scritta accanto, perché è il rischio che questo progetto ha già pagato una volta:** scavalcare una regola dopo aver visto i numeri è esattamente il meccanismo della finestra di grazia, dove un criterio messo per una ragione plausibile fabbricava la conclusione. Qui la differenza è che **la regola non viene riscritta per far vincere `'voce'`**: viene dichiarata insufficiente a decidere una parità che non aveva previsto, e la decisione la prende una persona, per iscritto, con tutte e quattro le colonne visibili. Chi rilegge può non essere d'accordo — e ha davanti i numeri per dirlo.
+
+⚠️ **Il «battere in minoranza», il 43,7% e il 12 su 15 NON sono entrati in questa scelta.** Sono conseguenze: si riportano al Task 7, non decidono.
+
+Cambiare il default a `'voce'` in `profilo_da_colpi()` e in `profilo()`, e scrivere accanto alla firma la data e il rimando a questa sezione.
 
 - [ ] **Step 4: Aggiornare il test di neutralità**
 
@@ -1131,7 +1198,7 @@ Cambiare il default in `profilo_da_colpi()` e in `profilo()` al valore scelto.
           SCELTO)
 ```
 
-dove `SCELTO` è la stringa del taglio deciso, e aggiungere sopra, nel test, il commento con la **data della scelta e la ragione in una riga**. Fare la stessa sostituzione in `test_groove_taglio_neutro_sul_corpus`.
+dove `SCELTO` è `'voce'`, e aggiungere sopra, nel test, il commento con la **data della scelta e la ragione in una riga**. Fare la stessa sostituzione in `test_groove_taglio_neutro_sul_corpus`.
 
 - [ ] **Step 5: Eseguire tutta la suite**
 
@@ -1143,11 +1210,17 @@ Expected: tutti PASS. ⚠️ **Se un test scritto prima di questo piano diventa 
 
 ```bash
 git add tools/delugexml/groove.py tools/misura_groove.py tests/test_all.py out/
-git commit -m "groove: il default e' <SCELTO>, e la regola era scritta prima
+git commit -m "groove: il default e' 'voce', e la regola scritta prima diceva 'rado'
 
-Scelto con la prova di traslazione per voce e con la regola dei tre criteri
-scritta al Task 6 del piano, non con la tenuta della casella 6. Il battere in
-minoranza e il 12 su 15 sono conseguenze, e stanno nella scheda.
+La misura chiude da sola la domanda vera: 'vicino' non e' uno stimatore,
+pendenza 0,808 contro 0,998, e 16 voci su 111 che saltano di mezzo passo
+contro 3 e 4. Quale dei due candidati non lo chiude: la pendenza e' pari a
+tre decimali.
+
+La regola scritta prima selezionava 'rado' per una voce su 111. Il
+proprietario ha scelto 'voce', che vince su scarto massimo mediano (1,47
+contro 1,97) e ancoraggio (2 celle contro 5). La sostituzione sta scritta
+nel piano come decisione, non travestita da esito della regola.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 ```
@@ -1170,6 +1243,12 @@ Nella sezione «Il bordo fra due passi», sostituire il paragrafo che dice *«è
 
 ⚠️ **I numeri vecchi non si cancellano.** In questo progetto una correzione sta datata accanto a ciò che correggeva, non al suo posto: è così che le due correzioni del conteggio reggae sono leggibili.
 
+⚠️ **E la casella deve dichiarare il limite che RESTA, che non è lo stesso di prima.** Il rovesciamento del segno è chiuso; al suo posto c'è l'**ancoraggio**, ed è un limite più piccolo e di natura diversa. Va scritto con questi elementi:
+
+- **cos'è:** chiuso lo spezzarsi di un gesto fra due celle, resta indeciso su **quale** dei due passi ancorarlo. Dai dati soli «14 tick prima del passo 4» e «10 tick dopo il passo 3» sono la stessa cosa, e il gesto è anzi **più vicino** al passo debole: nessun criterio di distanza può preferire il battere. A distinguerli c'è solo il **metro**;
+- **quanto pesa, misurato** il 26 agosto 2026 su 42 esecuzioni e 5 batteristi: **2 celle** col taglio scelto (kick di `drummer10/session1/8`, passi 7 e 15), contro 5 con `'rado'` e 0 con `'vicino'` — dove lo zero di `'vicino'` è **impossibile per costruzione**, non una virtù. Gli scarti stanno fra **+12,70 e +16,50** tick: sporgono di 1-4 tick oltre il punto in cui la distanza smette di decidere, cioè sono casi **genuinamente ambigui**, non collocazioni grossolanamente sbagliate;
+- **perché non si è scritta una regola**, deciso il 26 agosto 2026: `MU.applica_groove()` **già lo riferisce**. Se il pattern chiede un passo che il profilo non ha, la nota resta com'è e il passo finisce in `senza_appoggio`, che va letto. Il caso è **visibile e non silenzioso**, ed è lo stesso principio del «non inventa». Una regola avrebbe dovuto pesare il metro contro la distanza senza nessuna misura che dica quanto — cioè inventare un numero per 2 celle.
+
 - [ ] **Step 2: `jazz.md` — i numeri della casella 6 che si sono mossi**
 
 Rileggere `out/groove_jazz.txt` e aggiornare, ognuno **con la sua data**: il profilo posizionale (il 43,7%), il charleston contro il ride (**12 su 15**, e mai «15 su 15»: quello che regge è delle fasi grezze), la stratificazione, il massimo spostamento e l'escursione.
@@ -1183,6 +1262,8 @@ Nel § «Il groove template» di `docs/MUSICA.md` e nella riga di `applica_groov
 - [ ] **Step 4: `HANDOFF.md`**
 
 In **§7**, togliere il punto «l'aggregazione per passo del groove template» dall'elenco dei punti aperti. In **§6-terdecies**, sotto «Cosa resta aperto», sostituire il punto sul limite dello stimatore con due righe che dicono **che è stato chiuso, quando, e con quale criterio** — e che i due criteri più ovvi erano trappole.
+
+Nell'elenco dei punti aperti **entra l'ancoraggio**, con una riga che dice cos'è, quanto pesa (2 celle su 42 esecuzioni), perché non si è chiuso, e che `senza_appoggio` lo rende visibile. È un punto aperto **più piccolo** di quello che chiude, e va detto anche questo.
 
 ⚠️ Il punto **«la stratificazione misurata non è mai stata messa davanti a un orecchio»** resta aperto, e va aggiornato: la coppia da ascoltare è su `drummer10/session1/1`, passi 4 e 12, cioè **le celle che questo lavoro ha spostato**. I divari di 5,64 e 5,93 tick sono **da rimisurare** col taglio scelto prima di costruire quella coppia.
 

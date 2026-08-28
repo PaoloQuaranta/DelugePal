@@ -213,7 +213,10 @@ def applica_groove(note: list[Note], profilo, dove: str) -> dict[str, object]:
     benedizione della funzione scritta per impedirlo.
 
     Ritorna un rapporto (regola 4: un'operazione silenziosa non e'
-    correggibile).
+    correggibile): `strumento`, `da` (l'id del profilo), `toccate`,
+    `senza_appoggio` (i passi senza misura) e `collisioni` -- le posizioni
+    dove due note sono finite sullo stesso tick, cosa possibile dal 26
+    agosto 2026 perche' lo scarto puo' arrivare a un passo intero.
     """
     if dove not in profilo.passi:
         raise ValueError(
@@ -237,8 +240,18 @@ def applica_groove(note: list[Note], profilo, dove: str) -> dict[str, object]:
         n.pos = max(0, n.pos + int(round(misura.scarto)))
         toccate += 1
 
+    # ⚠️ DAL 26 AGOSTO 2026 due note possono finire sullo stesso tick: uno
+    # scarto puo' arrivare a un passo intero, quindi il passo 3 in ritardo e
+    # il 4 in anticipo si incontrano. Il Deluge lo accetta e non e' un
+    # errore, ma va riferito -- e' la regola 4, un'operazione silenziosa non
+    # e' correggibile.
+    quante: dict[int, int] = {}
+    for n in note:
+        quante[n.pos] = quante.get(n.pos, 0) + 1
+    collisioni = sorted(p for p, q in quante.items() if q > 1)
+
     return {'strumento': dove, 'da': profilo.id, 'toccate': toccate,
-            'senza_appoggio': sorted(senza)}
+            'senza_appoggio': sorted(senza), 'collisioni': collisioni}
 
 
 def durata_in_tick(spec: str | int) -> int:
