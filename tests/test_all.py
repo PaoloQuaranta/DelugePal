@@ -6124,16 +6124,25 @@ def test_applica_groove():
           str(bordo[0].velocity))
 
 
-def test_groove_taglio_neutro():
-    """Il parametro `taglio` esiste, e chiamare senza equivale a nominarlo.
+def test_groove_taglio_default():
+    """Il default di `profilo_da_colpi()` e' il taglio SCELTO, e nient'altro.
 
-    ⚠️ FINO AL 26 AGOSTO 2026 questo era il cancello di tutto il confronto
-    fra stimatori: il default era `'vicino'`, e se non riproduceva
-    esattamente i numeri di prima ogni differenza misurata fra i tagli
-    sarebbe stata inattribuibile -- non si sarebbe saputo se l'aveva mossa
-    lo stimatore o la ristrutturazione del ciclo. Il Task 6 ha spostato il
-    default su `'voce'`; il check resta, ma ora confronta il default con
-    `SCELTO` invece che con `'vicino'` -- vedi il commento sopra `SCELTO`.
+    ⚠️ FINO AL 28 AGOSTO 2026 questa funzione si chiamava
+    `test_groove_taglio_neutro`, ed e' il nome con cui la citano il piano e
+    i rapporti dei Task 1 e 6. Quel nome diceva il vero solo finche' il
+    default era `'vicino'`: allora questo era il CANCELLO DI NEUTRALITA' di
+    tutto il confronto fra stimatori -- la ristrutturazione del ciclo in
+    due passate non doveva muovere un solo numero, se no ogni differenza
+    misurata fra i tagli sarebbe stata inattribuibile: non si sarebbe
+    saputo se l'aveva mossa lo stimatore o il refactoring. Il Task 6 ha
+    spostato il default su `'voce'`, e da allora il confronto e' col taglio
+    SCELTO. Di neutralita' non se ne misura piu': si inchioda il default, e
+    il nome ora lo dice.
+
+    Cosa asserisce, in tre punti: che il default sia `SCELTO`; che un
+    taglio sconosciuto sollevi nominando i tre modi; e che `'vicino'` non
+    sposti il taglio, cioe' che il termine di paragone sia davvero il
+    `round()` di sempre.
     """
     from delugexml import groove as GR                      # noqa: PLC0415
 
@@ -6169,11 +6178,23 @@ def test_groove_taglio_neutro():
           str(GR.spostamento_del_taglio([1.0, 2.0, 3.0], 24.0, 'vicino')))
 
 
-def test_groove_taglio_neutro_sul_corpus():
-    """Lo stesso cancello, sul dataset vero. SALTA se non c'e'.
+def test_groove_taglio_default_sul_corpus():
+    """Lo stesso default, all'ALTRO ingresso e sul dataset vero.
 
-    Il caso sintetico non ha colpi al bordo; il corpus ne ha. Se la
-    ristrutturazione avesse cambiato qualcosa, e' qui che si vede.
+    SALTA se il dataset non c'e', come gli altri test del corpus.
+
+    ⚠️ FINO AL 28 AGOSTO 2026 si chiamava
+    `test_groove_taglio_neutro_sul_corpus`, e il docstring diceva «se la
+    ristrutturazione avesse cambiato qualcosa, e' qui che si vede»: vero
+    quando il default era `'vicino'` e il confronto valeva come cancello di
+    neutralita'. Non lo e' piu'.
+
+    Due cose lo distinguono dal test qui sopra, e non e' una ripetizione.
+    La prima: `profilo()` ha un default TUTTO SUO, scritto nella sua firma,
+    che potrebbe scostarsi da quello di `profilo_da_colpi()` senza che
+    nessun altro test se ne accorga -- ed e' `profilo()` l'ingresso che
+    usano `misura_groove.py` e `genera_groove.py`. La seconda: il caso
+    sintetico non ha colpi al bordo, il corpus ne ha.
     """
     from delugexml import groove as GR                      # noqa: PLC0415
 

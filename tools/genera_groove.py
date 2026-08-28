@@ -20,6 +20,31 @@ Da lanciare da D:\\DelugePal:
 
 ⚠️ Vuole due cose non versionate: `refs/songs/TEMPL0.XML` (la song di
 partenza) e il Groove MIDI Dataset in `to-read/`. Senza, si ferma dicendolo.
+
+⚠️ NON E' UN PULSANTE DA PREMERE, e il divieto e' scritto per intero in
+`HANDOFF.md`, «Cosa NON rifare», e in `docs/repertori/jazz.md`, casella 6.
+Eseguirlo SOVRASCRIVE l'unico esemplare di `out/GROOVE0.XML` e
+`out/GROOVE1.XML`, su cui poggiano quattro ascolti e un giro sul dispositivo
+(31 posizioni su 31). Chi rivuole la coppia col codice di oggi la scriva
+ALTROVE e la confronti con quella.
+
+⚠️ E QUELLO CHE USCIREBBE NON SAREBBE PIU' LA COPPIA ASCOLTATA, per due
+ragioni indipendenti che si sommano:
+
+1. la coppia e' stata costruita PRIMA che la finestra di mezzo passo di
+   grazia fosse tolta da `profilo_da_colpi()` (commit `18f26e5`): rifacendo
+   la catena oggi la riga del pedale esce a -4 tick invece di -3, e cambiano
+   altre otto posizioni su 31;
+2. `main()` chiama `GR.profilo(BASE_GROOVE, ESECUZIONE)` SENZA nominare
+   `taglio`, quindi segue il default del modulo -- che il 26 agosto 2026 e'
+   passato da `'vicino'` a `'voce'` (vedi `GR.TAGLI`). Il residuo che il
+   template porta non e' piu' quello di allora.
+
+⚠️ LA CHIAMATA RESTA SENZA `taglio`, ed e' una scelta. Inchiodarla a
+`'vicino'` farebbe credere che lo script riproduca la coppia ascoltata: non
+lo fa comunque, per il punto 1, e una fedelta' finta e' peggio di
+un'infedelta' dichiarata. Questo script segue il modulo; qual era il taglio
+al momento dell'ascolto lo dice la scheda, non il codice.
 """
 from __future__ import annotations
 
