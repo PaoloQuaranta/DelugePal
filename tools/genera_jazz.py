@@ -86,14 +86,20 @@ ESECUZIONE = 'drummer10/session1/1'
 #:       misurata dei gradi SULLA TONICA DEL PEZZO invece che sulla scala
 #:       dell'accordo, e la griglia dell'assolo passa a sedicesimi.
 #:       Verdetto: «ora suona molto meglio. Le note sono a posto, le corse
-#:       suonano bene ed e' decisamente piu' pirotecnico».
+#:       suonano bene ed e' decisamente piu' pirotecnico». E, riascoltando:
+#:       «le frasi finiscono sempre su note che non hanno molto senso dal
+#:       punto di vista della gravitazione tonale».
+#:   04  29 agosto 2026. Le fini di frase atterrano su fondamentale, quinta
+#:       o settima minore, misurate su 1913 fini di frase in 80 assoli; e il
+#:       motivo finisce sulla quinta invece che sull'undicesima. Cambia SOLO
+#:       questo rispetto alla 03: le altre note del cammino sono le stesse.
 #:
 #: ⚠️ E' il primo giro CHIUSO di questo progetto: una lamentela all'orecchio,
 #: una misura sul corpus, una correzione, e lo stesso orecchio che approva.
 #: Le tre versioni restano una coppia controllata a tre -- batteria, basso e
 #: comping hanno le stesse identiche note in tutte e tre -- quindi i tre
 #: verdetti parlano dell'assolo e di nient'altro.
-VERSIONE = 3
+VERSIONE = 4
 
 BPM = 128
 #: Casella 10 di `docs/repertori/jazz.md`, riga HARDBOP/BEBOP. `figura='1/8'`
@@ -319,9 +325,15 @@ SLOT_BATTUTA = {9: '....xxxxxxxxxxxx'}
 
 #: Il motivo: cinque note, cioe' quattro intervalli. ⚠️ Cinque e non tre: a
 #: tre note la ripetizione e' indistinguibile dal caso (1,02x contro la stessa
-#: linea mescolata), a cinque vale 4,2x in 78 assoli su 80. Sono i gradi della
-#: scala dell'accordo, non semitoni.
-MOTIVO = (0, 1, 2, 4, 3)
+#: linea mescolata), a cinque vale 4,2x in 78 assoli su 80.
+#:
+#: ⚠️ FINISCE SULLA QUINTA, e dalla versione 04. Prima era `fa sol la do sib`
+#: e finiva sull'UNDICESIMA: su F7 il sib e' la sospensione che chiede il la,
+#: e la terza enunciazione cade proprio in fine di frase, quindi il pezzo
+#: chiudeva il giro dell'assolo su una sospensione irrisolta. Adesso e'
+#: `fa sol la sib do` -- stessa salita, un grado in piu', e atterra sulla
+#: quinta, che il corpus da' a 1,29x fra le fini di frase.
+MOTIVO_SEMITONI = [0, 2, 4, 5, 7]
 
 #: Dove il motivo viene enunciato: battuta del giro -> trasposizione in
 #: SEMITONI dalla prima enunciazione.
@@ -371,6 +383,32 @@ TONICA = 5
 #: Sui movimenti si preferisce una nota dell'accordo: e' li' che una nota
 #: fuori si sente come un errore invece che come un passaggio.
 PESO_ACCORDO = 3.0
+
+#: ⚠️ DOVE ATTERRA UNA FRASE, e dalla versione 04 non e' piu' dove il cammino
+#: capita. La 03 finiva le frasi sul b3 e sull'11ma -- su F7 il sib, cioe' la
+#: nota che CHIEDE di risolvere sul la e non risolveva -- e l'utente l'ha
+#: sentito: «le frasi finiscono sempre su note che non hanno molto senso dal
+#: punto di vista della gravitazione tonale».
+#:
+#: Misurato su 1913 fini di frase in 80 assoli `[MIS]`, come grado
+#: sull'accordo sotto. Una fine di frase e' l'ultima nota prima di un buco di
+#: almeno mezza battuta, la stessa soglia con cui le frasi sono contate nella
+#: casella 8:
+#:
+#:     fondamentale  22,1% alla fine contro 14,1% ovunque   1,57x
+#:     quinta        17,1%              13,3%               1,29x
+#:     settima min   12,0%              10,7%               1,12x
+#:     terza          7,4%               8,2%               0,90x
+#:     undicesima     7,3%               9,1%               0,80x
+#:     nona bemolle   2,5%               4,5%               0,56x
+#:     settima MAG    2,5%               4,9%               0,51x
+#:
+#: Le note dell'accordo sono il 58,7% alle fini contro il 46,3% ovunque. Il
+#: disegno e' netto: si atterra sullo SCHELETRO -- fondamentale, quinta,
+#: settima minore -- e si evitano la settima maggiore e le alterate, tutte
+#: dimezzate. ⚠️ La TERZA non e' favorita (0,90x), che e' controintuitivo e
+#: va tenuto a mente: non e' «una nota dell'accordo qualunque».
+ATTERRAGGI = {0: 22.1, 7: 17.1, 10: 12.0}
 
 #: La finestra dell'assolo, in numeri di nota MIDI: re4 - la5. Il tema sta
 #: dentro do5 - fa5, quindi l'assolo ha piu' spazio sotto e sopra.
@@ -425,7 +463,7 @@ def assolo(giro_del_solista: list[str]) -> tuple:
         if battuta in ENUNCIAZIONI:
             # il motivo, alle stesse altezze ogni volta piu' la trasposizione
             base = ASSOLO_PARTENZA + ENUNCIAZIONI[battuta]
-            passo = [0, 2, 4, 7, 5]          # i gradi di MOTIVO in semitoni
+            passo = MOTIVO_SEMITONI
             posti = [k for k, c in enumerate(pattern) if c == 'x']
             for k, s in enumerate(posti):
                 if k < len(passo):
@@ -451,7 +489,47 @@ def assolo(giro_del_solista: list[str]) -> tuple:
                     or rng.random() < 0.18:
                 direzione = -direzione
         fuori.append(tuple(note))
-    return tuple(fuori)
+    return _fai_atterrare(fuori, giro_del_solista, rng)
+
+
+def _fai_atterrare(battute, giro_del_solista, rng):
+    """Rimette l'ultima nota di ogni frase su uno degli ATTERRAGGI.
+
+    ⚠️ E' una passata a parte, e non un peso in piu' dentro il cammino, per
+    una ragione che la misura impone: le fini di frase seguono una
+    distribuzione DIVERSA dal resto della linea, non una versione inclinata
+    della stessa. Il 58,7% cade sulle note dell'accordo contro il 46,3%
+    ovunque, e la terza -- che pure e' dell'accordo -- ci finisce MENO della
+    media. Un bonus sul peso non produrrebbe questa forma.
+
+    Fine di frase = ultima nota prima di un buco di almeno mezza battuta, la
+    stessa soglia della casella 8. Si sceglie l'atterraggio piu' vicino alla
+    nota che c'era, cosi' la frase non viene deviata ma solo posata.
+    """
+    piatta = [(i, s, x) for i, b in enumerate(battute)
+              for s, x in enumerate(b) if x is not None]
+    if not piatta:
+        return tuple(battute)
+    righe = [list(b) for b in battute]
+
+    for k, (i, s, x) in enumerate(piatta):
+        pos = i * 16 + s
+        ultima = k == len(piatta) - 1
+        if not ultima:
+            j, s2, _ = piatta[k + 1]
+            ultima = (j * 16 + s2) - pos >= 8          # mezza battuta
+        if not ultima:
+            continue
+        fond = ACCORDI[giro_del_solista[i]][0]
+        scelte = [n for n in range(ASSOLO_MIN, ASSOLO_MAX + 1)
+                  if (n - fond) % 12 in ATTERRAGGI]
+        # il piu' vicino, con la quota misurata a fare da spareggio
+        vicino = min(abs(n - x) for n in scelte)
+        pari = [n for n in scelte if abs(n - x) <= vicino + 1]
+        pesi = [ATTERRAGGI[(n - fond) % 12] / (1 + abs(n - x)) ** 2
+                for n in pari]
+        righe[i][s] = rng.choices(pari, weights=pesi, k=1)[0]
+    return tuple(tuple(b) for b in righe)
 
 
 # --------------------------------------------------------------------------
