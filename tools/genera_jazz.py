@@ -89,17 +89,19 @@ ESECUZIONE = 'drummer10/session1/1'
 #:       suonano bene ed e' decisamente piu' pirotecnico». E, riascoltando:
 #:       «le frasi finiscono sempre su note che non hanno molto senso dal
 #:       punto di vista della gravitazione tonale».
-#:   04  29 agosto 2026. Le fini di frase atterrano su fondamentale, quinta
-#:       o settima minore, misurate su 1913 fini di frase in 80 assoli; e il
-#:       motivo finisce sulla quinta invece che sull'undicesima. Cambia SOLO
-#:       questo rispetto alla 03: le altre note del cammino sono le stesse.
+#:   04  29 agosto 2026. Atterraggi misurati + motivo cambiato. RESPINTA:
+#:       «il solo in generale e' peggio di quello precedente... molte note
+#:       sembrano un po' ardite rispetto alla tonalita'». Cambiare il motivo
+#:       aveva fatto divergere tutto il cammino, non solo tre note.
+#:   05  29 agosto 2026. Il cammino della 03, IDENTICO, con le sole tre note
+#:       di fine frase riportate sugli atterraggi misurati.
 #:
 #: ⚠️ E' il primo giro CHIUSO di questo progetto: una lamentela all'orecchio,
 #: una misura sul corpus, una correzione, e lo stesso orecchio che approva.
 #: Le tre versioni restano una coppia controllata a tre -- batteria, basso e
 #: comping hanno le stesse identiche note in tutte e tre -- quindi i tre
 #: verdetti parlano dell'assolo e di nient'altro.
-VERSIONE = 4
+VERSIONE = 5
 
 BPM = 128
 #: Casella 10 di `docs/repertori/jazz.md`, riga HARDBOP/BEBOP. `figura='1/8'`
@@ -327,13 +329,26 @@ SLOT_BATTUTA = {9: '....xxxxxxxxxxxx'}
 #: tre note la ripetizione e' indistinguibile dal caso (1,02x contro la stessa
 #: linea mescolata), a cinque vale 4,2x in 78 assoli su 80.
 #:
-#: ⚠️ FINISCE SULLA QUINTA, e dalla versione 04. Prima era `fa sol la do sib`
-#: e finiva sull'UNDICESIMA: su F7 il sib e' la sospensione che chiede il la,
-#: e la terza enunciazione cade proprio in fine di frase, quindi il pezzo
-#: chiudeva il giro dell'assolo su una sospensione irrisolta. Adesso e'
-#: `fa sol la sib do` -- stessa salita, un grado in piu', e atterra sulla
-#: quinta, che il corpus da' a 1,29x fra le fini di frase.
-MOTIVO_SEMITONI = [0, 2, 4, 5, 7]
+#: ⚠️ RESTA `fa sol la do sib`, E LA VERSIONE 04 AVEVA PROVATO A CAMBIARLO.
+#: Finisce sull'undicesima, che in fine di frase e' sbagliata -- ma a
+#: correggerlo qui il danno era molto piu' grande del difetto.
+#:
+#: Il motivo e' l'ultima cosa che succede in una battuta, quindi la sua ultima
+#: nota e' il `corrente` da cui riparte il cammino della battuta dopo.
+#: Cambiarla ha fatto DIVERGERE TUTTO L'ASSOLO: 56 slot su 192 diversi invece
+#: dei 3 di atterraggio, e le note cromatiche SUI MOVIMENTI sono passate dal
+#: 12% al 21%. L'utente l'ha sentito subito -- «il solo in generale e' peggio
+#: di quello precedente, che sbagliava solo la nota di atterraggio... molte
+#: note sembrano un po' ardite rispetto alla tonalita'».
+#:
+#: ⚠️ E LA MIA METRICA DICEVA IL CONTRARIO: lo scarto dal corpus sui gradi era
+#: SCESO da 33,7 a 23,3. Contava QUANTE note di ogni grado e non DOVE
+#: cadevano, che e' precisamente la regola che la casella 11 aveva appena
+#: scritto. Una misura aggregata puo' migliorare mentre la musica peggiora.
+#:
+#: L'undicesima finale la corregge `_fai_atterrare()`, che tocca la sola
+#: ultima nota della frase e lascia il cammino dov'era.
+MOTIVO_SEMITONI = [0, 2, 4, 7, 5]
 
 #: Dove il motivo viene enunciato: battuta del giro -> trasposizione in
 #: SEMITONI dalla prima enunciazione.
