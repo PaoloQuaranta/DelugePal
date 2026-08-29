@@ -2136,20 +2136,23 @@ il ripiego che la casella 7 prescrive. L'utente infatti non se n'è lamentato.
 Quel silenzio quindi **non assolve la libreria**: assolve un aggiramento fatto
 a mano, che va rifatto ogni volta finché la 7 non è chiusa.
 
-### Il giro si chiude: JAZZ02 e JAZZ03 — 29 agosto 2026
+### Il giro si chiude: cinque versioni in un pomeriggio — 29 agosto 2026
 
 ⚠️ **È la prima volta in questo progetto che una correzione dall'ascolto viene
 convertita in una misura e rimessa nel generatore, con lo stesso orecchio che
 approva il risultato.** Fino a qui l'ascolto aveva sempre e solo *aperto*
-domande. Le tre versioni sono una **coppia controllata a tre**: batteria,
-basso e comping hanno le stesse identiche note in tutte e tre — verificato
-confrontando i file — e cambia solo la tromba.
+domande. Le cinque versioni sono una **coppia controllata a cinque**:
+batteria, basso e comping hanno le stesse identiche note in tutte — verificato
+confrontando i file — e cambia solo la tromba. Ogni verdetto parla quindi
+dell'assolo e di nient'altro.
 
 | | l'assolo | il verdetto |
 |---|---|---|
 | `JAZZ01` | scritto a mano, crome | *«poco pirotecnico»* |
 | `JAZZ02` | dalle cinque regole, crome, scale d'accordo | *«alcune note sembrano fuori tonalità… non mi sembra più pirotecnico, soprattutto perché è tutto in ottavi»* |
-| `JAZZ03` | pesi misurati sulla tonica, corse in sedicesimi | *«ora suona molto meglio. Le note sono a posto, le corse suonano bene ed è decisamente più pirotecnico»* |
+| `JAZZ03` | pesi misurati sulla tonica, corse in sedicesimi | *«ora suona molto meglio. Le note sono a posto, le corse suonano bene ed è decisamente più pirotecnico»*. Riascoltando: *«le frasi finiscono sempre su note che non hanno molto senso dal punto di vista della gravitazione tonale»* |
+| `JAZZ04` | atterraggi misurati **+ motivo cambiato** | **RESPINTA** — *«il solo in generale è peggio di quello precedente, che sbagliava solo la nota di atterraggio… molte note sembrano un po' ardite rispetto alla tonalità»* |
+| `JAZZ05` | il cammino della 03 **identico**, e le sole due note di atterraggio | *«molto meglio»* |
 
 #### La correzione di JAZZ02, e perché era misurabile
 
@@ -2184,6 +2187,85 @@ sta bassa.
 DOVE.** La stessa quota distribuita male suona storta lo stesso. Nel generatore
 questo è il peso che una nota dell'accordo prende **sui movimenti** — senza,
 la distribuzione giusta produceva comunque una linea sbagliata.
+
+#### Gli atterraggi, misurati — e la trappola che ci si è nascosta dentro
+
+Le frasi della `JAZZ03` finivano dove il cammino capitava, perché il
+generatore **non sapeva cosa fosse una fine di frase**: sceglieva ogni nota
+con la stessa regola. Le tre fini erano il grado 1, il **b3** (la terza blues,
+sola in una battuta altrimenti vuota) e l'**undicesima** — su F7 il sib, cioè
+la sospensione che chiede il la e non risolveva, proprio a chiudere il giro
+dell'assolo.
+
+**Misurato su 1913 fini di frase in 80 assoli** `[MIS]` — ultima nota prima di
+un buco di mezza battuta, la stessa soglia con cui le frasi sono contate più
+sopra — come grado **sull'accordo sotto**:
+
+| grado | fine frase | ovunque | rapporto |
+|---|---|---|---|
+| **fondamentale** | 22,1% | 14,1% | **1,57×** |
+| **quinta** | 17,1% | 13,3% | **1,29×** |
+| **settima minore** | 12,0% | 10,7% | 1,12× |
+| terza | 7,4% | 8,2% | 0,90× |
+| undicesima | 7,3% | 9,1% | 0,80× |
+| nona bemolle | 2,5% | 4,5% | 0,56× |
+| settima maggiore | 2,5% | 4,9% | 0,51× |
+
+Le note dell'accordo sono il **58,7%** alle fini contro il **46,3%** ovunque.
+Si atterra sullo **scheletro** e si evitano la settima maggiore e le alterate,
+tutte dimezzate.
+
+⚠️ **La terza NON è favorita (0,90×)**, ed è controintuitivo: non basta «una
+nota dell'accordo», sono quelle tre.
+
+⚠️ **Va applicato come passata a parte, non come peso in più dentro la scelta
+della nota.** La misura lo impone: le fini seguono una distribuzione *diversa*
+dal resto della linea, non una versione inclinata della stessa — un bonus sul
+peso non abbasserebbe mai la terza.
+
+#### La trappola: nel generatore lo stato passa da una battuta all'altra
+
+⚠️ **Questa è la trappola vera del pomeriggio, ed è di macchina, non di
+musica.** Per correggere l'undicesima finale la `JAZZ04` aveva cambiato
+l'ultima nota del **motivo**. Sembra una modifica di una nota. Non lo è: il
+motivo è l'ultima cosa che succede nella sua battuta, quindi la sua ultima
+nota è il valore da cui **riparte il cammino della battuta dopo**. Tutto
+l'assolo è divergiuto.
+
+| | `JAZZ04` | `JAZZ05` |
+|---|---|---|
+| slot diversi dalla `JAZZ03`, su 192 | **56** | **2** |
+| note cromatiche **sui movimenti** | 12% → **21%** | 12% → **12%** |
+
+Quel passaggio dal 12 al 21 per cento è ciò che l'utente ha sentito come
+«ardito», e l'ha sentito **subito**. La `JAZZ05` fa la stessa correzione senza
+toccare il motivo: la passata di atterraggio cambia la sola ultima nota della
+frase e lascia il cammino dov'era. **Due slot su 192.**
+
+**La regola operativa:** in un generatore che cammina, una modifica sembra
+locale e non lo è finché non si guarda **quale stato attraversa la battuta**.
+Prima di dire «cambia solo X», si contano gli slot diversi.
+
+#### E una misura aggregata può migliorare mentre la musica peggiora
+
+⚠️ **È successo due volte nello stesso pomeriggio, e la seconda dopo che la
+lezione era già scritta qui sopra.**
+
+| | la misura diceva | l'orecchio diceva |
+|---|---|---|
+| `JAZZ01` | densità media 5,00 contro 5,23 del corpus: **centrata** | *«poco pirotecnico»* |
+| `JAZZ04` | scarto dal corpus sui gradi **sceso** da 33,7 a 23,3 | *«peggio di quello precedente»* |
+
+Nel secondo caso lo scarto era stato riportato **come un miglioramento**.
+Contava *quante* note di ogni grado e non *dove* cadevano — che è
+letteralmente la regola scritta poche righe più su, non applicata alla misura
+stessa che la doveva verificare.
+
+⚠️ **Una statistica aggregata non è un criterio di accettazione.** Serve a
+trovare *dove guardare*, e la prima volta ha funzionato benissimo — il grado
+11 al triplo sulle corse era invisibile a orecchio nudo e la misura l'ha
+localizzato. Ma **la promozione la dà l'ascolto**, e una metrica che migliora
+non è una prova che qualcosa sia migliorato.
 
 #### Il grado 2, che resta fuori quota ed è dichiarato
 

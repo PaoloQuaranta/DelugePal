@@ -2062,7 +2062,7 @@ Lo strumento è `tools/misura_melodia.py`, l'ultimo giro in
 `wjazzd.db`, con un controllo di **periodicità** della griglia: 15 assoli su 81
 non lo passano e sono **scartati e contati**.
 
-### I tre risultati, in breve
+### I quattro risultati, in breve
 
 **L'arco del giro** — 66 assoli, 38 solisti, 4808 battute `[MIS]`. Le corse
 culminano sul **ii-V** (battute 9-10): **34,4%** contro il **13,3%** della
@@ -2082,7 +2082,15 @@ lunghe**: 0,493 s di mediana contro 0,107 di una nota nuda, **4,6×**. Slide e
 bend stanno invece su note di durata ordinaria — sono gesti di attacco, non di
 tenuta.
 
-### Le tre lezioni di metodo, che valgono oltre la casella
+**Dove atterra una frase** — 1913 fini di frase in 80 assoli `[MIS]`, misurate
+il pomeriggio stesso perché l'ascolto le aveva nominate: *«le frasi finiscono
+sempre su note che non hanno molto senso dal punto di vista della gravitazione
+tonale»*. Si atterra sullo **scheletro dell'accordo** — fondamentale 1,57×,
+quinta 1,29×, settima minore 1,12× — e le note dell'accordo passano dal 46,3%
+ovunque al **58,7%** alle fini. ⚠️ La **terza non è favorita** (0,90×): non
+basta «una nota dell'accordo», sono quelle tre.
+
+### Le cinque lezioni di metodo, che valgono oltre la casella
 
 ⚠️ **1. La previsione era sbagliata, e nel verso che conta.** Ci si aspetta la
 domanda e la risposta — silenzio, poi scoppio. I dati dicono il contrario: dopo
@@ -2097,7 +2105,25 @@ a 140. Lo strumento gira **cinque semi**, stampa min e max e marca `BALLA` da
 sé, così l'instabilità non va riscoperta. Si cita il minimo; a sette note non
 si cita affatto un rapporto, si dice che per caso non ricorre.
 
-⚠️ **3. Due misure indipendenti hanno dato la stessa soglia.** Il controllo
+⚠️ **3. In un generatore che cammina, una modifica sembra locale e non lo è.**
+Per correggere l'undicesima finale, `JAZZ04` aveva cambiato l'ultima nota del
+**motivo**: sembra una nota, ed è invece il valore da cui riparte il cammino
+della battuta dopo. Tutto l'assolo è divergiuto — **56 slot su 192** invece di
+3, con le note cromatiche **sui movimenti** dal 12% al 21%, che l'utente ha
+sentito subito e ha respinto. `JAZZ05` fa la stessa correzione senza toccare
+il motivo: **2 slot su 192**. Prima di dire «cambia solo X», si contano gli
+slot diversi.
+
+⚠️ **4. Una misura aggregata può migliorare mentre la musica peggiora, ed è
+successo DUE VOLTE in un pomeriggio.** `JAZZ01` centrava la densità mediana ed
+era piatto; `JAZZ04` **abbassava** lo scarto dal corpus sui gradi da 33,7 a
+23,3 — e quel numero era stato riportato come un miglioramento — mentre
+peggiorava. Contava *quante* note e non *dove*, che è la lezione appena
+scritta, non applicata alla misura che la doveva verificare. **Una statistica
+aggregata serve a trovare dove guardare, non a promuovere:** la promozione la
+dà l'ascolto.
+
+⚠️ **5. Due misure indipendenti hanno dato la stessa soglia.** Il controllo
 anti-copiatura del pezzo (§6-quindecies) aveva dichiarato tre note in comune
 «la scala, non una citazione», per argomento. Questa misura lo conferma con un
 riferimento casuale: a tre note la ricorrenza è indistinguibile dal caso. Le
