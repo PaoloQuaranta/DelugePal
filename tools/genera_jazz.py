@@ -1,6 +1,6 @@
 """Il primo pezzo jazz di Deluge Pal: un blues di 12 battute in fa.
 
-    out/JAZZ01.XML   ->   /SONGS/DelugePal/JAZZ01.XML
+    out/JAZZ0<N>.XML   ->   /SONGS/DelugePal/JAZZ0<N>.XML
 
 Forma TEMA / ASSOLO / TEMA, 36 battute, hardbop, 128 BPM. Quattro tracce:
 batteria (KIT009, un RX-5), basso walking, comping, tema.
@@ -49,6 +49,7 @@ Senza, si ferma dicendolo.
 """
 from __future__ import annotations
 
+import random
 import sys
 from pathlib import Path
 
@@ -72,6 +73,13 @@ TABELLA = RADICE / 'out' / 'format_table.json'
 #: L'esecuzione da cui esce il groove template. Va NOMINATA ogni volta che se
 #: ne cita un numero: e' `[OSS]` su un esecutore, non `[MIS]` sul jazz.
 ESECUZIONE = 'drummer10/session1/1'
+
+#: La versione che si scrive. `put` non sovrascrive mai: si incrementa.
+#:   01  29 agosto 2026, assolo scritto a mano. «Poco pirotecnico».
+#:   02  29 agosto 2026, assolo generato dalle cinque regole della
+#:       casella 8. Tutto il resto e' identico alla 01, di proposito:
+#:       se la differenza si sente, e' attribuibile.
+VERSIONE = 2
 
 BPM = 128
 #: Casella 10 di `docs/repertori/jazz.md`, riga HARDBOP/BEBOP. `figura='1/8'`
@@ -242,24 +250,142 @@ TEMA_NOTE = (
 #: L'ultima battuta del pezzo: al posto del levare, la fondamentale tenuta.
 TEMA_CHIUSA = (77, None, None, None, None, None, None, None)
 
-#: L'assolo. 60 note su 12 battute = 5,0 per battuta, contro le 5,2
-#: misurate; l'83% degli intervalli sta entro 2 semitoni, con qualche
-#: arpeggio (battute 7 e 9 del giro) a bilanciare. Le frasi si chiudono con
-#: un buco a meta' della 4a e della 8a battuta.
-ASSOLO_NOTE = (
-    (None, 65, 67, 69, 70, 72, 74, 75),         #  1  F7
-    (74, None, 72, 70, None, 69, 70, None),     #  2  Bb7
-    (72, None, 69, 70, 72, 74, 72, 69),         #  3  F7
-    (67, None, None, None, None, None, 69, 70), #  4  F7   -- respiro
-    (72, 74, 75, 77, None, 75, 74, 72),         #  5  Bb7
-    (70, None, None, None, None, 72, 74, 75),   #  6  Bb7
-    (77, None, 75, 72, 69, None, 72, None),     #  7  F7
-    (70, 69, None, None, None, None, None, None),  # 8 F7 -- respiro
-    (None, 67, 70, 74, 77, None, 75, 74),       #  9  Gm7
-    (72, None, 70, 69, 67, None, 64, 67),       # 10  C7
-    (65, None, 69, 72, None, 69, None, None),   # 11  F7
-    (None, None, 74, None, 72, None, 70, 69),   # 12  turnaround
-)
+#: ⚠️ L'ASSOLO NON E' PIU' UNA TABELLA SCRITTA A MANO. Fino al 29 agosto 2026
+#: lo era, e il difetto si e' sentito: l'utente lo ha giudicato «poco
+#: pirotecnico». La casella 11 porta il numero che gli da' ragione -- media e
+#: mediana centrate sul corpus, DISPERSIONE DIMEZZATA, zero battute vuote,
+#: zero corse. Scrivere per centrare una media produce la media.
+#:
+#: Adesso l'assolo esce dalle cinque regole misurate nella CASELLA 8:
+#:
+#:   1. l'arco del giro: poche corse all'inizio, il picco sul ii-V, il vuoto
+#:      sul turnaround;
+#:   2. il respiro a fine frase: battute 4, 8 e 12, con la 12 la piu' vuota;
+#:   3. una corsa dura UNA battuta, due al massimo;
+#:   4. le corse si ADDENSANO, non si alternano ai silenzi;
+#:   5. un motivo e' di almeno CINQUE note -- sotto le quattro la ripetizione
+#:      e' indistinguibile dal caso.
+
+#: Note per battuta, una per posizione del giro. NON e' una scelta di gusto:
+#: segue l'arco misurato su 66 assoli e 38 solisti. Le corse (8) cadono sul
+#: ii-V, i respiri (2, 1, 0) sulle chiusure delle tre frasi, e la 12 e' vuota
+#: perche' e' la posizione piu' vuota del corpus (14,8%).
+#:
+#: ⚠️ IL MASSIMO E' 8, CIOE' UNA BATTUTA DI CROME PIENE, ED E' UNA RINUNCIA
+#: DICHIARATA. Il corpus arriva a 16 note per battuta, cioe' a semicrome: ma
+#: una semicroma sotto `set_swing(figura='1/8')` cade FRA le crome, e cosa il
+#: firmware ne faccia e' un punto aperto di `HANDOFF.md` §7. Si sceglie di non
+#: scriverci sopra. 8 e' anche la soglia con cui le corse sono state contate.
+DENSITA = (5, 6, 6, 2, 5, 7, 6, 1, 8, 8, 5, 0)
+
+#: Dove cadono le note dentro la battuta, per densita'. Le battute di respiro
+#: mettono le note ALL'INIZIO e poi tacciono: sono chiusure di frase, non
+#: levare.
+SLOT = {
+    0: '........',
+    1: 'x.......',
+    2: 'xx......',
+    5: 'x.x.xx.x',
+    6: 'x.xxx.xx',
+    7: 'xxxxx.xx',
+    8: 'xxxxxxxx',
+}
+
+#: Il motivo: cinque note, cioe' quattro intervalli. ⚠️ Cinque e non tre: a
+#: tre note la ripetizione e' indistinguibile dal caso (1,02x contro la stessa
+#: linea mescolata), a cinque vale 4,2x in 78 assoli su 80. Sono i gradi della
+#: scala dell'accordo, non semitoni.
+MOTIVO = (0, 1, 2, 4, 3)
+
+#: Dove il motivo viene enunciato: battuta del giro -> trasposizione in
+#: SEMITONI dalla prima enunciazione.
+#: ⚠️ In semitoni e non per grado, ed e' la ragione per cui il motivo si
+#: ritrova: la misura della casella 8 conta i profili di INTERVALLI, e una
+#: trasposizione per grado ne cambierebbe uno. +5 sulla battuta 5 porta il
+#: materiale di F7 su Bb7 conservando il rapporto, che e' la risposta classica
+#: del blues.
+ENUNCIAZIONI = {1: 0, 5: 5, 11: 0}
+
+#: La scala di ogni accordo, in semitoni dalla fondamentale. Misolidia sulle
+#: dominanti, dorica sul ii.
+SCALE = {
+    'F7':  (0, 2, 4, 5, 7, 9, 10),
+    'Bb7': (0, 2, 4, 5, 7, 9, 10),
+    'C7':  (0, 2, 4, 5, 7, 9, 10),
+    'Gm7': (0, 2, 3, 5, 7, 9, 10),
+}
+
+#: La finestra dell'assolo, in numeri di nota MIDI: re4 - la5. Il tema sta
+#: dentro do5 - fa5, quindi l'assolo ha piu' spazio sotto e sopra.
+ASSOLO_MIN, ASSOLO_MAX = 62, 81
+#: da dove parte il motivo la prima volta: fa4, la fondamentale
+ASSOLO_PARTENZA = 65
+SEME_ASSOLO = 8
+
+
+def _gradi(sigla: str) -> list[int]:
+    """Le altezze della scala dell'accordo, dentro la finestra dell'assolo."""
+    fond, _ = ACCORDI[sigla]
+    fuori = []
+    for ottava in range(3, 8):
+        for g in SCALE[sigla]:
+            n = 12 * ottava + fond + g
+            if ASSOLO_MIN <= n <= ASSOLO_MAX:
+                fuori.append(n)
+    return sorted(fuori)
+
+
+def assolo(giro_del_solista: list[str]) -> tuple:
+    """Le dodici battute dell'assolo, otto crome ciascuna.
+
+    Non sceglie quante note: quelle le dice `DENSITA`, che viene dalla misura.
+    Sceglie QUALI, e lo fa camminando per gradi congiunti sulla scala
+    dell'accordo -- il 61% degli intervalli di un assolo vero sta entro 2
+    semitoni -- con un salto ogni tanto e un'inversione di direzione ai bordi
+    del registro.
+    """
+    rng = random.Random(SEME_ASSOLO)
+    fuori = []
+    corrente = ASSOLO_PARTENZA
+    direzione = 1
+
+    for i, sigla in enumerate(giro_del_solista):
+        battuta = i + 1
+        d = DENSITA[i]
+        pattern = SLOT[d]
+        scala = _gradi(sigla)
+        note = [None] * 8
+
+        if battuta in ENUNCIAZIONI:
+            # il motivo, alle stesse altezze ogni volta piu' la trasposizione
+            base = ASSOLO_PARTENZA + ENUNCIAZIONI[battuta]
+            passo = [0, 2, 4, 7, 5]          # i gradi di MOTIVO in semitoni
+            for k, s in enumerate(i2 for i2, c in enumerate(pattern) if c == 'x'):
+                if k < len(passo):
+                    note[s] = base + passo[k]
+            corrente = base + passo[min(len(passo), d) - 1]
+            fuori.append(tuple(note))
+            continue
+
+        for s, c in enumerate(pattern):
+            if c != 'x':
+                continue
+            vicini = [n for n in scala if abs(n - corrente) <= 4]
+            if not vicini:
+                vicini = scala
+            avanti = [n for n in vicini
+                      if (n - corrente) * direzione > 0] or vicini
+            # per gradi quasi sempre, un salto ogni tanto
+            avanti.sort(key=lambda n: abs(n - corrente))
+            scelta = avanti[0] if rng.random() < 0.72 else \
+                avanti[min(1, len(avanti) - 1)]
+            note[s] = scelta
+            corrente = scelta
+            if corrente >= ASSOLO_MAX - 2 or corrente <= ASSOLO_MIN + 2 \
+                    or rng.random() < 0.22:
+                direzione = -direzione
+        fuori.append(tuple(note))
+    return tuple(fuori)
 
 # --------------------------------------------------------------------------
 # La batteria
@@ -464,7 +590,7 @@ def costruisci(prof):
                                folder='SYNTHS', length=LUNGHEZZA,
                                playing=True)
     ultimo = list(TEMA_NOTE[:-1]) + [TEMA_CHIUSA]
-    linea_tema = list(TEMA_NOTE) + list(ASSOLO_NOTE) + ultimo
+    linea_tema = list(TEMA_NOTE) + list(assolo(giro[12:24])) + ultimo
     note = MU.melodia(_spec_melodia(linea_tema), durata='1/8', velocity=95)
     rapporti.append(MU.scrivi(doc, clip_tema, note))
 
@@ -501,7 +627,7 @@ def main() -> int:
     avvisi = MU.avvertenze(doc)
     print(f'avvertenze(): {avvisi if avvisi else "nessuna"}')
 
-    remoto = MU.destinazione('jazz', 1)
+    remoto = MU.destinazione('jazz', VERSIONE)
     locale = RADICE / 'out' / Path(remoto).name
     write_file(doc, locale, FormatTable.load(TABELLA))
     print(f'\nscritto {locale}')

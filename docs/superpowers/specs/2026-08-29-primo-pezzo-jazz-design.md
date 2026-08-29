@@ -140,6 +140,21 @@ Il tema e l'assolo si scrivono rispettando queste grandezze. Il **tema** e'
 piu' rado e piu' cantabile dell'assolo, e i due giri di tema sono lo stesso
 materiale; l'**assolo** sta alla densita' misurata.
 
+⚠️ **Corretto lo stesso giorno, dopo l'ascolto: «l'assolo sta alla densita'
+misurata» era la riga sbagliata di questo progetto.** L'assolo ci stava, e
+usciva piatto — dispersione dimezzata, zero corse, zero battute vuote. Una
+statistica aggregata dice dov'e' il centro, non dove sta l'interesse.
+
+Dalla **versione 02** l'assolo non e' piu' una tabella scritta a mano: esce
+dalle cinque regole della **casella 8**, misurate nel pomeriggio dello stesso
+giorno — l'arco del giro col picco sul ii-V, il respiro sulle chiusure di
+frase, la corsa di una battuta, le corse che si addensano, e il motivo di
+almeno cinque note.
+
+`JAZZ01` e `JAZZ02` sono una **coppia controllata**: batteria, basso e comping
+sono identici nota per nota — verificato confrontando i due file — e solo la
+tromba cambia. Quel che si sente e' attribuibile all'assolo e a nient'altro.
+
 ## Sul Deluge
 
 Quattro tracce, **una clip da 36 battute ciascuna**, cosi' basso, comping e
