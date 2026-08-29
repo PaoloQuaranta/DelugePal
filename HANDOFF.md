@@ -17,7 +17,7 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > generato il suo primo pezzo vero — un dub in sol minore, tre versioni,
 > ciascuna corretta dall'ascolto dell'utente. Verdetto sull'ultima: *«va
 > meglio, ma musicalmente ci sarebbe ancora moltissimo da dire»*.
-> **981 test.** Il progetto è **pubblicato su GitHub** senza il corpus.
+> **997 test.** Il progetto è **pubblicato su GitHub** senza il corpus.
 > Il 17-18 agosto `docs/MUSICA.md` è stato **rifondato sullo schema neutro**
 > (§6-duodecies): il reggae non è più la forma del documento ma un caso
 > compilato fra molti, e l'**indice** dice cosa manca a quale repertorio.
@@ -33,6 +33,16 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > criterio che lo dice era stato fissato prima che le misure esistessero. Il
 > default di `GR.profilo()` è cambiato, e con esso alcuni numeri della
 > casella 6.
+>
+> Il **29 agosto** Deluge Pal ha scritto il suo **primo pezzo jazz**
+> (§6-quindecies) — un blues in fa. È il primo lavoro che *spende* le misure
+> invece di aggiungerne, ed è nato da una domanda dell'utente: *«siamo entrati
+> in un rabbit hole?»*. Il conto gli ha dato ragione — undici giorni erano
+> andati tutti nella **casella 6**, che occupava il **67%** della scheda del
+> jazz mentre **cinque caselle su undici** restavano vuote. Verdetto sul pezzo:
+> *«non è niente male… forse il solo potrebbe essere un po' più pirotecnico»*,
+> e quel «pirotecnico» **si misura**. La **casella 11** del jazz non è più
+> vuota.
 >
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
@@ -69,7 +79,7 @@ mettere le mani, e un'agenda ottimista la rimanderebbe esattamente lì.
 | casella | cosa la chiude, e dov'è |
 |---|---|
 | ~~**jazz 6** (dinamica)~~ | **chiusa il 25 agosto 2026**, dal ramo `groove-midi`: velocity, profilo posizionale e microtiming residuo di **cinque batteristi** del Groove MIDI, con la scheda che porta accanto a ogni numero quante esecuzioni e quanti batteristi lo reggono. Vedi §6-terdecies |
-| **jazz 8** (melodia e ornamentazione) | `wjazzd.db`, già leggibile con `WJ.melodia()`/`WJ.armonia()`: 456 assoli con **gli accordi allineati alla linea**, guardati finora solo per lo swing |
+| **jazz 8** (melodia e ornamentazione) | `wjazzd.db`, già leggibile con `WJ.melodia()`/`WJ.armonia()`: 456 assoli con **gli accordi allineati alla linea**, guardati finora solo per lo swing. ⚠️ **E dal 29 agosto si sa cosa andarci a misurare:** non la densità media — quella è già misurata, e una linea scritta per centrarla esce piatta — ma la **distribuzione nel tempo**, dove stanno le corse e cosa le precede. Vedi §6-quindecies |
 
 ⚠️ **La 6 del reggae il Groove MIDI NON la chiude, e non è una questione di
 sforzo.** Di reggae quel dataset porta **venti esecuzioni**, che sono **quattro
@@ -392,7 +402,13 @@ La tabella qui sopra si è fermata all'11 agosto. Da allora sono arrivate le
 fasi 6 e 7 — arranger, MIDI/CV, audio, e lo strato in linguaggio naturale —
 tutte verificate sul dispositivo: vedi §6-ter e `docs/FINDINGS.md`.
 
-**981 test** in `tests/test_all.py`, tutti verdi. I **38** aggiunti dal 26 al
+**997 test** in `tests/test_all.py`. ⚠️ **Uno è rosso, e solo su questa
+macchina:** `COPPIE_OSSERVATE` si ri-deriva dal corpus, e i quattro preset
+scaricati il 29 agosto per il pezzo jazz lo hanno allargato — vedi
+§6-quindecies, «Cosa NON rifare». `refs/` è ignorato da git, quindi **su un
+clone la suite è verde**; senza quei quattro file sono **989**, tutti verdi.
+I **16** aggiunti il 29 agosto sono quelli del nome dei drum e del rebuild
+(§6-quindecies). I **38** aggiunti dal 26 al
 29 agosto sono quelli dello stimatore per passo (§6-quaterdecies), e buona
 parte gira su voci **sintetiche costruite apposta**, perché il caso da provare
 — un gesto che sporge oltre mezzo passo — nel corpus è raro e non si può
@@ -607,7 +623,8 @@ D:\DelugePal\
   out\                   tabella di formato, inventari, file generati. L'unico
                          versionato e' `format_table.json`: e' un artefatto
                          DERIVATO e non contiene musica
-  tests\test_all.py      981 test (il 460/460 + 82 salti in un
+  tests\test_all.py      997 test, 989 senza i quattro preset del
+                         29 agosto (il 460/460 + 82 salti in un
                          clone e' del 25 agosto, non rimisurato)
   .venv\                 mido + python-rtmidi, per il SysEx
 ```
@@ -1851,6 +1868,166 @@ con una data.** Nessuno dei quattro l'ha trovato un test.
 - **non citare un numero di `out/groove_jazz.txt` senza dire con quale taglio**
   è stato calcolato. Adesso il file lo stampa. Prima no, e quei numeri
   dipendono dal taglio più di quanto sembri.
+
+---
+
+## 6-quindecies. Il primo pezzo jazz — 29 agosto 2026
+
+⚠️ **Questo lavoro non aggiunge una misura: spende quelle che c'erano.** È la
+prima volta che succede, e la ragione per cui è stato fatto adesso è una
+domanda dell'utente:
+
+> «I punti aperti di jazz sono dettagli o aspetti importanti dello sviluppo?
+> Da un po' ho la sensazione che siamo entrati in un rabbit hole.»
+
+**Il conto gli ha dato ragione, e va scritto perché la prossima sessione ci
+ricasca.** La scheda del jazz ha undici caselle: due piene, quattro parziali,
+**cinque vuote**. Undici giorni — i rami `groove-midi` e `stimatore-per-passo` —
+erano andati tutti nella **casella 6**, e gli ultimi quattro *dentro una casella
+già chiusa*. Nel file la 6 occupava **1311 righe su 1954**, cioè il **67%**; la
+casella 8, la melodia, ne aveva **17**. E la casella 11 dichiarava di sé che si
+riempie «al primo pezzo jazz corretto dall'utente, e quel momento non è ancora
+venuto»: dopo undici giorni di misure sulla batteria jazz, Deluge Pal non aveva
+**mai scritto un pezzo jazz**.
+
+⚠️ **Il difetto non era il lavoro fatto, ma l'assenza di una regola per
+fermarsi.** Ogni misura ne apriva una più piccola, e nessuno ha mai chiesto
+*questo cambia cosa Pal scrive?*. `midi.py`, `groove.py` e il metodo — misurare
+su cinque batteristi invece di prendere le etichette dal web — restano buoni e
+servono a **ogni** repertorio.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `tools/genera_jazz.py` | il generatore: blues di 12 battute in fa, hardbop, tema/assolo/tema, 36 battute, 128 BPM, quattro tracce. Tutte le scelte musicali stanno in tabelle in cima al file |
+| `out/JAZZ01.XML` → `/SONGS/DelugePal/JAZZ01.XML` | sul dispositivo, caricato e verificato per rilettura |
+| `song.nome_drum()` | un difetto della libreria trovato strada facendo — qui sotto |
+| la **casella 11** del jazz | non è più vuota: la prima correzione dall'ascolto di un pezzo jazz, e il numero che la spiega |
+| `docs/FONTI.md`, «Corpora musicali» | l'attribuzione delle due licenze, che mancava del tutto |
+
+Il progetto del pezzo, con la provenienza e il grado di prova di ogni scelta,
+sta in `docs/superpowers/specs/2026-08-29-primo-pezzo-jazz-design.md`.
+
+⚠️ **`genera_jazz.py` NON è come `genera_groove.py` e `genera_swing.py`:**
+rigenerarlo non distrugge niente. Non è una coppia controllata, non ci poggia
+nessun ascolto A/B, e il divieto di quei due non si estende a questo.
+
+### Il difetto della libreria: il nome di un drum sta in due posti
+
+Il formato scrive il nome di un drum in **due grafie**. Il firmware recente lo
+mette come **attributo** — `<sound name="KICK">` — ed è così in tutte le 43 song
+del corpus e nei tre kit di terzi in `refs/kits/`. Il firmware vecchio lo
+scriveva come **elemento figlio**, `<name>KICK</name>`.
+
+`drum_index_of()` e `drum_names()` leggevano il solo attributo. Su `KIT009` —
+un kit dell'utente — non trovavano **nessun** drum, e ogni scrittura per nome
+falliva, mentre il dispositivo quel kit lo apre senza storie. Ora c'è
+`song.nome_drum()`, che legge entrambe.
+
+⚠️ **Che la forma a elemento fosse la VECCHIA l'ha detto l'utente**, non i file:
+da soli dicevano solo che erano due. È la settima volta che una sua frase
+sblocca qualcosa che i file non potevano dire — vedi §8.
+
+⚠️ **E la causa vale oltre questo caso: la libreria è stata scritta contro il
+materiale recente perché è l'unico che c'era.** Un kit di dieci anni fa non è
+un caso limite esotico, è la libreria di chi usa il Deluge da dieci anni. Lo
+stesso firmware vecchio scrive anche un elemento vuoto spezzato su due righe —
+`REBUILD_NOTO` in `tests/test_all.py` porta ora tre file invece di uno.
+
+### Il verdetto, e il numero che lo spiega
+
+*«Non è niente male… non ho niente di cui lamentarmi, forse il solo potrebbe
+essere un po' più pirotecnico, ma come test va bene così.»*
+
+⚠️ **«Non ho niente di cui lamentarmi» non è «promosso», e la distinzione l'ha
+fatta l'utente**: ha giudicato il pezzo *«come test»*. La casella 11 incassa
+**una** direzione, e il resto è un ascolto solo, un ascoltatore, nessuna
+ripetizione.
+
+**La direzione però si misura, ed è il risultato che vale più del pezzo.**
+L'assolo era stato scritto per stare dentro le grandezze osservate su un assolo
+vero — `Walkin'`, melid 196 — e ci sta dentro benissimo. È quello il difetto.
+Note per battuta, 12 battute contro 83:
+
+| | generato | `Walkin'` |
+|---|---|---|
+| media | 5,00 | 5,23 |
+| **deviazione standard** | **1,58** | **3,16** |
+| massimo | 7 | **16** |
+| battute vuote | **0%** | 8% |
+| **battute da 8 note in su** | **0%** | **23%** |
+
+Media e mediana centrate, **dispersione dimezzata**. I fuochi d'artificio stanno
+nel 23% di battute che corrono da 8 a 16 note, e il respiro nell'8% che tace.
+
+⚠️ **Una statistica aggregata dice dov'è il centro, non dove sta l'interesse.**
+Scrivere per centrare una mediana produce la mediana. Non è un errore di
+esecuzione — la misura era giusta e la linea la rispetta — **era la misura
+sbagliata da rispettare**. Ne segue un requisito per la casella 8: di un assolo
+va misurata la **distribuzione nel tempo**, dove stanno le corse e cosa le
+precede, non la densità media.
+
+### Come si è provato che la melodia non è copiata
+
+Il tema e l'assolo sono originali, e la domanda l'ha posta l'utente. La risposta
+è una misura, non una parola: la **più lunga sequenza di intervalli identici
+consecutivi** — cioè una citazione, anche trasposta — fra la linea generata e i
+corpora, con tre coppie di controllo:
+
+| confronto | note con lo stesso profilo |
+|---|---|
+| generato vs `Walkin'`/Johnson — **la fonte letta** | **6** |
+| generato vs `Walkin'`/Davis — mai aperto | 8 |
+| **Davis vs Johnson — stesso pezzo, due umani** | **12** |
+| Rollins/`Blue Seven` vs Johnson — due blues diversi | 5 |
+
+⚠️ **Il controllo è la riga che conta.** Se ci fosse copiatura, il primo numero
+sarebbe il più alto; è il più basso, e sotto al confronto con un assolo mai
+aperto. Due musicisti veri sullo stesso pezzo condividono **12** note di
+profilo: è quello il fondoscala, non zero. Sulle altezze assolute la sequenza
+comune più lunga è di **3** note, che in una scala condivisa non è una
+citazione, è la scala.
+
+### L'attribuzione mancava, e una delle due licenze la richiede
+
+I due corpora erano **nominati** in `MUSICA.md` e nelle schede, ma non c'era da
+nessuna parte la licenza né la citazione richiesta: `FONTI.md` copriva le sole
+fonti tecniche. Ora c'è, con i crediti anche nel `README.md`.
+
+| corpus | licenza | letta da |
+|---|---|---|
+| Groove MIDI Dataset | **CC BY 4.0** | il file `LICENSE` **dentro** il dataset |
+| Weimar Jazz Database | **ODbL 1.0** (contenuti: DbCL 1.0) | la tabella `db_info` **dentro** il `.db` |
+
+⚠️ **La seconda non era indovinabile**, e il modo di trovarla vale come metodo:
+`select * from db_info` dà licenza, autore, versione 2.1 e stato FINAL. Per un
+database è la fonte più autoritativa che esista, ed era a portata di query da
+due settimane. A occhio sembrava un altro caso Creative Commons.
+
+⚠️ **L'ODbL ha una clausola di reciprocità sui database derivati che la CC BY
+non ha.** `FONTI.md` porta il quadro dei fatti su cosa il progetto pubblica
+oggi, scritto **come quadro dei fatti e non come parere legale**.
+
+### Cosa NON rifare
+
+- **non scrivere una linea melodica per centrare una media.** È il difetto che
+  l'utente ha sentito, ed è misurato qui sopra;
+- **non dedurre che una casella sia chiusa perché nessuno se n'è lamentato.**
+  Il comping non ha sollevato obiezioni, ma non era stato scritto con
+  `MU.armonia()`: l'alternanza A/B dei voicing era stata calcolata **a mano**,
+  che è il ripiego prescritto dalla casella 7. Quel silenzio assolve
+  l'aggiramento, non la libreria;
+- **non far durare un ramo di misura oltre la domanda che lo ha aperto.** La
+  regola operativa che mancava, e che ora esiste: prima di aprire una misura
+  nuova, dire **cosa cambierebbe in ciò che Pal scrive**. Se la risposta è
+  «niente», la misura aspetta;
+- **non aggiungere file a `refs/` senza guardare i test.** I quattro preset
+  scaricati per questo pezzo entrano nel corpus locale e hanno smosso due test:
+  uno è stato chiuso (`REBUILD_NOTO`), l'altro — `COPPIE_OSSERVATE` — resta
+  **rosso in locale** ed è una decisione dell'utente, perché rigenerare quella
+  tabella inciderebbe i quattro preset dentro `sound.py`, che è versionato.
+  `refs/` è ignorato da git: su un clone la suite resta verde.
 
 ---
 

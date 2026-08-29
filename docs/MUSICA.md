@@ -926,7 +926,7 @@ casella della scheda corrispondente: la scheda è la fonte, questa matrice ne
 | repertorio | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | [reggae / dub](repertori/reggae-dub.md) | ◐ | ● | ● | ◐ | ● | ● | ◐ | ○ | ◐ | ◐ | ● |
-| [jazz](repertori/jazz.md) | ○ | ○ | ◐ | ● | ○ | ● | ◐ | ○ | ◐ | ◐ | ○ |
+| [jazz](repertori/jazz.md) | ○ | ○ | ◐ | ● | ○ | ● | ◐ | ○ | ◐ | ◐ | ◐ |
 | classica · barocca · antica | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | elettronica · IDM · techno · hip hop · trip hop · DnB · jungle | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 

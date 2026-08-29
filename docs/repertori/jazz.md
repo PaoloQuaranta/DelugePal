@@ -1913,8 +1913,90 @@ casella 11.
 
 ## 11. Trappole del generatore
 
-**Vuota, e il 24 agosto 2026 una correzione dall'ascolto è arrivata davvero —
-ma non è di questo repertorio, e sta nel comune.** Vale la pena scrivere perché,
+**Parziale: una correzione sola, del 29 agosto 2026, dal primo pezzo jazz.**
+La casella si è aperta esattamente come dichiarava di volersi aprire — «al
+primo pezzo jazz corretto dall'utente» — e quello che ha incassato è **una**
+direzione, non un promosso.
+
+### Il primo pezzo jazz — 29 agosto 2026
+
+`JAZZ01`: blues di 12 battute in fa, hardbop, tema/assolo/tema, 36 battute,
+128 BPM, quattro tracce. Da dove viene ogni cosa, col grado di prova, sta in
+[`../superpowers/specs/2026-08-29-primo-pezzo-jazz-design.md`](../superpowers/specs/2026-08-29-primo-pezzo-jazz-design.md);
+il generatore è `tools/genera_jazz.py`.
+
+Il verdetto dell'utente, per intero: *«non è niente male… non ho niente di cui
+lamentarmi, forse il solo potrebbe essere un po' più pirotecnico, ma come test
+va bene così»*.
+
+```
+Tengo:            groove, swing, comping, basso, forma e suoni. Nessuna
+                  obiezione su niente di tutto questo.
+Cambio:           l'assolo, che è poco pirotecnico.
+Direzione:        più virtuosismo — i tratti di corsa e i silenzi che un
+                  assolo vero alterna, non una densità più alta dappertutto.
+Resta regolabile: il tempo (128 è scelto per far coincidere il template col
+                  riferimento, non per gusto), il kit (KIT009 è un RX-5,
+                  cioè una drum machine), e il numero di giri.
+```
+
+⚠️ **«Non ho niente di cui lamentarmi» NON vuol dire che il generatore ha
+superato la prova, e la distinzione l'ha fatta l'utente stesso**: ha giudicato
+il pezzo *«come test»*, non come musica da tenere. Un pezzo che nessuno voleva
+conservare non mette sotto sforzo le stesse cose. Vale poi la riserva che il
+comune mette su qualunque cosa esca da un orecchio: un ascolto, un
+ascoltatore, nessuna ripetizione.
+
+#### Perché l'assolo è piatto: MISURATO, e non è una questione di gusto
+
+La linea era stata scritta per stare dentro le grandezze osservate su un
+assolo vero — `Walkin'`, `wjazzd.db` melid 196 — e **ci sta dentro benissimo**.
+È proprio quello il difetto. Note per battuta, 12 battute contro 83 `[OSS]`:
+
+| | l'assolo generato | `Walkin'` (melid 196) |
+|---|---|---|
+| media | 5,00 | 5,23 |
+| mediana | 5,0 | 5,0 |
+| **deviazione standard** | **1,58** | **3,16** |
+| minimo | 2 | **0** |
+| massimo | 7 | **16** |
+| battute vuote | **0 (0%)** | 7 (8%) |
+| **battute da 8 note in su** | **0 (0%)** | **19 (23%)** |
+
+Media e mediana sono centrate quasi esattamente; la **dispersione è la metà**.
+I fuochi d'artificio stanno nel **23% di battute che corrono da 8 a 16 note**,
+e il respiro nell'**8% che tace del tutto**. La linea generata non scende mai
+sotto 2 e non sale mai sopra 7: ha il centro giusto e **non ha né le corse né i
+silenzi**.
+
+⚠️ **La lezione di metodo, che vale oltre questa casella: una statistica
+aggregata dice dov'è il centro, non dove sta l'interesse.** Scrivere per
+centrare una mediana produce la mediana, e la mediana non è pirotecnica. Non è
+un errore di esecuzione — la misura di partenza era giusta e la linea la
+rispetta — è che **era la misura sbagliata da rispettare**.
+
+Ne segue un requisito preciso per la **casella 8**, quando verrà aperta: di un
+assolo va misurata la **distribuzione nel tempo** — dove stanno le corse, quanto
+durano, cosa le precede e cosa le segue — non la densità media. La media è già
+misurata e non serve a scrivere.
+
+⚠️ **E non basta alzare la varianza a caso.** Le corse di un assolo vero stanno
+in *posti*: dopo un silenzio, verso la fine di una frase, sul turnaround. È
+quella collocazione, non la dispersione, la cosa da andare a prendere.
+
+#### Cosa questa correzione NON dice
+
+Il pezzo non ha messo alla prova la lacuna che la **casella 7** dichiara — la
+condotta delle parti. Il comping non è stato scritto con `MU.armonia()` ma
+**a mano**, calcolando l'alternanza A/B dei voicing senza fondamentale, che è
+il ripiego che la casella 7 prescrive. L'utente infatti non se n'è lamentato.
+Quel silenzio quindi **non assolve la libreria**: assolve un aggiramento fatto
+a mano, che va rifatto ogni volta finché la 7 non è chiusa.
+
+### La correzione del 24 agosto 2026 — che non è di questo repertorio
+
+**Il 24 agosto 2026 una correzione dall'ascolto era arrivata davvero — ma non
+è di questo repertorio, e sta nel comune.** Vale la pena scrivere perché,
 perché è la prima volta che questa casella ha dovuto decidere.
 
 Quel giorno l'utente ha ascoltato la coppia `GROOVE0`/`GROOVE1` sul dispositivo,
@@ -1935,7 +2017,7 @@ tempo» — dove valgono per tutti invece che per il jazz soltanto.
 E la coppia ascoltata, del resto, non era un pezzo da giudicare: era uno
 strumento di misura costruito per rispondere a una domanda sola. Questa casella
 si riempie al primo **pezzo jazz corretto dall'utente**, come è successo al dub,
-e quel momento non è ancora venuto.
+e quel momento è venuto il **29 agosto 2026**: sta in cima a questa casella.
 
 *Nel frattempo, per comporre:* qui non c'è dove andare a prendere niente, e
 non è una lacuna da colmare in fretta — **una trappola si osserva**, e
