@@ -263,3 +263,30 @@ Reading order, all Italian:
 The Deluge is made by [Synthstrom Audible](https://synthstrom.com/). This project
 is not affiliated with them and learns the community firmware's file format by
 observation. Built with [Claude Code](https://claude.com/claude-code).
+
+### Musical corpora
+
+The measured musical knowledge in `docs/MUSICA.md` and `docs/repertori/` is
+derived from two datasets. Neither is redistributed here — they live outside the
+repository — but the numbers derived from them **are** published, which is what
+the attribution is for. How each licence was read, and the one clause that
+differs between them, is in [docs/FONTI.md](docs/FONTI.md).
+
+**Groove MIDI Dataset** — [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+Source of the velocity scale and the groove templates.
+
+> Jon Gillick, Adam Roberts, Jesse Engel, Douglas Eck, and David Bamman.
+> "Learning to Groove with Inverse Sequence Transformations."
+> *International Conference on Machine Learning (ICML)*, 2019.
+> <https://magenta.tensorflow.org/datasets/groove>
+
+**Weimar Jazz Database (WJazzD)** v2.1 — The Jazzomat Research Project (c)
+2012-2017. Database under [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1.0/),
+individual contents under [DbCL 1.0](https://opendatacommons.org/licenses/dbcl/1.0/).
+Source of the measured swing and the harmonic grids.
+
+> Pfleiderer, Martin; Frieler, Klaus; Abeßer, Jakob; Zaddach, Wolf-Georg;
+> Burkhart, Benjamin (eds.) (2017): *Inside the Jazzomat — New Perspectives for
+> Jazz Research*. Schott Campus.
+> <https://jazzomat.hfm-weimar.de/>
+
