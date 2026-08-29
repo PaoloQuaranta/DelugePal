@@ -17,7 +17,7 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > generato il suo primo pezzo vero — un dub in sol minore, tre versioni,
 > ciascuna corretta dall'ascolto dell'utente. Verdetto sull'ultima: *«va
 > meglio, ma musicalmente ci sarebbe ancora moltissimo da dire»*.
-> **943 test.** Il progetto è **pubblicato su GitHub** senza il corpus.
+> **981 test.** Il progetto è **pubblicato su GitHub** senza il corpus.
 > Il 17-18 agosto `docs/MUSICA.md` è stato **rifondato sullo schema neutro**
 > (§6-duodecies): il reggae non è più la forma del documento ma un caso
 > compilato fra molti, e l'**indice** dice cosa manca a quale repertorio.
@@ -26,6 +26,13 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > dal web — e ha costruito il **groove template** (§6-terdecies). È il primo
 > lavoro di questo progetto il cui risultato non è una funzione che passa i
 > test ma **un'affermazione sul mondo**, e si vede da quanto è costato.
+>
+> Dal 26 al 29 agosto il ramo `stimatore-per-passo` ha **cambiato come si
+> aggrega** (§6-quaterdecies). Non è un modo migliore fra due: l'aggregazione
+> usata da sempre — il passo **più vicino** — **non seguiva i dati**, e il
+> criterio che lo dice era stato fissato prima che le misure esistessero. Il
+> default di `GR.profilo()` è cambiato, e con esso alcuni numeri della
+> casella 6.
 >
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
@@ -84,7 +91,7 @@ Cosa c'è già in mano:
 |---|---|
 | `docs/MUSICA.md` | non è più vuoto: uno schema neutro di **undici caselle**, pensato per reggere da Josquin alla jungle, più **il comune** a ogni repertorio e **l'indice** — la matrice repertorio × casella che è anche l'**agenda**: dice cosa manca a quale repertorio senza aprire niente. I repertori compilati sono schede a sé in `docs/repertori/`: oggi reggae/dub e jazz, stato di ciascuna nell'indice |
 | `tools/delugexml/midi.py` | il ponte per far entrare il materiale: legge Standard MIDI File **senza dipendenze**, validato nota per nota contro `mido` |
-| `tools/delugexml/groove.py` | il lettore del **Groove MIDI**, sopra `midi.py`: cerca per stile, batterista e metro, e ne cava la scala di velocity e il **groove template**. §6-terdecies |
+| `tools/delugexml/groove.py` | il lettore del **Groove MIDI**, sopra `midi.py`: cerca per stile, batterista e metro, e ne cava la scala di velocity e il **groove template** (§6-terdecies). Dal 26 agosto 2026 il passo su cui un colpo viene contato si sceglie con `taglio=`, e il default **non** è più il passo più vicino: §6-quaterdecies |
 | `to-read/` | 112 000 file e 4,8 GB di libri, paper e librerie MIDI già raccolti dall'utente. **Fuori dal versionamento** |
 
 ### Il perimetro vero, detto dall'utente il 17 agosto 2026
@@ -385,7 +392,11 @@ La tabella qui sopra si è fermata all'11 agosto. Da allora sono arrivate le
 fasi 6 e 7 — arranger, MIDI/CV, audio, e lo strato in linguaggio naturale —
 tutte verificate sul dispositivo: vedi §6-ter e `docs/FINDINGS.md`.
 
-**943 test** in `tests/test_all.py`, tutti verdi. Gli **84** aggiunti dal 18 al
+**981 test** in `tests/test_all.py`, tutti verdi. I **38** aggiunti dal 26 al
+29 agosto sono quelli dello stimatore per passo (§6-quaterdecies), e buona
+parte gira su voci **sintetiche costruite apposta**, perché il caso da provare
+— un gesto che sporge oltre mezzo passo — nel corpus è raro e non si può
+ordinare a un batterista. Gli **84** aggiunti dal 18 al
 25 agosto sono quelli del Groove MIDI e del groove template (§6-terdecies): una
 parte legge il dataset e quindi salta senza `to-read/`, un'altra gira su **file
 MIDI sintetici costruiti apposta**, così che gli invarianti veri — che l'origine
@@ -596,7 +607,8 @@ D:\DelugePal\
   out\                   tabella di formato, inventari, file generati. L'unico
                          versionato e' `format_table.json`: e' un artefatto
                          DERIVATO e non contiene musica
-  tests\test_all.py      943 test (460/460 + 82 salti in un clone, misurato)
+  tests\test_all.py      981 test (il 460/460 + 82 salti in un
+                         clone e' del 25 agosto, non rimisurato)
   .venv\                 mido + python-rtmidi, per il SysEx
 ```
 
@@ -1750,6 +1762,95 @@ gli ascolti non hanno stabilito:
   charleston non dice *rispetto a che cosa*, e un millisecondo ricavato da lì
   non ha un referente. Lì i tick servono a una cosa sola, a dire che il residuo
   è piccolo.
+
+---
+
+## 6-quaterdecies. Lo stimatore per passo — 26-29 agosto 2026
+
+Chiude il punto che §6-terdecies aveva lasciato aperto e che la casella 6 del
+jazz **dichiarava senza prenderlo**: un groove template è per passo, e un colpo
+che anticipa di più di mezzo passo usciva sul passo **precedente col segno
+rovesciato** — lo stesso gesto contato in due celle.
+
+⚠️ **Il risultato non è «un modo migliore di aggregare»: è che il modo usato da
+sempre non misurava.** `round()` — il passo **più vicino** — segue i dati per
+lo **0,808**, contro lo **0,998** dei due candidati, con **16 voci su 111** che
+saltano di mezzo passo contro 3 e 4.
+
+### Il criterio, e perché conta che sia stato fissato prima
+
+**Uno stimatore è uno stimatore se la sua risposta segue ciò che misura.**
+Traslata **una voce sola** di δ tick, la posizione che dichiara deve muoversi
+di δ. Il criterio è stato scelto **prima che le misure esistessero**, ed è la
+ragione per cui il risultato regge quando lo si attacca.
+
+⚠️ **I due criteri più ovvi erano trappole**, e vanno tenute a mente perché si
+ripresenteranno la prossima volta che si sceglie fra due modi di misurare:
+
+| il criterio | perché non si può usare |
+|---|---|
+| l'**errore di ricostruzione per inversione** | **premia lo stimatore rotto**: spezzare un gesto in due celle stringe entrambe le mediane, quindi l'errore *scende* proprio dove lo stimatore sbaglia di più |
+| la **tenuta delle conclusioni della casella 6** | sarebbe **fabbricare la conclusione** — la finestra di grazia di §6-terdecies rifatta uguale |
+
+Stanno scritti nella docstring di `la_prova_di_traslazione()` e non solo nel
+piano: un criterio che vive in un documento di progetto è un criterio che la
+prossima sessione non trova.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `GR.spostamento_del_taglio(dritte, passo_tick, taglio)` | sposta il **confine** fra due passi invece della griglia. Tre modi: `'vicino'` (il vecchio `round()`), `'voce'` (la fase media della voce), `'rado'` (il centro dell'arco vuoto più largo) |
+| il **default `'voce'`** su `profilo_da_colpi()` e `profilo()` | ⚠️ il residuo resta misurato **dalla griglia vera**, non dal taglio spostato: sottrarre anche lo spostamento toglierebbe il feel invece di collocarlo. È una riga sola, ed è quella che decide se il lavoro ha senso |
+| tre sezioni nuove in `tools/misura_groove.py` | `il_vuoto_delle_voci()`, `la_prova_di_traslazione()`, `l_ancoraggio()`. E ora **ogni sezione dice con quale taglio** ha calcolato: prima `out/groove_jazz.txt` non lo diceva, e i suoi numeri dipendono dal taglio |
+| `MU.applica_groove()` riferisce le **collisioni** | uno scarto può arrivare a un passo intero, quindi due note su passi adiacenti possono finire sullo stesso tick. Il Deluge lo accetta, ma un'operazione silenziosa non è correggibile |
+
+### Cosa si è mosso, e cosa no
+
+⚠️ **Il BUR non si è mosso, e non poteva:** si misura **prima** che un passo
+sia assegnato, senza mai vedere `taglio`. Resta 1,48 su 41 esecuzioni. Ne segue
+che `set_swing()` è intatto e **l'A/B sullo swing non va riletto**. La coppia
+costruita col vecchio default è `GROOVE0`/`GROOVE1`, non `SWINGA`/`SWINGB` — e
+il primo rapporto di questo lavoro aveva scritto il contrario.
+
+I numeri che si sono mossi stanno nella casella 6, coi vecchi accanto ai nuovi.
+**Due vanno contro conclusioni già scritte**, ed è la ragione per cui il
+ritorno del «15 su 15» non è sospetto:
+
+- la **latenza fissa non è più rifiutata sulla cassa**: 1,0 σ, dove non esclude
+  più niente;
+- il divario ride/charleston **entra** nella finestra 20-40 ms, quindi cade
+  l'argomento «tanto sta sotto la soglia dell'udibile».
+
+⚠️ **E il «15 su 15» che torna è dichiarato contingente:** con `'rado'` sarebbe
+14 su 15, perché dipende dallo spareggio fra i due candidati — l'unica scelta
+del lavoro presa **dopo** i numeri, e contro la regola scritta prima, che
+selezionava `'rado'`. La *direzione* invece non dipende dal taglio: il divario
+cresce con tutt'e due.
+
+### Il dato che vale più dei numeri
+
+⚠️ **Il piano ha avuto torto tre volte, e tre volte l'ha trovato chi lo
+eseguiva** invece di aggirarlo: `'voce'` che chiamando `GR.origine()` sarebbe
+stato un candidato finto — la finestra di quella funzione scarta proprio i
+colpi anticipati, 58 su 143 — ; `'rado'` col taglio **incollato a fase 0**, che
+sarebbe arrivato al confronto come un fantoccio; e la regola che doveva fissare
+la larghezza della finestra, che sui dati **non decideva**. Una quarta l'ha
+trovata la revisione finale: il motivo scritto per non chiudere l'ancoraggio
+era falso, e sta corretto e datato dove stava.
+
+È la conferma della regola di §6-terdecies: **un piano approvato è un'ipotesi
+con una data.** Nessuno dei quattro l'ha trovato un test.
+
+### Cosa NON rifare
+
+- **non rigenerare** `out/GROOVE0.XML`, `out/GROOVE1.XML`, `out/SWINGA.XML`,
+  `out/SWINGB.XML`. Il divieto di §6-terdecies **vale di più adesso**, non di
+  meno: `tools/genera_groove.py` chiama `GR.profilo()` **senza passare
+  `taglio`**, quindi segue in silenzio un default che è cambiato;
+- **non citare un numero di `out/groove_jazz.txt` senza dire con quale taglio**
+  è stato calcolato. Adesso il file lo stampa. Prima no, e quei numeri
+  dipendono dal taglio più di quanto sembri.
 
 ---
 
