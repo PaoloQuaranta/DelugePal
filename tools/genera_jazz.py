@@ -79,7 +79,13 @@ ESECUZIONE = 'drummer10/session1/1'
 #:   02  29 agosto 2026, assolo generato dalle cinque regole della
 #:       casella 8. Tutto il resto e' identico alla 01, di proposito:
 #:       se la differenza si sente, e' attribuibile.
-VERSIONE = 2
+#:       Verdetto: «alcune note sembrano fuori tonalita'... non mi sembra
+#:       piu' pirotecnico, soprattutto perche' e' tutto in ottavi».
+#:   03  29 agosto 2026, e cambia DUE cose insieme, che va detto perche'
+#:       limita l'attribuzione: le note si scelgono sulla distribuzione
+#:       misurata dei gradi SULLA TONICA DEL PEZZO invece che sulla scala
+#:       dell'accordo, e la griglia dell'assolo passa a sedicesimi.
+VERSIONE = 3
 
 BPM = 128
 #: Casella 10 di `docs/repertori/jazz.md`, riga HARDBOP/BEBOP. `figura='1/8'`
@@ -271,25 +277,37 @@ TEMA_CHIUSA = (77, None, None, None, None, None, None, None)
 #: ii-V, i respiri (2, 1, 0) sulle chiusure delle tre frasi, e la 12 e' vuota
 #: perche' e' la posizione piu' vuota del corpus (14,8%).
 #:
-#: ⚠️ IL MASSIMO E' 8, CIOE' UNA BATTUTA DI CROME PIENE, ED E' UNA RINUNCIA
-#: DICHIARATA. Il corpus arriva a 16 note per battuta, cioe' a semicrome: ma
-#: una semicroma sotto `set_swing(figura='1/8')` cade FRA le crome, e cosa il
-#: firmware ne faccia e' un punto aperto di `HANDOFF.md` §7. Si sceglie di non
-#: scriverci sopra. 8 e' anche la soglia con cui le corse sono state contate.
-DENSITA = (5, 6, 6, 2, 5, 7, 6, 1, 8, 8, 5, 0)
+#: ⚠️ DALLA VERSIONE 03 LA GRIGLIA E' DI SEDICESIMI, 16 per battuta. Fino
+#: alla 02 era di crome col massimo a 8, e l'utente ha detto: «non mi sembra
+#: piu' pirotecnico, soprattutto perche' e' tutto in ottavi, perche' non usi
+#: anche sedicesimi?». Aveva ragione -- il corpus arriva a 16 note per
+#: battuta, e senza semicrome una corsa non e' una corsa.
+#:
+#: ⚠️ IL PUNTO APERTO NON E' STATO CHIUSO, e' stato attraversato. Una
+#: semicroma sotto `set_swing(figura='1/8')` cade FRA le crome, e cosa il
+#: firmware ne faccia sta in `HANDOFF.md` §7. Si e' scelto di scriverci sopra
+#: e di far decidere all'orecchio, che e' l'unico strumento che qui puo'
+#: decidere. SE LA CORSA SUONA STORTA, la prima cosa da sospettare e' questa e
+#: non la scelta delle note.
+DENSITA = (5, 6, 6, 2, 5, 7, 6, 1, 12, 12, 5, 0)
 
-#: Dove cadono le note dentro la battuta, per densita'. Le battute di respiro
-#: mettono le note ALL'INIZIO e poi tacciono: sono chiusure di frase, non
-#: levare.
+#: Dove cadono le note dentro la battuta, su 16 sedicesimi. I respiri mettono
+#: le note ALL'INIZIO e poi tacciono: sono chiusure di frase, non levare. Le
+#: corse sono tre movimenti di sedicesimi e poi aria -- una corsa che riempie
+#: la battuta intera non atterra da nessuna parte.
 SLOT = {
-    0: '........',
-    1: 'x.......',
-    2: 'xx......',
-    5: 'x.x.xx.x',
-    6: 'x.xxx.xx',
-    7: 'xxxxx.xx',
-    8: 'xxxxxxxx',
+    0:  '................',
+    1:  'x...............',
+    2:  'x.x.............',
+    5:  'x...x...x.x...x.',
+    6:  'x...x.x.x...x.x.',
+    7:  'x.x.x.x.x...x.x.',
+    12: 'xxxxxxxxxxxx....',
 }
+
+#: Le due corse non partono dallo stesso posto: la 9 entra sul secondo
+#: movimento, la 10 sul primo. Due corse identiche di fila sono un esercizio.
+SLOT_BATTUTA = {9: '....xxxxxxxxxxxx'}
 
 #: Il motivo: cinque note, cioe' quattro intervalli. ⚠️ Cinque e non tre: a
 #: tre note la ripetizione e' indistinguibile dal caso (1,02x contro la stessa
@@ -306,14 +324,45 @@ MOTIVO = (0, 1, 2, 4, 3)
 #: del blues.
 ENUNCIAZIONI = {1: 0, 5: 5, 11: 0}
 
-#: La scala di ogni accordo, in semitoni dalla fondamentale. Misolidia sulle
-#: dominanti, dorica sul ii.
-SCALE = {
-    'F7':  (0, 2, 4, 5, 7, 9, 10),
-    'Bb7': (0, 2, 4, 5, 7, 9, 10),
-    'C7':  (0, 2, 4, 5, 7, 9, 10),
-    'Gm7': (0, 2, 3, 5, 7, 9, 10),
+#: ⚠️ LA SCALA DELL'ACCORDO ERA L'ERRORE DELLA VERSIONE 02, e l'utente l'ha
+#: sentito: «alcune note sembrano fuori tonalita'... il solo suona troppo
+#: distante dalla tonalita'». Costruire la scala di OGNI ACCORDO -- misolidia
+#: su F7 e Bb7, dorica su Gm7, misolidia su C7 -- e' corretto sull'accordo e
+#: sbagliato sul pezzo. Misurato su 80 assoli e 33 714 note, sui gradi
+#: relativi alla TONICA DEL PEZZO:
+#:
+#:   - il grado 11 (in fa il mi naturale) stava al 18,8% sulle battute 9-10
+#:     contro il 6,7% del corpus, QUASI IL TRIPLO, e proprio sulle corse;
+#:   - il grado 3, la TERZA BLUES, stava all'1,7% contro l'8,3%;
+#:   - i gradi 1, 6 e 8 erano a ZERO contro 3,7%, 5,0% e 4,2%.
+#:
+#: Un assolo di blues non cambia scala a ogni accordo: sta sulla tonica e usa
+#: TUTTI E DODICI i gradi, con quelli fuori a bassa quota.
+
+#: La quota misurata di ogni grado sulla tonica del pezzo `[MIS]`, da
+#: `tools/misura_melodia.py`. E' il bersaglio della scelta delle note: non una
+#: scala da cui pescare a caso, ma una distribuzione da rispettare.
+GRADI_CORPUS = {
+    0: 14.3,   # do   -- tonica
+    1:  3.7,   # do#
+    2:  9.8,   # re
+    3:  8.3,   # mib  -- la terza blues
+    4:  8.9,   # mi
+    5: 10.8,   # fa
+    6:  5.0,   # fa#
+    7: 12.5,   # sol  -- quinta
+    8:  4.2,   # lab
+    9:  9.4,   # la
+    10: 7.4,   # sib
+    11: 5.6,   # si
 }
+
+#: La tonica del PEZZO, come classe di altezza. Fa.
+TONICA = 5
+
+#: Sui movimenti si preferisce una nota dell'accordo: e' li' che una nota
+#: fuori si sente come un errore invece che come un passaggio.
+PESO_ACCORDO = 3.0
 
 #: La finestra dell'assolo, in numeri di nota MIDI: re4 - la5. Il tema sta
 #: dentro do5 - fa5, quindi l'assolo ha piu' spazio sotto e sopra.
@@ -323,26 +372,36 @@ ASSOLO_PARTENZA = 65
 SEME_ASSOLO = 8
 
 
-def _gradi(sigla: str) -> list[int]:
-    """Le altezze della scala dell'accordo, dentro la finestra dell'assolo."""
-    fond, _ = ACCORDI[sigla]
-    fuori = []
-    for ottava in range(3, 8):
-        for g in SCALE[sigla]:
-            n = 12 * ottava + fond + g
-            if ASSOLO_MIN <= n <= ASSOLO_MAX:
-                fuori.append(n)
-    return sorted(fuori)
+def _peso(nota: int, sigla: str, forte: bool) -> float:
+    """Quanto quella nota e' probabile qui, secondo il corpus.
+
+    Il peso base e' la quota misurata di quel grado SULLA TONICA DEL PEZZO --
+    non sulla fondamentale dell'accordo, che era l'errore della versione 02.
+    Cosi' tutti e dodici i gradi sono disponibili, ognuno alla sua frequenza:
+    la terza blues all'8,3%, il grado 11 al 5,6%, i cromatici sotto il 5%.
+
+    ⚠️ Sui MOVIMENTI una nota dell'accordo pesa `PESO_ACCORDO` volte tanto. E'
+    li' che una nota fuori si sente come un errore invece che come un
+    passaggio, e senza questa distinzione la distribuzione giusta produrrebbe
+    comunque una linea storta: non conta solo QUANTE volte una nota compare,
+    ma DOVE.
+    """
+    p = GRADI_CORPUS[(nota - TONICA) % 12]
+    if forte:
+        fond, gradi = ACCORDI[sigla]
+        if (nota - fond) % 12 in gradi:
+            p *= PESO_ACCORDO
+    return p
 
 
 def assolo(giro_del_solista: list[str]) -> tuple:
-    """Le dodici battute dell'assolo, otto crome ciascuna.
+    """Le dodici battute dell'assolo, sedici sedicesimi ciascuna.
 
-    Non sceglie quante note: quelle le dice `DENSITA`, che viene dalla misura.
-    Sceglie QUALI, e lo fa camminando per gradi congiunti sulla scala
-    dell'accordo -- il 61% degli intervalli di un assolo vero sta entro 2
-    semitoni -- con un salto ogni tanto e un'inversione di direzione ai bordi
-    del registro.
+    Non sceglie quante note ne' dove: quelle le dicono `DENSITA` e `SLOT`, che
+    vengono dall'arco misurato. Sceglie QUALI, e lo fa camminando per gradi
+    congiunti -- il 61% degli intervalli di un assolo vero sta entro 2
+    semitoni -- pescando fra i vicini con la probabilita' misurata di ogni
+    grado.
     """
     rng = random.Random(SEME_ASSOLO)
     fuori = []
@@ -352,40 +411,40 @@ def assolo(giro_del_solista: list[str]) -> tuple:
     for i, sigla in enumerate(giro_del_solista):
         battuta = i + 1
         d = DENSITA[i]
-        pattern = SLOT[d]
-        scala = _gradi(sigla)
-        note = [None] * 8
+        pattern = SLOT_BATTUTA.get(battuta, SLOT[d])
+        note = [None] * 16
 
         if battuta in ENUNCIAZIONI:
             # il motivo, alle stesse altezze ogni volta piu' la trasposizione
             base = ASSOLO_PARTENZA + ENUNCIAZIONI[battuta]
             passo = [0, 2, 4, 7, 5]          # i gradi di MOTIVO in semitoni
-            for k, s in enumerate(i2 for i2, c in enumerate(pattern) if c == 'x'):
+            posti = [k for k, c in enumerate(pattern) if c == 'x']
+            for k, s in enumerate(posti):
                 if k < len(passo):
                     note[s] = base + passo[k]
-            corrente = base + passo[min(len(passo), d) - 1]
+            corrente = base + passo[min(len(passo), len(posti)) - 1]
             fuori.append(tuple(note))
             continue
 
         for s, c in enumerate(pattern):
             if c != 'x':
                 continue
-            vicini = [n for n in scala if abs(n - corrente) <= 4]
-            if not vicini:
-                vicini = scala
+            forte = s % 4 == 0                      # i quattro movimenti
+            vicini = [n for n in range(corrente - 4, corrente + 5)
+                      if ASSOLO_MIN <= n <= ASSOLO_MAX and n != corrente]
             avanti = [n for n in vicini
                       if (n - corrente) * direzione > 0] or vicini
-            # per gradi quasi sempre, un salto ogni tanto
-            avanti.sort(key=lambda n: abs(n - corrente))
-            scelta = avanti[0] if rng.random() < 0.72 else \
-                avanti[min(1, len(avanti) - 1)]
+            pesi = [_peso(n, sigla, forte) / (1 + abs(n - corrente)) ** 2
+                    for n in avanti]
+            scelta = rng.choices(avanti, weights=pesi, k=1)[0]
             note[s] = scelta
             corrente = scelta
             if corrente >= ASSOLO_MAX - 2 or corrente <= ASSOLO_MIN + 2 \
-                    or rng.random() < 0.22:
+                    or rng.random() < 0.18:
                 direzione = -direzione
         fuori.append(tuple(note))
     return tuple(fuori)
+
 
 # --------------------------------------------------------------------------
 # La batteria
@@ -589,9 +648,26 @@ def costruisci(prof):
     _, clip_tema = C.add_track(doc, PRESET_TEMA, name='062 Trumpet',
                                folder='SYNTHS', length=LUNGHEZZA,
                                playing=True)
+    # ⚠️ TRE CHIAMATE E NON UNA, ed e' la ragione per cui `da=` esiste.
+    # `melodia()` applica UNA durata a tutta la stringa: dalla versione 03
+    # l'assolo e' in sedicesimi e il tema no, e passarli insieme
+    # dimezzerebbe la lunghezza di ogni nota del tema senza che nessuno se ne
+    # accorga. Il tema resta in crome, l'assolo va in sedicesimi, e le tre
+    # parti si uniscono per altezza -- che e' la forma in cui il Deluge tiene
+    # le righe di una clip.
     ultimo = list(TEMA_NOTE[:-1]) + [TEMA_CHIUSA]
-    linea_tema = list(TEMA_NOTE) + list(assolo(giro[12:24])) + ultimo
-    note = MU.melodia(_spec_melodia(linea_tema), durata='1/8', velocity=95)
+    parti = (
+        MU.melodia(_spec_melodia(TEMA_NOTE), durata='1/8',
+                   da=0, velocity=95),
+        MU.melodia(_spec_melodia(assolo(giro[12:24])), durata='1/16',
+                   da=12 * TICK_BATTUTA, velocity=95),
+        MU.melodia(_spec_melodia(ultimo), durata='1/8',
+                   da=24 * TICK_BATTUTA, velocity=95),
+    )
+    note = {}
+    for parte in parti:
+        for altezza, ns in parte.items():
+            note.setdefault(altezza, []).extend(ns)
     rapporti.append(MU.scrivi(doc, clip_tema, note))
 
     return doc, rapporti
