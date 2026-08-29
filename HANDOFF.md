@@ -44,6 +44,12 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > e quel «pirotecnico» **si misura**. La **casella 11** del jazz non è più
 > vuota.
 >
+> E la **casella 8** — la melodia — e' stata **misurata lo stesso giorno**
+> (§6-sexdecies), perche' il difetto sentito diceva dove guardare: le corse
+> culminano sul **ii-V**, i silenzi sulle chiusure di frase, e un motivo e' di
+> almeno **cinque** note perche' sotto le quattro la ripetizione e'
+> indistinguibile dal caso. Il jazz ha ora **tre caselle piene** su undici.
+>
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
 > regole di quel documento non sono consigli: ognuna nasce da un errore pagato.
@@ -69,8 +75,15 @@ ascoltato il terzo tentativo di dub:
 vuota dichiara *cosa servirebbe per riempirla*, quindi l'agenda si legge dalla
 matrice.
 
-⚠️ **Questa tabella dava due caselle per vicine a chiudersi, e il 25 agosto
-2026 ne resta una.** La riga che c'era prometteva che il Groove MIDI avrebbe
+⚠️ **Questa tabella è ora VUOTA: tutt'e due le caselle che elencava sono
+chiuse**, la 6 il 25 agosto e la 8 il 29. Resta come storia, e perché la riga
+barrata dice più della sua assenza. ⚠️ **Chi cerca il prossimo lavoro NON lo
+trova qui: lo trova nell'indice in fondo a `docs/MUSICA.md`**, dove il jazz ha
+ancora vuote la 1, la 2 e la 5, e gli altri tre repertori del perimetro le
+hanno vuote tutte e undici.
+
+⚠️ La nota che questa tabella portava, e che vale ancora: **dava due caselle
+per vicine a chiudersi, e il 25 agosto 2026 ne restava una.** La riga che c'era prometteva che il Groove MIDI avrebbe
 chiuso «la 6 del jazz e i `[WEB]` della 6 del reggae»: **per il jazz è andata
 così, per il reggae era falsa**, e il perché sta due righe più giù. È corretta
 invece che lasciata perché è dall'agenda che la prossima sessione decide dove
@@ -79,7 +92,7 @@ mettere le mani, e un'agenda ottimista la rimanderebbe esattamente lì.
 | casella | cosa la chiude, e dov'è |
 |---|---|
 | ~~**jazz 6** (dinamica)~~ | **chiusa il 25 agosto 2026**, dal ramo `groove-midi`: velocity, profilo posizionale e microtiming residuo di **cinque batteristi** del Groove MIDI, con la scheda che porta accanto a ogni numero quante esecuzioni e quanti batteristi lo reggono. Vedi §6-terdecies |
-| **jazz 8** (melodia e ornamentazione) | `wjazzd.db`, già leggibile con `WJ.melodia()`/`WJ.armonia()`: 456 assoli con **gli accordi allineati alla linea**, guardati finora solo per lo swing. ⚠️ **E dal 29 agosto si sa cosa andarci a misurare:** non la densità media — quella è già misurata, e una linea scritta per centrarla esce piatta — ma la **distribuzione nel tempo**, dove stanno le corse e cosa le precede. Vedi §6-quindecies |
+| ~~**jazz 8** (melodia e ornamentazione)~~ | **chiusa il 29 agosto 2026**, da `wjazzd.db`: l'arco del giro su **66 assoli e 38 solisti**, la soglia del motivo su 80, e l'ornamentazione su 166 346 note. Lo strumento e' `tools/misura_melodia.py`. Vedi §6-sexdecies |
 
 ⚠️ **La 6 del reggae il Groove MIDI NON la chiude, e non è una questione di
 sforzo.** Di reggae quel dataset porta **venti esecuzioni**, che sono **quattro
@@ -2028,6 +2041,80 @@ oggi, scritto **come quadro dei fatti e non come parere legale**.
   **rosso in locale** ed è una decisione dell'utente, perché rigenerare quella
   tabella inciderebbe i quattro preset dentro `sound.py`, che è versionato.
   `refs/` è ignorato da git: su un clone la suite resta verde.
+
+---
+
+## 6-sexdecies. La melodia, misurata — 29 agosto 2026
+
+Chiude la **casella 8** del jazz, ed è il seguito diretto di §6-quindecies: la
+domanda non è nata da un'agenda ma da un difetto **sentito**. L'assolo del
+primo pezzo centrava la densità mediana del corpus e usciva piatto; la
+domanda giusta non era *quante* note ma **dove**.
+
+⚠️ **La regola di §6-quindecies è stata applicata prima di aprire la misura**,
+ed è la prima volta: *cosa cambierebbe in ciò che Pal scrive?* Risposta —
+l'assolo di `genera_jazz.py` è una tabella scritta a mano; misurata la
+distribuzione, diventa generabile da una regola, e la prova è un secondo pezzo
+che l'utente giudica. C'era un esito, quindi la misura si è aperta.
+
+Lo strumento è `tools/misura_melodia.py`, l'ultimo giro in
+`out/melodia_jazz.txt`. Il campione sono i blues `A12` a feel `SWING` di
+`wjazzd.db`, con un controllo di **periodicità** della griglia: 15 assoli su 81
+non lo passano e sono **scartati e contati**.
+
+### I tre risultati, in breve
+
+**L'arco del giro** — 66 assoli, 38 solisti, 4808 battute `[MIS]`. Le corse
+culminano sul **ii-V** (battute 9-10): **34,4%** contro il **13,3%** della
+battuta 1, cioè 2,6 volte. I silenzi cadono sulle chiusure di frase — battute
+4, 8 e **12**, quest'ultima vuota nel **14,8%** dei casi e la più rada di
+tutte. **25 solisti su 31** lo fanno individualmente, quindi è del repertorio e
+non di qualcuno. Una corsa dura **una battuta** (62%), due al massimo.
+
+**La cella e la scala** — 80 assoli `[MIS]`. Una cella di **3 note ripetuta non
+è un motivo: è la scala.** Contro la stessa linea mescolata il rapporto è
+**1,02×**, cioè il caso. Il segnale compare a 4 note e diventa netto a **5**
+(4,2×, in 78 assoli su 80).
+
+**L'ornamentazione** — 166 346 note `[MIS]`, da `melody.f0_mod`, che nessuno
+aveva notato. Il 3,9% delle note è ornato, e il **vibrato sta sulle note
+lunghe**: 0,493 s di mediana contro 0,107 di una nota nuda, **4,6×**. Slide e
+bend stanno invece su note di durata ordinaria — sono gesti di attacco, non di
+tenuta.
+
+### Le tre lezioni di metodo, che valgono oltre la casella
+
+⚠️ **1. La previsione era sbagliata, e nel verso che conta.** Ci si aspetta la
+domanda e la risposta — silenzio, poi scoppio. I dati dicono il contrario: dopo
+una battuta rada una corsa arriva nel **17,6%** dei casi, dopo una battuta
+piena nel **24,2%**. Un assolo ha **zone**, non un'alternanza. Un generatore
+costruito sull'intuizione avrebbe scritto una cosa che nel corpus non c'è.
+
+⚠️ **2. Un rapporto contro un riferimento casuale va citato solo dove è
+stabile.** Su celle da 6 e 7 note il riferimento tende a zero e lo si sta
+dividendo per quasi niente: fra cinque semi il valore balla da 16 a 24 e da 84
+a 140. Lo strumento gira **cinque semi**, stampa min e max e marca `BALLA` da
+sé, così l'instabilità non va riscoperta. Si cita il minimo; a sette note non
+si cita affatto un rapporto, si dice che per caso non ricorre.
+
+⚠️ **3. Due misure indipendenti hanno dato la stessa soglia.** Il controllo
+anti-copiatura del pezzo (§6-quindecies) aveva dichiarato tre note in comune
+«la scala, non una citazione», per argomento. Questa misura lo conferma con un
+riferimento casuale: a tre note la ricorrenza è indistinguibile dal caso. Le
+due cose non si sapevano l'una dell'altra.
+
+### Cosa NON rifare
+
+- **non citare un rapporto reale/mescolato senza guardare se balla.** È la
+  ragione per cui `misura_melodia.py` non ha un seme solo;
+- **non ripetere celle di tre note per «fare sviluppo motivico».** Misurato: è
+  ciò che succederebbe comunque, ed è la soglia sotto cui si sta guardando il
+  vocabolario e chiamandolo motivo;
+- **non generare alternando corsa e silenzio**, per quanto sia l'immagine
+  ovvia. Le corse si addensano;
+- ⚠️ **non dare per scritto sul Deluge ciò che il corpus annota.** Vibrato,
+  slide, bend e fall-off sono misurati *nel corpus*; che il dispositivo sappia
+  farli è una domanda della **casella 10** e **nessuno dei tre è stato provato**.
 
 ---
 

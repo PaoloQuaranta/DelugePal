@@ -1639,20 +1639,159 @@ impedire.
 
 ## 8. Melodia e ornamentazione
 
-**Vuota, ed è la più vicina a chiudersi.** `wjazzd.db` è esattamente questo —
-assoli trascritti a mano con **gli accordi allineati alla linea**, e quanti
-siano lo dice [`../../HANDOFF.md`](../../HANDOFF.md), «La decisione sui
-formati simbolici» — ed è già su disco e già leggibile con `WJ.melodia()` e
-`WJ.armonia()`. Manca solo guardarlo per lo sviluppo motivico invece che per
-lo swing.
+**Misurata il 29 agosto 2026**, e non su una statistica di comodo: la domanda
+è arrivata da un difetto che si è **sentito**. Il primo pezzo jazz aveva un
+assolo scritto per centrare la densità mediana del corpus, e la centrava —
+media 5,00 contro 5,23 — ma l'utente l'ha giudicato *«poco pirotecnico»*, e la
+casella 11 porta il numero che gli dà ragione: **dispersione dimezzata, zero
+battute vuote, zero corse**. Da lì la domanda giusta: non *quante* note, ma
+**dove**.
 
-*Nel frattempo, per comporre:* si guarda **un assolo solo** del corpus che è
-già in casa — `WJ.elenco(db, style=…)` per sceglierlo, `WJ.melodia()` e
-`WJ.armonia()` per leggerlo — e quello che se ne ricava è `[OSS]` su un
-assolo, non `[MIS]`: un assolo è un musicista, non un repertorio. Se
-`wjazzd.db` non c'è, e non è versionato, la domanda va **alla skill**:
-`melody/motivic-development.md`, dal `references/00-navigation.md`, segnando
-`[WEB]`.
+Lo strumento è `tools/misura_melodia.py`, l'ultimo giro sta in
+`out/melodia_jazz.txt`. Il campione sono i blues **`A12` a feel `SWING`** di
+`wjazzd.db` — la forma va nota perché la posizione dentro il giro abbia senso,
+ed è anche la forma che si genera. Ogni assolo passa un controllo di
+**periodicità** (la sigla alla battuta *b* deve tornare alla *b+12* nell'80%
+dei casi); chi non lo passa è **scartato e contato**, non aggiustato: sono 15
+su 81, quasi tutti per giri insufficienti.
+
+### L'arco del giro: dove stanno le corse, e dove i silenzi
+
+**66 assoli, 38 solisti, 4808 battute** `[MIS]`. Una **corsa** è una battuta
+oltre il terzo quartile *di quell'assolo* e comunque da 8 note in su: la parte
+relativa impedisce di misurare chi suona fitto invece di dove accelera, il
+minimo assoluto impedisce che in un assolo rado qualunque battuta media
+diventi una corsa.
+
+| pos | l'accordo, in un blues | corse | vuote | note (mediana) |
+|---|---|---|---|---|
+| 1 | I | **13,3%** | 1,7% | 5 |
+| 2 | IV | 17,5% | 1,8% | 5 |
+| 3 | I | 18,8% | 3,3% | 5 |
+| 4 | I | 27,4% | **7,4%** | 6 |
+| 5 | IV | 19,4% | 2,3% | 6 |
+| 6 | IV | 22,1% | **6,3%** | 6 |
+| 7 | I | 23,6% | 3,0% | 6 |
+| 8 | I | 27,9% | **10,3%** | 6 |
+| **9** | **ii** | **34,4%** | 1,8% | **7** |
+| **10** | **V** | **31,4%** | 2,3% | **7** |
+| 11 | I | 21,5% | 2,0% | 5 |
+| 12 | turnaround | 17,2% | **14,8%** | **4** |
+
+Tre fatti, e nessuno era ricavabile dalla media:
+
+- **le corse culminano sul ii-V**, battute 9-10: **34,4%** contro il **13,3%**
+  della battuta 1, cioè **2,6 volte**. La mediana sale a 7 note dove altrove
+  sta a 5;
+- **i silenzi cadono sulle chiusure di frase** — battute 4, 8 e 12, con 7,4%,
+  10,3% e **14,8%**. Sono le tre frasi da quattro battute del blues, e il
+  solista respira alla fine di ognuna;
+- **la battuta 12 è insieme la più vuota e la più rada** (mediana 4). Ci si
+  ferma prima di ripartire, e il turnaround lo si lascia alla sezione ritmica.
+
+**Regge sui singoli, non solo sull'aggregato: 25 solisti su 31** hanno
+individualmente più corse sul ii-V che sulle battute 1 e 12. È una proprietà
+del repertorio, non l'abitudine di qualcuno.
+
+#### Una corsa dura UNA battuta
+
+Mediana 1, media 1,63, massimo 10 `[MIS]`. **Il 62% delle corse è di una
+battuta sola**, il 22% di due, il 10% di tre. Non è un tratto lungo: è uno
+scoppio.
+
+#### E le corse si addensano fra loro — la previsione era sbagliata
+
+⚠️ **Scritto perché la previsione era l'opposto, ed era la mia.** Ci si aspetta
+la domanda e la risposta: silenzio, poi scoppio. I dati dicono il contrario.
+
+| dopo una battuta… | la successiva è una corsa nel |
+|---|---|
+| **rada** (fino a 2 note) | **17,6%** (n=800) |
+| **piena** | **24,2%** (n=3942) |
+
+Una corsa è **più** probabile dopo una battuta piena che dopo una rada. Un
+assolo ha **zone** — tratti fitti e tratti radi — non un'alternanza colpo su
+colpo. Chi genera alternando scoppio e silenzio scrive una cosa che nel corpus
+non c'è.
+
+### La cella e la scala: quanto lunga dev'essere per essere un motivo
+
+**80 assoli** `[MIS]`. Quanto spesso una cella di *N* intervalli ricompare
+nello stesso assolo, contro **la stessa linea mescolata** — che conserva la
+distribuzione degli intervalli e distrugge il solo ordine, cioè isola
+esattamente ciò che si vuole misurare.
+
+| cella | note | reale | mescolato | rapporto (5 semi) | assoli |
+|---|---|---|---|---|---|
+| 2 intervalli | 3 | 80,2% | 78,4% | **1,02× - 1,03×** | 51/80 |
+| 3 intervalli | 4 | 44,7% | 30,2% | 1,47× - 1,50× | 78/80 |
+| 4 intervalli | **5** | 21,9% | 5,0% | **4,22× - 4,66×** | 78/80 |
+| 5 intervalli | 6 | 11,3% | 0,6% | oltre **16×** | 73/80 |
+| 6 intervalli | 7 | 6,7% | 0,07% | (non citabile) | 69/80 |
+
+⚠️ **Sotto le quattro note non c'è sviluppo motivico: c'è la scala.** A tre
+note la ripetizione è **indistinguibile dal caso** (1,02×), e in poco più di
+metà degli assoli. Il segnale compare a **quattro** note e diventa netto a
+**cinque**, dove una cella ricorre quattro volte più del caso in 78 assoli su
+80. Ripetere una cella di tre note non produce un motivo: produce quello che
+succederebbe comunque.
+
+⚠️ **E il rapporto va citato solo dove è stabile.** Su celle da 6 e 7 note il
+riferimento casuale tende a zero e lo si sta dividendo per quasi niente: fra
+cinque semi il valore balla da 16 a 24 e da 84 a 140. Si cita il **minimo**, e
+a sette note non si cita affatto un rapporto — si dice che una cella così
+lunga **per caso non ricorre**, e quindi ogni sua ricorrenza è voluta. Lo
+strumento stampa min e max e marca `BALLA` da sé, così la cosa non va
+riscoperta.
+
+⚠️ È la stessa soglia che ha retto il controllo anti-copiatura del pezzo
+(casella 11, §6-quindecies dell'handoff), dove tre note in comune erano state
+dichiarate «la scala, non una citazione». I due risultati sono indipendenti e
+concordano.
+
+### L'ornamentazione: il 3,9% delle note, e il vibrato ha un posto
+
+`wjazzd.db` la annota, in `melody.f0_mod`, e non era stato notato prima.
+**166 346 note di assoli a feel `SWING`** `[MIS]`:
+
+| | quota | durata mediana | contro una nota nuda |
+|---|---|---|---|
+| nessuna | 96,1% | 0,107 s | — |
+| **vibrato** | 1,89% | **0,493 s** | **4,59×** |
+| slide | 1,48% | 0,102 s | 0,95× |
+| bend | 0,25% | 0,102 s | 0,95× |
+| fall-off | 0,23% | 0,193 s | 1,80× |
+
+**Il vibrato sta sulle note lunghe** — quasi cinque volte la durata di una nota
+qualunque — ed è la sola ornamentazione che si sceglie *per durata*. **Slide e
+bend stanno su note di lunghezza ordinaria**: sono gesti di attacco e di
+passaggio, non di tenuta. Il **fall-off** sta a metà, ed è un gesto di
+chiusura.
+
+⚠️ **Che il Deluge sappia farli è un'altra domanda, e sta nella casella 10.**
+Qui c'è dove vanno, non come si scrivono: vibrato è un patch cable LFO →
+pitch, slide e bend sono portamento o automazione. Nessuno dei tre è stato
+provato sul dispositivo.
+
+### Cosa serve per scrivere una linea, in breve
+
+Le cinque cose da rispettare, tutte `[MIS]` qui sopra:
+
+1. **l'arco del giro:** poche corse all'inizio, il picco sul **ii-V**, il vuoto
+   sul **turnaround**;
+2. **il respiro a fine frase:** battute 4, 8 e 12, con la 12 la più vuota;
+3. **una corsa dura una battuta**, due al massimo;
+4. **le corse si addensano**, non si alternano ai silenzi;
+5. **un motivo è di almeno cinque note**, e ripeterne tre non serve a niente.
+
+⚠️ **E la cosa da NON fare, che è quella che è già costata:** non scrivere per
+centrare una media. La media è già misurata, vale 5,2 note per battuta, e una
+linea costruita per rispettarla esce corretta e piatta.
+
+*Cosa manca ancora:* **come una corsa è fatta dentro** — se sale, se scende, se
+gira attorno a una nota — e la **collocazione dell'ornamentazione dentro la
+frase**, che qui è misurata per durata ma non per posizione. Nessuna delle due
+blocca la scrittura di una linea.
 
 ## 9. Forma e densità
 
@@ -1913,8 +2052,8 @@ casella 11.
 
 ## 11. Trappole del generatore
 
-**Parziale: una correzione sola, del 29 agosto 2026, dal primo pezzo jazz.**
-La casella si è aperta esattamente come dichiarava di volersi aprire — «al
+**Parziale.** Una correzione sola, del **29 agosto 2026**, dal primo pezzo
+jazz. La casella si è aperta esattamente come dichiarava di volersi aprire — «al
 primo pezzo jazz corretto dall'utente» — e quello che ha incassato è **una**
 direzione, non un promosso.
 
