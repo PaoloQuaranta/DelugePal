@@ -73,6 +73,41 @@ def test_multi_root():
 
 # ---------------------------------------------------------------- roundtrip
 
+#: I file che il REBUILD completo non ricostruisce byte-esatto. Sono limiti
+#: del modello di formato, non dati sbagliati: il Deluge legge XML e non conta
+#: gli spazi, e il round-trip CHIRURGICO -- quello che `write_file()` usa
+#: davvero -- resta byte-esatto su tutti e tre.
+#:
+#: Due cause diverse, e vanno tenute distinte:
+#:
+#:   TRASF401MIDI.XML   la DISPOSIZIONE DEGLI ATTRIBUTI. `inline_prefix` sa
+#:                      esprimere "N attributi sulla riga del tag, il resto
+#:                      uno per riga"; quel nodo ne ha ZERO sulla riga del tag
+#:                      e poi tutti e tre INSIEME su quella dopo. Documentato
+#:                      in FINDINGS 2.2-bis.
+#:
+#:   KIT009.XML         un ELEMENTO VUOTO SPEZZATO SU DUE RIGHE. L'originale
+#:   062 Trumpet.XML    scrive `<midiKnobs>` e `</midiKnobs>` su righe
+#:                      diverse, il rebuild le unisce. 42 righe su 2449 nel
+#:                      primo, 3 su 205 nel secondo. Trovati il 29 agosto
+#:                      2026 scaricando i preset per il primo pezzo jazz.
+#:                      ⚠️ Di KIT009 l'utente ha detto che e' VECCHIO, e
+#:                      infatti scrive il nome dei drum come elemento invece
+#:                      che come attributo (vedi `song.nome_drum()`). Di
+#:                      `062 Trumpet` non si sa l'eta': condivide solo la
+#:                      grafia dell'elemento vuoto, il che SUGGERISCE la
+#:                      stessa origine e non la dimostra.
+#:
+#: ⚠️ NON e' una lista per far tacere i test. `test_rebuild_differisce_solo_negli_spazi` gira
+#: su QUESTO stesso insieme e pretende, file per file, che la differenza sia
+#: di soli spazi e che il chirurgico resti byte-esatto. Aggiungere un nome qui
+#: aggiunge un controllo, non lo toglie.
+#:
+#: Nessuno dei tre e' versionato: `refs/` sta fuori dal repo. L'intersezione
+#: coi file presenti fa svuotare l'insieme da se' su un clone.
+REBUILD_NOTO = {'TRASF401MIDI.XML', 'KIT009.XML', '062 Trumpet.XML'}
+
+
 def test_roundtrip():
     files = [p for p in sorted(REFS.rglob('*.XML')) if not p.name.startswith('._')]
     if not files:
@@ -86,18 +121,11 @@ def test_roundtrip():
           not bad, ', '.join(bad[:4]))
 
     # Il rebuild completo ricostruisce ogni nodo dalle regole di formato
-    # apprese. Un file solo non ci riesce, e il perche' e' documentato in
-    # FINDINGS §2.2-bis: il modello `inline_prefix` sa esprimere "N attributi
-    # sulla riga del tag, il resto uno per riga", mentre quel nodo ne ha ZERO
-    # sulla riga del tag e poi tutti e tre INSIEME su quella dopo. Non e' una
-    # forma che il modello puo' rappresentare.
-    #
-    # Non viene ignorato: `test_rebuild_differisce_solo_negli_spazi` controlla
-    # che la differenza resti di soli spazi. Se un giorno diventasse altro, o
-    # se un secondo file cadesse qui, questi due test lo dicono.
-    # l'unico file che non si ricostruisce byte-esatto; se non e' stato
-    # pubblicato (contiene un preset di terzi) l'insieme si svuota da se'
-    NOTO = {'TRASF401MIDI.XML'} & {p.name for p, _ in docs}
+    # apprese. Tre file non ci riescono, per due ragioni diverse, e stanno
+    # elencati con la causa in REBUILD_NOTO qui sopra. Se un giorno la
+    # differenza diventasse altro, o se un QUARTO file cadesse qui, questo
+    # test e `test_rebuild_differisce_solo_negli_spazi` lo dicono.
+    NOTO = REBUILD_NOTO & {p.name for p, _ in docs}
     bad = [p.name for p, d in docs
            if serialize(d, table, rebuild=True) != d.raw]
     check(f'rebuild completo byte-esatto ({len(docs)} file, {len(NOTO)} noto)',
@@ -105,26 +133,35 @@ def test_roundtrip():
 
 
 def test_rebuild_differisce_solo_negli_spazi():
-    """L'unico file che non si ricostruisce byte-esatto differisce SOLO nella
-    disposizione degli attributi, non nel contenuto.
+    """I file che il rebuild non ricostruisce differiscono SOLO negli spazi.
 
-    E' il limite del modello di formato, non un dato sbagliato: il Deluge
-    legge XML e non conta gli spazi, e il round-trip CHIRURGICO -- quello che
-    si usa davvero, che ricopia i byte dei nodi non toccati -- e' byte-esatto
-    anche su questo file.
+    Sono quelli di REBUILD_NOTO, e la causa di ciascuno sta scritta li'.
+    ⚠️ Questo test e' la ragione per cui quella lista non e' un modo per far
+    tacere `test_roundtrip`: ogni nome elencato deve dimostrare QUI che la
+    differenza e' di soli spazi bianchi, e che il round-trip CHIRURGICO --
+    quello che `write_file()` usa davvero -- resta byte-esatto. Aggiungere un
+    nome a REBUILD_NOTO aggiunge tre controlli, non ne toglie uno.
+
+    Il limite e' del modello di formato, non un dato sbagliato: il Deluge
+    legge XML e non conta gli spazi.
     """
-    p = REFS / 'songs' / 'TRASF401MIDI.XML'
-    docs = [parse_file(q) for q in sorted(REFS.rglob('*.XML'))
-            if not q.name.startswith('._')]
-    table = FormatTable().learn(docs)
-    doc = parse_file(p)
-    rebuilt = serialize(doc, table, rebuild=True)
+    tutti = [q for q in sorted(REFS.rglob('*.XML'))
+             if not q.name.startswith('._')]
+    presenti = [q for q in tutti if q.name in REBUILD_NOTO]
+    if not presenti:
+        salta('il rebuild differisce solo negli spazi',
+              'nessuno dei file di REBUILD_NOTO e presente')
+        return
+    table = FormatTable().learn(parse_file(q) for q in tutti)
 
-    check('il rebuild differisce davvero', rebuilt != doc.raw)
-    check('ma solo negli spazi bianchi',
-          ''.join(rebuilt.split()) == ''.join(doc.raw.split()))
-    check('e il round-trip chirurgico resta byte-esatto',
-          serialize(doc, table) == doc.raw)
+    for q in presenti:
+        doc = parse_file(q)
+        rebuilt = serialize(doc, table, rebuild=True)
+        check(f'{q.name}: il rebuild differisce davvero', rebuilt != doc.raw)
+        check(f'{q.name}: ma solo negli spazi bianchi',
+              ''.join(rebuilt.split()) == ''.join(doc.raw.split()))
+        check(f'{q.name}: il chirurgico resta byte-esatto',
+              serialize(doc, table) == doc.raw)
 
 
 def test_surgical_isolation():
@@ -1194,6 +1231,63 @@ def test_kit_drum_names():
           _raises(lambda: S.drum_index(doc, kit_clip, 'BONGOZZO'), ValueError))
     check('un synth non ha drum',
           _raises(lambda: S.drum_names(doc, synth_clip), ValueError))
+
+
+def test_nome_drum_legge_le_due_forme_del_nome():
+    """Il nome di un drum sta in due posti diversi secondo l'eta' del file.
+
+    Il firmware recente lo scrive come ATTRIBUTO, `<sound name="KICK">`, ed
+    e' cosi' in tutte le 43 song del corpus e nei tre kit di terzi in
+    `refs/kits/`. Quello vecchio lo scriveva come ELEMENTO figlio,
+    `<name>KICK</name>`: e' la forma di `KIT009`, un kit dell'utente creato
+    molte versioni fa, e il dispositivo lo apre ancora senza storie.
+
+    Fino al 29 agosto 2026 la libreria leggeva il solo attributo: su un kit
+    vecchio `drum_index_of()` non trovava NESSUN drum e ogni scrittura per
+    nome falliva. Il difetto e' venuto fuori scrivendo il primo pezzo jazz,
+    e che la forma a elemento fosse la VECCHIA l'ha detto l'utente: dai
+    file soli si vedeva solo che erano due.
+
+    I tre kit si costruiscono qui invece di leggerli dal corpus: la forma
+    vecchia non sta in nessun file versionato, e un test che salta non e'
+    un test.
+    """
+    from delugexml import kit as K                        # noqa: PLC0415
+
+    forme = {
+        'nuova':   '<sound name="KICK"/><sound name="SNARE"/>',
+        'vecchia': ('<sound><name>KICK</name></sound>'
+                    '<sound><name>SNARE</name></sound>'),
+        'mista':   '<sound name="KICK"/><sound><name>SNARE</name></sound>',
+    }
+    kit = {e: parse(f'<kit><soundSources>{c}</soundSources></kit>')
+           for e, c in forme.items()}
+
+    for eta, doc in kit.items():
+        nomi = [S.nome_drum(d) for d in S.drums(doc.root)]
+        check(f'forma {eta}: i nomi si leggono',
+              nomi == ['KICK', 'SNARE'], str(nomi))
+        check(f'forma {eta}: la ricerca per nome trova il secondo',
+              K.drum_index_of(doc.root, 'SNARE') == 1)
+
+    check('sulla forma vecchia la ricerca ignora le maiuscole',
+          K.drum_index_of(kit['vecchia'].root, 'snare') == 1)
+    check('un nome inesistente resta un errore, non un indice sbagliato',
+          _raises(lambda: K.drum_index_of(kit['vecchia'].root, 'BONGOZZO'),
+                  ValueError))
+
+    p = REFS / 'kits' / 'KIT009.XML'
+    if not p.exists():
+        salta('il kit vecchio vero', 'KIT009.XML assente')
+        return
+    reale = parse_file(p)
+    nomi = [S.nome_drum(d) for d in S.drums(reale.root)]
+    check('KIT009 ha 14 drum e nessuno resta senza nome',
+          len(nomi) == 14 and all(nomi), str(nomi))
+    voci = ('KICK', 'SNARE', 'HATC', 'RIDE')
+    indici = [K.drum_index_of(reale.root, n) for n in voci]
+    check('KIT009: le quattro voci del jazz si trovano per nome',
+          indici == [0, 1, 2, 5], str(indici))
 
 
 def _raises(fn, exc):

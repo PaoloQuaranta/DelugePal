@@ -57,9 +57,9 @@ def drum_index_of(kit: Node, name: str) -> int:
     """L'indice del drum che si chiama `name`."""
     bersaglio = name.strip().upper()
     for i, d in enumerate(S.drums(kit)):
-        if (d.get('name') or '').strip().upper() == bersaglio:
+        if (S.nome_drum(d) or '').strip().upper() == bersaglio:
             return i
-    disponibili = ', '.join(d.get('name') or '?' for d in S.drums(kit))
+    disponibili = ', '.join(S.nome_drum(d) or '?' for d in S.drums(kit))
     raise ValueError(f'nessun drum "{name}" in questo kit. '
                      f'Disponibili: {disponibili}')
 

@@ -983,6 +983,31 @@ def drums(kit: Node) -> list[Node]:
     return ss.children if ss else []
 
 
+def nome_drum(drum: Node) -> str | None:
+    """Il nome di un drum, che il formato scrive in DUE modi diversi.
+
+    Il firmware recente lo mette come ATTRIBUTO -- `<sound name="KICK">` --
+    ed e' cosi' in tutte le 43 song del corpus e nei tre kit di terzi in
+    `refs/kits/`. Il firmware VECCHIO lo scriveva come ELEMENTO figlio,
+    `<name>KICK</name>`: e' la forma di `KIT009`, un kit che l'utente ha
+    creato molte versioni fa, e il dispositivo la legge ancora senza
+    storie.
+
+    ⚠️ Trovato il 29 agosto 2026 scrivendo il primo pezzo jazz.
+    `drum_index_of()` e `drum_names()` leggevano il solo attributo, quindi
+    su un kit vecchio non trovavano NESSUN drum e ogni chiamata per nome
+    falliva. Non e' una preferenza fra due grafie: leggerne una sola rende
+    inservibile un kit che il dispositivo apre. Che la forma a elemento sia
+    la vecchia lo ha detto l'utente, non i file -- da soli dicevano solo
+    che erano due.
+    """
+    attributo = drum.get('name')
+    if attributo:
+        return attributo
+    figlio = drum.find('name')
+    return figlio.text if figlio is not None else None
+
+
 def drum_names(doc: Document, clip: Node) -> list[str]:
     """I nomi dei drum della clip, indicizzati da `drumIndex`.
 
@@ -999,7 +1024,8 @@ def drum_names(doc: Document, clip: Node) -> list[str]:
     if kit is None:
         raise ValueError(f'kit "{clip.get("instrumentPresetName")}" non '
                          'trovato fra gli strumenti della song')
-    return [d.get('name') or f'({d.tag} {i})' for i, d in enumerate(drums(kit))]
+    return [nome_drum(d) or f'({d.tag} {i})'
+            for i, d in enumerate(drums(kit))]
 
 
 def drum_index(doc: Document, clip: Node, name: str) -> int:
