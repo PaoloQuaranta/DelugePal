@@ -85,6 +85,14 @@ ESECUZIONE = 'drummer10/session1/1'
 #:       limita l'attribuzione: le note si scelgono sulla distribuzione
 #:       misurata dei gradi SULLA TONICA DEL PEZZO invece che sulla scala
 #:       dell'accordo, e la griglia dell'assolo passa a sedicesimi.
+#:       Verdetto: «ora suona molto meglio. Le note sono a posto, le corse
+#:       suonano bene ed e' decisamente piu' pirotecnico».
+#:
+#: ⚠️ E' il primo giro CHIUSO di questo progetto: una lamentela all'orecchio,
+#: una misura sul corpus, una correzione, e lo stesso orecchio che approva.
+#: Le tre versioni restano una coppia controllata a tre -- batteria, basso e
+#: comping hanno le stesse identiche note in tutte e tre -- quindi i tre
+#: verdetti parlano dell'assolo e di nient'altro.
 VERSIONE = 3
 
 BPM = 128

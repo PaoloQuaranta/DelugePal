@@ -2229,7 +2229,15 @@ due cose non si sapevano l'una dell'altra.
   risponde a questa domanda, e la divergenza fra le due letture è massima
   proprio a fase 0,25 e 0,75. Si chiuderebbe con una coppia controllata
   **costruita** a quelle fasi. Il buco noto adiacente è già dichiarato in
-  `song.SWING_SCARTO_SORGENTE`
+  `song.SWING_SCARTO_SORGENTE`.
+
+  ⚠️ **Il 29 agosto 2026 ci si è scritto sopra per la prima volta, e non è
+  suonato rotto.** `JAZZ03` porta 12 note su 128 fra le crome — le corse
+  dell'assolo, in sedicesimi — e il verdetto è stato *«le corse suonano
+  bene»* `[OSS]`. **Non chiude niente:** resta ignoto *cosa* il firmware
+  faccia, e quella è l'assenza di un sintomo riferita da un ascoltatore una
+  volta sola, non una misura del meccanismo. Cambia però l'urgenza: era una
+  ragione per non scrivere sedicesimi, e non lo è più
 - **quanto grande debba essere un residuo di posizione perché si senta.** Non è
   una lacuna del Deluge ma del protocollo: gli ascolti del 24 agosto 2026 sono
   **un ascoltatore, nessuna ripetizione, nessuna prova alla cieca**, e

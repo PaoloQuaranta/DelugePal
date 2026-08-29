@@ -2052,10 +2052,14 @@ casella 11.
 
 ## 11. Trappole del generatore
 
-**Parziale.** Una correzione sola, del **29 agosto 2026**, dal primo pezzo
-jazz. La casella si è aperta esattamente come dichiarava di volersi aprire — «al
-primo pezzo jazz corretto dall'utente» — e quello che ha incassato è **una**
-direzione, non un promosso.
+**Parziale.** Tre correzioni, tutte del **29 agosto 2026** e tutte dallo
+stesso pezzo in tre versioni. La casella si è aperta esattamente come
+dichiarava di volersi aprire — «al primo pezzo jazz corretto dall'utente» — e
+alla terza versione il verdetto è stato *«ora suona molto meglio»*.
+
+⚠️ **Resta parziale, e non per modestia:** tre ascolti dello stesso
+ascoltatore sullo stesso pezzo non sono un repertorio di trappole. Quel che c'è
+è **un giro che si chiude**, non una casistica.
 
 ### Il primo pezzo jazz — 29 agosto 2026
 
@@ -2131,6 +2135,82 @@ condotta delle parti. Il comping non è stato scritto con `MU.armonia()` ma
 il ripiego che la casella 7 prescrive. L'utente infatti non se n'è lamentato.
 Quel silenzio quindi **non assolve la libreria**: assolve un aggiramento fatto
 a mano, che va rifatto ogni volta finché la 7 non è chiusa.
+
+### Il giro si chiude: JAZZ02 e JAZZ03 — 29 agosto 2026
+
+⚠️ **È la prima volta in questo progetto che una correzione dall'ascolto viene
+convertita in una misura e rimessa nel generatore, con lo stesso orecchio che
+approva il risultato.** Fino a qui l'ascolto aveva sempre e solo *aperto*
+domande. Le tre versioni sono una **coppia controllata a tre**: batteria,
+basso e comping hanno le stesse identiche note in tutte e tre — verificato
+confrontando i file — e cambia solo la tromba.
+
+| | l'assolo | il verdetto |
+|---|---|---|
+| `JAZZ01` | scritto a mano, crome | *«poco pirotecnico»* |
+| `JAZZ02` | dalle cinque regole, crome, scale d'accordo | *«alcune note sembrano fuori tonalità… non mi sembra più pirotecnico, soprattutto perché è tutto in ottavi»* |
+| `JAZZ03` | pesi misurati sulla tonica, corse in sedicesimi | *«ora suona molto meglio. Le note sono a posto, le corse suonano bene ed è decisamente più pirotecnico»* |
+
+#### La correzione di JAZZ02, e perché era misurabile
+
+```
+Tengo:            l'arco del giro. Sulla forma non ha obiettato ne' la
+                  prima ne' la seconda volta.
+Cambio:           le note dell'assolo, e la griglia.
+Direzione:        piu' vicino alla tonalita' del pezzo, e i sedicesimi.
+Resta regolabile: il seme del generatore, i pesi, il registro.
+```
+
+⚠️ **«Fuori tonalità» non voleva dire fuori scala, e la misura lo ha
+precisato.** `JAZZ02` costruiva la scala **di ogni accordo** — misolidia su F7
+e Bb7, dorica su Gm7, misolidia su C7 — che è corretto sull'accordo e sbagliato
+sul pezzo. Sui gradi relativi alla **tonica del pezzo**, contro gli 80 assoli e
+le 33 714 note della sezione «L'ornamentazione» qui sopra:
+
+| | `JAZZ02` | `JAZZ03` | corpus |
+|---|---|---|---|
+| **grado 11 sulle corse** (in fa il mi naturale) | **18,8%** | 8,3% | 6,7% |
+| grado 3, **la terza blues** | 1,7% | 7,5% | 8,3% |
+| grado 6 | 0,0% | 4,5% | 5,0% |
+| grado 8 | 0,0% | 6,0% | 4,2% |
+| *scarto totale dal corpus* | *41,4* | *33,7* | — |
+
+Il difetto era **uno solo e localizzato**: il grado 11 a quasi il triplo della
+sua quota, e **proprio sulle battute 9-10**, cioè sulle corse, dove si sente di
+più. Non «note sbagliate»: **troppe** di una nota che nel repertorio c'è ma
+sta bassa.
+
+⚠️ **La lezione operativa: non conta solo QUANTE volte una nota compare, ma
+DOVE.** La stessa quota distribuita male suona storta lo stesso. Nel generatore
+questo è il peso che una nota dell'accordo prende **sui movimenti** — senza,
+la distribuzione giusta produceva comunque una linea sbagliata.
+
+#### Il grado 2, che resta fuori quota ed è dichiarato
+
+Nella `JAZZ03` il grado 2 sta al **17,9%** contro il **9,8%** del corpus, ed è
+lo scarto più grosso rimasto. È il sol: su Gm7 è la fondamentale e su C7 la
+quinta, quindi prende il peso di nota d'accordo proprio sulle due battute più
+fitte. Musicalmente ci sta, e l'ascolto non l'ha segnalato. Sta scritto perché
+è il candidato numero uno se un domani qualcuno dirà che l'assolo gira sempre
+sulle stesse note.
+
+#### I sedicesimi, e cosa l'ascolto dice davvero del punto aperto
+
+La `JAZZ02` era tutta in crome e l'utente ha nominato **quello** come la
+ragione per cui non era pirotecnica. La `JAZZ03` porta le corse a 12
+sedicesimi, e **12 note su 128 cadono fra le crome**.
+
+⚠️ **Questo NON chiude il punto aperto di [`../../HANDOFF.md`](../../HANDOFF.md)
+§7**, e la distinzione è quella di sempre. Resta ignoto **cosa** il firmware
+faccia a una nota che cade fra le crome sotto `set_swing(figura='1/8')`: quel
+che si sa adesso è solo che **scriverci sopra non produce niente che suoni
+rotto** — *«le corse suonano bene»* `[OSS]`, un ascoltatore, una volta, senza
+confronto controllato. Non è una misura del meccanismo: è l'assenza di un
+sintomo. La coppia che deciderebbe va **costruita a fase 0,25 e 0,75**, ed è
+descritta in §7.
+
+Vale però come **declassamento della sua urgenza**: era una ragione per non
+scrivere sedicesimi, e non lo è più.
 
 ### La correzione del 24 agosto 2026 — che non è di questo repertorio
 
