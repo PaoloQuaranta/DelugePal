@@ -48,7 +48,11 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > (§6-sexdecies), perche' il difetto sentito diceva dove guardare: le corse
 > culminano sul **ii-V**, i silenzi sulle chiusure di frase, e un motivo e' di
 > almeno **cinque** note perche' sotto le quattro la ripetizione e'
-> indistinguibile dal caso. Il jazz ha ora **tre caselle piene** su undici.
+> indistinguibile dal caso. E la **casella 7** e' stata chiusa lo stesso
+> giorno (§6-septdecies): `MU.armonia()` conduce le parti, e la fonte che la
+> casella dava per risolutiva **non specificava** quello che le si attribuiva.
+> Il jazz ha ora **quattro caselle piene** su undici, e il primo pezzo e'
+> arrivato alla sesta versione.
 >
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
@@ -2141,6 +2145,65 @@ due cose non si sapevano l'una dell'altra.
 - ⚠️ **non dare per scritto sul Deluge ciò che il corpus annota.** Vibrato,
   slide, bend e fall-off sono misurati *nel corpus*; che il dispositivo sappia
   farli è una domanda della **casella 10** e **nessuno dei tre è stato provato**.
+
+---
+
+## 6-septdecies. La condotta delle parti — 29 agosto 2026
+
+Chiude la **casella 7** del jazz. `MU.voci_condotte()`: ogni accordo dopo il
+primo si posa nella disposizione che muove meno voci rispetto a quello prima.
+`MU.armonia()` la usa **di default**, `condotta=False` dà il comportamento
+precedente, `voci()` e un accordo solo non cambiano.
+
+⚠️ **L'invariante che rende la cosa sicura: cambia DOVE, non QUALI.** Si
+scelgono le ottave, mai le note — le classi di altezza restano quelle che
+`voci()` sceglie. Verificato sul pezzo: passando il comping dalla tabella
+scritta a mano alla libreria, **tutte e 59 le posizioni di accordo hanno le
+stesse classi di prima**, e 35 su 59 anche le stesse altezze esatte.
+
+E `genera_jazz.py` **perde la tabella di altezze scritta a mano**. Era il
+criterio dichiarato prima di aprire il lavoro — «la tabella sparisce» — ed è
+quello che dice che la casella è chiusa davvero.
+
+### Le tre cose che valgono più del codice
+
+⚠️ **1. La casella 7 diceva una cosa falsa, e mandava una sessione a
+implementarla.** Diceva: «la chiuderebbe `assets/jazz-voicings.md`… qui manca
+implementarla, non trovarla». Quella fonte **non specifica** l'alternanza A/B
+in modo implementabile, per tre ragioni indipendenti, tutte verificate in
+`test_condotta_delle_parti`: i nomi A e B non sono definiti (la fonte stessa
+scrive *«the naming convention depends on the source»*); il suo esempio non usa
+nessuna delle due forme — il G7 è `b7-9-3-13`, con la tredicesima al posto
+della quinta; e la regola che dichiara, *«only one voice moves per chord
+change»*, **fallisce sul suo stesso esempio** (`Dm7 → G7` una voce,
+`G7 → Cmaj7` tre). Resta solido lo **scopo**, ed è quello che si implementa.
+
+⚠️ **La correzione è stata scritta nella casella, non sostituita in silenzio.**
+Una riga che manda a cercare qualcosa che non c'è costa più di una casella
+vuota.
+
+⚠️ **2. Il minimo movimento è goloso, e si vede solo sulla lunghezza vera.** Su
+un ii-V-I la funzione sembrava a posto. Sul blues per **tre giri** il comping
+scendeva di **diciassette semitoni** — da `[57,60,63,67]` a `[40,43,46,50]` —
+perché il passo piccolo è sempre disponibile nella stessa direzione e la scelta
+golosa lo prende ogni volta. `MU.DERIVA_MASSIMA = 6` lo tiene entro mezza
+ottava dall'ancora: deriva da −17 a −5. **La regola: una funzione che sceglie
+un passo alla volta va provata sulla lunghezza a cui verrà usata.** Tre accordi
+non sono trentasei battute.
+
+⚠️ **3. `racconta_armonia()` avrebbe mentito.** Esiste per la regola 4 — un
+operazione silenziosa non è correggibile — e non conosceva la condotta: avrebbe
+riferito le altezze **non condotte** mentre `armonia()` ne scriveva altre. Ha
+ora lo stesso default, e un test che confronta quel che dice con quel che viene
+scritto. **Una funzione che rende conto e sbaglia il conto è peggio di
+nessuna**, ed è il genere di difetto che nessun altro test avrebbe visto.
+
+### Cosa resta fuori, e sta scritto nella casella
+
+La **sostituzione di tensione** (la tredicesima al posto della quinta), il
+**ritmo armonico** — quando un accordo cambia — e le **sostituzioni di
+accordo**, che il giro letto da `Walkin'` non ha e su cui la casella non dice
+se sia tipico o sia quel pezzo.
 
 ---
 

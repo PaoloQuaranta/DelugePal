@@ -5255,6 +5255,24 @@ def test_condotta_casi_al_bordo():
           f'{max(medie) - min(medie):.1f} semitoni fra la piu alta e la piu '
           f'bassa, con DERIVA_MASSIMA={MU.DERIVA_MASSIMA}')
 
+    # ⚠️ `racconta_armonia()` deve dire il VERO. Esiste per la regola 4 --
+    # un'operazione silenziosa non e' correggibile -- e fino al 29 agosto 2026
+    # non conosceva la condotta: avrebbe riferito altezze diverse da quelle
+    # scritte nel file. Una funzione che rende conto e sbaglia il conto e'
+    # peggio di nessuna.
+    detto = MU.racconta_armonia('Dm7 | G7 | Cmaj7',
+                                voicing='senza-fondamentale', registro='do4')
+    scritte = sorted(MU.armonia('Dm7 | G7 | Cmaj7',
+                                voicing='senza-fondamentale', registro='do4'))
+    nomi = {MU.nome_altezza(y) for y in scritte}
+    check('racconta_armonia riferisce le altezze che armonia scrive',
+          all(n in detto for n in nomi), f'{sorted(nomi)} contro {detto}')
+    check('e dichiara che gli accordi sono condotti', 'CONDOTTI' in detto,
+          detto.splitlines()[-1])
+    check('con condotta=False lo dichiara diversamente',
+          'per conto suo' in MU.racconta_armonia(
+              'Dm7 | G7', voicing='senza-fondamentale', condotta=False))
+
     # `armonia()` la usa di default, e si puo' spegnere
     a = MU.armonia('Dm7 | G7 | Cmaj7', voicing='senza-fondamentale',
                    registro='do4')

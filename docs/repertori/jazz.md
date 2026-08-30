@@ -1612,30 +1612,87 @@ figura.
 
 ## 7. Armonia
 
-**Parziale.** C'è il **vocabolario**, ed è completo: `MU.armonia()`,
-`MU.voci()`, `MU.sigla()`, i quattro voicing di `MU.VOICING` — `chiuso`,
-`shell`, `senza-fondamentale`, `drop2` — e il dialetto di Weimar, che
-`WJ.sigla_weimar()` scioglie **per intero, senza fallimenti**. Manca **la
-condotta delle parti**: ogni accordo è costruito per conto suo, e i voicing
-alternati A/B del ii-V-I non sono implementati — cioè manca esattamente quello
-che fa suonare un comping invece di una fila di accordi. Come ci si è arrivati,
-e che cosa copre la grammatica delle sigle, sta in
-[`../../HANDOFF.md`](../../HANDOFF.md) §6-octies; quanti simboli distinti siano
-stati sciolti, e su quante occorrenze, in §6-nonies. **La chiuderebbe
-`assets/jazz-voicings.md` di `music-composition`**, che è già la fonte da cui i
-voicing vengono e che l'alternanza A/B la specifica: qui manca implementarla,
-non trovarla.
+**Compilata il 29 agosto 2026.** C'è il **vocabolario**, ed è completo:
+`MU.armonia()`, `MU.voci()`, `MU.sigla()`, i quattro voicing di `MU.VOICING` —
+`chiuso`, `shell`, `senza-fondamentale`, `drop2` — e il dialetto di Weimar, che
+`WJ.sigla_weimar()` scioglie **per intero, senza fallimenti**. E c'è ora anche
+**la condotta delle parti**, che era il buco dichiarato: `MU.voci_condotte()`,
+usata di default da `MU.armonia()`. Come ci si è arrivati, e che cosa copre la
+grammatica delle sigle, sta in [`../../HANDOFF.md`](../../HANDOFF.md)
+§6-octies; quanti simboli distinti siano stati sciolti, e su quante
+occorrenze, in §6-nonies.
 
-*Nel frattempo, per comporre:* si scrivono le **altezze a mano**, con
-`MU.accordi()`, leggendole da `assets/jazz-voicings.md` di
-`music-composition` — la fonte già nominata qui sopra, raggiunta dal suo
-`references/00-navigation.md` — e `[WEB]` a quello che ne esce. **Non** con
-`MU.armonia()` cambiando `voicing=`: `MU.VOICING` ha **una sola** forma senza
-fondamentale (3-5-7-9, cioè la sola «A») e `voci()` la restituisce sempre
-ascendente, quindi la «B» non esiste e nessun argomento la produce. Un secondo
-voicing scelto lì — `chiuso`, `drop2` — sarebbe un'alternanza **inventata**,
-non quella del documento, ed è esattamente ciò che questa riga esiste per
-impedire.
+### La condotta: cambia dove, non quali
+
+Ogni accordo dopo il primo si posa nella **disposizione che muove meno voci**
+rispetto a quello prima. Il primo è l'ancora e sta dove `registro` lo mette.
+
+⚠️ **L'invariante che rende la cosa sicura: si scelgono le ottave, mai le
+note.** Le classi di altezza di ogni accordo restano esattamente quelle che
+`voci()` sceglie — chi vuole un'altra tensione cambia `voicing`, non la
+condotta. Verificato sul primo pezzo jazz: passando il comping dalla tabella
+scritta a mano a `MU.armonia()`, **tutte e 59 le posizioni di accordo hanno le
+stesse classi di altezza di prima**, e 35 su 59 anche le stesse altezze esatte.
+
+`condotta=False` dà il comportamento precedente, dove ogni accordo era
+ancorato a `registro` per conto suo.
+
+### ⚠️ Correzione: la fonte NON specificava quello che questa casella diceva
+
+Fino al 29 agosto 2026 qui c'era scritto: *«la chiuderebbe
+`assets/jazz-voicings.md` di `music-composition`, che è già la fonte da cui i
+voicing vengono e che l'alternanza A/B la specifica: qui manca implementarla,
+non trovarla»*. **È falso**, e va tenuto perché è il tipo di riga che manda
+una sessione a implementare una cosa che non c'è.
+
+Il paragrafo «Rootless voicings» di quella fonte ha **tre problemi
+indipendenti**, tutti verificati in `test_condotta_delle_parti`:
+
+| | |
+|---|---|
+| **i nomi non sono definiti** | scrive «A» = 3-5-7-9 *(or 7-9-3-5)* e «B» = 7-9-3-5 *(or 3-5-7-9)*, poi aggiunge *«the naming convention depends on the source»* |
+| **il suo esempio non usa nessuna delle due forme** | il G7 è `b7-9-3-13`, con la **tredicesima** al posto della quinta |
+| **la sua regola fallisce sul suo stesso esempio** | dichiara *«only one voice moves per chord change»*: `Dm7 → G7` ne muove una, `G7 → Cmaj7` ne muove **tre** |
+
+Quel che resta solido è lo **scopo** — *«the voice leading is smooth»* — ed è
+quello che si implementa. Sul ii-V-I del documento la funzione dà il suo stesso
+`Dm7` e il suo stesso `Cmaj7`.
+
+⚠️ **Il totale del movimento è lo stesso: sei semitoni per tutti e due.** Il
+primo rapporto di questo lavoro aveva scritto «sei contro sette» ed era un
+errore di aritmetica — il secondo cambio del documento muove 1+2+2 = 5, non 6.
+Quel che cambia è la **distribuzione**: il documento fa una voce e poi tre, la
+funzione due e due, cioè nessun cambio sobbalza. E ci arriva **senza sostituire
+tensioni**, mentre il suo G7 ha bisogno della tredicesima.
+
+### ⚠️ Il minimo movimento è goloso, e su tre giri esce dal registro
+
+**È il difetto che si vede solo su una lunghezza vera.** Provata su un ii-V-I
+la funzione sembrava a posto; provata sul blues per **tre giri**, il comping
+scendeva di **diciassette semitoni** — da `[57, 60, 63, 67]` a
+`[40, 43, 46, 50]` — perché il passo piccolo è sempre disponibile nella stessa
+direzione e la scelta golosa lo prende ogni volta.
+
+`MU.DERIVA_MASSIMA = 6` tiene ogni disposizione entro mezza ottava, **in
+media**, dall'ancora che `registro` dichiara. Deriva da −17 a −5, estensione
+toccata da 27 a 16 semitoni. C'è il test.
+
+**La regola operativa che ne esce:** una funzione che sceglie un passo alla
+volta va provata **sulla lunghezza a cui verrà usata**, non su un esempio da
+manuale. Tre accordi non sono trentasei battute.
+
+### Cosa resta fuori, e non è poco
+
+- **La sostituzione di tensione** — la tredicesima al posto della quinta che il
+  G7 del documento fa. È una scelta di **colore**, non di condotta, e la fonte
+  la mostra una volta senza dire quando si applica: inventarne la regola
+  sarebbe esattamente ciò che questa casella ha appena finito di correggere.
+- **Il ritmo armonico** — quando un accordo cambia, e ogni quanto. Qui il giro
+  è una casella per battuta perché così lo porta `wjazzd.db`; che sia una
+  proprietà del repertorio non è misurato.
+- **Le sostituzioni di accordo** — tritono, ii-V interpolati, turnaround
+  alternativi. Il giro letto da `Walkin'` non ne ha nessuna, e la casella non
+  dice se sia tipico o sia quel pezzo.
 
 ## 8. Melodia e ornamentazione
 

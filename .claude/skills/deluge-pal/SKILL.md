@@ -123,10 +123,15 @@ from delugexml.writer import FormatTable
 - **una sigla sconosciuta viene RIFIUTATA**, e l'errore elenca quelle che
   esistono. Aggiungerne una vuol dire scriverla in `MU.SIGLE` **coi suoi
   gradi**, presi da una fonte: mai indovinarla al volo.
-- **non c'è condotta delle parti**: ogni accordo è costruito per conto suo. Le
-  note sono giuste, il *collegamento* fra un accordo e il successivo no —
-  i voicing alternati A/B del ii-V-I sono un passo successivo, non
-  implementato. `racconta_armonia()` lo dichiara ogni volta.
+- **la condotta delle parti c'è, dal 29 agosto 2026, ed è il default**: ogni
+  accordo dopo il primo si posa dove muove meno voci — `MU.voci_condotte()`,
+  che `armonia()` usa da sé, e che `racconta_armonia()` riferisce. ⚠️ **Cambia
+  le ottave, mai le note**: le classi di altezza restano quelle che `voci()`
+  sceglie. `condotta=False` dà il comportamento di prima. Resta fuori la
+  **sostituzione di tensione**, e l'alternanza «A/B» non è implementata perché
+  la fonte non la specifica in modo implementabile — le tre ragioni stanno
+  nella docstring di `voci_condotte()`. ⚠️ Su una progressione lunga il vincolo
+  di registro conta: senza, il minimo movimento è goloso e deriva.
 
 | per | usare |
 |---|---|

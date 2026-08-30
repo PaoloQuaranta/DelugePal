@@ -433,11 +433,16 @@ def da_bur(bur: float) -> float:
 #
 # COSA NON FA, E VA DETTO
 # -----------------------
-# **Non fa condotta delle parti fra un accordo e il successivo.** Il documento
-# mostra che nel ii-V-I le voci senza fondamentale si ALTERNANO fra due forme
-# (A e B) proprio per muovere una voce sola per cambio; qui ogni accordo e'
-# costruito per conto suo. Le note sono giuste, il collegamento no. E' un
-# passo successivo, non un difetto nascosto.
+# ⚠️ Fino al 29 agosto 2026 qui c'era scritto che la condotta delle parti non
+# c'era, e che il documento «mostra come nel ii-V-I le voci si ALTERNANO fra
+# due forme (A e B)». La prima meta' e' stata risolta -- `voci_condotte()` --
+# e la seconda era SBAGLIATA: quel documento non specifica l'alternanza A/B in
+# modo implementabile, e le tre ragioni stanno nella docstring di
+# `voci_condotte()`.
+#
+# Non fa la SOSTITUZIONE DI TENSIONE: la tredicesima al posto della quinta che
+# il G7 dell'esempio usa. E' una scelta di colore, non di condotta, e la fonte
+# la mostra una volta senza dire quando si applica.
 
 from typing import NamedTuple                              # noqa: E402
 
@@ -881,22 +886,36 @@ def armonia(spec: str, *, voicing: str = 'chiuso', registro: str = 'do3',
 
 
 def racconta_armonia(spec: str, *, voicing: str = 'chiuso',
-                     registro: str = 'do3') -> str:
+                     registro: str = 'do3', condotta: bool = True) -> str:
     """Cosa e' diventata ogni sigla, e quali ambiguita' sono state sciolte.
 
     Regola 4: un'operazione silenziosa non e' correggibile. Qui il rischio
     non e' sbagliare le note -- e' sceglierne di plausibili senza che nessuno
     possa accorgersi che erano un'altra cosa.
+
+    ⚠️ `condotta` c'e' e ha lo STESSO default di `armonia()`, e non e' un
+    dettaglio: questa funzione esiste per riferire cosa e' stato scritto, e se
+    non conducesse riferirebbe altezze diverse da quelle che finiscono nel
+    file. Una funzione che rende conto e sbaglia il conto e' peggio di
+    nessuna.
     """
-    righe = [f'voicing {voicing!r} ({VOICING[voicing]}), registro {registro}']
+    righe = [f'voicing {voicing!r} ({VOICING[voicing]}), registro {registro}'
+             + (', condotta delle parti' if condotta else '')]
     avvisi = []
+    guidate = (voci_condotte(spec, voicing=voicing, registro=registro)
+               if condotta else None)
+    k = 0
     for gruppo in spec.split(SEPARATORE_ACCORDI):
         testo = gruppo.strip()
         if not testo or testo == PAUSA:
             righe.append('  .           pausa')
             continue
         s = sigla(testo)
-        note = voci(s, voicing=voicing, registro=registro)
+        if guidate is not None:
+            note = guidate[k]
+            k += 1
+        else:
+            note = voci(s, voicing=voicing, registro=registro)
         nomi = ' '.join(nome_altezza(y) for y in note)
         righe.append(f'  {testo:<12}{nomi}')
         if s.letto_come:
@@ -904,8 +923,13 @@ def racconta_armonia(spec: str, *, voicing: str = 'chiuso',
     if avvisi:
         righe.append('letture ambigue sciolte cosi:')
         righe.extend(f'  - {a}' for a in avvisi)
-    righe.append('nota: ogni accordo e costruito per conto suo, senza '
-                 'condotta delle parti fra uno e il successivo')
+    if condotta:
+        righe.append('nota: gli accordi sono CONDOTTI -- ognuno si posa dove '
+                     'muove meno voci rispetto al precedente. Cambiano le '
+                     'ottave, mai le note')
+    else:
+        righe.append('nota: ogni accordo e costruito per conto suo, senza '
+                     'condotta delle parti fra uno e il successivo')
     return '\n'.join(righe)
 
 

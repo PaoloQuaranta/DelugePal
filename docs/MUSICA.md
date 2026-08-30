@@ -108,10 +108,12 @@ respirare.
 
 ### 7. Armonia
 
-Vocabolario, ritmo armonico, condotta delle parti. Qui il progetto ha un
-buco noto e dichiarato: `MU.armonia()` copre il **vocabolario** — sigle e
-voicing — e **non** la condotta delle parti. Una casella 7 che tace su come si
-muovono le voci sta tacendo sul pezzo che manca.
+Vocabolario, ritmo armonico, condotta delle parti. Una casella 7 che tace su
+come si muovono le voci sta tacendo sul pezzo che manca. ⚠️ **Il buco c'è
+stato fino al 29 agosto 2026**, ed è chiuso: `MU.armonia()` copriva il solo
+**vocabolario** — sigle e voicing — e ora usa `MU.voci_condotte()`, che posa
+ogni accordo dove muove meno voci. Restano fuori il **ritmo armonico** e le
+**sostituzioni**.
 
 ### 8. Melodia e ornamentazione
 
@@ -926,7 +928,7 @@ casella della scheda corrispondente: la scheda è la fonte, questa matrice ne
 | repertorio | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | [reggae / dub](repertori/reggae-dub.md) | ◐ | ● | ● | ◐ | ● | ● | ◐ | ○ | ◐ | ◐ | ● |
-| [jazz](repertori/jazz.md) | ○ | ○ | ◐ | ● | ○ | ● | ◐ | ● | ◐ | ◐ | ◐ |
+| [jazz](repertori/jazz.md) | ○ | ○ | ◐ | ● | ○ | ● | ● | ● | ◐ | ◐ | ◐ |
 | classica · barocca · antica | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | elettronica · IDM · techno · hip hop · trip hop · DnB · jungle | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 
