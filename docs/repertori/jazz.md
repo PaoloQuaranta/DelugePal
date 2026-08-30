@@ -75,9 +75,11 @@ l'**utente**: questa è una distribuzione osservata, non una prescrizione.
 
 ## 4. Feel
 
-**L'unica casella `[MIS]` del progetto, e l'unica piena di questa scheda.**
-Lo swing del jazz è misurato; tutto il resto del jazz, qui, è dichiarato
-mancante.
+**Misurata — la prima `[MIS]` del progetto.** Lo swing del jazz è misurato su
+due corpora. ⚠️ Fino al 30 agosto 2026 questa riga diceva anche «e l'unica
+piena di questa scheda»: era vera quando fu scritta e ha smesso di esserlo il
+29 agosto, quando le caselle 7, 8 e 9 si sono riempite nello stesso giro. Le
+righe che si vantano di essere sole invecchiano da sé.
 
 ### Lo swing del jazz, MISURATO — 17 agosto 2026
 
@@ -1859,11 +1861,90 @@ blocca la scrittura di una linea.
 
 ## 9. Forma e densità
 
-**Parziale.** Della **forma** non c'è ancora niente — AABA, il blues di dodici
-battute, il rhythm changes — e la chiuderebbe MusicXML o le lead sheet, con la
-stessa avvertenza della casella 5: il lettore va scritto, non procurato. Ci
-sono invece **i fill**, misurati: quanto sono densi, quanto durano e con quali
-strumenti si fanno.
+**Misurata il 30 agosto 2026**, ed è la prima casella aperta sotto la regola
+«Le caselle si riempiono su domanda» del comune. La domanda non era un difetto
+sentito ma un **limite di capacità**: `genera_jazz.py` sapeva scrivere un blues
+e nient'altro, perché la forma era cablata dentro.
+
+### ⚠️ Correzione: la forma era già in casa
+
+Fino al 30 agosto 2026 qui c'era scritto: *«Della forma non c'è ancora niente…
+e la chiuderebbe MusicXML o le lead sheet, con la stessa avvertenza della
+casella 5: il lettore va scritto, non procurato»*. **È falso.**
+
+`wjazzd.db` ha una colonna `composition_info.form`, e la porta su **tutti e 361**
+gli assoli a feel `SWING`. Nessuno l'aveva aperta. È la **seconda** riga
+sbagliata trovata in due giorni — l'altra è nella casella 7 — e tutte e due
+mandavano a cercare fuori qualcosa che era già su disco. Il perché sta nel
+comune, «una casella scritta senza domanda invecchia sbagliata».
+
+### Il vocabolario delle forme
+
+La grammatica è `lettera + numero di battute`, ripetuta, e si legge con
+`([A-Z])(\d+)`. **349 assoli swing su 361 hanno una forma scomponibile**; i 12
+che restano sono `open`, cioè senza forma — e vanno tenuti fuori, non forzati.
+
+| forma | assoli | cos'è |
+|---|---|---|
+| **`A8A8B8A8`** | **103** | l'**AABA** di 32 battute, la forma più comune del repertorio |
+| **`A12`** | **81** | il **blues di 12 battute** |
+| `A16B16` | 32 | 32 battute in due metà |
+| `A8B8A8C8` · `A8A8B8C8` · `A8A8B8C12` | 19 | varianti di 32-36 battute |
+| `A16` · `A8B8` · `A16A16` · `A16A16B16A16` | 24 | il resto |
+
+⚠️ **E la colonna `template` nomina i due modelli canonici**, che questa casella
+citava senza averli: **`Blues`** su 81 assoli e **`I Got Rhythm`** su 19 — cioè
+il *rhythm changes*, che è un `A8A8B8A8` con la sua armonia. Sono etichette
+scritte a mano dai trascrittori, quindi `[OSS]` sul singolo pezzo ma affidabili
+come classificazione.
+
+### L'arco dell'AABA: sale fino al ponte e ricade
+
+**57 assoli, 36 solisti, 6777 battute** `[MIS]`. Stessa definizione di corsa
+della casella 8 — battuta oltre il terzo quartile *di quell'assolo* e comunque
+da 8 note in su — e stesso controllo di periodicità, qui con periodo 32.
+
+⚠️ **53 assoli su 110 sono stati scartati**, e quasi tutti (35) per «giri
+insufficienti»: un giro di 32 battute ne chiede più di 64 per verificare che si
+ripeta, e molti assoli AABA sono di uno o due giri soli. È un limite del
+metodo, non dei dati, ed è la ragione per cui il campione qui è più piccolo che
+nella casella 8.
+
+| sezione | battute | corse | vuote | note (mediana) |
+|---|---|---|---|---|
+| **A1** | 1-8 | **18,8%** | 5,7% | 5 |
+| **A2** | 9-16 | 24,8% | 4,0% | 6 |
+| **B**, il ponte | 17-24 | **26,3%** | 3,5% | 6 |
+| **A3** | 25-32 | 20,9% | 4,6% | 5 |
+
+**C'è un arco, ed è narrativo:** si parte rado, si cresce, si culmina sul
+**ponte**, si ricade sull'ultimo A. Non è un ciclo che si ripete quattro volte:
+le quattro sezioni di otto battute hanno densità diverse.
+
+#### Il ponte è la sola sezione che non respira alla fine
+
+Le chiusure di sezione — battute 8, 16, 24, 32 — non si comportano allo stesso
+modo, e la differenza è la cosa più utile di questa casella:
+
+| | batt. **8** | batt. **16** | batt. **24** | batt. **32** |
+|---|---|---|---|---|
+| | fine A1 | fine A2 | **fine ponte** | fine giro |
+| battute vuote | **15,6%** | 10,5% | **6,2%** | 7,7% |
+| corse | 22,2% | 19,5% | **29,3%** | 16,7% |
+| note (mediana) | 4 | 4 | **6** | 4 |
+
+Le fini di A1 e A2 **respirano** — vuote al 15,6% e al 10,5%, mediana 4. La
+fine del ponte fa **il contrario**: ha il massimo di corse di tutto il giro
+(29,3%) e non si svuota. **Spinge dentro l'ultimo A** invece di lasciargli
+spazio.
+
+⚠️ **E questo è un arco DIVERSO da quello del blues**, misurato nella casella 8:
+là il punto più vuoto era il **turnaround** (battuta 12, vuoto al 14,8%) e il
+picco di corse stava sul **ii-V** (battute 9-10). Le due forme non si
+somigliano, e una regola presa dall'una **non vale sull'altra**. È il limite
+che il comune dichiara: *su domanda si misura stretto, e stretto vale stretto*.
+
+### I fill, misurati — 18 agosto 2026
 
 ### I fill, misurati — 18 agosto 2026
 

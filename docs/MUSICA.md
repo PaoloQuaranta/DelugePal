@@ -228,6 +228,14 @@ hole di `HANDOFF.md` §6-quindecies.
    sembrano fuori tonalità» → i gradi. «Le frasi finiscono su note che non hanno
    senso» → gli atterraggi. Non si sceglie la casella da un'agenda: la sceglie
    l'orecchio.
+
+   ⚠️ **E la domanda ha due forme, non una** — aggiunto il 30 agosto 2026,
+   aprendo la casella 9. Oltre al **difetto sentito** in un pezzo che c'è,
+   c'è il **limite di capacità**: un pezzo che si vuole scrivere e non si può.
+   La 9 è stata aperta così — «Pal sa scrivere solo un blues perché la forma è
+   cablata» — e non da un ascolto. Vale come domanda a tutti gli effetti,
+   purché sia **un pezzo vero che si vuole**, non «prima o poi servirà»: è
+   quest'ultimo che riporta al lavoro a tappeto.
 4. **Misura solo quello**, col bersaglio fissato **prima** dei numeri.
 5. **Rimettilo nel generatore, UNA COSA ALLA VOLTA.**
 6. **Riascolta.** Se peggiora si torna indietro — è successo, `JAZZ04`.
@@ -1016,7 +1024,7 @@ casella della scheda corrispondente: la scheda è la fonte, questa matrice ne
 | repertorio | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | [reggae / dub](repertori/reggae-dub.md) | ◐ | ● | ● | ◐ | ● | ● | ◐ | ○ | ◐ | ◐ | ● |
-| [jazz](repertori/jazz.md) | ○ | ○ | ◐ | ● | ○ | ● | ● | ● | ◐ | ◐ | ◐ |
+| [jazz](repertori/jazz.md) | ○ | ○ | ◐ | ● | ○ | ● | ● | ● | ● | ◐ | ◐ |
 | classica · barocca · antica | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | elettronica · IDM · techno · hip hop · trip hop · DnB · jungle | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 
