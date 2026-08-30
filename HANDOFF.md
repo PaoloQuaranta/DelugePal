@@ -196,9 +196,9 @@ collaudato (una coppia controllata, un passo di differenza):
 **2. I punti aperti sul formato** in §7, che sono lì da prima e non bloccano
 niente.
 
-**3. Due code della pubblicazione**, piccole: `SKILL.md` dice «Il progetto sta
-in `D:\DelugePal`», che per un clone è falso; e l'hook di pre-push non è
-versionato, quindi vale solo su questa macchina (§9).
+~~**3. Due code della pubblicazione**~~ — **chiuse il 30 agosto 2026**,
+insieme a una terza che non era in lista: la tabella `COPPIE_OSSERVATE` non
+aveva lo script che la rigenera. Vedi §9.
 
 ### Cosa NON rifare
 
@@ -2472,10 +2472,26 @@ git clone D:\DelugePal-storia.bundle una-cartella
 
 ### Cosa resta da sistemare
 
-- `.claude/skills/deluge-pal/SKILL.md` dice «Il progetto sta in `D:\DelugePal`»,
-  che per chi clona è falso
-- l'hook non è versionato: per condividerlo servirebbe una cartella `hooks/`
-  tracciata più `core.hooksPath`
+- ~~`SKILL.md` dice «Il progetto sta in `D:\DelugePal`»~~ — **corretto il 30
+  agosto 2026**: dichiara che i percorsi sono relativi alla radice e che quel
+  path è solo la macchina dell'autore
+- ~~l'hook non è versionato~~ — **versionato il 30 agosto 2026** in
+  `hooks/pre-push`. ⚠️ **Git non lo installa da sé**: esegue quelli in
+  `.git/hooks/`, che non è versionata. Serve una riga, una volta per clone:
+
+      git config core.hooksPath hooks
+
+  Sta scritto nel commento dell'hook stesso e nel README, perché un hook che
+  c'è e non gira è peggio di uno che manca: dà l'impressione di una guardia
+- ⚠️ **E una terza coda che non era in questa lista**, trovata il 29 agosto
+  aggiungendo quattro preset a `refs/`: la tabella `COPPIE_OSSERVATE` di
+  `sound.py` era «generata da uno script e poi incollata» — e **lo script non
+  era nel repo**. Chi allargava il corpus vedeva `test_patch_cable_tabelle`
+  diventare rosso senza modo di rifare la tabella. Ora c'è
+  `tools/genera_coppie_cable.py`, che la ri-deriva, dice cosa è cambiato e
+  con `--scrivi` la sostituisce. ⚠️ Rigenerarla **incide il corpus locale in
+  un file versionato**: va fatto quando il corpus è quello giusto, non ogni
+  volta che il test diventa rosso
 - il README dichiara i limiti noti, ma `docs/` resta **tutto in italiano** — la
   traduzione è stata valutata e rimandata: ~50 000 parole di prosa più le
   docstring, che sono saggi e non descrizioni di argomenti

@@ -173,6 +173,23 @@ instrument is built from.
 Tests that need material you have not supplied print `SKIP` with the reason.
 They are not failures.
 
+### Turn on the push guard
+
+A Deluge song embeds the full parameters of every instrument it uses, so
+publishing one publishes the paid presets inside it. `.gitignore` is
+deny-by-default, but it only looks forward: a file added and later removed
+stays in the history. `hooks/pre-push` refuses a push whose **history** would
+carry corpus material, checking every commit in the range and not just the tip.
+
+Git does not install it for you — it runs the hooks in `.git/hooks/`, which is
+not versioned. One line, once per clone:
+
+```
+git config core.hooksPath hooks
+```
+
+If you know what you are doing, `git push --no-verify` bypasses it.
+
 ---
 
 ## Language

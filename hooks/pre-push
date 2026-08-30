@@ -1,0 +1,74 @@
+#!/bin/sh
+#
+# Rifiuta il push se un commit contiene materiale che non va pubblicato.
+#
+# PERCHE' ESISTE
+# --------------
+# Il .gitignore e' deny-by-default e basta a impedire che il corpus entri per
+# distrazione. Non basta contro un `git add -f`, ne' contro un commit vecchio
+# che si trascina dietro un file tolto piu' tardi: .gitignore guarda il futuro,
+# la storia resta. Questo hook guarda la STORIA CHE STA PER PARTIRE.
+#
+# Controlla OGNI commit del tratto che si spinge, non solo la punta: un file
+# aggiunto e poi rimosso resterebbe pubblicato lo stesso.
+#
+# COSA CERCA
+#   - qualunque .XML che non sia il synth vuoto del firmware
+#   - qualunque .wav
+#   - qualunque cosa sotto corpus_versions/ o to-read/
+#
+# DOV'E' E COME SI ACCENDE
+# ------------------------
+# Dal 30 agosto 2026 questo file e' VERSIONATO, in hooks/. Git pero' non
+# installa niente da se': gli hook che esegue stanno in .git/hooks/, che non
+# e' versionata. Serve una riga, una volta per clone:
+#
+#     git config core.hooksPath hooks
+#
+# Prima di allora l'hook viveva solo in .git/hooks/ e valeva su una macchina
+# sola -- ed era una delle «code della pubblicazione» che HANDOFF §9
+# elencava.
+
+CONSENTITO='refs/synths/TEMPL.XML'
+VUOTO='0000000000000000000000000000000000000000'
+stato=0
+
+while read -r _local_ref local_sha _remote_ref remote_sha
+do
+	# cancellazione di un ramo: niente da controllare
+	[ "$local_sha" = "$VUOTO" ] && continue
+
+	if [ "$remote_sha" = "$VUOTO" ]; then
+		commits=$(git rev-list "$local_sha")
+	else
+		commits=$(git rev-list "$remote_sha..$local_sha")
+	fi
+
+	for c in $commits
+	do
+		sospetti=$(git ls-tree -r --name-only "$c" \
+			| grep -Ei '\.xml$|\.wav$|^corpus_versions/|^to-read/' \
+			| grep -v -x -F "$CONSENTITO")
+
+		if [ -n "$sospetti" ]; then
+			echo "" >&2
+			echo "pre-push BLOCCATO: il commit $c pubblicherebbe" >&2
+			echo "materiale che non e' nostro da distribuire:" >&2
+			echo "$sospetti" | sed 's/^/    /' >&2
+			stato=1
+		fi
+	done
+done
+
+if [ "$stato" -ne 0 ]; then
+	echo "" >&2
+	echo "Le song del Deluge incorporano i parametri completi di ogni" >&2
+	echo "strumento che usano, quindi pubblicarne una pubblica anche i" >&2
+	echo "preset a pagamento che contiene. Vedi README, \"Bring your own" >&2
+	echo "corpus\", e .gitignore." >&2
+	echo "" >&2
+	echo "Se sai cosa stai facendo: git push --no-verify" >&2
+	echo "" >&2
+fi
+
+exit $stato

@@ -5,7 +5,9 @@ description: Genera e modifica song per il Synthstrom Deluge a partire da descri
 
 # Deluge Pal
 
-Il progetto sta in `D:\DelugePal`. **Leggere `HANDOFF.md` a inizio sessione.**
+**Leggere `HANDOFF.md` a inizio sessione.** I percorsi di questo documento
+sono relativi alla radice del progetto; sulla macchina dell'autore e'
+`D:\DelugePal`, ma nulla qui lo presuppone.
 
 ## Il ciclo
 
