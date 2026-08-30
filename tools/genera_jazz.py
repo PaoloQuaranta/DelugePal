@@ -14,6 +14,8 @@ e dice da dove viene ogni cosa, col grado di prova. In due righe:
   - il GIRO ARMONICO e' letto dalla trascrizione di `Walkin'` in `wjazzd.db`
     (melid 196): blues classico in fa, nessuna sostituzione bebop;
   - i VOICING e il WALKING vengono dalla skill `music-composition`, `[WEB]`;
+    la CONDOTTA DELLE PARTI invece no -- quella fonte non la specifica in
+    modo implementabile, e il perche' sta in `MU.voci_condotte()`;
   - il TEMA e l'ASSOLO sono ORIGINALI. Di `Walkin'` si e' osservata la
     FORMA -- densita' 5,2 note/battuta, 61% degli intervalli entro 2
     semitoni, una frase ogni ~2,7 battute -- e non si e' copiata nessuna
@@ -95,13 +97,18 @@ ESECUZIONE = 'drummer10/session1/1'
 #:       aveva fatto divergere tutto il cammino, non solo tre note.
 #:   05  29 agosto 2026. Il cammino della 03, IDENTICO, con le sole tre note
 #:       di fine frase riportate sugli atterraggi misurati.
+#:       Verdetto: «molto meglio».
+#:   06  29 agosto 2026. L'assolo e' quello della 05, intatto. Cambia il
+#:       COMPING: non esce piu' da una tabella di altezze scritta a mano ma
+#:       da `MU.armonia()`, che dal 29 agosto conduce le parti. E' la
+#:       casella 7 che si chiude in libreria.
 #:
 #: ⚠️ E' il primo giro CHIUSO di questo progetto: una lamentela all'orecchio,
 #: una misura sul corpus, una correzione, e lo stesso orecchio che approva.
 #: Le tre versioni restano una coppia controllata a tre -- batteria, basso e
 #: comping hanno le stesse identiche note in tutte e tre -- quindi i tre
 #: verdetti parlano dell'assolo e di nient'altro.
-VERSIONE = 5
+VERSIONE = 6
 
 BPM = 128
 #: Casella 10 di `docs/repertori/jazz.md`, riga HARDBOP/BEBOP. `figura='1/8'`
@@ -124,24 +131,26 @@ LUNGHEZZA = TICK_BATTUTA * BATTUTE
 GIRO = ('F7', 'Bb7', 'F7', 'F7', 'Bb7', 'Bb7',
         'F7', 'F7', 'Gm7', 'C7', 'F7', 'Gm7|C7')
 
-#: I voicing SENZA FONDAMENTALE, scritti a mano dalle tabelle di
-#: `assets/jazz-voicings.md` della skill `music-composition`, e alternati
-#: A (3-5-7-9) / B (7-9-3-5) per la condotta delle parti.
+#: ⚠️ QUI C'ERA UNA TABELLA DI ALTEZZE SCRITTA A MANO, ed e' sparita il 29
+#: agosto 2026. Era il ripiego che la casella 7 prescriveva -- «si scrivono le
+#: altezze a mano» -- perche' la condotta delle parti non esisteva in
+#: libreria. Adesso esiste: `MU.voci_condotte()`, e `MU.armonia()` la usa di
+#: default.
 #:
-#: ⚠️ NON si ottengono con `MU.armonia(voicing=…)`: `MU.VOICING` ha UNA sola
-#: forma senza fondamentale, quindi la «B» non esiste e nessun argomento la
-#: produce. La casella 7 dichiara la lacuna e prescrive questo ripiego.
+#: I quattro voicing che c'erano erano `senza-fondamentale` in registro `do3`,
+#: ruotati a mano. La libreria ne riproduce OTTO su tredici identici e sceglie
+#: disposizioni sue sul ii-V-I finale; le classi di altezza sono le stesse in
+#: tutti e tredici.
 #:
-#: La condotta che ne esce, verificata a mano:
-#:     F7 -> Bb7    -1,  0, -1, -2      (una nota comune)
-#:     Gm7 -> C7     0,  0, -1, -2      (DUE note comuni: il ii-V)
-#:     C7 -> F7     -1, -2, -1,  0      (una nota comune)
-VOICING = {
-    'F7':  (57, 60, 63, 67),   # A: la3  do4  mib4 sol4   (3-5-7-9)
-    'Bb7': (56, 60, 62, 65),   # B: lab3 do4  re4  fa4    (7-9-3-5)
-    'Gm7': (58, 62, 65, 69),   # A: sib3 re4  fa4  la4    (3-5-7-9)
-    'C7':  (58, 62, 64, 67),   # B: sib3 re4  mi4  sol4   (7-9-3-5)
-}
+#: ⚠️ E la riga della casella 7 che diceva «la chiuderebbe
+#: `assets/jazz-voicings.md`... manca implementarla, non trovarla» era FALSA:
+#: quella fonte non specifica l'alternanza A/B in modo implementabile. Le tre
+#: ragioni stanno nella docstring di `MU.voci_condotte()` e in
+#: `test_condotta_delle_parti`.
+
+#: Il registro del comping: e' l'ancora da cui la condotta parte, e da cui non
+#: si allontana piu' di `MU.DERIVA_MASSIMA` in media.
+REGISTRO_COMPING = 'do3'
 
 #: Il ritmo del comping, otto crome per battuta, `x` suona e `.` tace.
 #: Sincopato e VARIO: un comping identico dodici volte e' la stessa morte
@@ -641,7 +650,14 @@ def _spec_melodia(battute) -> str:
 
 def _spec_comping(giro_esteso: list[str]) -> str:
     """La progressione del comping: un gruppo per croma, separati da `|`.
-    Un gruppo che e' un punto solo e' una pausa."""
+
+    Sono SIGLE, non altezze: le altezze le sceglie `MU.armonia()`, che dal 29
+    agosto 2026 conduce le parti. Un gruppo che e' un punto solo e' una pausa.
+
+    ⚠️ Una sigla ripetuta su crome successive non fa muovere niente -- la
+    condotta cerca il minimo movimento, e su un accordo uguale a se stesso lo
+    trova a zero -- quindi il comping non sobbalza fra un colpo e l'altro
+    della stessa battuta."""
     gruppi = []
     for battuta, ritmo in enumerate(COMPING):
         sigla = giro_esteso[battuta]
@@ -654,7 +670,7 @@ def _spec_comping(giro_esteso: list[str]) -> str:
             corrente = sigla
             if doppia and sigla == 'Gm7' and slot >= 4:
                 corrente = 'C7'
-            gruppi.append(' '.join(MU.nome_altezza(n) for n in VOICING[corrente]))
+            gruppi.append(corrente)
     return ' | '.join(gruppi)
 
 
@@ -741,7 +757,8 @@ def costruisci(prof):
     _, clip_comping = C.add_track(doc, PRESET_COMPING, name='Pianism I',
                                   folder='SYNTHS', length=LUNGHEZZA,
                                   playing=True)
-    note = MU.accordi(_spec_comping(giro), durata='1/8',
+    note = MU.armonia(_spec_comping(giro), voicing='senza-fondamentale',
+                      registro=REGISTRO_COMPING, durata='1/8',
                       articolazione='staccato', velocity=72)
     rapporti.append(MU.scrivi(doc, clip_comping, note))
 

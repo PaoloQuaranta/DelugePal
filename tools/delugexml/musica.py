@@ -723,16 +723,124 @@ def voci(simbolo, *, voicing: str = 'chiuso',
     return note
 
 
+#: Quanto un accordo condotto puo' allontanarsi in media dall'ancora che
+#: `registro` gli darebbe, in semitoni. Sei e' mezza ottava: lascia ruotare
+#: le voci e impedisce di camminare via per ottave.
+DERIVA_MASSIMA = 6
+
+
+def _disposizioni(note: list[int]) -> list[list[int]]:
+    """Le disposizioni della STESSA armonia: rotazioni e ottave.
+
+    Ruotare vuol dire portare la voce piu' bassa un'ottava sopra: cambia
+    l'ordine delle voci e non le classi di altezza. E' l'unica liberta' che
+    ci si prende -- le note restano quelle che il voicing ha scelto.
+    """
+    v = sorted(note)
+    fuori = []
+    for k in range(len(v)):
+        girata = sorted(v[k:] + [y + 12 for y in v[:k]])
+        for ottava in (-24, -12, 0, 12, 24):
+            spostata = [y + ottava for y in girata]
+            if all(0 <= y <= 127 for y in spostata):
+                fuori.append(spostata)
+    return fuori
+
+
+def voci_condotte(spec: str, *, voicing: str = 'chiuso',
+                  registro: str = 'do3') -> list[list[int]]:
+    """Le altezze di una progressione, con la CONDOTTA DELLE PARTI.
+
+    Ogni accordo dopo il primo si posa nella disposizione che muove meno
+    voci rispetto a quello prima. Il primo e' l'ancora e sta dove
+    `registro` lo mette, come in `voci()`.
+
+    ⚠️ CAMBIA DOVE, NON QUALI. Le classi di altezza di ogni accordo sono
+    esattamente quelle che `voci()` sceglie: qui si scelgono le ottave, mai
+    le note. Chi volesse un'altra tensione cambia `voicing`, non questa
+    funzione -- e il test lo verifica come invariante.
+
+    ⚠️ PERCHE' NON L'ALTERNANZA «A/B», che e' quello che la casella 7 di
+    `docs/repertori/jazz.md` diceva di implementare. La fonte -- il paragrafo
+    «Rootless voicings» di `assets/jazz-voicings.md`, skill
+    `music-composition` -- NON la specifica in modo implementabile, e per tre
+    ragioni indipendenti, tutte verificate in `test_condotta_delle_parti`:
+
+      1. i nomi non sono definiti: la fonte scrive «A» = 3-5-7-9 (or
+         7-9-3-5) e «B» = 7-9-3-5 (or 3-5-7-9), poi aggiunge «the naming
+         convention depends on the source»;
+      2. il suo esempio non usa nessuna delle due forme: il G7 e'
+         b7-9-3-13, con la TREDICESIMA al posto della quinta;
+      3. la regola che dichiara -- «only one voice moves per chord change»
+         -- fallisce sul suo stesso esempio: Dm7 -> G7 muove una voce,
+         G7 -> Cmaj7 ne muove TRE.
+
+    Quel che resta solido e' lo SCOPO, «the voice leading is smooth», ed e'
+    quello che si implementa. Sul ii-V-I del documento questa funzione da'
+    il suo stesso Dm7 e il suo stesso Cmaj7, e in tutto muove SEI semitoni
+    contro i sette del suo esempio.
+
+    ⚠️ Resta fuori la SOSTITUZIONE DI TENSIONE -- la 13ma al posto della 5ta
+    che il suo G7 fa. E' una scelta di colore, non di condotta, e la fonte
+    la mostra una volta senza dire quando si applica: inventarne la regola
+    sarebbe esattamente cio' che la casella 7 vieta.
+    """
+    fuori: list[list[int]] = []
+    precedente: list[int] | None = None
+    for gruppo in spec.split(SEPARATORE_ACCORDI):
+        testo = gruppo.strip()
+        if not testo or testo == PAUSA:
+            continue
+        base = voci(testo, voicing=voicing, registro=registro)
+        ancora = sum(base) / len(base)
+        if precedente is None or len(base) != len(precedente):
+            # ⚠️ Quando il numero di voci cambia -- una triade dopo una
+            # settima -- non c'e' una corrispondenza fra le voci, e
+            # inventarne una accoppierebbe cose diverse. L'accordo riparte
+            # dall'ancora, che e' il comportamento dichiarato di `voci()`.
+            scelto = base
+        else:
+            # ⚠️ IL VINCOLO DI REGISTRO NON E' UN DETTAGLIO: senza, il
+            # minimo movimento e' GOLOSO e prende sempre il passo piccolo
+            # nella stessa direzione. Misurato sul blues di 12 battute per
+            # tre giri, il comping derivava di DICIASSETTE semitoni verso il
+            # basso -- da [57,60,63,67] a [40,43,46,50] -- cioe' usciva dal
+            # registro in cui era stato messo. Ogni disposizione resta entro
+            # mezza ottava, in media, dall'ancora che `registro` dichiara.
+            vicine = [c for c in _disposizioni(base)
+                      if abs(sum(c) / len(c) - ancora) <= DERIVA_MASSIMA]
+            scelto = min(
+                vicine or _disposizioni(base),
+                key=lambda c: (sum(abs(a - b) for a, b in zip(c, precedente)),
+                               # a pari movimento, quella piu' vicina
+                               # all'ancora: senza, la scelta fra due
+                               # disposizioni equivalenti dipende dall'ordine
+                               # in cui sono state generate
+                               abs(sum(c) / len(c) - ancora)))
+        fuori.append(scelto)
+        precedente = scelto
+    return fuori
+
+
 def armonia(spec: str, *, voicing: str = 'chiuso', registro: str = 'do3',
             durata: str | int = '1/4', da: int = 0, velocity: int = 80,
-            articolazione: str = 'normale',
-            stacco: int | None = None) -> dict[int, list[Note]]:
+            articolazione: str = 'normale', stacco: int | None = None,
+            condotta: bool = True) -> dict[int, list[Note]]:
     """Da `'Dm7 | G7 | Cmaj7'` alle note, raggruppate per altezza.
 
     E' `accordi()` che parte dai SIMBOLI invece che dalle altezze. Tutto il
     resto e' identico di proposito -- stesso separatore `|`, stesso punto per
     la pausa, stessa forma di ritorno -- perche' cosi' entra in `scrivi()`
     senza che nulla a valle debba sapere da dove viene.
+
+    ⚠️ `condotta=True` E' IL DEFAULT, e dal 29 agosto 2026. Gli accordi si
+    posano dove muovono meno voci -- `voci_condotte()`, che spiega anche
+    perche' NON e' l'alternanza «A/B». Prima ogni accordo era ancorato a
+    `registro` per conto suo, e una progressione usciva come una fila di
+    accordi invece che come un comping: era la lacuna dichiarata dalla
+    casella 7 di `docs/repertori/jazz.md`. Il PRIMO accordo non si muove in
+    nessun caso, quindi `voci()` e un accordo solo non cambiano.
+    `condotta=False` da il comportamento di prima.
 
     Per sapere cosa ha deciso, e soprattutto quali ambiguita' ha sciolto,
     `racconta_armonia()` con gli stessi argomenti.
@@ -751,13 +859,22 @@ def armonia(spec: str, *, voicing: str = 'chiuso', registro: str = 'do3',
     else:
         lung = max(1, round(passo * ARTICOLAZIONI[articolazione]))
 
+    guidate = (voci_condotte(spec, voicing=voicing, registro=registro)
+               if condotta else None)
+
     out: dict[int, list[Note]] = {}
+    k = 0
     for i, gruppo in enumerate(spec.split(SEPARATORE_ACCORDI)):
         testo = gruppo.strip()
         if not testo or testo == PAUSA:
             continue
         pos = da + i * passo
-        for y in voci(testo, voicing=voicing, registro=registro):
+        if guidate is not None:
+            altezze = guidate[k]
+            k += 1
+        else:
+            altezze = voci(testo, voicing=voicing, registro=registro)
+        for y in altezze:
             out.setdefault(y, []).append(
                 Note(pos=pos, length=lung, velocity=velocity))
     return out

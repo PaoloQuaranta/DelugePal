@@ -5138,6 +5138,137 @@ def test_armonia_pausa_registro_e_basso():
           alto == [72, 76, 79, 83], str(alto))
 
 
+
+def test_condotta_delle_parti():
+    """Gli accordi di una progressione si posano dove muovono meno voci.
+
+    E' la lacuna che la casella 7 di `docs/repertori/jazz.md` dichiarava:
+    ogni accordo era costruito per conto suo, ancorato a `registro`, quindi
+    una progressione usciva come una FILA DI ACCORDI e non come un comping.
+
+    ⚠️ La fonte -- `assets/jazz-voicings.md` della skill `music-composition`
+    -- NON specifica l'alternanza A/B in modo implementabile, e la scheda
+    diceva il contrario. Tre cose, tutte verificate qui sotto: i nomi A e B
+    sono dichiarati ambigui dalla fonte stessa, il suo G7 non e' nessuna
+    delle due forme (usa la 13ma al posto della 5ta), e la sua affermazione
+    «only one voice moves» fallisce sul suo stesso esempio. Quel che resta
+    solido e' lo SCOPO -- muovere meno voci -- ed e' quello che si implementa.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    giro = 'Dm7 | G7 | Cmaj7'
+    condotte = MU.voci_condotte(giro, voicing='senza-fondamentale',
+                                registro='do4')
+    nude = [MU.voci(s.strip(), voicing='senza-fondamentale', registro='do4')
+            for s in giro.split('|')]
+
+    # --- l'invariante che conta: cambia DOVE, non QUALI --------------------
+    check('la condotta non cambia le classi di altezza',
+          [sorted({y % 12 for y in v}) for v in condotte]
+          == [sorted({y % 12 for y in v}) for v in nude],
+          f'{condotte} contro {nude}')
+    check('ne il numero di voci',
+          [len(v) for v in condotte] == [len(v) for v in nude])
+
+    # --- il primo accordo e' l'ancora e non si muove -----------------------
+    check('il primo accordo resta dov era', condotte[0] == nude[0],
+          f'{condotte[0]} contro {nude[0]}')
+
+    # --- muove meno ---------------------------------------------------------
+    def moto(vs):
+        return sum(sum(abs(a - b) for a, b in zip(x, y))
+                   for x, y in zip(vs, vs[1:]))
+    check('e la progressione condotta muove MENO di quella nuda',
+          moto(condotte) < moto(nude), f'{moto(condotte)} contro {moto(nude)}')
+
+    # --- le voci non si incrociano -----------------------------------------
+    check('le voci restano in ordine', all(v == sorted(v) for v in condotte),
+          str(condotte))
+
+    # --- contro l'esempio del documento ------------------------------------
+    # Dm7 = fa la do mi, Cmaj7 = mi sol si re. Il suo G7 no: usa la 13ma, che
+    # e' una sostituzione di tensione che la fonte non prescrive in modo
+    # generale e che qui NON si inventa.
+    check('il primo accordo coincide con quello del documento',
+          condotte[0] == [MU.altezza(n) for n in ('fa4', 'la4', 'do5', 'mi5')],
+          str([MU.nome_altezza(y) for y in condotte[0]]))
+    check('e anche l ultimo',
+          condotte[2] == [MU.altezza(n) for n in ('mi4', 'sol4', 'si4', 're5')],
+          str([MU.nome_altezza(y) for y in condotte[2]]))
+
+    # --- il documento contraddice se stesso, ed e' la ragione del design ---
+    doc = [[MU.altezza(n) for n in gruppo] for gruppo in
+           (('fa4', 'la4', 'do5', 'mi5'),
+            ('fa4', 'la4', 'si4', 'mi5'),
+            ('mi4', 'sol4', 'si4', 're5'))]
+    mosse = [sum(1 for a, b in zip(x, y) if a != b)
+             for x, y in zip(doc, doc[1:])]
+    check('l esempio della fonte muove 1 voce e poi 3, non 1 e 1',
+          mosse == [1, 3], str(mosse))
+    # ⚠️ Il totale e' LO STESSO: sei semitoni per tutti e due. Il primo
+    # rapporto di questo lavoro aveva scritto «sei contro sette» ed era un
+    # errore di aritmetica -- il secondo cambio del documento muove 1+2+2=5,
+    # non 6. Quel che cambia e' la DISTRIBUZIONE: il documento fa una voce e
+    # poi tre, questa funzione due e due, cioe' nessun cambio sobbalza.
+    check('il totale del movimento e lo stesso del documento',
+          moto(condotte) == moto(doc), f'{moto(condotte)} contro {moto(doc)}')
+    nostre = [sum(1 for a, b in zip(x, y) if a != b)
+              for x, y in zip(condotte, condotte[1:])]
+    check('ma nessun singolo cambio muove piu voci del suo peggiore',
+          max(nostre) < max(mosse), f'{nostre} contro {mosse}')
+    check('e ci arriva SENZA sostituire tensioni',
+          {y % 12 for y in condotte[1]}
+          == {y % 12 for y in MU.voci('G7', voicing='senza-fondamentale')},
+          str(sorted({y % 12 for y in condotte[1]})))
+
+
+def test_condotta_casi_al_bordo():
+    """Numero di voci che cambia, pausa, e la via per spegnerla."""
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    # una triade e poi una settima: le voci non sono in pari numero, e non
+    # si inventa una corrispondenza -- l'accordo che cambia taglia riparte
+    # dall'ancora invece di essere condotto a caso.
+    misto = MU.voci_condotte('C | Dm7 | G7', voicing='chiuso', registro='do4')
+    check('un cambio di numero di voci non fa saltare niente',
+          [len(v) for v in misto] == [3, 4, 4], str(misto))
+
+    # la pausa non e' un accordo e non entra nella catena
+    conpausa = MU.voci_condotte('Dm7 | . | G7', voicing='chiuso',
+                                registro='do4')
+    check('la pausa non produce un voicing', len(conpausa) == 2,
+          str(conpausa))
+
+    # ⚠️ LA DERIVA. Il minimo movimento e' goloso: senza un vincolo di
+    # registro prende sempre il passo piccolo nella stessa direzione, e sul
+    # blues per tre giri il comping scendeva di DICIASSETTE semitoni, uscendo
+    # dal registro in cui era stato messo. Trovato il 29 agosto 2026 provando
+    # la funzione su 36 battute invece che su tre accordi -- su un ii-V-I non
+    # si vedeva.
+    uno = ('F7 | Bb7 | F7 | F7 | Bb7 | Bb7 | F7 | F7 | Gm7 | C7 | F7 | '
+           'Gm7 | C7')
+    lungo = MU.voci_condotte(' | '.join([uno] * 3),
+                             voicing='senza-fondamentale', registro='do3')
+    medie = [sum(c) / len(c) for c in lungo]
+    check('su tre giri il comping non cammina via per ottave',
+          max(medie) - min(medie) <= 2 * MU.DERIVA_MASSIMA,
+          f'{max(medie) - min(medie):.1f} semitoni fra la piu alta e la piu '
+          f'bassa, con DERIVA_MASSIMA={MU.DERIVA_MASSIMA}')
+
+    # `armonia()` la usa di default, e si puo' spegnere
+    a = MU.armonia('Dm7 | G7 | Cmaj7', voicing='senza-fondamentale',
+                   registro='do4')
+    b = MU.armonia('Dm7 | G7 | Cmaj7', voicing='senza-fondamentale',
+                   registro='do4', condotta=False)
+    check('armonia() conduce di default', sorted(a) != sorted(b),
+          f'{sorted(a)} contro {sorted(b)}')
+    check('e condotta=False da il comportamento di prima',
+          sorted(b) == sorted({y for s in ('Dm7', 'G7', 'Cmaj7')
+                               for y in MU.voci(
+                                   s, voicing='senza-fondamentale',
+                                   registro='do4')}),
+          str(sorted(b)))
+
 def test_racconta_armonia():
     """Regola 4: un'operazione silenziosa non e' correggibile."""
     from delugexml import musica as MU                      # noqa: PLC0415
