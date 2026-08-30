@@ -53,6 +53,7 @@ from __future__ import annotations
 
 import random
 import sys
+from typing import NamedTuple
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -121,8 +122,8 @@ BPM = 128
 SWING = 64
 
 TICK_BATTUTA = 384
-BATTUTE = 36
-LUNGHEZZA = TICK_BATTUTA * BATTUTE
+#: Quanti giri: tema, assolo, tema.
+GIRI = 3
 
 # --------------------------------------------------------------------------
 # L'armonia
@@ -132,7 +133,7 @@ LUNGHEZZA = TICK_BATTUTA * BATTUTE
 #: HARDBOP, SWING, 128 BPM, forma `A12`). Blues classico in fa col
 #: turnaround ii-V, nessuna sostituzione bebop. Una casella per battuta;
 #: la 12 ne porta due, meta' e meta'.
-GIRO = ('F7', 'Bb7', 'F7', 'F7', 'Bb7', 'Bb7',
+GIRO_BLUES = ('F7', 'Bb7', 'F7', 'F7', 'Bb7', 'Bb7',
         'F7', 'F7', 'Gm7', 'C7', 'F7', 'Gm7|C7')
 
 #: ⚠️ QUI C'ERA UNA TABELLA DI ALTEZZE SCRITTA A MANO, ed e' sparita il 29
@@ -154,7 +155,7 @@ GIRO = ('F7', 'Bb7', 'F7', 'F7', 'Bb7', 'Bb7',
 
 #: Il registro del comping: e' l'ancora da cui la condotta parte, e da cui non
 #: si allontana piu' di `MU.DERIVA_MASSIMA` in media.
-REGISTRO_COMPING = 'do3'
+
 
 #: Il ritmo del comping, otto crome per battuta, `x` suona e `.` tace.
 #: Sincopato e VARIO: un comping identico dodici volte e' la stessa morte
@@ -162,7 +163,7 @@ REGISTRO_COMPING = 'do3'
 #: spazio, il secondo (l'assolo) risponde di piu'.
 #: ⚠️ La battuta 12 di ogni giro ne porta due, di accordi: la sua stringa
 #: vale per Gm7 sulla prima meta' e C7 sulla seconda.
-COMPING = (
+COMPING_BLUES = (
     # giro 1 -- il tema. Rado.
     'x..x....', '...x....', 'x.....x.', '...x....',
     'x..x....', '......x.', 'x..x....', '....x...',
@@ -184,10 +185,18 @@ COMPING = (
 #: I gradi di ogni accordo, in semitoni dalla fondamentale, per costruire il
 #: walking. Fondamentale come classe di altezza (do = 0).
 ACCORDI = {
-    'F7':  (5,  (0, 4, 7, 10)),
-    'Bb7': (10, (0, 4, 7, 10)),
-    'Gm7': (7,  (0, 3, 7, 10)),
-    'C7':  (0,  (0, 4, 7, 10)),
+    'F7':   (5,  (0, 4, 7, 10)),
+    'Bb7':  (10, (0, 4, 7, 10)),
+    'Gm7':  (7,  (0, 3, 7, 10)),
+    'C7':   (0,  (0, 4, 7, 10)),
+    # il rhythm changes
+    'Bb6':  (10, (0, 4, 7, 9)),
+    'G7':   (7,  (0, 4, 7, 10)),
+    'Cm7':  (0,  (0, 3, 7, 10)),
+    'Eb6':  (3,  (0, 4, 7, 9)),
+    'Ebm6': (3,  (0, 3, 7, 9)),
+    'Dm7':  (2,  (0, 3, 7, 10)),
+    'D7':   (2,  (0, 4, 7, 10)),
 }
 
 #: La forma della battuta di walking: quali gradi sui primi tre movimenti.
@@ -203,7 +212,7 @@ FORME = {
 
 #: Una forma per battuta, per tutte e 36. Cambia fra i tre giri cosi' che il
 #: basso non ripeta la stessa linea tre volte.
-FORME_PER_BATTUTA = (
+FORME_BLUES = (
     'su', 'giu', 'arco', 'su', 'giu', 'su', 'arco', 'sest', 'su', 'giu', 'arco', 'su',
     'giu', 'su', 'sest', 'arco', 'su', 'giu', 'su', 'arco', 'giu', 'su', 'sest', 'arco',
     'arco', 'su', 'giu', 'sest', 'arco', 'su', 'giu', 'su', 'arco', 'giu', 'su', 'su',
@@ -229,7 +238,7 @@ def _vicino(classe: int, riferimento: int) -> int:
     return migliore if migliore is not None else riferimento
 
 
-def walking(giro_esteso: list[str]) -> list[int]:
+def walking(giro_esteso: list[str], forme_basso) -> list[int]:
     """La linea di walking: una nota per movimento, 4 per battuta.
 
     Fondamentale sul primo movimento, due gradi dell'accordo, e sul quarto
@@ -238,15 +247,27 @@ def walking(giro_esteso: list[str]) -> list[int]:
     arrivati. Non e' un'invenzione: e' la costruzione che la skill descrive.
     """
     note, precedente = [], 41       # fa2, da cui si parte
-    for i, sigla in enumerate(giro_esteso):
-        fond, _ = ACCORDI[sigla]
-        prossima = ACCORDI[giro_esteso[(i + 1) % len(giro_esteso)]][0]
-        forma = FORME[FORME_PER_BATTUTA[i % len(FORME_PER_BATTUTA)]]
+    for i, casella in enumerate(giro_esteso):
+        parti = casella.split('|')
+        dopo = giro_esteso[(i + 1) % len(giro_esteso)].split('|')[0]
+        prossima = ACCORDI[dopo][0]
+        forma = FORME[forme_basso[i % len(forme_basso)]]
 
-        radice = _vicino(fond, precedente)
-        battuta = [radice]
-        for grado in forma[1:]:
-            battuta.append(_vicino((fond + grado) % 12, battuta[-1]))
+        if len(parti) == 2:
+            # ⚠️ DUE ACCORDI IN UNA BATTUTA: la fondamentale del secondo va sul
+            # TERZO movimento. Ignorarlo darebbe un basso che sta sull'accordo
+            # sbagliato per meta' battuta -- sul blues succede solo sul
+            # turnaround, sul rhythm changes su ventiquattro battute su
+            # trentadue.
+            f1, f2 = ACCORDI[parti[0]][0], ACCORDI[parti[1]][0]
+            battuta = [_vicino(f1, precedente)]
+            battuta.append(_vicino((f1 + forma[1]) % 12, battuta[-1]))
+            battuta.append(_vicino(f2, battuta[-1]))
+        else:
+            fond = ACCORDI[parti[0]][0]
+            battuta = [_vicino(fond, precedente)]
+            for grado in forma[1:]:
+                battuta.append(_vicino((fond + grado) % 12, battuta[-1]))
 
         # il quarto movimento: cromatico verso la fondamentale che viene
         bersaglio = _vicino(prossima, battuta[-1])
@@ -267,7 +288,7 @@ def walking(giro_esteso: list[str]) -> list[int]:
 #: Il TEMA e' piu' rado e piu' cantabile dell'assolo: ~2,8 note per battuta
 #: contro le 5,2 misurate su un assolo, ed e' una scelta dichiarata -- una
 #: testa non e' un chorus.
-TEMA_NOTE = (
+TEMA_BLUES = (
     (None, None, 72, 74, 75, 77, None, None),   #  1  F7
     (None, None, 77, None, 75, None, 74, None), #  2  Bb7
     (72, None, None, None, None, None, None, None),  # 3  F7
@@ -283,7 +304,7 @@ TEMA_NOTE = (
 )
 
 #: L'ultima battuta del pezzo: al posto del levare, la fondamentale tenuta.
-TEMA_CHIUSA = (77, None, None, None, None, None, None, None)
+TEMA_CHIUSA_BLUES = (77, None, None, None, None, None, None, None)
 
 #: ⚠️ L'ASSOLO NON E' PIU' UNA TABELLA SCRITTA A MANO. Fino al 29 agosto 2026
 #: lo era, e il difetto si e' sentito: l'utente lo ha giudicato «poco
@@ -318,7 +339,7 @@ TEMA_CHIUSA = (77, None, None, None, None, None, None, None)
 #: e di far decidere all'orecchio, che e' l'unico strumento che qui puo'
 #: decidere. SE LA CORSA SUONA STORTA, la prima cosa da sospettare e' questa e
 #: non la scelta delle note.
-DENSITA = (5, 6, 6, 2, 5, 7, 6, 1, 12, 12, 5, 0)
+DENSITA_BLUES = (5, 6, 6, 2, 5, 7, 6, 1, 12, 12, 5, 0)
 
 #: Dove cadono le note dentro la battuta, su 16 sedicesimi. I respiri mettono
 #: le note ALL'INIZIO e poi tacciono: sono chiusure di frase, non levare. Le
@@ -328,15 +349,17 @@ SLOT = {
     0:  '................',
     1:  'x...............',
     2:  'x.x.............',
+    4:  'x...x.....x...x.',
     5:  'x...x...x.x...x.',
     6:  'x...x.x.x...x.x.',
     7:  'x.x.x.x.x...x.x.',
+    8:  'x.x.x.x.x.x.x.x.',
     12: 'xxxxxxxxxxxx....',
 }
 
 #: Le due corse non partono dallo stesso posto: la 9 entra sul secondo
 #: movimento, la 10 sul primo. Due corse identiche di fila sono un esercizio.
-SLOT_BATTUTA = {9: '....xxxxxxxxxxxx'}
+SLOT_BATTUTA_BLUES = {9: '....xxxxxxxxxxxx'}
 
 #: Il motivo: cinque note, cioe' quattro intervalli. ⚠️ Cinque e non tre: a
 #: tre note la ripetizione e' indistinguibile dal caso (1,02x contro la stessa
@@ -370,7 +393,7 @@ MOTIVO_SEMITONI = [0, 2, 4, 7, 5]
 #: trasposizione per grado ne cambierebbe uno. +5 sulla battuta 5 porta il
 #: materiale di F7 su Bb7 conservando il rapporto, che e' la risposta classica
 #: del blues.
-ENUNCIAZIONI = {1: 0, 5: 5, 11: 0}
+ENUNCIAZIONI_BLUES = {1: 0, 5: 5, 11: 0}
 
 #: ⚠️ LA SCALA DELL'ACCORDO ERA L'ERRORE DELLA VERSIONE 02, e l'utente l'ha
 #: sentito: «alcune note sembrano fuori tonalita'... il solo suona troppo
@@ -405,8 +428,9 @@ GRADI_CORPUS = {
     11: 5.6,   # si
 }
 
-#: La tonica del PEZZO, come classe di altezza. Fa.
-TONICA = 5
+#: ⚠️ La tonica e' del PEZZO, non del modulo: fa nel blues, si bemolle nel
+#: rhythm changes. Sta in `Pezzo.tonica` -- qui resta il solo commento perche'
+#: e' su questa che poggiano i pesi di `GRADI_CORPUS`.
 
 #: Sui movimenti si preferisce una nota dell'accordo: e' li' che una nota
 #: fuori si sente come un errore invece che come un passaggio.
@@ -446,7 +470,181 @@ ASSOLO_PARTENZA = 65
 SEME_ASSOLO = 8
 
 
-def _peso(nota: int, sigla: str, forte: bool) -> float:
+class Pezzo(NamedTuple):
+    """Tutto cio' che dipende dalla FORMA, e nient'altro.
+
+    Il resto dello script -- walking, assolo, atterraggi, batteria, comping --
+    non sa che forma sta suonando: prende questa struttura e lavora. E' la
+    ragione per cui aggiungere una forma non duplica ottocento righe.
+
+    ⚠️ `giro` porta UNA VOCE PER BATTUTA. Una voce `'X|Y'` sono due accordi
+    nella stessa battuta, il primo sulla prima meta' e il secondo sulla
+    seconda: il blues lo usa solo sul turnaround, il rhythm changes su
+    ventiquattro battute su trentadue.
+    """
+    nome: str               #: il nome del file, per `MU.destinazione()`
+    forma: str              #: la sigla di `wjazzd`, es. 'A8A8B8A8'
+    tonica: int             #: classe di altezza su cui pesano i gradi
+    scala: tuple            #: (nota, modo) per `S.set_scale()`
+    voicing: str            #: il voicing del comping
+    giro: tuple             #: una voce per battuta
+    finale: str             #: la sigla su cui il pezzo si ferma invece di girare
+    densita: tuple          #: note per battuta dell'assolo, lunga come `giro`
+    slot_battuta: dict      #: dove cadono le note, per le battute che non seguono SLOT
+    enunciazioni: dict      #: battuta -> trasposizione in semitoni del motivo
+    partenza: int           #: la prima nota del motivo
+    tema: tuple             #: le battute del tema, otto crome ciascuna
+    comping: tuple          #: un ritmo per battuta, per i tre giri
+    forme_basso: tuple      #: una forma di walking per battuta, per i tre giri
+    tema_chiusa: tuple      #: l'ultima battuta del pezzo, che non gira
+    registro: str           #: l'ancora del comping
+
+
+#: ⚠️ IL BLUES E' RIMASTO IDENTICO NEL RIFACIMENTO, e non e' un'affermazione:
+#: rigenerandolo dopo aver estratto questa struttura il file esce byte per byte
+#: uguale a `out/JAZZ06.XML`. Era la guardia del rifacimento -- una coppia
+#: controllata sul codice invece che sulla musica.
+BLUES = Pezzo(
+    nome='jazz',
+    forma='A12',
+    tonica=5,      # fa
+    scala=('fa', 'misolidio'),
+    voicing='senza-fondamentale',
+    giro=GIRO_BLUES,
+    finale='F7',
+    densita=DENSITA_BLUES,
+    slot_battuta=SLOT_BATTUTA_BLUES,
+    enunciazioni=ENUNCIAZIONI_BLUES,
+    partenza=65,
+    tema=TEMA_BLUES,
+    tema_chiusa=TEMA_CHIUSA_BLUES,
+    comping=COMPING_BLUES,
+    forme_basso=FORME_BLUES,
+    registro='do3',
+)
+
+# --------------------------------------------------------------------------
+# Il rhythm changes -- 30 agosto 2026
+# --------------------------------------------------------------------------
+
+#: ⚠️ IL GIRO E' UN MODELLO CONDIVISO, NON UNA COMPOSIZIONE. Letto dalla
+#: trascrizione di `Anthropology` (`wjazzd.db` melid 133, Dizzy Gillespie,
+#: Bb-maj), che `composition_info.template` etichetta **`I Got Rhythm`**: sono
+#: i trascrittori stessi a trattarlo come forma riusabile, e centinaia di pezzi
+#: jazz ci suonano sopra. Della composizione si prende la GRIGLIA ARMONICA, che
+#: e' armonia generica; il tema no, quello e' scritto qui.
+#:
+#: Le A: due accordi per battuta. Il PONTE: un accordo ogni due battute, il
+#: ciclo di quinte III7 - VI7 - II7 - V7.
+A_RHYTHM = ('Bb6|G7', 'Cm7|F7', 'Bb6|Gm7', 'C7|F7',
+            'Bb7', 'Eb6|Ebm6', 'Dm7|G7', 'Cm7|F7')
+B_RHYTHM = ('D7', 'D7', 'G7', 'G7', 'C7', 'C7', 'F7', 'F7')
+
+#: ⚠️ L'ARCO DELL'AABA, dalla casella 9, e non e' quello del blues. Le corse
+#: crescono da A1 al PONTE (18,8% -> 26,3%) e ricadono su A3. Le fini di A1 e
+#: A2 RESPIRANO -- vuote al 15,6% e al 10,5% -- mentre la fine del ponte fa il
+#: contrario: massimo di corse di tutto il giro (29,3%) e non si svuota, spinge
+#: dentro l'ultimo A.
+#:
+#: Trentadue valori: otto per sezione. Il massimo resta 12, cioe' tre movimenti
+#: di sedicesimi, per la stessa ragione del blues (`DENSITA`).
+DENSITA_RHYTHM = (
+    4, 5, 5, 6, 5, 6, 5, 1,      # A1: si parte radi, e la 8 respira
+    5, 6, 6, 7, 6, 7, 6, 2,      # A2: si cresce, e la 16 respira meno
+    6, 7, 7, 8, 7, 12, 12, 12,   # B: il ponte sale e NON si svuota
+    5, 6, 5, 6, 5, 6, 4, 0,      # A3: ricade, e il giro si chiude vuoto
+)
+
+#: Il tema, otto battute di A e otto di B. La forma le monta A-A-B-A: e' cosa
+#: vuol dire AABA, e ripetere il materiale di A tre volte e' quello che rende
+#: un tema un tema invece di trentadue battute diverse.
+#:
+#: ⚠️ ORIGINALE, come quello del blues. Della trascrizione di `Anthropology` si
+#: prende la sola griglia armonica, che e' un modello condiviso; le note sono
+#: scritte qui. Registro sib4 - sib5, sopra il comping e sopra il basso.
+A_TEMA_RHYTHM = (
+    (70, None, 74, None, 77, None, 79, None),    # Bb6 | G7
+    (79, None, 77, None, 75, None, 72, None),    # Cm7 | F7
+    (70, None, 74, None, 77, None, 82, None),    # Bb6 | Gm7
+    (81, None, 79, None, 77, None, 75, None),    # C7  | F7
+    (74, None, 77, None, 80, None, 77, None),    # Bb7
+    (79, None, 75, None, 78, None, 75, None),    # Eb6 | Ebm6
+    (77, None, 74, None, 71, None, 74, None),    # Dm7 | G7
+    (72, None, None, None, None, None, None, None),   # Cm7 | F7 -- respira
+)
+B_TEMA_RHYTHM = (
+    (78, None, None, None, 81, None, None, None),     # D7
+    (81, None, None, None, 78, None, None, None),     # D7
+    (77, None, None, None, 71, None, None, None),     # G7
+    (74, None, None, None, 77, None, None, None),     # G7
+    (76, None, None, None, 79, None, None, None),     # C7
+    (70, None, None, None, 76, None, None, None),     # C7
+    (81, None, None, None, 72, None, None, None),     # F7
+    (75, None, None, None, None, None, None, None),   # F7 -- respira
+)
+
+#: Il ritmo del comping. Due palette per sezione -- le A e il ponte -- e due
+#: densita': i giri del tema lasciano spazio, quello dell'assolo risponde di
+#: piu'. ⚠️ Sul PONTE il comping e' piu' rado e piu' lungo, perche' li'
+#: l'armonia cambia ogni DUE battute invece che due volte per battuta: tenere
+#: la stessa fitta darebbe una martellata su un accordo solo.
+A_COMPING_RADO = ('x..x....', '...x....', 'x.....x.', '...x....',
+                  'x..x....', '..x...x.', 'x..x....', '....x...')
+A_COMPING_FITTO = ('...x....', 'x..x..x.', '...x....', 'x.....x.',
+                   '..x...x.', '...x....', 'x..x..x.', '......x.')
+B_COMPING_RADO = ('x.......', '....x...', 'x.......', '....x...',
+                  'x.......', '....x...', 'x.......', '..x.....')
+B_COMPING_FITTO = ('x...x...', '....x...', 'x...x...', '..x.....',
+                   'x...x...', '....x...', 'x..x....', '..x...x.')
+
+#: Le forme del walking, una per battuta. ⚠️ Sul ponte l'accordo dura DUE
+#: battute, quindi la seconda non riparte dalla fondamentale: `arco` e `sest`
+#: ci girano attorno invece di ribatterla.
+A_FORME = ('su', 'giu', 'arco', 'su', 'giu', 'su', 'arco', 'sest')
+B_FORME = ('su', 'arco', 'giu', 'sest', 'su', 'arco', 'giu', 'su')
+
+
+def _aaba(a, b):
+    """Monta una sezione A e una B nella forma A-A-B-A."""
+    return tuple(a) + tuple(a) + tuple(b) + tuple(a)
+
+
+RHYTHM = Pezzo(
+    nome='rhythm',
+    forma='A8A8B8A8',
+    tonica=10,     # si bemolle
+    scala=('sib', 'maggiore'),
+    #: ⚠️ `chiuso` E NON `senza-fondamentale`, ED E' UNA RINUNCIA DICHIARATA.
+    #: Il rhythm changes poggia su accordi di SESTA -- Bb6, Eb6, Ebm6 -- e
+    #: `senza-fondamentale` e' definito 3-5-7-9: su una sesta la settima non
+    #: c'e', e `voci()` RIFIUTA invece di inventarla. Ha ragione. La fonte,
+    #: `assets/jazz-voicings.md`, non ha affatto gli accordi di sesta: copre
+    #: maj7, m7, dom7, semidiminuito, diminuito e sus. Senza una fonte non si
+    #: inventa un voicing -- e' quello che la casella 7 vieta.
+    #: Il prezzo: `chiuso` porta la fondamentale, che il basso raddoppia.
+    voicing='chiuso',
+    giro=_aaba(A_RHYTHM, B_RHYTHM),
+    finale='Bb6',
+    densita=DENSITA_RHYTHM,
+    slot_battuta={22: '....xxxxxxxxxxxx', 23: 'xxxxxxxxxxxx....'},
+    #: Il motivo apre ogni A, che e' il modo in cui una forma AABA si fa
+    #: riconoscere. Sul ponte non c'e': il ponte e' l'altra cosa.
+    enunciazioni={1: 0, 9: 0, 25: 0},
+    partenza=70,
+    tema=_aaba(A_TEMA_RHYTHM, B_TEMA_RHYTHM),
+    tema_chiusa=(70, None, None, None, None, None, None, None),
+    comping=(_aaba(A_COMPING_RADO, B_COMPING_RADO)
+             + _aaba(A_COMPING_FITTO, B_COMPING_FITTO)
+             + _aaba(A_COMPING_RADO, B_COMPING_RADO)),
+    forme_basso=_aaba(A_FORME, B_FORME) * 3,
+    registro='fa3',
+)
+
+#: I pezzi che questo script sa scrivere. Il nome sceglie il file.
+PEZZI = {'jazz': BLUES, 'rhythm': RHYTHM}
+
+
+def _peso(nota: int, sigla: str, forte: bool, tonica: int) -> float:
     """Quanto quella nota e' probabile qui, secondo il corpus.
 
     Il peso base e' la quota misurata di quel grado SULLA TONICA DEL PEZZO --
@@ -460,7 +658,7 @@ def _peso(nota: int, sigla: str, forte: bool) -> float:
     comunque una linea storta: non conta solo QUANTE volte una nota compare,
     ma DOVE.
     """
-    p = GRADI_CORPUS[(nota - TONICA) % 12]
+    p = GRADI_CORPUS[(nota - tonica) % 12]
     if forte:
         fond, gradi = ACCORDI[sigla]
         if (nota - fond) % 12 in gradi:
@@ -468,7 +666,7 @@ def _peso(nota: int, sigla: str, forte: bool) -> float:
     return p
 
 
-def assolo(giro_del_solista: list[str]) -> tuple:
+def assolo(p, giro_del_solista: list[str]) -> tuple:
     """Le dodici battute dell'assolo, sedici sedicesimi ciascuna.
 
     Non sceglie quante note ne' dove: quelle le dicono `DENSITA` e `SLOT`, che
@@ -479,18 +677,19 @@ def assolo(giro_del_solista: list[str]) -> tuple:
     """
     rng = random.Random(SEME_ASSOLO)
     fuori = []
-    corrente = ASSOLO_PARTENZA
+    corrente = p.partenza
     direzione = 1
 
-    for i, sigla in enumerate(giro_del_solista):
+    for i, casella in enumerate(giro_del_solista):
         battuta = i + 1
-        d = DENSITA[i]
-        pattern = SLOT_BATTUTA.get(battuta, SLOT[d])
+        sigla = casella.split('|')[0]
+        d = p.densita[i]
+        pattern = p.slot_battuta.get(battuta, SLOT[d])
         note = [None] * 16
 
-        if battuta in ENUNCIAZIONI:
+        if battuta in p.enunciazioni:
             # il motivo, alle stesse altezze ogni volta piu' la trasposizione
-            base = ASSOLO_PARTENZA + ENUNCIAZIONI[battuta]
+            base = p.partenza + p.enunciazioni[battuta]
             passo = MOTIVO_SEMITONI
             posti = [k for k, c in enumerate(pattern) if c == 'x']
             for k, s in enumerate(posti):
@@ -504,12 +703,15 @@ def assolo(giro_del_solista: list[str]) -> tuple:
             if c != 'x':
                 continue
             forte = s % 4 == 0                      # i quattro movimenti
+            # ⚠️ due accordi in una battuta: la seconda meta' pesa sul secondo
+            sotto = (casella.split('|')[1] if '|' in casella and s >= 8
+                     else sigla)
             vicini = [n for n in range(corrente - 4, corrente + 5)
                       if ASSOLO_MIN <= n <= ASSOLO_MAX and n != corrente]
             avanti = [n for n in vicini
                       if (n - corrente) * direzione > 0] or vicini
-            pesi = [_peso(n, sigla, forte) / (1 + abs(n - corrente)) ** 2
-                    for n in avanti]
+            pesi = [_peso(n, sotto, forte, p.tonica)
+                    / (1 + abs(n - corrente)) ** 2 for n in avanti]
             scelta = rng.choices(avanti, weights=pesi, k=1)[0]
             note[s] = scelta
             corrente = scelta
@@ -517,7 +719,7 @@ def assolo(giro_del_solista: list[str]) -> tuple:
                     or rng.random() < 0.18:
                 direzione = -direzione
         fuori.append(tuple(note))
-    return _fai_atterrare(fuori, giro_del_solista, rng)
+    return _fai_atterrare(fuori, [c.split('|')[0] for c in giro_del_solista], rng)
 
 
 def _fai_atterrare(battute, giro_del_solista, rng):
@@ -652,7 +854,7 @@ def _spec_melodia(battute) -> str:
     return ' '.join(fuori)
 
 
-def _spec_comping(giro_esteso: list[str]) -> str:
+def _spec_comping(p, giro_esteso: list[str]) -> str:
     """La progressione del comping: un gruppo per croma, separati da `|`.
 
     Sono SIGLE, non altezze: le altezze le sceglie `MU.armonia()`, che dal 29
@@ -663,48 +865,53 @@ def _spec_comping(giro_esteso: list[str]) -> str:
     trova a zero -- quindi il comping non sobbalza fra un colpo e l'altro
     della stessa battuta."""
     gruppi = []
-    for battuta, ritmo in enumerate(COMPING):
-        sigla = giro_esteso[battuta]
-        # la battuta 12 del giro porta due accordi: Gm7 sulla prima meta'
-        doppia = (battuta % 12) == 11
+    for battuta, ritmo in enumerate(p.comping):
+        parti = giro_esteso[battuta].split('|')
         for slot, c in enumerate(ritmo):
             if c != 'x':
                 gruppi.append('.')
                 continue
-            corrente = sigla
-            if doppia and sigla == 'Gm7' and slot >= 4:
-                corrente = 'C7'
-            gruppi.append(corrente)
+            # due accordi: il secondo dalla meta' della battuta in poi
+            gruppi.append(parti[1] if len(parti) == 2 and slot >= 4
+                          else parti[0])
     return ' | '.join(gruppi)
 
 
-def _giro_esteso() -> list[str]:
-    """Le 36 battute come sigle, una per battuta. La 12 di ogni giro porta
-    Gm7 (e C7 sulla seconda meta', che `_spec_comping` gestisce). L'ULTIMA
-    battuta del pezzo e' F7: il pezzo finisce, non gira."""
-    fuori = []
-    for _ in range(3):
-        for casella in GIRO:
-            fuori.append(casella.split('|')[0])
-    fuori[-1] = 'F7'
+def _giro_esteso(p) -> list[str]:
+    """Tutte le battute del pezzo, una voce per battuta.
+
+    ⚠️ Le voci restano GREZZE, col `|` dei due accordi: chi ne vuole uno solo
+    fa `.split('|')[0]`. Il comping, il basso e l'assolo li usano tutti e due,
+    e ognuno decide dove cade il secondo.
+
+    L'ULTIMA battuta del pezzo e' `p.finale`: il pezzo finisce, non gira."""
+    fuori = list(p.giro) * GIRI
+    fuori[-1] = p.finale
     return fuori
 
 
-def batteria(prof) -> list[tuple[str, list, dict]]:
-    """Le righe di batteria, 36 battute, col template posato sopra."""
+def batteria(p, prof) -> list[tuple[str, list, dict]]:
+    """Le righe di batteria, tutte le battute, col template posato sopra."""
     per_drum: dict[str, list] = {d: [] for d in TENUTI}
+    battute = len(p.giro) * GIRI
+    # ⚠️ il fill sta sull'ULTIMA battuta dei giri che non sono l'ultimo: e'
+    # dove il giro si chiude e ne comincia un altro. Con la forma cablata era
+    # `(11, 23)`, che valeva per il solo blues.
+    fill_battute = {len(p.giro) * (g + 1) - 1 for g in range(GIRI - 1)}
 
-    for battuta in range(BATTUTE):
+    for battuta in range(battute):
         da = battuta * TICK_BATTUTA
-        if battuta in FILL_BATTUTE:
+        if battuta in fill_battute:
             for drum, pattern in FILL.items():
                 per_drum[drum].extend(MU.passi(pattern, da=da))
             continue
         per_drum['RIDE'].extend(MU.passi(RIDE, da=da))
         per_drum['HATC'].extend(MU.passi(PEDALE, da=da))
         per_drum['KICK'].extend(
-            MU.passi(CASSE[CASSA_PER_BATTUTA[battuta]], da=da))
-        rull = RULLANTI[RULLANTE_PER_BATTUTA[battuta]]
+            MU.passi(CASSE[CASSA_PER_BATTUTA[battuta % len(CASSA_PER_BATTUTA)]],
+                     da=da))
+        rull = RULLANTI[RULLANTE_PER_BATTUTA[
+            battuta % len(RULLANTE_PER_BATTUTA)]]
         if rull.strip('.'):
             per_drum['SNARE'].extend(MU.passi(rull, da=da))
 
@@ -718,8 +925,9 @@ def batteria(prof) -> list[tuple[str, list, dict]]:
     return fuori
 
 
-def costruisci(prof):
+def costruisci(p, prof):
     """La song intera. Ritorna (doc, rapporti)."""
+    lunghezza = TICK_BATTUTA * len(p.giro) * GIRI
     doc = parse_file(TEMPL)
     S.set_bpm(doc.root, BPM)
     S.set_swing(doc, SWING, figura='1/8')
@@ -728,30 +936,30 @@ def costruisci(prof):
     # c'entra: la scala non cambia le altezze scritte, cambia come il
     # dispositivo disegna la griglia -- ma lasciarla sbagliata e' informazione
     # falsa in un file, e `racconta()` la ripete.
-    S.set_scale(doc, 'fa', 'misolidio')
+    S.set_scale(doc, *p.scala)
 
     # la song di partenza porta roba sua: qui serve solo il pezzo
     for strumento in list(S.instruments(doc)):
         MU.togli(doc, strumento)
 
     rapporti = []
-    giro = _giro_esteso()
+    giro = _giro_esteso(p)
 
     # --- batteria ---------------------------------------------------------
     kit, clip_kit = C.add_track(doc, KIT, name='KIT009', folder='KITS',
-                                length=LUNGHEZZA, playing=True)
+                                length=lunghezza, playing=True)
     for nome in [S.nome_drum(d) for d in S.drums(kit)]:
         if nome and nome not in TENUTI:
             K.remove_drum(doc, kit, nome)
-    for drum, note, rapporto in batteria(prof):
+    for drum, note, rapporto in batteria(p, prof):
         rapporti.append(rapporto)
         rapporti.append(MU.scrivi(doc, clip_kit, note, dove=drum))
 
     # --- basso walking ----------------------------------------------------
     _, clip_basso = C.add_track(doc, PRESET_BASSO, name='Square Saw Bass',
-                                folder='SYNTHS', length=LUNGHEZZA,
+                                folder='SYNTHS', length=lunghezza,
                                 playing=True)
-    linea = walking(giro)
+    linea = walking(giro, p.forme_basso)
     spec = ' '.join(MU.nome_altezza(n) for n in linea)
     note = MU.melodia(spec, durata='1/4', articolazione='staccato',
                       velocity=78)
@@ -759,16 +967,16 @@ def costruisci(prof):
 
     # --- comping ----------------------------------------------------------
     _, clip_comping = C.add_track(doc, PRESET_COMPING, name='Pianism I',
-                                  folder='SYNTHS', length=LUNGHEZZA,
+                                  folder='SYNTHS', length=lunghezza,
                                   playing=True)
-    note = MU.armonia(_spec_comping(giro), voicing='senza-fondamentale',
-                      registro=REGISTRO_COMPING, durata='1/8',
+    note = MU.armonia(_spec_comping(p, giro), voicing=p.voicing,
+                      registro=p.registro, durata='1/8',
                       articolazione='staccato', velocity=72)
     rapporti.append(MU.scrivi(doc, clip_comping, note))
 
     # --- tema e assolo ----------------------------------------------------
     _, clip_tema = C.add_track(doc, PRESET_TEMA, name='062 Trumpet',
-                               folder='SYNTHS', length=LUNGHEZZA,
+                               folder='SYNTHS', length=lunghezza,
                                playing=True)
     # ⚠️ TRE CHIAMATE E NON UNA, ed e' la ragione per cui `da=` esiste.
     # `melodia()` applica UNA durata a tutta la stringa: dalla versione 03
@@ -777,14 +985,15 @@ def costruisci(prof):
     # accorga. Il tema resta in crome, l'assolo va in sedicesimi, e le tre
     # parti si uniscono per altezza -- che e' la forma in cui il Deluge tiene
     # le righe di una clip.
-    ultimo = list(TEMA_NOTE[:-1]) + [TEMA_CHIUSA]
+    n = len(p.giro)
+    ultimo = list(p.tema[:-1]) + [p.tema_chiusa]
     parti = (
-        MU.melodia(_spec_melodia(TEMA_NOTE), durata='1/8',
+        MU.melodia(_spec_melodia(p.tema), durata='1/8',
                    da=0, velocity=95),
-        MU.melodia(_spec_melodia(assolo(giro[12:24])), durata='1/16',
-                   da=12 * TICK_BATTUTA, velocity=95),
+        MU.melodia(_spec_melodia(assolo(p, giro[n:2 * n])), durata='1/16',
+                   da=n * TICK_BATTUTA, velocity=95),
         MU.melodia(_spec_melodia(ultimo), durata='1/8',
-                   da=24 * TICK_BATTUTA, velocity=95),
+                   da=2 * n * TICK_BATTUTA, velocity=95),
     )
     note = {}
     for parte in parti:
@@ -808,7 +1017,15 @@ def main() -> int:
     print(f'template: {prof.id}  {prof.style}  {prof.bpm} BPM  '
           f'BUR {prof.bur:.2f}  {prof.battute} battute')
 
-    doc, rapporti = costruisci(prof)
+    quale = sys.argv[1] if len(sys.argv) > 1 else 'jazz'
+    if quale not in PEZZI:
+        print(f'pezzo {quale!r} sconosciuto, usare {sorted(PEZZI)}')
+        return 1
+    p = PEZZI[quale]
+    print(f'pezzo: {p.nome}  forma {p.forma}  {len(p.giro)} battute per giro, '
+          f'{GIRI} giri')
+
+    doc, rapporti = costruisci(p, prof)
 
     print('\n--- rapporti (regola 4) ---')
     for r in rapporti:
@@ -825,7 +1042,7 @@ def main() -> int:
     avvisi = MU.avvertenze(doc)
     print(f'avvertenze(): {avvisi if avvisi else "nessuna"}')
 
-    remoto = MU.destinazione('jazz', VERSIONE)
+    remoto = MU.destinazione(p.nome, VERSIONE)
     locale = RADICE / 'out' / Path(remoto).name
     write_file(doc, locale, FormatTable.load(TABELLA))
     print(f'\nscritto {locale}')
