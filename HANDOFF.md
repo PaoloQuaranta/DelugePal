@@ -51,8 +51,18 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > indistinguibile dal caso. E la **casella 7** e' stata chiusa lo stesso
 > giorno (§6-septdecies): `MU.armonia()` conduce le parti, e la fonte che la
 > casella dava per risolutiva **non specificava** quello che le si attribuiva.
-> Il jazz ha ora **quattro caselle piene** su undici, e il primo pezzo e'
-> arrivato alla sesta versione.
+> Il jazz ha ora **cinque caselle piene** su undici -- il 30 agosto si e'
+> aggiunta la **9**, la forma, che era gia' in `wjazzd.db` e nessuno aveva
+> aperto.
+>
+> ⚠️ **E il 30 agosto e' cambiato il metodo, non solo il contenuto.** Le
+> caselle si riempiono **su domanda**, non a tappeto: sta nel comune di
+> `docs/MUSICA.md`, e la ragione sta nei tempi -- la casella 6, riempita senza
+> che un pezzo la chiedesse, e' costata **undici giorni**; le caselle 8, 7 e 11,
+> ognuna aperta da un difetto sentito, **otto ore in tutto**. Il generatore e'
+> stato reso **parametrico sulla forma**, e il secondo pezzo -- un rhythm
+> changes AABA -- e' uscito giusto **alla prima versione** contro le sei del
+> blues.
 >
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei

@@ -1614,7 +1614,9 @@ figura.
 
 ## 7. Armonia
 
-**Compilata il 29 agosto 2026.** C'è il **vocabolario**, ed è completo:
+**Compilata il 29 agosto 2026.** C'è il **vocabolario** — ⚠️ **non completo, e
+la riga che diceva il contrario è stata corretta il 30 agosto**: vedi «Le seste»
+in fondo —
 `MU.armonia()`, `MU.voci()`, `MU.sigla()`, i quattro voicing di `MU.VOICING` —
 `chiuso`, `shell`, `senza-fondamentale`, `drop2` — e il dialetto di Weimar, che
 `WJ.sigla_weimar()` scioglie **per intero, senza fallimenti**. E c'è ora anche
@@ -1702,6 +1704,25 @@ manuale. Tre accordi non sono trentasei battute.
 - **Le sostituzioni di accordo** — tritono, ii-V interpolati, turnaround
   alternativi. Il giro letto da `Walkin'` non ne ha nessuna, e la casella non
   dice se sia tipico o sia quel pezzo.
+
+#### ⚠️ Le seste: il vocabolario non è completo, e l'ha detto un pezzo
+
+Fino al 30 agosto 2026 la prima riga di questa casella diceva che il
+vocabolario **è completo**. Non lo è, e a scoprirlo è stato il primo rhythm
+changes: quella forma poggia su accordi di **sesta** — `Bb6`, `Eb6`, `Ebm6` — e
+`MU.voci()` con `senza-fondamentale` li **rifiuta**, perché quel voicing è
+definito 3-5-7-9 e una sesta la settima non ce l'ha.
+
+**Il rifiuto è giusto**, e la fonte non aiuta: `assets/jazz-voicings.md` **non
+ha affatto** gli accordi di sesta — copre maj7, m7, dom7, semidiminuito,
+diminuito e sus. Senza una fonte non si inventa un voicing, che è la regola con
+cui questa casella è stata scritta.
+
+Il ripiego usato: `voicing='chiuso'`, che porta la fondamentale e la raddoppia
+col basso. ⚠️ **All'ascolto non ha dato fastidio** — *«il comping non
+impasta»* `[OSS]` — quindi la lacuna è **dichiarata e non urgente**. Chiuderla
+vuol dire trovare una fonte per il voicing senza fondamentale di una sesta, non
+dedurlo.
 
 ## 8. Melodia e ornamentazione
 
@@ -2197,8 +2218,8 @@ casella 11.
 
 ## 11. Trappole del generatore
 
-**Parziale.** Tre correzioni, tutte del **29 agosto 2026** e tutte dallo
-stesso pezzo in tre versioni. La casella si è aperta esattamente come
+**Parziale.** Le correzioni sono di due pezzi: sei versioni di un blues il
+**29-30 agosto 2026**, e **una sola** del rhythm changes che è venuto dopo. La casella si è aperta esattamente come
 dichiarava di volersi aprire — «al primo pezzo jazz corretto dall'utente» — e
 alla terza versione il verdetto è stato *«ora suona molto meglio»*.
 
@@ -2299,6 +2320,7 @@ dell'assolo e di nient'altro.
 | `JAZZ04` | atterraggi misurati **+ motivo cambiato** | **RESPINTA** — *«il solo in generale è peggio di quello precedente, che sbagliava solo la nota di atterraggio… molte note sembrano un po' ardite rispetto alla tonalità»* |
 | `JAZZ05` | il cammino della 03 **identico**, e le sole due note di atterraggio | *«molto meglio»* |
 | `JAZZ06` | l'assolo della 05 intatto; il **comping** passa dalla tabella a mano a `MU.armonia()` condotta | *«ora il voicing è meglio di prima. Va bene»* |
+| **`RHYTHM06`** | un pezzo **diverso**: rhythm changes, AABA di 32 battute, forma parametrica | *«la forma si sente bene… il comping non impasta… il tema regge tre volte»* — **alla prima versione** |
 
 #### La correzione di JAZZ02, e perché era misurabile
 
@@ -2333,6 +2355,30 @@ sta bassa.
 DOVE.** La stessa quota distribuita male suona storta lo stesso. Nel generatore
 questo è il peso che una nota dell'accordo prende **sui movimenti** — senza,
 la distribuzione giusta produceva comunque una linea sbagliata.
+
+#### Il secondo pezzo è uscito giusto alla prima, e questo è il dato
+
+⚠️ **Sei versioni per il blues, una per il rhythm changes.** Il 30 agosto 2026
+il generatore è stato reso parametrico sulla forma e ne è uscito un AABA di 32
+battute — armonia, tema, arco dell'assolo e comping tutti diversi. Il verdetto,
+alla **prima** versione: *«la forma si sente bene»*, il comping *«non impasta»*,
+il tema *«regge tre volte»*.
+
+**Non è fortuna: è che le misure hanno retto fuori dal caso in cui erano state
+prese.** Il groove, lo swing, il generatore d'assolo, gli atterraggi e la
+condotta delle parti sono arrivati dal blues **senza una modifica**. L'unica
+cosa nuova era l'arco della casella 9, misurato sull'AABA, e l'orecchio l'ha
+confermata.
+
+⚠️ **E vale come prova del metodo del comune, non come vanto:** il primo pezzo
+di un repertorio costa, il secondo molto meno, perché quel che si è misurato
+per il primo è già lì. È l'argomento che rende sostenibile riempire le caselle
+su domanda invece che a tappeto.
+
+⚠️ **Il limite resta quello dichiarato:** ha retto fra due forme **dello stesso
+repertorio**, entrambe swing, entrambe a 128 BPM, con lo stesso batterista e lo
+stesso kit. Che regga su una ballad, o fuori dal jazz, **non è dimostrato da
+questo**.
 
 #### Gli atterraggi, misurati — e la trappola che ci si è nascosta dentro
 
