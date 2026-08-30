@@ -162,6 +162,12 @@ Così l'agenda del progetto si legge dallo schema invece che da una lista tenuta
 a parte, e i lettori che verranno atterrano da soli nella casella che
 riempiono.
 
+⚠️ **Ma l'agenda dice cosa manca, non in che ordine riempirlo**, e dal 30 agosto
+2026 l'ordine lo decide il pezzo che si sta scrivendo: vedi «Le caselle si
+riempiono SU DOMANDA» nel comune. Riempirle a tappeto costa mesi e produce
+righe che nessuno mette alla prova — è già successo due volte, e le due caselle
+scritte in anticipo dicevano il falso.
+
 Per lo stesso motivo le undici ci sono **sempre tutte**, anche quando sono
 vuote: è quello che permette di sapere dove guardare senza leggere, e di vedere
 cosa manca senza che qualcuno debba accorgersene.
@@ -190,6 +196,88 @@ patch cable compresi, che lì non c'è e sta in
 legge sempre insieme al comune.
 
 ### Metodo
+
+#### Le caselle si riempiono SU DOMANDA — 30 agosto 2026
+
+**Lo schema ha undici caselle e il perimetro ha quattro repertori: quarantaquattro
+caselle.** Riempirle a tappeto è un lavoro di mesi, e il 30 agosto 2026 l'utente
+ha proposto di non farlo:
+
+> «Visto che il repertorio è mastodontico, non credo sia possibile pensare a un
+> riempimento completo di tutte le caselle… io punterei a usare questo primo
+> passaggio sul blues per creare un metodo di riempimento delle caselle, da
+> applicare **in itinere ogni volta che il task compositivo lo richiede**.»
+
+**Ha ragione, e non è un'opinione: sta nei tempi dei commit.**
+
+| | come è stata riempita | quanto è costata |
+|---|---|---|
+| **casella 6** del jazz, dinamica | *a tappeto*, senza che nessun pezzo la chiedesse | **undici giorni** (18-29 agosto, due rami) |
+| **caselle 8, 7 e 11** del jazz | *su domanda*, ognuna aperta da un difetto sentito | **circa otto ore in tutto**, 29-30 agosto |
+
+Venti volte, per casella. E la casella 6 è quella che ha prodotto il rabbit
+hole di `HANDOFF.md` §6-quindecies.
+
+##### Il ciclo
+
+1. **Genera con quello che c'è**, dichiarando ogni ripiego. Una casella vuota
+   non ferma un pezzo: dice solo con che grado di prova esce quel che ne
+   dipende.
+2. **Fai ascoltare.**
+3. ⚠️ **Il difetto nomina la casella.** «Poco pirotecnico» → la 8. «Alcune note
+   sembrano fuori tonalità» → i gradi. «Le frasi finiscono su note che non hanno
+   senso» → gli atterraggi. Non si sceglie la casella da un'agenda: la sceglie
+   l'orecchio.
+4. **Misura solo quello**, col bersaglio fissato **prima** dei numeri.
+5. **Rimettilo nel generatore, UNA COSA ALLA VOLTA.**
+6. **Riascolta.** Se peggiora si torna indietro — è successo, `JAZZ04`.
+7. **Scrivi la correzione con la data**, nella casella che le compete.
+
+⚠️ **Il passo che fa la velocità è il 3.** Non si misura mai ciò di cui nessuno
+si è lamentato. È esattamente ciò che la casella 6 ha fatto per undici giorni, e
+gli ultimi quattro *dentro una casella già chiusa*.
+
+##### E una casella scritta senza domanda invecchia SBAGLIATA
+
+Non è solo lentezza. È il difetto che si è visto **due volte nello stesso
+giorno**, il 29-30 agosto, in due caselle compilate in anticipo:
+
+| casella | diceva | com'era |
+|---|---|---|
+| **jazz 7**, armonia | «la chiuderebbe `assets/jazz-voicings.md`… manca implementarla, non trovarla» | quella fonte **non specifica affatto** l'alternanza A/B: nomi ambigui per sua stessa ammissione, esempio che non usa nessuna delle due forme, e una regola che fallisce sul proprio esempio |
+| **jazz 9**, forma | «la chiuderebbe MusicXML o le lead sheet: il lettore va scritto, non procurato» | la colonna `form` di `wjazzd.db` la porta su **tutti e 361** gli assoli swing |
+
+Tutte e due **mandavano a cercare fuori qualcosa che era già in casa**, e
+nessuna delle due era stata messa alla prova perché nessun pezzo gliel'aveva
+chiesto. Una riga così costa più di una casella vuota: una casella vuota dice
+«non lo so», questa dice «va' di là» e sbaglia direzione.
+
+##### I due limiti, che sono veri e vanno tenuti
+
+⚠️ **1. Su domanda si misura stretto, e stretto vale stretto.** Gli atterraggi
+della casella 8 sono misurati su blues `A12` a feel `SWING`: che valgano su un
+AABA o su una ballad **non è noto**. La disciplina dei gradi — `[MIS]` contro
+`[OSS]`, e «quante esecuzioni, quanti esecutori» — va estesa al **contesto** e
+non solo alla numerosità. Una misura porta con sé il perimetro in cui è stata
+presa, e chi la riusa fuori da lì lo sta assumendo, non sapendo.
+
+⚠️ **2. Alcune caselle hanno prerequisiti che non si scoprono a metà pezzo.** La
+casella 5 vuole un lettore MusicXML: non è una cosa che si trova mancante alle
+cinque e si risolve alle sei. Quelle vanno **viste arrivare**. Il metodo su
+domanda copre tutto ciò che è **già raggiungibile**; quel che richiede
+infrastruttura nuova va tenuto in una lista corta e dichiarata, perché nessun
+ascolto la può produrre al volo.
+
+##### Cosa NON segue da qui
+
+- **non che le misure non servano.** La misura ha localizzato in un colpo un
+  difetto invisibile a orecchio nudo — il grado 11 al triplo della sua quota,
+  e *solo* sulle due battute delle corse;
+- **non che una casella vada chiusa in fretta.** Va **aperta** solo su domanda;
+  una volta aperta si misura con la cura di sempre, e si dichiara cosa resta
+  fuori;
+- **non che l'agenda sparisca.** L'indice resta la vista di cosa c'è. Cambia chi
+  decide l'ordine: non la matrice, ma il pezzo che si sta scrivendo.
 
 #### Le due skill, e chi comanda su cosa — 17 agosto 2026
 
