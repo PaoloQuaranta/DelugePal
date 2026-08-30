@@ -102,6 +102,10 @@ ESECUZIONE = 'drummer10/session1/1'
 #:       COMPING: non esce piu' da una tabella di altezze scritta a mano ma
 #:       da `MU.armonia()`, che dal 29 agosto conduce le parti. E' la
 #:       casella 7 che si chiude in libreria.
+#:       Verdetto: «ora il voicing e' meglio di prima. Va bene».
+#:       ⚠️ Non e' un pareggio: la condotta calcolata batte la tabella che
+#:       era stata scritta a mano, e il criterio era che almeno la
+#:       eguagliasse.
 #:
 #: ⚠️ E' il primo giro CHIUSO di questo progetto: una lamentela all'orecchio,
 #: una misura sul corpus, una correzione, e lo stesso orecchio che approva.

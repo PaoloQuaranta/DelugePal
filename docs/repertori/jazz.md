@@ -1637,6 +1637,13 @@ stesse classi di altezza di prima**, e 35 su 59 anche le stesse altezze esatte.
 `condotta=False` dà il comportamento precedente, dove ogni accordo era
 ancorato a `registro` per conto suo.
 
+⚠️ **E l'orecchio l'ha promossa, il 29 agosto 2026.** Il criterio dichiarato
+prima di aprire il lavoro era che la libreria **almeno eguagliasse** la tabella
+scritta a mano — `JAZZ05` e `JAZZ06` differiscono solo per il comping, tutto il
+resto è identico nota per nota. Il verdetto è stato *«ora il voicing è meglio
+di prima»* `[OSS]`: non un pareggio. Vale la riserva di sempre — un
+ascoltatore, una volta — ma la direzione è quella.
+
 ### ⚠️ Correzione: la fonte NON specificava quello che questa casella diceva
 
 Fino al 29 agosto 2026 qui c'era scritto: *«la chiuderebbe
@@ -2210,6 +2217,7 @@ dell'assolo e di nient'altro.
 | `JAZZ03` | pesi misurati sulla tonica, corse in sedicesimi | *«ora suona molto meglio. Le note sono a posto, le corse suonano bene ed è decisamente più pirotecnico»*. Riascoltando: *«le frasi finiscono sempre su note che non hanno molto senso dal punto di vista della gravitazione tonale»* |
 | `JAZZ04` | atterraggi misurati **+ motivo cambiato** | **RESPINTA** — *«il solo in generale è peggio di quello precedente, che sbagliava solo la nota di atterraggio… molte note sembrano un po' ardite rispetto alla tonalità»* |
 | `JAZZ05` | il cammino della 03 **identico**, e le sole due note di atterraggio | *«molto meglio»* |
+| `JAZZ06` | l'assolo della 05 intatto; il **comping** passa dalla tabella a mano a `MU.armonia()` condotta | *«ora il voicing è meglio di prima. Va bene»* |
 
 #### La correzione di JAZZ02, e perché era misurabile
 
