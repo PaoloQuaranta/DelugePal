@@ -521,7 +521,14 @@ VOICING = {
     'shell': 'solo terza e settima: le due note che portano l identita',
     'senza-fondamentale': '3-5-7-9, il basso suona la fondamentale altrove',
     'drop2': 'posizione chiusa con la seconda voce dall alto giu di un ottava',
+    'quartale': 'tre quarte giuste e una terza: il suono del comping modale',
 }
+
+#: Lo stack di quarte, in semitoni dalla fondamentale. Dalla fonte --
+#: `assets/jazz-voicings.md`, «Quartal voicings»: «Stack of 4ths. The "So
+#: What" voicing (modal jazz): D - G - C - F - A -- five notes stacked in
+#: 4ths». Su un minore settima danno fondamentale, 11, b7, b3 e 5.
+QUARTE = (0, 5, 10, 15, 19)
 
 #: Le lettere di nota, dalle piu' lunghe alle piu' corte: l'alternanza di una
 #: regex prende il PRIMO ramo che combacia, non il piu' lungo, quindi
@@ -706,6 +713,20 @@ def voci(simbolo, *, voicing: str = 'chiuso',
         if 11 in s.gradi:
             scelti = [i for i in scelti if i != s.gradi.get(5)]
         note = [radice + i for i in sorted(scelti)]
+    elif voicing == 'quartale':
+        # ⚠️ RIFIUTA fuori dal minore settima, e non e' pignoleria. Lo stack
+        # di quarte dalla fondamentale produce l'11, la b7 e la b3: su un
+        # maggiore settima darebbero sib e mib, che nell'accordo non ci sono.
+        # La fonte lo mostra su un minore ("over E Dorian or similar") e su un
+        # "F minor"; fuori di li' non dice niente, e non lo si inventa.
+        if s.gradi.get(3) != 3 or s.gradi.get(7) != 10:
+            raise ValueError(
+                f"voicing 'quartale' su {s.testo!r}: lo stack di quarte "
+                f"dalla fondamentale vuole terza MINORE e settima MINORE, e "
+                f"questo accordo ha {s.gradi.get(3)} e {s.gradi.get(7)}. La "
+                f"fonte lo mostra sul minore settima e nient'altro: fuori di "
+                f"li' produrrebbe note che l'accordo non dichiara")
+        note = [radice + i for i in QUARTE]
     else:                                                   # drop2
         chiuse = [radice + i for i in s.intervalli]
         if len(chiuse) < 4:

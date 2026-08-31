@@ -197,6 +197,8 @@ ACCORDI = {
     'Ebm6': (3,  (0, 3, 7, 9)),
     'Dm7':  (2,  (0, 3, 7, 10)),
     'D7':   (2,  (0, 4, 7, 10)),
+    # il modale
+    'Fm7':  (5,  (0, 3, 7, 10)),
 }
 
 #: La forma della battuta di walking: quali gradi sui primi tre movimenti.
@@ -487,6 +489,7 @@ class Pezzo(NamedTuple):
     tonica: int             #: classe di altezza su cui pesano i gradi
     scala: tuple            #: (nota, modo) per `S.set_scale()`
     voicing: str            #: il voicing del comping
+    gradi: dict             #: quota di ogni grado sulla tonica, per l'assolo
     giro: tuple             #: una voce per battuta
     finale: str             #: la sigla su cui il pezzo si ferma invece di girare
     densita: tuple          #: note per battuta dell'assolo, lunga come `giro`
@@ -510,6 +513,7 @@ BLUES = Pezzo(
     tonica=5,      # fa
     scala=('fa', 'misolidio'),
     voicing='senza-fondamentale',
+    gradi=GRADI_CORPUS,
     giro=GIRO_BLUES,
     finale='F7',
     densita=DENSITA_BLUES,
@@ -623,6 +627,7 @@ RHYTHM = Pezzo(
     #: inventa un voicing -- e' quello che la casella 7 vieta.
     #: Il prezzo: `chiuso` porta la fondamentale, che il basso raddoppia.
     voicing='chiuso',
+    gradi=GRADI_CORPUS,
     giro=_aaba(A_RHYTHM, B_RHYTHM),
     finale='Bb6',
     densita=DENSITA_RHYTHM,
@@ -640,11 +645,117 @@ RHYTHM = Pezzo(
     registro='fa3',
 )
 
+# --------------------------------------------------------------------------
+# Il modale -- 30 agosto 2026
+# --------------------------------------------------------------------------
+
+#: ⚠️ NON E' LA GRIGLIA DI NESSUN PEZZO. Il modale del corpus si concentra su
+#: pochi titoli -- `So What` e `Impressions` stanno su Dm7 che sale di un
+#: SEMITONO a Ebm7, e quella e' la loro identita', non un modello. Qui i due
+#: modi distano una TERZA MINORE: re dorico per le A, fa dorico per il ponte.
+#: La forma invece e' presa dal corpus: A8A8B8A8 e' quella di `So What`,
+#: `Impressions`, `Maiden Voyage` e `Softly as in a Morning Sunrise`, cioe' di
+#: quasi tutto il modale che c'e'.
+A_MODALE = ('Dm7',) * 8
+B_MODALE = ('Fm7',) * 8
+
+#: ⚠️ I PESI SONO `[OSS]`, NON `[MIS]`, e la ragione e' un numero. Misurati su
+#: 11 assoli modali e 9 solisti di `wjazzd.db` (`tonalitytype = 'MODAL'`), ma
+#: **Coltrane e' 6 dei 16**: lo scarto fra la sua distribuzione e quella di
+#: tutti gli altri e' **19,2**, contro i **23,9** che separano il modale dal
+#: blues. Quasi lo stesso. Quel che si e' misurato e' in buona parte lui.
+#:
+#: Regge su tutt'e due le fette, e vale la pena saperlo: la TERZA MINORE
+#: domina (12,6% contro l'8,3% del blues), la maggiore si dimezza (5,2 contro
+#: 8,9) e l'UNDICESIMA e' alta (10,8) -- che e' il suono quartale visto dal
+#: lato della melodia.
+GRADI_MODALE = {
+    0: 10.2,   # la fondamentale del modo
+    1:  5.2,
+    2:  5.8,
+    3: 12.6,   # la terza minore: il grado piu' battuto
+    4:  5.2,
+    5: 10.8,   # l'undicesima
+    6:  6.0,
+    7: 14.5,
+    8:  6.2,
+    9:  9.5,
+    10: 7.7,
+    11: 6.4,
+}
+
+#: Il tema: otto battute di A in re dorico e otto di B in fa dorico, che la
+#: forma monta A-A-B-A. ⚠️ RADO di proposito, ed e' del genere: un tema modale
+#: vive di note lunghe e di spazio, non di linee di crome. La battuta 4 tace
+#: del tutto.
+A_TEMA_MODALE = (
+    (62, None, 65, None, 69, None, None, None),       # re fa la
+    (67, None, None, None, 65, None, 64, None),       # sol fa mi
+    (62, None, None, None, 69, None, None, None),     # re la
+    (None,) * 8,                                      # respira
+    (69, None, 72, None, 74, None, None, None),       # la do re
+    (72, None, None, None, 69, None, 67, None),       # do la sol
+    (65, None, None, None, 64, None, None, None),     # fa mi
+    (62, None, None, None, None, None, None, None),   # re
+)
+B_TEMA_MODALE = (
+    (65, None, 68, None, 72, None, None, None),       # fa lab do
+    (70, None, None, None, 68, None, 67, None),       # sib lab sol
+    (65, None, None, None, 72, None, None, None),     # fa do
+    (None,) * 8,
+    (72, None, 75, None, 77, None, None, None),       # do mib fa
+    (75, None, None, None, 72, None, 70, None),       # mib do sib
+    (68, None, None, None, 67, None, None, None),     # lab sol
+    (65, None, None, None, None, None, None, None),   # fa
+)
+
+#: ⚠️ IL COMPING E' RADISSIMO, e non e' pigrizia. Sul blues l'armonia cambia
+#: ogni battuta e il comping la disegna; qui un accordo dura OTTO BATTUTE, e
+#: tenere la stessa fitta darebbe una martellata sullo stesso voicing per
+#: sedici secondi. Lo spazio e' il genere.
+A_COMPING_MODALE = ('x.......', '........', '....x...', '........',
+                    'x.......', '........', '..x.....', '........')
+A_COMPING_MODALE_F = ('x.......', '....x...', 'x.......', '..x.....',
+                      'x.......', '....x...', 'x..x....', '..x.....')
+B_COMPING_MODALE = ('x.......', '........', '..x.....', '........',
+                    'x.......', '........', '....x...', '........')
+B_COMPING_MODALE_F = ('x.......', '..x.....', 'x.......', '....x...',
+                      'x.......', '..x.....', 'x...x...', '........')
+
+#: Le forme del walking. ⚠️ Su un accordo che dura otto battute il quarto
+#: movimento non ha una fondamentale NUOVA verso cui andare, quindi
+#: l'avvicinamento gira attorno alla stessa: la varieta' deve venire da qui.
+A_FORME_MODALE = ('su', 'arco', 'giu', 'sest', 'arco', 'su', 'sest', 'giu')
+B_FORME_MODALE = ('giu', 'sest', 'su', 'arco', 'giu', 'su', 'arco', 'sest')
+
+MODALE = Pezzo(
+    nome='modale',
+    forma='A8A8B8A8',
+    tonica=2,      # re
+    scala=('re', 'dorico'),
+    voicing='quartale',
+    giro=_aaba(A_MODALE, B_MODALE),
+    finale='Dm7',
+    densita=DENSITA_RHYTHM,
+    slot_battuta={22: '....xxxxxxxxxxxx', 23: 'xxxxxxxxxxxx....'},
+    enunciazioni={1: 0, 9: 0, 25: 0},
+    partenza=62,
+    tema=_aaba(A_TEMA_MODALE, B_TEMA_MODALE),
+    tema_chiusa=(62, None, None, None, None, None, None, None),
+    comping=(_aaba(A_COMPING_MODALE, B_COMPING_MODALE)
+             + _aaba(A_COMPING_MODALE_F, B_COMPING_MODALE_F)
+             + _aaba(A_COMPING_MODALE, B_COMPING_MODALE)),
+    forme_basso=_aaba(A_FORME_MODALE, B_FORME_MODALE) * 3,
+    registro='re3',
+    gradi=GRADI_MODALE,
+)
+
+
 #: I pezzi che questo script sa scrivere. Il nome sceglie il file.
-PEZZI = {'jazz': BLUES, 'rhythm': RHYTHM}
+PEZZI = {'jazz': BLUES, 'rhythm': RHYTHM, 'modale': MODALE}
 
 
-def _peso(nota: int, sigla: str, forte: bool, tonica: int) -> float:
+def _peso(nota: int, sigla: str, forte: bool, tonica: int, gradi) -> float:
     """Quanto quella nota e' probabile qui, secondo il corpus.
 
     Il peso base e' la quota misurata di quel grado SULLA TONICA DEL PEZZO --
@@ -658,7 +769,7 @@ def _peso(nota: int, sigla: str, forte: bool, tonica: int) -> float:
     comunque una linea storta: non conta solo QUANTE volte una nota compare,
     ma DOVE.
     """
-    p = GRADI_CORPUS[(nota - tonica) % 12]
+    p = gradi[(nota - tonica) % 12]
     if forte:
         fond, gradi = ACCORDI[sigla]
         if (nota - fond) % 12 in gradi:
@@ -710,7 +821,7 @@ def assolo(p, giro_del_solista: list[str]) -> tuple:
                       if ASSOLO_MIN <= n <= ASSOLO_MAX and n != corrente]
             avanti = [n for n in vicini
                       if (n - corrente) * direzione > 0] or vicini
-            pesi = [_peso(n, sotto, forte, p.tonica)
+            pesi = [_peso(n, sotto, forte, p.tonica, p.gradi)
                     / (1 + abs(n - corrente)) ** 2 for n in avanti]
             scelta = rng.choices(avanti, weights=pesi, k=1)[0]
             note[s] = scelta

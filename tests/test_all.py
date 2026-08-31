@@ -5222,6 +5222,53 @@ def test_condotta_delle_parti():
           str(sorted({y % 12 for y in condotte[1]})))
 
 
+def test_voicing_quartale():
+    """Lo stack di quarte, il suono del comping modale.
+
+    Dalla fonte -- `assets/jazz-voicings.md`, sezione «Quartal voicings»:
+    «Stack of 4ths. The "So What" voicing (modal jazz): D - G - C - F - A --
+    five notes stacked in 4ths». Sono tre quarte giuste e una terza maggiore
+    in cima, che su un minore settima danno fondamentale, 11, b7, b3 e 5.
+
+    ⚠️ Aggiunto il 30 agosto 2026 perche' un pezzo lo ha chiesto: il primo
+    jazz modale. `MU.VOICING` aveva chiuso, shell, senza-fondamentale e
+    drop2, e nessuno dei quattro fa il suono modale.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    check('quartale sta fra i voicing', 'quartale' in MU.VOICING)
+
+    # l'esempio della fonte, alla lettera: D G C F A
+    dm = MU.voci('Dm7', voicing='quartale', registro='re3')
+    check('il voicing della fonte, nota per nota',
+          [y % 12 for y in dm] == [2, 7, 0, 5, 9],   # re sol do fa la
+          str([MU.nome_altezza(y) for y in dm]))
+    check('e sono cinque note che salgono', dm == sorted(dm) and len(dm) == 5,
+          str(dm))
+    check('tre quarte giuste e una terza maggiore in cima',
+          [b - a for a, b in zip(dm, dm[1:])] == [5, 5, 5, 4],
+          str([b - a for a, b in zip(dm, dm[1:])]))
+
+    # il secondo esempio della fonte: F - Bb - Eb - Ab su un minore.
+    # ⚠️ Si confrontano le ALTEZZE e non i nomi: la fonte scrive coi bemolli e
+    # `nome_altezza()` coi diesis, quindi `sib` esce `la#`. Sono le stesse
+    # note -- la grafia e' un buco noto e dichiarato del progetto, non un
+    # difetto di questo voicing.
+    fm = MU.voci('Fm7', voicing='quartale', registro='fa3')
+    check('anche il secondo esempio della fonte torna',
+          [y % 12 for y in fm[:4]] == [5, 10, 3, 8],   # fa sib mib lab
+          str([MU.nome_altezza(y) for y in fm]))
+
+    # ⚠️ e RIFIUTA dove non ha senso, invece di produrre note fuori
+    for sigla in ('Cmaj7', 'C7', 'C6'):
+        try:
+            MU.voci(sigla, voicing='quartale')
+            check(f'quartale su {sigla} deve rifiutare', False, 'non ha alzato')
+        except ValueError as e:
+            check(f'quartale su {sigla} rifiuta e dice perche',
+                  'quartale' in str(e), str(e)[:70])
+
+
 def test_condotta_casi_al_bordo():
     """Numero di voci che cambia, pausa, e la via per spegnerla."""
     from delugexml import musica as MU                      # noqa: PLC0415
