@@ -99,6 +99,11 @@ ESECUZIONE = 'drummer10/session1/1'
 #:   05  29 agosto 2026. Il cammino della 03, IDENTICO, con le sole tre note
 #:       di fine frase riportate sugli atterraggi misurati.
 #:       Verdetto: «molto meglio».
+#:   07  30 agosto 2026. IL PATTERN DELLA BATTERIA ESCE DAL PROFILO invece
+#:       che da una tabella scritta a mano, e ogni pezzo nomina un
+#:       BATTERISTA DIVERSO. Fino alla 06 la batteria era identica in tutti e
+#:       tre i pezzi -- misurato: le stesse 25 posizioni, gli stessi colpi per
+#:       battuta -- e l'utente l'ha sentito.
 #:   06  29 agosto 2026. L'assolo e' quello della 05, intatto. Cambia il
 #:       COMPING: non esce piu' da una tabella di altezze scritta a mano ma
 #:       da `MU.armonia()`, che dal 29 agosto conduce le parti. E' la
@@ -113,7 +118,7 @@ ESECUZIONE = 'drummer10/session1/1'
 #: Le tre versioni restano una coppia controllata a tre -- batteria, basso e
 #: comping hanno le stesse identiche note in tutte e tre -- quindi i tre
 #: verdetti parlano dell'assolo e di nient'altro.
-VERSIONE = 6
+VERSIONE = 7
 
 BPM = 128
 #: Casella 10 di `docs/repertori/jazz.md`, riga HARDBOP/BEBOP. `figura='1/8'`
@@ -470,6 +475,10 @@ ASSOLO_MIN, ASSOLO_MAX = 62, 81
 #: da dove parte il motivo la prima volta: fa4, la fondamentale
 ASSOLO_PARTENZA = 65
 SEME_ASSOLO = 8
+#: ⚠️ un seme a parte per la batteria: cambiare l'assolo non deve muovere il
+#: groove, e viceversa. Senza, un pezzo non e' piu' confrontabile col
+#: precedente per una sola cosa alla volta.
+SEME_BATTERIA = 21
 
 
 class Pezzo(NamedTuple):
@@ -490,6 +499,7 @@ class Pezzo(NamedTuple):
     scala: tuple            #: (nota, modo) per `S.set_scale()`
     voicing: str            #: il voicing del comping
     gradi: dict             #: quota di ogni grado sulla tonica, per l'assolo
+    esecuzione: str         #: da quale batterista viene il groove
     giro: tuple             #: una voce per battuta
     finale: str             #: la sigla su cui il pezzo si ferma invece di girare
     densita: tuple          #: note per battuta dell'assolo, lunga come `giro`
@@ -514,6 +524,7 @@ BLUES = Pezzo(
     scala=('fa', 'misolidio'),
     voicing='senza-fondamentale',
     gradi=GRADI_CORPUS,
+    esecuzione='drummer10/session1/1',
     giro=GIRO_BLUES,
     finale='F7',
     densita=DENSITA_BLUES,
@@ -628,6 +639,10 @@ RHYTHM = Pezzo(
     #: Il prezzo: `chiuso` porta la fondamentale, che il basso raddoppia.
     voicing='chiuso',
     gradi=GRADI_CORPUS,
+    #: ⚠️ un batterista DIVERSO da quello del blues, ed e' il punto: fino al
+    #: 30 agosto 2026 tutti i pezzi ne avevano uno solo. 125 BPM, BUR 1,83,
+    #: ride credibile (281 colpi contro 17 di tom basso).
+    esecuzione='drummer1/session1/49',
     giro=_aaba(A_RHYTHM, B_RHYTHM),
     finale='Bb6',
     densita=DENSITA_RHYTHM,
@@ -748,6 +763,7 @@ MODALE = Pezzo(
     forme_basso=_aaba(A_FORME_MODALE, B_FORME_MODALE) * 3,
     registro='re3',
     gradi=GRADI_MODALE,
+    esecuzione='drummer1/session1/52',
 )
 
 
@@ -1001,9 +1017,47 @@ def _giro_esteso(p) -> list[str]:
     return fuori
 
 
+def _voce_dal_profilo(prof, voce, rng, minimo=3):
+    """I passi che quella voce colpisce in UNA battuta, dal batterista vero.
+
+    ⚠️ FINO AL 30 AGOSTO 2026 QUI C'ERA UN PATTERN SCRITTO A MANO, uguale per
+    tutti i pezzi. L'utente l'ha sentito: «basso, batteria e in un certo modo
+    anche tastiere sono praticamente uguali a quelle dei pezzi precedenti».
+    Misurato: la batteria era IDENTICA -- le stesse 25 posizioni, gli stessi
+    colpi per battuta -- in tutti e tre i pezzi. E il dato per non farlo era
+    gia' in mano da dodici giorni: `GR.profilo()` porta, per ogni voce, QUALI
+    PASSI il batterista colpisce e quanti colpi ci mette.
+
+    `Passo.colpi / Profilo.battute` e' la frequenza con cui quel batterista
+    colpisce quel passo. Qui e' usata come PROBABILITA' per battuta: un passo
+    che lui suona quasi sempre esce quasi sempre, uno raro esce raro. La
+    varieta' battuta-per-battuta viene percio' da lui e non da una tabella.
+
+    ⚠️ IL LIMITE, ed e' vero: riproduce la DENSITA' di ogni passo, non le
+    CORRELAZIONI fra passi nella stessa battuta. Un batterista che alterna due
+    figure intere qui esce con le due figure mescolate. Per averle davvero
+    servirebbe leggere le battute una per una, cioe' rifare in `GR` la catena
+    di origine, swing e taglio: e' un lavoro di libreria, non di generatore.
+
+    `minimo` scarta i passi con troppo pochi colpi perche' la quota significhi
+    qualcosa: su un'esecuzione dove la cassa batte trenta volte in sessanta
+    battute, un passo da due colpi e' rumore.
+    """
+    ss = prof.passi.get(voce, [])
+    if not ss:
+        return None
+    scelti = [x.passo for x in ss
+              if x.colpi >= minimo
+              and rng.random() < min(1.0, x.colpi / max(1, prof.battute))]
+    if not scelti:
+        return None
+    return ''.join('x' if i in scelti else '.' for i in range(16))
+
+
 def batteria(p, prof) -> list[tuple[str, list, dict]]:
     """Le righe di batteria, tutte le battute, col template posato sopra."""
     per_drum: dict[str, list] = {d: [] for d in TENUTI}
+    rng = random.Random(SEME_BATTERIA)
     battute = len(p.giro) * GIRI
     # ⚠️ il fill sta sull'ULTIMA battuta dei giri che non sono l'ultimo: e'
     # dove il giro si chiude e ne comincia un altro. Con la forma cablata era
@@ -1016,15 +1070,12 @@ def batteria(p, prof) -> list[tuple[str, list, dict]]:
             for drum, pattern in FILL.items():
                 per_drum[drum].extend(MU.passi(pattern, da=da))
             continue
-        per_drum['RIDE'].extend(MU.passi(RIDE, da=da))
-        per_drum['HATC'].extend(MU.passi(PEDALE, da=da))
-        per_drum['KICK'].extend(
-            MU.passi(CASSE[CASSA_PER_BATTUTA[battuta % len(CASSA_PER_BATTUTA)]],
-                     da=da))
-        rull = RULLANTI[RULLANTE_PER_BATTUTA[
-            battuta % len(RULLANTE_PER_BATTUTA)]]
-        if rull.strip('.'):
-            per_drum['SNARE'].extend(MU.passi(rull, da=da))
+        for voce, drum in VOCI.items():
+            if drum not in per_drum:
+                continue
+            pattern = _voce_dal_profilo(prof, voce, rng)
+            if pattern:
+                per_drum[drum].extend(MU.passi(pattern, da=da))
 
     fuori = []
     for voce, drum in VOCI.items():
@@ -1124,10 +1175,6 @@ def main() -> int:
             print(f'manca: {p}')
         return 1
 
-    prof = GR.profilo(BASE_GROOVE, ESECUZIONE)
-    print(f'template: {prof.id}  {prof.style}  {prof.bpm} BPM  '
-          f'BUR {prof.bur:.2f}  {prof.battute} battute')
-
     quale = sys.argv[1] if len(sys.argv) > 1 else 'jazz'
     if quale not in PEZZI:
         print(f'pezzo {quale!r} sconosciuto, usare {sorted(PEZZI)}')
@@ -1135,6 +1182,9 @@ def main() -> int:
     p = PEZZI[quale]
     print(f'pezzo: {p.nome}  forma {p.forma}  {len(p.giro)} battute per giro, '
           f'{GIRI} giri')
+    prof = GR.profilo(BASE_GROOVE, p.esecuzione)
+    print(f'template: {prof.id}  {prof.style}  {prof.bpm} BPM  '
+          f'BUR {prof.bur:.2f}  {prof.battute} battute')
 
     doc, rapporti = costruisci(p, prof)
 

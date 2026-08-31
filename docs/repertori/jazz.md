@@ -287,19 +287,54 @@ non dice niente.
 
 ## 5. Ruoli e spartizione
 
-**Vuota.** È la casella più difficile da chiudere con il materiale in casa:
+**Vuota, ed è il muro che il 30 agosto 2026 ha fermato tre cose di fila.**
+È la casella più difficile da chiudere con il materiale in casa:
 `wjazzd.db` trascrive **la linea solista**, non l'accompagnamento, quindi del
 rapporto fra comping, walking e solista non dice niente. Servirebbe MusicXML —
 che però il progetto non legge ancora: in `tools/delugexml/` ci sono il lettore
 di MIDI, quello dell'XML del Deluge e quello di `wjazzd.db`, e nessun lettore
 di partitura. Qui non manca il corpus, manca il codice che lo apre.
 
+### Le tre cose che questa casella ha fermato — 30 agosto 2026
+
+**In un giorno solo, tre lavori diversi si sono fermati qui.** Vale la pena
+elencarli perché insieme dicono che non è una casella fra le altre: è
+l'infrastruttura mancante.
+
+1. **Il basso non varia mai.** Misurato sui tre pezzi jazz: **4,00 note per
+   battuta, zero battute diverse da quattro su 228**, quattro posizioni, una
+   sola durata. Un walking vero resta quattro quarti — è l'idioma — ma lo
+   rompe, e *come* lo rompa non sta né in `wjazzd.db` né nella skill.
+2. **Il modale vorrebbe un basso diverso**, o forse no. La sezione «Modal
+   jazz» di `genres/jazz-styles.md` copre armonia e voicing e **del basso
+   tace**. Senza fonte non si sceglie.
+3. **La batteria non può rispondere a nessuno.** È il difetto che l'utente ha
+   sentito il 30 agosto: *«le interruzioni, accenti e struttura delle parti di
+   batteria sono strettamente correlati alla sezione ritmica, e non le puoi
+   applicare acriticamente»*. Giusto — e quella correlazione è precisamente
+   ciò che questa casella dovrebbe contenere.
+
+⚠️ **E il muro è preciso, non generico: nessun corpus in casa ha l'insieme che
+suona insieme.** Il Groove MIDI è **batteria sola**; `wjazzd.db` è **la linea
+solista sola**. Si può misurare cosa fa un batterista, e cosa fa un solista,
+e mai come si rispondono. Non è una questione di quanti dati: è che il dato
+non c'è.
+
+**Quel che servirebbe è un lettore di partiture** — MusicXML, con la
+`**kern`/`BachChoralesAnalyzed` come seconda fonte per l'analisi già fatta.
+È **codice da scrivere**, non un corpus da procurare, ed è l'unico caso finora
+in cui il metodo del comune («le caselle si riempiono su domanda») dice
+esplicitamente di **vedere arrivare** il lavoro invece di aspettare che un
+pezzo lo chieda: nessun ascolto può produrre un lettore a metà pomeriggio.
+
 *Nel frattempo, per comporre:* la domanda va **alla skill**, dal suo
 `references/00-navigation.md`: `genres/jazz-styles.md` per come comping,
 walking e solista si spartiscono la battuta, e `instrument-idiom/bass.md` per
 il walking. `[WEB]` a quello che ne esce. Il rapporto fra cassa e basso va
-comunque **dichiarato** e non subìto, qualunque sia la fonte: il comune,
-«Cassa e basso sono una coppia, e va dichiarata».
+comunque **dichiarato** e non subìto: il comune, «Cassa e basso sono una
+coppia, e va dichiarata». ⚠️ E con la consapevolezza che sulla **spartizione
+fra batteria e sezione ritmica** quella fonte non dice niente: ogni scelta lì
+è `[IPO]` finché il lettore non esiste.
 
 ## 6. Dinamica
 

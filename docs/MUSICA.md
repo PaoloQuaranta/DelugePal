@@ -197,6 +197,78 @@ legge sempre insieme al comune.
 
 ### Metodo
 
+#### Il corpus dà RELAZIONI, non superfici — 30 agosto 2026
+
+**È la regola che dice cosa si può prendere da un corpus, ed è stata data
+dall'utente il 30 agosto 2026 dopo aver ascoltato tre pezzi:**
+
+> «Credo sia importante sottolineare che noi vogliamo un tool per AI per
+> creare musica **ORIGINALE**, non repliche dei pattern studiati. Vogliamo
+> usare quel database per produrre qualcosa di **nuovo ma coerente con il
+> contesto**.»
+
+⚠️ **Non è un desiderio, è un criterio di accettazione, e va applicato PRIMA
+di prendere una misura.** Una misura si può usare per generare se descrive una
+**relazione** — fra una nota e la sua funzione, fra una frase e la sua fine,
+fra una sezione e quella dopo. Non si può usare se descrive una **superficie**:
+quali passi ha colpito quel batterista, con che frequenza quel solista ha
+suonato quel grado.
+
+Le relazioni generalizzano, e ogni cosa che ne esce è nuova. Le superfici sono
+**di chi le ha suonate**, e riprodurle è una copia con del rumore sopra.
+
+##### L'inventario, fatto il giorno in cui la regola è arrivata
+
+Vale come esempio di come si applica, e perché non è ovvia: metà del lavoro
+del jazz stava dalla parte giusta e metà no, senza che nessuno se ne fosse
+accorto.
+
+| dalla parte **giusta** — relazioni | |
+|---|---|
+| una frase atterra su fondamentale, quinta o settima minore | è una regola: ogni linea che ne esce è diversa |
+| un motivo è di almeno cinque note e ricorre | regola |
+| l'arco di densità sulla forma | una **forma**, non un pattern |
+| una corsa dura una battuta e le corse si addensano | regole |
+| la condotta delle parti per minimo movimento | **calcolata**, non copiata da nessuno |
+| le griglie armoniche (blues, rhythm changes) | modelli condivisi, non composizioni |
+
+| dalla parte **sbagliata** — superfici | |
+|---|---|
+| il pattern di batteria campionato dalle frequenze di **una** esecuzione | riproduce le abitudini di quel batterista |
+| le altezze dell'assolo campionate da un istogramma di gradi | dà note con la statistica giusta, non una linea con un'intenzione |
+
+⚠️ **E un caso grigio, che non va risolto per decreto: il groove template.**
+Velocity e microtiming presi da un'esecuzione nominata sono un trasferimento
+di *feel*, quello che qualunque DAW fa con un groove template — ma restano la
+copia della tempistica di un esecutore. Sta qui perché l'ascolto lo ha
+approvato tre volte, e perché la sua alternativa (inventare un microtiming)
+sarebbe peggio. **Chi lo usa lo sappia; chi lo togliesse non sbaglierebbe.**
+
+##### La prova da fare prima di prendere una misura
+
+**Due generazioni con la stessa misura devono poter essere diverse.** Se la
+misura fissa *cosa* si suona, è una superficie; se fissa *come si sta* — dove
+si atterra, quanto si cresce, cosa risponde a cosa — è una relazione.
+
+##### Il difetto che ha fatto arrivare la regola
+
+Il 30 agosto 2026 la batteria dei tre pezzi jazz è stata resa varia
+campionando le frequenze di tre esecuzioni diverse. Ha risolto il sintomo — i
+tre pezzi non suonavano più uguali — **col metodo sbagliato**, e l'utente ha
+sentito subito il difetto nuovo:
+
+> «La batteria in questi pezzi suona discontinua rispetto a basso e piano che
+> sono praticamente costanti. Le interruzioni, accenti e struttura delle parti
+> di batteria sono strettamente correlati alla sezione ritmica, e non le puoi
+> applicare acriticamente.»
+
+Misurato: deviazione standard dei colpi per battuta, **batteria 1,48-1,65**,
+comping 0,54-0,61, **basso 0,00**. La batteria varia contro uno sfondo fermo.
+
+⚠️ **E la correlazione che servirebbe non è misurabile da nessun corpus in
+casa:** il Groove MIDI è batteria sola, `wjazzd.db` è la linea solista sola.
+**Nessuno dei due ha l'insieme suonare insieme.** È il muro della casella 5.
+
 #### Le caselle si riempiono SU DOMANDA — 30 agosto 2026
 
 **Lo schema ha undici caselle e il perimetro ha quattro repertori: quarantaquattro

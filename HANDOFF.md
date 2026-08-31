@@ -55,6 +55,18 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > aggiunta la **9**, la forma, che era gia' in `wjazzd.db` e nessuno aveva
 > aperto.
 >
+> ⚠️ **Il 30 agosto sono cambiate DUE REGOLE, e valgono piu' di qualunque
+> misura di questo file** -- stanno in §6-octodecies e nel comune di
+> `docs/MUSICA.md`. La prima: le caselle si riempiono **su domanda**. La
+> seconda, data dopo tre ascolti: **il corpus da' RELAZIONI, non superfici** --
+> *«vogliamo un tool per AI per creare musica ORIGINALE, non repliche dei
+> pattern studiati»*. Meta' del lavoro fatto sul jazz stava dalla parte
+> sbagliata senza che nessuno se ne fosse accorto.
+>
+> Il generatore e' ora **parametrico sulla forma** e ha scritto tre pezzi --
+> blues, rhythm changes, modale. ⚠️ **E il prossimo passo non e' una casella
+> ma un LETTORE DI PARTITURE**: vedi «Il prossimo lavoro».
+>
 > ⚠️ **E il 30 agosto e' cambiato il metodo, non solo il contenuto.** Le
 > caselle si riempiono **su domanda**, non a tappeto: sta nel comune di
 > `docs/MUSICA.md`, e la ragione sta nei tempi -- la casella 6, riempita senza
@@ -83,6 +95,39 @@ ascoltato il terzo tentativo di dub:
 > database serio.»
 
 È il lavoro nominato, e tutto il resto è secondario.
+
+---
+
+### ⚠️ IL PROSSIMO PASSO CONCRETO, deciso il 30 agosto 2026: un lettore di partiture
+
+**Non è una casella da riempire: è l'infrastruttura senza cui tre lavori
+diversi si sono fermati nello stesso giorno.** Sta scritto per esteso nella
+casella 5 di `docs/repertori/jazz.md`, «Le tre cose che questa casella ha
+fermato»; qui c'è il perché in breve.
+
+Il generatore scrive quattro parti — batteria, basso, comping, tema — e **non
+sa come si rispondono**. Il basso esce a 4,00 note per battuta con deviazione
+**zero** su 228 battute; la batteria, resa varia, suona scollata perché varia
+contro uno sfondo fermo. L'utente:
+
+> «Le interruzioni, accenti e struttura delle parti di batteria sono
+> strettamente correlati alla sezione ritmica, e non le puoi applicare
+> acriticamente.»
+
+⚠️ **E quella correlazione non è misurabile da nessun corpus in casa.** Il
+Groove MIDI è **batteria sola**; `wjazzd.db` è **la linea solista sola**.
+Nessuno dei due ha l'insieme che suona insieme — non è questione di quanti
+dati, è che il dato non esiste. Interpellato, l'utente ha risposto: *«non ho
+conoscenze sufficienti per risponderti, credo serva lettore»*.
+
+**Serve quindi MusicXML** — `xml.etree` + `zipfile`, stdlib, costo di lettura
+≈ zero, ed è già la decisione presa il 17 agosto («La decisione sui formati
+simbolici»). Con `**kern` come seconda fonte, che porta l'analisi già fatta.
+
+⚠️ **È anche l'unico caso in cui il metodo del comune dice di VEDERE ARRIVARE
+il lavoro invece di aspettare che un pezzo lo chieda**: nessun ascolto può
+produrre un lettore di partiture a metà pomeriggio. Il metodo su domanda copre
+tutto ciò che è già raggiungibile; questo no.
 
 **Da dove si comincia, adesso che lo schema esiste: dall'indice in fondo a
 `docs/MUSICA.md`.** Non serve una lista di cose da fare a parte — ogni casella
@@ -193,6 +238,14 @@ E una lezione di metodo che vale per tutto il lavoro futuro sui generi:
 > il turnaround, i colpi fantasma e lo swing, cioè tutto.
 
 ### Gli altri punti, in ordine di valore
+
+⚠️ **0. La batteria va RIFATTA, e non e' un difetto da poco.** Il 30 agosto
+2026 e' stata resa varia **campionando** le frequenze di tre esecuzioni
+diverse: toglie il sintomo (i pezzi non suonano piu' uguali) col metodo che la
+regola «relazioni, non superfici» vieta, e ne introduce uno nuovo che l'utente
+ha sentito subito -- suona **scollata** dalla sezione ritmica. Va generata da
+**forma + ensemble + idioma**, col corpus usato per il solo *feel*. ⚠️ Il
+punto 2 di quei tre e' bloccato dal lettore di partiture: vedi sopra.
 
 **1. Le due misure rimaste aperte**, entrambe piccole e con il metodo ormai
 collaudato (una coppia controllata, un passo di differenza):
@@ -2214,6 +2267,129 @@ La **sostituzione di tensione** (la tredicesima al posto della quinta), il
 **ritmo armonico** — quando un accordo cambia — e le **sostituzioni di
 accordo**, che il giro letto da `Walkin'` non ha e su cui la casella non dice
 se sia tipico o sia quel pezzo.
+
+---
+
+## 6-octodecies. Il metodo cambia, e la direzione anche — 30 agosto 2026
+
+**È la sezione più importante di questo file per chi riprende**, perché due
+delle tre cose che porta non sono risultati ma **regole**, e cambiano cosa si
+fa e cosa non si fa.
+
+### 1. Le caselle si riempiono SU DOMANDA, non a tappeto
+
+Proposta dell'utente, dopo aver visto il ritmo di lavoro:
+
+> «Visto che il repertorio è mastodontico… io punterei a usare questo primo
+> passaggio sul blues per creare un metodo di riempimento delle caselle, da
+> applicare **in itinere ogni volta che il task compositivo lo richiede**.»
+
+⚠️ **E i tempi dei commit gli danno ragione di venti volte:**
+
+| | come | costo |
+|---|---|---|
+| casella 6, dinamica | *a tappeto*, senza che un pezzo la chiedesse | **undici giorni** |
+| caselle 8, 7, 11 | *su domanda*, ognuna aperta da un difetto sentito | **otto ore in tutto** |
+
+Il ciclo in sette passi sta in `docs/MUSICA.md`, «Il comune → Metodo». **Il
+passo che fa la velocità è il terzo: il difetto nomina la casella.** Non si
+misura mai ciò di cui nessuno si è lamentato.
+
+⚠️ **E c'è un secondo argomento, più insidioso della lentezza: una casella
+scritta senza domanda invecchia SBAGLIATA.** In due giorni ne sono state
+trovate **tre** — 7, 9, e di nuovo 7 — e tutte e tre mandavano a cercare fuori
+qualcosa che era già su disco. Tutte e tre le ha trovate **un pezzo che
+qualcuno voleva scrivere**.
+
+### 2. Il corpus dà RELAZIONI, non superfici
+
+**È la regola che decide cosa si può prendere da un corpus**, data dall'utente
+dopo aver ascoltato tre pezzi:
+
+> «Noi vogliamo un tool per AI per creare musica **ORIGINALE**, non repliche
+> dei pattern studiati. Vogliamo usare quel database per produrre qualcosa di
+> **nuovo ma coerente con il contesto**.»
+
+Si applica **prima** di prendere una misura, e la prova è una riga: *due
+generazioni con la stessa misura devono poter essere diverse*. Se la misura
+fissa **cosa** si suona è una superficie; se fissa **come si sta** — dove si
+atterra, quanto si cresce, cosa risponde a cosa — è una relazione.
+
+L'inventario per esteso, con il caso grigio del groove template, sta nel
+comune. In breve: gli atterraggi, la soglia del motivo, l'arco di densità e la
+condotta delle parti stanno dalla parte giusta; **il pattern di batteria
+campionato da un'esecuzione e le altezze pescate da un istogramma no**.
+
+⚠️ **Metà del lavoro fatto sul jazz stava dalla parte sbagliata senza che
+nessuno se ne fosse accorto.** È la ragione per cui la regola è scritta e non
+sottintesa.
+
+### 3. Il generatore è parametrico sulla forma, e ci sono tre pezzi
+
+`tools/genera_jazz.py` non scrive più solo blues. Tutto ciò che dipende dalla
+forma sta in una struttura `Pezzo`; il resto dello script non sa che forma
+stia suonando.
+
+    .venv/Scripts/python.exe tools/genera_jazz.py            il blues
+    .venv/Scripts/python.exe tools/genera_jazz.py rhythm     il rhythm changes
+    .venv/Scripts/python.exe tools/genera_jazz.py modale     il modale
+
+⚠️ **La guardia del rifacimento, e va rifatta ogni volta che si tocca la
+struttura:** dopo ogni cambio, rigenerare i pezzi che non si volevano toccare
+deve dare file **byte per byte identici**. Ha funzionato due volte e ha
+scoperto l'unico cambio non voluto (il basso sul turnaround, che era invece
+una correzione giusta).
+
+| pezzo | forma | verdetto |
+|---|---|---|
+| `JAZZ06` | blues di 12, sei versioni | *«molto meglio»* alla sesta |
+| `RHYTHM06` | AABA, rhythm changes | *«la forma si sente bene»* **alla prima** |
+| `MODALE06` | AABA, due modi dorici | *«suona modale, il comping non impasta»* |
+
+⚠️ **Sei versioni per il primo pezzo, una per il secondo.** Groove, swing,
+generatore d'assolo, atterraggi e condotta sono arrivati dal blues **senza una
+modifica**. È l'argomento che rende sostenibile il metodo su domanda — col suo
+limite: ha retto fra forme **dello stesso repertorio**, stesso tempo, stesso
+batterista.
+
+### Cosa è entrato in libreria, e da quale fonte
+
+| | |
+|---|---|
+| `MU.voci_condotte()`, e `armonia(condotta=True)` di default | la condotta delle parti. ⚠️ **NON è l'alternanza A/B**: la fonte non la specifica, e le tre ragioni stanno nella sua docstring |
+| `MU.DERIVA_MASSIMA` | il vincolo di registro. Senza, il minimo movimento è **goloso** e su tre giri il comping scendeva di **diciassette semitoni** |
+| `voicing='quartale'` | lo stack di quarte, dalla fonte. **Rifiuta** fuori dal minore settima |
+| `tools/misura_melodia.py` | l'arco del giro e la soglia del motivo |
+| `tools/genera_coppie_cable.py` | ri-deriva `COPPIE_OSSERVATE`, che era «incollata» senza lo script |
+
+### ⚠️ Il difetto aperto, ed è quello con cui la sessione si è chiusa
+
+La batteria è stata resa varia **campionando** le frequenze di tre esecuzioni
+diverse. Ha tolto il sintomo — i tre pezzi non suonavano più uguali — **col
+metodo che la regola 2 vieta**, e l'utente ha sentito subito il difetto nuovo:
+
+> «La batteria suona discontinua rispetto a basso e piano che sono
+> praticamente costanti… le interruzioni, accenti e struttura delle parti di
+> batteria sono strettamente correlati alla sezione ritmica, e non le puoi
+> applicare acriticamente.»
+
+Misurato — deviazione standard dei colpi per battuta:
+
+| batteria | comping | basso |
+|---|---|---|
+| **1,48 - 1,65** | 0,54 - 0,61 | **0,00** |
+
+**Il basso non varia mai**: 4,00 note per battuta, zero battute diverse da
+quattro su 228, quattro posizioni, una sola durata. La batteria varia contro
+uno sfondo fermo.
+
+⚠️ **E la correlazione che servirebbe non è misurabile da nessun corpus in
+casa.** Il Groove MIDI è **batteria sola**, `wjazzd.db` è **la linea solista
+sola**: si può misurare cosa fa un batterista e cosa fa un solista, e mai come
+si rispondono. Non è questione di quanti dati — il dato non c'è.
+
+**L'utente, interpellato, ha risposto che non ha le conoscenze per dettarlo e
+che serve il lettore.** Vedi «Il prossimo lavoro».
 
 ---
 
