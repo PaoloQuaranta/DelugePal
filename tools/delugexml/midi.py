@@ -198,7 +198,20 @@ def _eventi_traccia(dati: bytes, indice: int) -> tuple[Traccia, float | None,
 
 def leggi(path: Path | str) -> FileMidi:
     """Legge uno Standard MIDI File. Nessuna dipendenza esterna."""
-    dati = Path(path).read_bytes()
+    return leggi_bytes(Path(path).read_bytes(), nome=str(path))
+
+
+def leggi_bytes(dati: bytes, nome: str = '<bytes>') -> FileMidi:
+    """Come `leggi()`, ma da byte gia' in memoria.
+
+    Serve a leggere un MIDI che sta DENTRO un archivio senza estrarlo, che e'
+    la regola di HANDOFF §6-duodecies: `zipfile` e' stdlib, e appoggiare il
+    membro in un file temporaneo solo per rileggerlo sarebbe lavoro in piu'
+    con una copia in piu' da sbagliare.
+
+    `nome` compare solo nei messaggi d'errore, per dire di quale file si sta
+    parlando quando il file non ha un percorso.
+    """
     testa = None
     tracce: list[Traccia] = []
     bpm = None
@@ -215,11 +228,11 @@ def leggi(path: Path | str) -> FileMidi:
             metro = metro if metro is not None else m
 
     if testa is None:
-        raise ValueError(f'{path}: non e uno Standard MIDI File (manca MThd)')
+        raise ValueError(f'{nome}: non e uno Standard MIDI File (manca MThd)')
     formato, _ntracce, divisione = testa
     if divisione <= 0:
         raise ValueError(
-            f'{path}: divisione SMPTE ({divisione}), non PPQ. Non gestita: '
+            f'{nome}: divisione SMPTE ({divisione}), non PPQ. Non gestita: '
             'nel materiale musicale non si incontra praticamente mai, e '
             'indovinarla sarebbe peggio che rifiutarla.')
     return FileMidi(formato=formato, ppq=divisione, bpm=bpm, metro=metro,

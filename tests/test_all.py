@@ -6723,6 +6723,168 @@ def test_groove_congelare_origine_e_levare():
           str([round(p.scarto, 2) for p in congelato.passi['ride']]))
 
 
+def test_midi_leggi_bytes():
+    """Un MIDI si legge anche quando sta dentro un archivio.
+
+    `leggi()` vuole un percorso; i MIDI del Jazz Trio Database stanno dentro
+    uno zip che la regola di HANDOFF §6-duodecies dice di non decomprimere.
+    Le due strade devono dare lo STESSO risultato: se divergessero, ogni
+    misura presa dallo zip sarebbe diversa da quella presa dal disco senza
+    che nessuno se ne accorga.
+    """
+    from delugexml import midi as MI                        # noqa: PLC0415
+
+    campione = (ROOT / 'to-read' / 'MIDI' / 'POP909-Dataset-master'
+                / 'POP909-Dataset-master' / 'POP909' / '001' / '001.mid')
+    if not campione.exists():
+        raise FileNotFoundError(str(campione))
+
+    da_disco = MI.leggi(campione)
+    da_bytes = MI.leggi_bytes(campione.read_bytes(), nome=str(campione))
+    check('leggi_bytes da lo stesso numero di tracce',
+          len(da_bytes.tracce) == len(da_disco.tracce),
+          f'{len(da_bytes.tracce)} vs {len(da_disco.tracce)}')
+    check('e le stesse note',
+          da_bytes.note == da_disco.note,
+          f'{len(da_bytes.note)} vs {len(da_disco.note)} note')
+    check('e lo stesso ppq', da_bytes.ppq == da_disco.ppq, str(da_bytes.ppq))
+
+
+def test_jtd_elenco():
+    """L'indice del Jazz Trio Database. SALTA se il corpus non c'e'.
+
+    I valori attesi vengono dal corpus stesso, che qui e' l'artefatto in
+    esame. Il primo brano in ordine alfabetico e' `All God's Children` di
+    Kenny Barron, 1990, con Ray Drummond al basso e Ben Riley alla batteria.
+    """
+    from delugexml import jtd as JT                         # noqa: PLC0415
+
+    zip_ = ROOT / 'to-read' / 'MIDI' / 'jazz-trio-database-v02.zip'
+    if not zip_.exists():
+        raise FileNotFoundError(str(zip_))
+
+    with JT.apri(zip_) as z:
+        tutti = JT.elenco(z)
+        check('il corpus ha 1294 brani', len(tutti) == 1294, str(len(tutti)))
+
+        b = tutti[0]
+        check('il primo e Kenny Barron', b.pianista == 'Kenny Barron', b.pianista)
+        check('con Ray Drummond al basso', b.bassista == 'Ray Drummond',
+              b.bassista)
+        check('e Ben Riley alla batteria', b.batterista == 'Ben Riley',
+              b.batterista)
+        check('in 4/4', b.metro == 4, str(b.metro))
+        check('del 1990', b.anno == 1990, str(b.anno))
+
+        curati = JT.elenco(z, curati=True)
+        check('JTD-300 ha 300 brani', len(curati) == 300, str(len(curati)))
+
+        tre = JT.elenco(z, metro=3)
+        check('90 brani in 3/4', len(tre) == 90, str(len(tre)))
+        check('e il filtro sul metro non lascia passare altro',
+              all(x.metro == 3 for x in tre))
+
+        suoi = JT.elenco(z, bassista='Ray Drummond')
+        check('il filtro sul bassista tiene',
+              bool(suoi) and all(x.bassista == 'Ray Drummond' for x in suoi),
+              f'{len(suoi)} brani')
+
+        m = JT.metadati(z, b.fname)
+        check('i NaN di metadata.json diventano None',
+              m['first_downbeat'] is None, repr(m['first_downbeat']))
+        check('e i campi buoni restano',
+              m['track_name'] == 'All Gods Children', m['track_name'])
+
+
+def test_jtd_griglia():
+    """La griglia dei beat, e la colonna vuota che vale piu' di tutte.
+
+    In `beats.csv` una cella vuota vuol dire che QUELLO strumento non ha
+    suonato su QUEL beat. E' il dato su cui poggia la casella 5: un walking
+    vero lascia buchi, e qui si vede dove.
+
+    I valori attesi vengono dal corpus: il primo brano ha 762 beat, comincia
+    in terza posizione di battuta (l'estratto parte a meta' battuta) e il
+    basso tace su 17 di quei beat.
+    """
+    from delugexml import jtd as JT                         # noqa: PLC0415
+
+    zip_ = ROOT / 'to-read' / 'MIDI' / 'jazz-trio-database-v02.zip'
+    if not zip_.exists():
+        raise FileNotFoundError(str(zip_))
+    fname = 'barronk-allgodschildren-drummondrrileyb-1990-8b77c067'
+
+    with JT.apri(zip_) as z:
+        g = JT.griglia(z, fname)
+        check('762 beat', len(g) == 762, str(len(g)))
+        check('il primo cade a 0,08 s', abs(g[0].istante - 0.08) < 1e-9,
+              str(g[0].istante))
+        check('in terza posizione di battuta', g[0].posizione == 3,
+              str(g[0].posizione))
+        check('le posizioni stanno tutte dentro il metro',
+              all(1 <= b.posizione <= 4 for b in g))
+
+        muti = {s: sum(1 for b in g if b.scarti[s] is None)
+                for s in JT.STRUMENTI}
+        check('il basso tace su 17 beat', muti['bass'] == 17, str(muti['bass']))
+        check('la batteria su 136', muti['drums'] == 136, str(muti['drums']))
+        check('il piano su 217', muti['piano'] == 217, str(muti['piano']))
+
+        # lo scarto e' l'onset MENO l'istante del beat: piccolo, e con segno.
+        scarti = [b.scarti['bass'] for b in g if b.scarti['bass'] is not None]
+        check('gli scarti sono piccoli e hanno segno',
+              max(abs(s) for s in scarti) < 0.5
+              and min(scarti) < 0 < max(scarti),
+              f'da {min(scarti):.3f} a {max(scarti):.3f} s')
+
+
+def test_jtd_battute():
+    """Le battute complete, e quante se ne buttano ai bordi.
+
+    Il primo brano da' 189 battute complete: l'estratto comincia a meta'
+    battuta e finisce senza chiudere l'ultima, e quei mozziconi si scartano
+    invece di contarli come battute corte -- che falserebbero ogni densita'.
+
+    ⚠️ E qui c'e' gia' la risposta alla domanda che apre la casella 5. Il
+    generatore fa 4,00 note di basso per battuta con deviazione ZERO. Ray
+    Drummond, in questo brano solo, fa 3 in 18 battute, 4 in 135, 5 in 33,
+    6 in 2 e 7 in 1.
+    """
+    import collections                                      # noqa: PLC0415
+
+    from delugexml import jtd as JT                         # noqa: PLC0415
+
+    zip_ = ROOT / 'to-read' / 'MIDI' / 'jazz-trio-database-v02.zip'
+    if not zip_.exists():
+        raise FileNotFoundError(str(zip_))
+    fname = 'barronk-allgodschildren-drummondrrileyb-1990-8b77c067'
+
+    with JT.apri(zip_) as z:
+        o = JT.onsets(z, fname, 'bass')
+        check('783 onset di basso', len(o) == 783, str(len(o)))
+        check('il primo a 0,09 s', abs(o[0] - 0.09) < 1e-9, str(o[0]))
+        check('e sono in ordine', o == sorted(o))
+
+        d = JT.battute(z, fname)
+        check('189 battute complete', len(d.battute) == 189,
+              str(len(d.battute)))
+        check('e lo dice quante ne ha scartate', d.scartate >= 1,
+              str(d.scartate))
+        check('ogni battuta ha 4 beat',
+              all(len(b.beat) == 4 for b in d.battute))
+        check('e i beat cominciano sul tempo forte',
+              all(b.beat[0].posizione == 1 for b in d.battute))
+
+        dens = collections.Counter(b.densita['bass'] for b in d.battute)
+        check('la densita del basso NON e costante',
+              dict(sorted(dens.items())) == {3: 18, 4: 135, 5: 33, 6: 2, 7: 1},
+              str(dict(sorted(dens.items()))))
+
+        f = JT.piano(z, fname)
+        check('il MIDI del piano si legge dentro lo zip',
+              len(f.note) > 0, f'{len(f.note)} note')
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
