@@ -162,6 +162,34 @@ sbagliata ogni cifra a valle **senza far fallire nessun test**.
 5. **Doppia misura.** Ogni numero di titolo si calcola su tutto **e** su
    JTD-300. Se divergono vince JTD-300, e **la divergenza si scrive**.
 
+
+### Gli esiti, misurati il 1 settembre 2026
+
+`tools/controlla_jtd.py`, su tutti i **1204 brani in 4/4**. Sono scritti anche
+quelli che passano: un controllo il cui esito non e' scritto non e' stato
+fatto.
+
+| | controllo | esito |
+|---|---|---|
+| 1 | il beat e' quello che il tempo conta | **passa.** Rapporto (60/intervallo) / tempo dichiarato: **mediana 0,9983**, min 0,746, max 1,114. Nessun fattore due, e il cancello si apre |
+| 2 | la cella vuota e' un silenzio | ⚠️ **da dichiarare.** Su **80 977** beat in cui il basso tace, **8183 (10,1%)** hanno un onset grezzo entro 50 ms: una su dieci **non e' un silenzio ma un allineamento mancato** |
+| 3 | niente `NaN` | **passa**, zero sopravvissuti |
+| 4 | i 3/4 a parte | **1204** in 4/4, **90** in 3/4. Le misure girano sui soli 4/4 |
+| 5 | il campione regge | ⚠️ **regge, ma e' concentrato.** Bassisti: **97** distinti, il piu' presente Ray Brown con 136 brani (**11,3%**). Batteristi: **104**, Ed Thigpen 100 (8,3%). Pianisti: **34 soli**, e Bill Evans da solo fa **216 brani, il 17,9%** |
+
+⚠️ **Due conseguenze, che valgono come vincoli sulle misure e non come note.**
+
+1. **La misura 2 non puo' citare il numero grezzo.** Il 10,1% del controllo 2
+   e' un limite superiore all'errore, non una stima dell'errore: va sottratto
+   o dichiarato accanto alla percentuale di beat taciuti, ogni volta che la si
+   scrive. Un «il basso tace sul 15% dei beat» senza quella riga accanto
+   sarebbe un numero gonfiato di un decimo.
+2. **La misura 5 porta il nome di Bill Evans piu' di quanto porti il nome del
+   jazz.** Con 34 pianisti e uno di essi al 17,9%, ogni numero sul piano va
+   accompagnato dal conteggio degli esecutori -- ed e' la stessa trappola per
+   cui la casella 6 del reggae e' rimasta `[WEB]`: *un esecutore non e' un
+   repertorio*.
+
 ## Cosa resta fuori, e va detto
 
 - ⚠️ **La batteria non e' per strumento.** Gli onset non dicono se e' cassa,

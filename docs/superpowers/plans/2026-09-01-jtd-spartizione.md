@@ -41,6 +41,12 @@ Nessun pacchetto esterno, mai.
   `[IPO]`, `[WEB]`, `[MAN]`) e, se è `[MIS]`, **quante esecuzioni e quanti
   esecutori lo reggono**.
 - **Il ramo è `spartizione-jtd`**, già creato, e il generatore non si tocca.
+- **`out/` non si committa.** E' in `.gitignore` (`out/*`), e l'unica
+  eccezione forzata e' `format_table.json`. Gli output di misura restano sul
+  disco di chi li ha girati: **i numeri vivono in `docs/`**, dove portano il
+  loro grado e i loro conteggi. Un file di output committato sarebbe un numero
+  senza contesto, e questo progetto ne ha gia' pagato uno (`COPPIE_OSSERVATE`
+  «incollata» senza lo script che la rigenera).
 - Il corpus è in `to-read/MIDI/jazz-trio-database-v02.zip` (24 MB, già
   scaricato). Dentro, ogni brano è una cartella
   `jazz-trio-database-v02/<fname>/`.
@@ -988,7 +994,7 @@ passano**: un controllo il cui esito non è scritto non è stato fatto.
 - [ ] **Passo 4: commit**
 
 ```bash
-git add tools/controlla_jtd.py out/controlli_jtd.txt docs/superpowers/specs/2026-09-01-jtd-spartizione-design.md && git commit -m "jtd: i cinque controlli, e il beat annotato e' quello giusto"
+git add tools/controlla_jtd.py docs/superpowers/specs/2026-09-01-jtd-spartizione-design.md && git commit -m "jtd: i cinque controlli, e il beat annotato e' quello giusto"
 ```
 
 ---
@@ -1148,7 +1154,7 @@ cd /d/DelugePal && .venv/Scripts/python.exe tools/misura_spartizione.py > out/sp
 - [ ] **Passo 4: commit**
 
 ```bash
-git add tools/misura_spartizione.py out/spartizione_jazz.txt && git commit -m "casella 5: quanto varia un walking vero, e su quale beat tace"
+git add tools/misura_spartizione.py && git commit -m "casella 5: quanto varia un walking vero, e su quale beat tace"
 ```
 
 ---
@@ -1284,7 +1290,7 @@ cd /d/DelugePal && .venv/Scripts/python.exe tools/misura_spartizione.py > out/sp
 - [ ] **Passo 4: commit**
 
 ```bash
-git add tools/misura_spartizione.py out/spartizione_jazz.txt && git commit -m "casella 5: la batteria risponde al basso, e di quanto"
+git add tools/misura_spartizione.py && git commit -m "casella 5: la batteria risponde al basso, e di quanto"
 ```
 
 ---
@@ -1430,7 +1436,7 @@ entra nella scheda è quello di JTD-300** e la divergenza si scrive accanto.
 - [ ] **Passo 6: commit**
 
 ```bash
-git add tools/misura_spartizione.py out/spartizione_jazz.txt && git commit -m "casella 5: il piano, la forbice, e la doppia misura su JTD-300"
+git add tools/misura_spartizione.py && git commit -m "casella 5: il piano, la forbice, e la doppia misura su JTD-300"
 ```
 
 ---
