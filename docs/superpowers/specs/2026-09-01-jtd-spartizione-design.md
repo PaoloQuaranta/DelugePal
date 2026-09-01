@@ -115,6 +115,10 @@ altezza = linea* — che e' **`[IPO]`**, non misurata. Quindi:
 - la densita' complessiva del piano e' `[MIS]`;
 - **ogni numero che dica «comping» invece che «piano» e' `[IPO]`**, e la
   regola che lo produce va dichiarata coi suoi parametri;
+- la v1 fissa **due o piu' note entro 50 ms = accordo di comping**, e ripete
+  la misura a **30 e 80 ms**: se il risultato cambia poco la regola regge, se
+  cambia molto il numero non si scrive. La sensibilita' si stampa accanto al
+  valore, non si tiene per se';
 - si riportano **entrambe** le versioni, con e senza la separazione, cosi'
   che un lettore veda quanto la regola sposta il risultato.
 
@@ -125,6 +129,7 @@ altezza = linea* — che e' **`[IPO]`**, non misurata. Quindi:
 | `tools/delugexml/jtd.py` | gemello di `wjazz.py`. **Stdlib pura** (`zipfile`, `csv`, `json`), legge **dentro lo zip senza decomprimere** — la regola di HANDOFF §6-duodecies. Nessuna dipendenza nuova, quindi i test girano col Python di sistema |
 | `tools/misura_spartizione.py` | gemello di `misura_melodia.py`: gira le cinque misure e stampa accanto a ogni numero **quante esecuzioni e quanti esecutori lo reggono**, come per la casella 6 |
 | test in `tests/test_all.py` | **saltano se lo zip non c'e'**, come gia' quelli di `wjazzd.db` e del corpus |
+| `tools/delugexml/midi.py` | **tre righe**, e sono l'unica modifica a codice esistente: `leggi_bytes()` accanto a `leggi()`, cosi' che il `piano_midi.mid` si legga **dentro lo zip** senza appoggiarlo in un file temporaneo. E' l'offerta rimasta aperta in §6-duodecies |
 
 L'API di `jtd.py`:
 
