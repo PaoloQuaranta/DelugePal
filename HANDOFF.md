@@ -64,8 +64,14 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > sbagliata senza che nessuno se ne fosse accorto.
 >
 > Il generatore e' ora **parametrico sulla forma** e ha scritto tre pezzi --
-> blues, rhythm changes, modale. ⚠️ **E il prossimo passo non e' una casella
-> ma un LETTORE DI PARTITURE**: vedi «Il prossimo lavoro».
+> blues, rhythm changes, modale. ⚠️ **Il 1 settembre 2026 la casella 5 --
+> ruoli e spartizione -- e' stata CHIUSA, e il lettore di partiture NON e'
+> servito** (§6-noviesdecies). La riga che lo rendeva necessario -- «nessun
+> corpus in casa ha l'insieme che suona insieme» -- era **falsa**, ed era
+> scritta in tre posti. Il **Jazz Trio Database** porta **1294 trii** con
+> piano, basso e batteria allineati agli stessi beat, licenza MIT, 24 MB. Il
+> numero che apre tutto: **il 59,7% delle battute di un walking vero non ha
+> quattro note**, contro il 4,00 con deviazione 0,00 del generatore.
 >
 > ⚠️ **E il 30 agosto e' cambiato il metodo, non solo il contenuto.** Le
 > caselle si riempiono **su domanda**, non a tappeto: sta nel comune di
@@ -98,7 +104,15 @@ ascoltato il terzo tentativo di dub:
 
 ---
 
-### ⚠️ IL PROSSIMO PASSO CONCRETO, deciso il 30 agosto 2026: un lettore di partiture
+### ⚠️ ~~IL PROSSIMO PASSO CONCRETO: un lettore di partiture~~ — SUPERATO il 1 settembre 2026
+
+> ⚠️ **QUESTA SEZIONE È STATA SMENTITA, e resta perché il modo in cui era
+> sbagliata vale più del suo contenuto.** Il lettore MusicXML non serviva alla
+> casella 5, e la casella 5 è stata chiusa senza di lui: vedi
+> **§6-noviesdecies**. Ciò che segue è il ragionamento del 30 agosto, con le
+> correzioni marcate. Il MusicXML resta invece la strada per **classica,
+> barocca e antica** (OpenScore Lieder e String Quartets, **CC0**), dove il
+> materiale notato con licenza c'è davvero.
 
 **Non è una casella da riempire: è l'infrastruttura senza cui tre lavori
 diversi si sono fermati nello stesso giorno.** Sta scritto per esteso nella
@@ -114,11 +128,15 @@ contro uno sfondo fermo. L'utente:
 > strettamente correlati alla sezione ritmica, e non le puoi applicare
 > acriticamente.»
 
-⚠️ **E quella correlazione non è misurabile da nessun corpus in casa.** Il
+⚠️ ~~**E quella correlazione non è misurabile da nessun corpus in casa.** Il
 Groove MIDI è **batteria sola**; `wjazzd.db` è **la linea solista sola**.
 Nessuno dei due ha l'insieme che suona insieme — non è questione di quanti
-dati, è che il dato non esiste. Interpellato, l'utente ha risposto: *«non ho
-conoscenze sufficienti per risponderti, credo serva lettore»*.
+dati, è che il dato non esiste.~~ **FALSO, verificato il 1 settembre 2026:**
+nessuno aveva cercato fuori da quei due. Il Jazz Trio Database ha i tre
+strumenti allineati agli stessi beat, licenza MIT, e la misura si è presa in
+un pomeriggio. Interpellato il 30 agosto, l'utente aveva risposto: *«non ho
+conoscenze sufficienti per risponderti, credo serva lettore»* — e la domanda
+giusta non era a lui, era al disco.
 
 **Serve quindi MusicXML** — `xml.etree` + `zipfile`, stdlib, costo di lettura
 ≈ zero, ed è già la decisione presa il 17 agosto («La decisione sui formati
@@ -244,8 +262,10 @@ E una lezione di metodo che vale per tutto il lavoro futuro sui generi:
 diverse: toglie il sintomo (i pezzi non suonano piu' uguali) col metodo che la
 regola «relazioni, non superfici» vieta, e ne introduce uno nuovo che l'utente
 ha sentito subito -- suona **scollata** dalla sezione ritmica. Va generata da
-**forma + ensemble + idioma**, col corpus usato per il solo *feel*. ⚠️ Il
-punto 2 di quei tre e' bloccato dal lettore di partiture: vedi sopra.
+**forma + ensemble + idioma**, col corpus usato per il solo *feel*. ⚠️ **Dal
+1 settembre 2026 non è più bloccato:** la casella 5 dice di quanto varia un
+walking vero e a cosa si aggancia la batteria (§6-noviesdecies). Il lavoro è
+adesso **spendere** quelle misure nel generatore, e farlo sentire.
 
 **1. Le due misure rimaste aperte**, entrambe piccole e con il metodo ormai
 collaudato (una coppia controllata, un passo di differenza):
@@ -2383,13 +2403,130 @@ Misurato — deviazione standard dei colpi per battuta:
 quattro su 228, quattro posizioni, una sola durata. La batteria varia contro
 uno sfondo fermo.
 
-⚠️ **E la correlazione che servirebbe non è misurabile da nessun corpus in
+⚠️ ~~**E la correlazione che servirebbe non è misurabile da nessun corpus in
 casa.** Il Groove MIDI è **batteria sola**, `wjazzd.db` è **la linea solista
 sola**: si può misurare cosa fa un batterista e cosa fa un solista, e mai come
-si rispondono. Non è questione di quanti dati — il dato non c'è.
+si rispondono. Non è questione di quanti dati — il dato non c'è.~~
 
-**L'utente, interpellato, ha risposto che non ha le conoscenze per dettarlo e
-che serve il lettore.** Vedi «Il prossimo lavoro».
+⚠️ **FALSO, e corretto il 1 settembre 2026 (§6-noviesdecies).** L'errore non
+era nei due corpora nominati — su quelli la frase è esatta — ma nel salto da
+«questi due non ce l'hanno» a «il dato non esiste», fatto **senza cercare**.
+Il Jazz Trio Database ce l'ha, con licenza MIT. **La correlazione è misurata:
+nella densità per battuta non c'è (+0,058), nella coincidenza degli eventi
+fuori griglia c'è e vale 1,52 volte il caso.**
+
+---
+
+## 6-noviesdecies. La casella 5, e una premessa che nessuno aveva verificato — 1 settembre 2026
+
+**La cosa che questa sezione porta non è la casella: è come si è arrivati a
+riempirla.** Il piano diceva di scrivere un lettore di partiture MusicXML. La
+prima mezz'ora è stata spesa a controllare *perché* lo diceva, e la ragione
+non reggeva.
+
+### La riga falsa, e le tre volte che era scritta
+
+L'handoff, la casella 5 di `jazz.md` e §6-octodecies dicevano tutt'e tre la
+stessa cosa: *«nessun corpus in casa ha l'insieme che suona insieme — non è
+questione di quanti dati, è che il dato non c'è»*. Misurato prima di scrivere
+una riga di codice:
+
+| affermazione | esito |
+|---|---|
+| MusicXML su disco | **zero file.** La strada dichiarata richiedeva **anche** procurare un corpus, e questo non era scritto da nessuna parte |
+| «nessun insieme in casa» | **falsa.** `to-read/MIDI/songs_archive` ha **17 230** file multitraccia, **241** di artisti jazz; su 14 letti a campione con `midi.py`, **11 portano basso e batteria insieme** coi ruoli nominati (`ACOU BASS`, `DRUMS`) |
+| il MusicXML risolverebbe la casella 5 | **no.** In **PDMX** — 250 000 spartiti di pubblico dominio, il più grande corpus MusicXML libero — oltre il **90% ha meno di cinque parti** e più della metà sono pezzi solistici, e gli autori scrivono che i multitraccia non sono di pubblico dominio. **Niente batteria** |
+| esiste un corpus d'insieme con licenza | **sì**, ed era a un download di distanza |
+
+⚠️ **È la quarta volta che una casella scritta senza domanda manda a cercare
+fuori qualcosa di già raggiungibile** — le altre tre stanno in §6-octodecies e
+nel comune di `MUSICA.md`. È anche la più cara, perché quella riga **aveva
+cambiato il piano di lavoro** e non solo il contenuto di una scheda.
+
+⚠️ **E ha portato via un esempio a una regola.** Il comune diceva: «alcune
+caselle hanno prerequisiti che non si scoprono a metà pezzo — la casella 5
+vuole un lettore MusicXML». La casella 5 è stata chiusa in un pomeriggio con
+**200 righe di stdlib**. La regola resta scritta ma **senza prova**, e chi la
+invoca per rimandare un lavoro deve portare l'esempio che adesso manca.
+
+### La fonte: il Jazz Trio Database
+
+**1294 esecuzioni** di trio jazz del 1947–2015 — **34 pianisti, 98 bassisti,
+106 batteristi** — ottenute da registrazioni vere per separazione di sorgente
+(Cheston, Schlichting, Cross, Harrison, TISMIR 2024). **Licenza MIT**,
+attribuzione in `docs/FONTI.md`. **24 MB**, in `to-read/MIDI/`, e l'audio non
+serve.
+
+Per ogni brano: gli onset di **piano, basso e batteria allineati agli stessi
+beat**, la posizione metrica, e il MIDI del piano. ⚠️ **La colonna vuota del
+suo `beats.csv` dice quando quello strumento NON ha suonato su quel beat**, ed
+è il dato su cui poggia tutta la casella.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `tools/delugexml/jtd.py` | il lettore, stdlib pura, legge **dentro lo zip senza decomprimere**. `elenco()`, `griglia()`, `battute()`, `onsets()`, `piano()`. Non decide niente di musicale: ogni soglia sta nello strumento di misura |
+| `tools/controlla_jtd.py` | i **cinque controlli** che, se saltano, sbagliano ogni cifra a valle senza far fallire un test |
+| `tools/misura_spartizione.py` | le cinque misure, **due volte**: su tutto il corpus e sul JTD-300 |
+| `midi.leggi_bytes()` | tre righe, l'offerta rimasta aperta in §6-duodecies |
+
+**1056 test**, e i nuovi saltano se il corpus non c'è.
+
+### I numeri, e il primo dice tutto
+
+| | tutto il corpus | JTD-300 |
+|---|---|---|
+| battute di basso **diverse da quattro** | **59,7%** | 58,7% |
+| deviazione dentro la singola esecuzione | **1,03** | 1,05 |
+| beat su cui il basso tace | 15,0% (corretto) | 14,8% |
+| correlazione densità basso↔batteria | +0,058 | +0,062 |
+| coincidenze fuori griglia a 20 ms | **30,6% contro 20,1% attesi** | 32,1% contro 21,3% |
+| scarto sul beat: piano / basso / batteria | **+15,3 / +2,3 / −0,4 ms** | +16,4 / +2,9 / −0,2 |
+
+⚠️ **Il generatore fa 4,00 note per battuta con deviazione 0,00.** Non è «meno
+vario di un bassista vero»: è **fuori dalla distribuzione**, perché il valore
+centrale del corpus copre solo il 40% delle battute.
+
+⚠️ **E l'utente aveva ragione sulla batteria, ma non dove sembrava.** Nella
+*densità* per battuta la batteria non segue il basso (+0,058, cioè niente).
+Nella *coincidenza* degli eventi fuori griglia lo segue eccome: **1,52 volte
+il caso** a 20 ms, e l'eccesso **cresce al restringersi della finestra**, che è
+la forma di una sincronia vera e non di un artefatto. Confermato identico sul
+campione indipendente JTD-300.
+
+### Cosa NON si può chiedere a questa casella
+
+- ⚠️ **quale pezzo del kit**: gli onset di batteria sono aggregati. «Il
+  rullante fa X» non è ricavabile da qui, ed è il limite che pesa di più sul
+  difetto del 30 agosto;
+- le **altezze** di basso e batteria (le avrebbe FiloBass, licenza ristretta);
+- la **forma**: JTD non annota sezioni;
+- la **dinamica** d'insieme: gli onset non portano intensità.
+
+### Cosa NON rifare
+
+- **non fidarsi di una riga che dice «il dato non esiste» senza averla
+  verificata.** Costa mezz'ora verificarla e ha cambiato la direzione del
+  lavoro. Quattro volte su quattro, finora, la riga era sbagliata;
+- **non misurare la simultaneità sugli onset detection.** `piano_onsets.csv`
+  conta **un attacco per accordo** — 1070 eventi dove il MIDI ne ha 3138 — e
+  chiedergli quante note attaccano insieme dà **0% di accordi a 30 ms**. Il
+  numero era assurdo e per questo si è visto: se fosse stato solo *basso*
+  sarebbe passato;
+- **non citare il numero grezzo dei beat taciuti.** Il 10,1% di quei silenzi è
+  un allineamento mancato, misurato dal controllo 2;
+- **non far entrare nella scheda un numero la cui forbice supera la soglia**
+  fissata prima di misurare. Il comping del piano sta fra il 69% e l'86% a
+  seconda della finestra: nella casella c'è la forbice, non una percentuale.
+
+### Il prossimo passo, e non è una casella
+
+**Spendere queste misure sul generatore.** Il basso deve variare come varia un
+walking vero, e la batteria deve agganciarsi agli eventi fuori griglia del
+basso invece di essere campionata da un'esecuzione. ⚠️ E poi va fatto sentire:
+finché un pezzo non è stato ascoltato dall'utente, di queste misure si sa che
+sono giuste, non che servono.
 
 ---
 

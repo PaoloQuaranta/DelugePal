@@ -320,12 +320,14 @@ gli ultimi quattro *dentro una casella già chiusa*.
 ##### E una casella scritta senza domanda invecchia SBAGLIATA
 
 Non è solo lentezza. È il difetto che si è visto **due volte nello stesso
-giorno**, il 29-30 agosto, in due caselle compilate in anticipo:
+giorno**, il 29-30 agosto, e una terza volta il 1 settembre — la più cara delle
+tre, perché quella riga aveva **cambiato il piano di lavoro**:
 
 | casella | diceva | com'era |
 |---|---|---|
 | **jazz 7**, armonia | «la chiuderebbe `assets/jazz-voicings.md`… manca implementarla, non trovarla» | quella fonte **non specifica affatto** l'alternanza A/B: nomi ambigui per sua stessa ammissione, esempio che non usa nessuna delle due forme, e una regola che fallisce sul proprio esempio |
 | **jazz 9**, forma | «la chiuderebbe MusicXML o le lead sheet: il lettore va scritto, non procurato» | la colonna `form` di `wjazzd.db` la porta su **tutti e 361** gli assoli swing |
+| **jazz 5**, ruoli | «nessun corpus in casa ha l'insieme che suona insieme… non è questione di quanti dati: è che il dato non c'è» | il dato c'era, a un download di distanza e con licenza MIT (Jazz Trio Database, 1294 trii). ⚠️ E il MusicXML che quella riga chiedeva **non l'avrebbe chiusa comunque**: nel più grande corpus libero oltre il 90% degli spartiti ha meno di cinque parti |
 
 Tutte e due **mandavano a cercare fuori qualcosa che era già in casa**, e
 nessuna delle due era stata messa alla prova perché nessun pezzo gliel'aveva
@@ -341,12 +343,20 @@ AABA o su una ballad **non è noto**. La disciplina dei gradi — `[MIS]` contro
 non solo alla numerosità. Una misura porta con sé il perimetro in cui è stata
 presa, e chi la riusa fuori da lì lo sta assumendo, non sapendo.
 
-⚠️ **2. Alcune caselle hanno prerequisiti che non si scoprono a metà pezzo.** La
-casella 5 vuole un lettore MusicXML: non è una cosa che si trova mancante alle
-cinque e si risolve alle sei. Quelle vanno **viste arrivare**. Il metodo su
-domanda copre tutto ciò che è **già raggiungibile**; quel che richiede
-infrastruttura nuova va tenuto in una lista corta e dichiarata, perché nessun
-ascolto la può produrre al volo.
+⚠️ **2. Alcune caselle hanno prerequisiti che non si scoprono a metà pezzo.**
+Quelle vanno **viste arrivare**: il metodo su domanda copre tutto ciò che è
+**già raggiungibile**, e quel che richiede infrastruttura nuova va tenuto in
+una lista corta e dichiarata, perché nessun ascolto la può produrre al volo.
+
+⚠️ **Ma l'unico esempio che questa regola aveva è crollato il 1 settembre
+2026, e la regola resta senza.** Diceva: «la casella 5 vuole un lettore
+MusicXML: non è una cosa che si trova mancante alle cinque e si risolve alle
+sei». La casella 5 è stata chiusa in un pomeriggio, con **200 righe di
+stdlib** su un corpus che era a un download di distanza — e il lettore
+MusicXML non c'entrava. La regola non è per questo sbagliata; è **senza
+prova**, e chi la invoca per rimandare un lavoro deve portare l'esempio che
+qui manca. Il costo di crederle senza verificare è misurato: il lavoro giusto
+era raggiungibile da due giorni e nessuno aveva guardato.
 
 ##### Cosa NON segue da qui
 
@@ -1096,7 +1106,7 @@ casella della scheda corrispondente: la scheda è la fonte, questa matrice ne
 | repertorio | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | [reggae / dub](repertori/reggae-dub.md) | ◐ | ● | ● | ◐ | ● | ● | ◐ | ○ | ◐ | ◐ | ● |
-| [jazz](repertori/jazz.md) | ○ | ○ | ◐ | ● | ○ | ● | ● | ● | ● | ◐ | ◐ |
+| [jazz](repertori/jazz.md) | ○ | ○ | ◐ | ● | ● | ● | ● | ● | ● | ◐ | ◐ |
 | classica · barocca · antica | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 | elettronica · IDM · techno · hip hop · trip hop · DnB · jungle | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 

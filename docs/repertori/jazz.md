@@ -287,15 +287,179 @@ non dice niente.
 
 ## 5. Ruoli e spartizione
 
-**Vuota, ed è il muro che il 30 agosto 2026 ha fermato tre cose di fila.**
-È la casella più difficile da chiudere con il materiale in casa:
-`wjazzd.db` trascrive **la linea solista**, non l'accompagnamento, quindi del
-rapporto fra comping, walking e solista non dice niente. Servirebbe MusicXML —
-che però il progetto non legge ancora: in `tools/delugexml/` ci sono il lettore
-di MIDI, quello dell'XML del Deluge e quello di `wjazzd.db`, e nessun lettore
-di partitura. Qui non manca il corpus, manca il codice che lo apre.
+**Misurata sul Jazz Trio Database — 1 settembre 2026.** Non era vuota per
+mancanza di corpus, come questa casella ha sostenuto fino al giorno prima: era
+vuota perché **nessuno aveva cercato**. Il JTD porta **1294 esecuzioni** di
+trio jazz del 1947–2015 con gli onset di **piano, basso e batteria allineati
+agli stessi beat**, ed è sotto licenza MIT (`docs/FONTI.md`). Le misure girano
+sui soli **1204 brani in 4/4** — i 90 in 3/4 si contano a parte — e si rifanno
+con:
+
+    .venv/Scripts/python.exe tools/misura_spartizione.py > out/spartizione_jazz.txt
+
+`to-read/` è in `.gitignore`, quindi i conteggi qui sotto sono lo stato di quel
+disco e non si riproducono senza il corpus.
+
+⚠️ **Ogni numero è stato calcolato due volte**, su tutto il corpus e sul
+sottoinsieme curato **JTD-300**, con la regola fissata prima di misurare: se
+divergono vince JTD-300. **Non divergono** — lo scarto massimo fra le due
+passate è sotto il 3%, e le colonne qui sotto lo mostrano invece di
+affermarlo.
+
+⚠️ **E come per la casella 6, il campione non è una folla anonima:**
+**96 bassisti** e **201 coppie basso-batteria** reggono le misure 1-3, ma i
+**pianisti sono 34** e Bill Evans da solo fa il **17,9%** dei brani. Per
+questo ogni riga porta accanto quante esecuzioni e quanti esecutori la
+sostengono: *un esecutore non è un repertorio*.
+
+### Il walking non è quattro note per battuta — `[MIS]`
+
+Su **116 580 battute**, **1099 esecuzioni**, **96 bassisti**:
+
+| note per battuta | tutto il corpus | JTD-300 |
+|---|---|---|
+| 0 (il basso tace del tutto) | 0,7% | 0,5% |
+| 1–2 | 6,1% | 4,9% |
+| 3 | 16,2% | 16,1% |
+| **4** | **40,3%** | **41,3%** |
+| 5 | 22,9% | 23,2% |
+| 6 | 8,8% | 8,8% |
+| 7 o più | 4,9% | 5,3% |
+
+**Il 59,7% delle battute non ha quattro note** (58,7% su JTD-300). La media per
+esecuzione è **4,27** (4,30), e la **deviazione dentro la singola esecuzione**
+è **1,03** (1,05).
+
+⚠️ **Il confronto che apre la casella:** il generatore fa **4,00 note per
+battuta con deviazione 0,00** su 228 battute. Non è «un po' meno vario di un
+bassista vero»: è **fuori dalla distribuzione**, perché il valore centrale del
+corpus copre solo il 40% dei casi.
+
+⚠️ **La coda alta va letta con sospetto.** Le battute da 8 note in su sono
+l'1,8% e potrebbero essere in parte doppi rilevamenti dell'onset detector, che
+lavora su una traccia separata dal missaggio. Il numero che regge è la
+**dispersione**, non il massimo.
+
+### Il basso salta un beat su sei, e non a caso — `[MIS]`
+
+Su **472 073 beat**, **1109 esecuzioni**, **96 bassisti**: il basso **non
+suona** sul **16,7%** dei beat. ⚠️ Il numero da citare è però **15,0%**: il
+controllo 2 di `tools/controlla_jtd.py` ha trovato che il **10,1%** di quei
+silenzi ha un onset grezzo entro 50 ms, cioè è un **allineamento mancato** e
+non un silenzio. Il grezzo è un limite superiore, e citarlo nudo gonfierebbe la
+misura di un decimo.
+
+| posizione nella battuta | beat taciuti | JTD-300 |
+|---|---|---|
+| 1 | 16,0% | 16,5% |
+| **2** | **18,5%** | **17,9%** |
+| 3 | 15,0% | 15,1% |
+| 4 | 17,4% | 16,4% |
+
+**Il basso tace di più sul 2 e sul 4** che sull'1 e sul 3, in tutt'e due le
+passate. `[MIS]` sui numeri; ⚠️ **qualunque lettura musicale di questo fatto è
+`[IPO]`** — che i buchi cadano dove la batteria marca il backbeat è
+un'osservazione, non un meccanismo dimostrato.
+
+### La batteria risponde al basso, ma non nella densità — `[MIS]`
+
+È la casella che la frase dell'utente del 30 agosto chiedeva di riempire:
+*«le interruzioni, accenti e struttura delle parti di batteria sono
+strettamente correlati alla sezione ritmica»*. Misurato su **1099 esecuzioni**
+e **201 coppie basso-batteria**, la risposta è **sì, ma non dove la si
+cercava**.
+
+**Nella densità per battuta, no.** La correlazione fra colpi di batteria e
+note di basso nella stessa battuta è **+0,058** (+0,062 su JTD-300): pressoché
+nulla. Chi generasse una batteria «che si infittisce dove si infittisce il
+basso» starebbe inventando una regola che il corpus non sostiene.
+
+**Nella coincidenza fuori griglia, sì.** Dei **170 394** onset di basso che
+cadono **fuori dai beat**, quelli che hanno un colpo di batteria vicino sono
+molti più di quanti ne darebbe il caso — e il riferimento casuale è calcolato
+con la stessa densità di colpi distribuita uniformemente, non stimato a
+occhio:
+
+| finestra | coincidenze osservate | attese per caso | rapporto |
+|---|---|---|---|
+| **20 ms** | **30,6%** | 20,1% | **1,52×** |
+| 30 ms | 36,0% | 30,1% | 1,20× |
+| 50 ms | 60,5% | 50,2% | 1,21× |
+
+⚠️ **L'eccesso è massimo alla finestra più stretta, ed è la forma che conta.**
+Se fosse un artefatto di densità crescerebbe con la finestra; cresce invece al
+restringerla, che è quello che fa una sincronia vera. Su JTD-300: 32,1% contro
+21,3%, cioè **1,51×** — lo stesso rapporto su un campione indipendente.
+
+### Chi sta avanti: la batteria è il riferimento — `[MIS]`
+
+Scarto mediano rispetto al beat di consenso, su **1109 esecuzioni**:
+
+| strumento | scarto mediano | dispersione | JTD-300 |
+|---|---|---|---|
+| **piano** | **+15,3 ms** | 8,6 | +16,4 |
+| basso | +2,3 ms | 6,4 | +2,9 |
+| batteria | **−0,4 ms** | 4,5 | −0,2 |
+
+**La batteria sta sul beat, il basso appena dietro, il piano quindici
+millisecondi più indietro ancora.** ⚠️ I valori sono **relativi**: il beat di
+consenso è calcolato dai tre strumenti insieme, quindi conta la differenza
+fra loro, non lo zero assoluto. Ed è una relazione, non una superficie: dice
+*come si sta insieme*, e due esecuzioni con lo stesso scarto restano diverse.
+
+### Il piano: quanto suona, e cosa non si può dire — `[MIS]` e `[IPO]`
+
+Su **1099 esecuzioni** ma **34 soli pianisti**: il piano fa **6,70 attacchi
+per battuta** in mediana (6,84 su JTD-300) — attacchi, non note, perché un
+accordo conta uno, ed è la grandezza confrontabile con basso e batteria che
+sono onset anche loro. `[MIS]`
+
+La sua densità **non segue** né il basso (**+0,023**) né la batteria
+(**−0,007**). `[MIS]`
+
+⚠️ **Quanto di quel piano sia comping e quanto assolo NON si sa, e il numero
+non si scrive.** In un trio il pianista fa tutt'e due le cose e
+`piano_midi.mid` è un flusso solo: distinguerli richiede una regola — *due o
+più note entro una finestra = accordo* — che è `[IPO]`. Misurata a tre
+finestre:
+
+| finestra | note in accordo |
+|---|---|
+| 30 ms | 69,3% |
+| 50 ms | 77,5% |
+| 80 ms | 86,2% |
+
+**La forbice è 16,8 punti** (17,1 su JTD-300), sopra i 15 che erano stati
+fissati **prima** di misurare come soglia oltre la quale il numero non vale.
+Quindi in questa casella sta la forbice e non la percentuale: *fra il 69% e
+l'86% degli attacchi del piano sono accordi, e dove esattamente dipende da
+dove si mette il confine*.
+
+⚠️ **Un errore che è costato un numero falso e plausibile, e vale come
+promemoria.** La stessa misura, presa su `piano_onsets.csv` invece che sul
+MIDI, dava **0% di accordi a 30 ms** — impossibile per un pianista che
+accompagna. Il rilevatore di onset conta **un attacco per accordo**: sul primo
+brano dà 1070 eventi dove il MIDI ne ha 3138. Il numero era assurdo e per
+questo si è visto; se fosse stato solo *basso* sarebbe passato.
+
+### Cosa questa casella NON può dire
+
+- ⚠️ **Niente sul singolo pezzo del kit.** Gli onset di batteria sono
+  aggregati: non c'è modo di sapere se un colpo è cassa, rullante o ride.
+  **Nessuna affermazione del tipo «il rullante fa X» è ricavabile da qui**, ed
+  è il limite che pesa di più sul difetto del 30 agosto.
+- **Niente sulle altezze di basso e batteria**: JTD non le porta. Le avrebbe
+  FiloBass, la cui licenza è ristretta (`docs/FONTI.md`).
+- **Niente sulla forma**: JTD non annota sezioni né ritornelli, quindi «cosa
+  cambia al confine di sezione» resta fuori.
+- **Niente sulla dinamica dell'insieme**: gli onset non portano intensità.
 
 ### Le tre cose che questa casella ha fermato — 30 agosto 2026
+
+⚠️ **Aggiornamento del 1 settembre 2026: di queste tre, la 1 e la 3 sono
+misurate e la 2 no.** Restano scritte com'erano perché il motivo per cui si
+erano fermate — una riga che dava il dato per inesistente — è più istruttivo
+del fatto che si siano sbloccate.
 
 **In un giorno solo, tre lavori diversi si sono fermati qui.** Vale la pena
 elencarli perché insieme dicono che non è una casella fra le altre: è
@@ -305,36 +469,43 @@ l'infrastruttura mancante.
    battuta, zero battute diverse da quattro su 228**, quattro posizioni, una
    sola durata. Un walking vero resta quattro quarti — è l'idioma — ma lo
    rompe, e *come* lo rompa non sta né in `wjazzd.db` né nella skill.
+   → **Misurato:** il 59,7% delle battute non ha quattro note.
 2. **Il modale vorrebbe un basso diverso**, o forse no. La sezione «Modal
    jazz» di `genres/jazz-styles.md` copre armonia e voicing e **del basso
    tace**. Senza fonte non si sceglie.
+   → **Ancora aperta:** JTD non distingue i sottogeneri.
 3. **La batteria non può rispondere a nessuno.** È il difetto che l'utente ha
    sentito il 30 agosto: *«le interruzioni, accenti e struttura delle parti di
    batteria sono strettamente correlati alla sezione ritmica, e non le puoi
    applicare acriticamente»*. Giusto — e quella correlazione è precisamente
    ciò che questa casella dovrebbe contenere.
+   → **Misurata, e l'utente aveva ragione:** 1,52× il caso a 20 ms.
 
-⚠️ **E il muro è preciso, non generico: nessun corpus in casa ha l'insieme che
-suona insieme.** Il Groove MIDI è **batteria sola**; `wjazzd.db` è **la linea
-solista sola**. Si può misurare cosa fa un batterista, e cosa fa un solista,
-e mai come si rispondono. Non è una questione di quanti dati: è che il dato
-non c'è.
+⚠️ **E LA RIGA CHE ERA FALSA, lasciata qui perché è il vero insegnamento.**
+Questa casella diceva: *«nessun corpus in casa ha l'insieme che suona insieme…
+non è una questione di quanti dati: è che il dato non c'è»*, e concludeva che
+servisse un lettore di partiture MusicXML. Verificata il 1 settembre 2026:
 
-**Quel che servirebbe è un lettore di partiture** — MusicXML, con la
-`**kern`/`BachChoralesAnalyzed` come seconda fonte per l'analisi già fatta.
-È **codice da scrivere**, non un corpus da procurare, ed è l'unico caso finora
-in cui il metodo del comune («le caselle si riempiono su domanda») dice
-esplicitamente di **vedere arrivare** il lavoro invece di aspettare che un
-pezzo lo chieda: nessun ascolto può produrre un lettore a metà pomeriggio.
+- il dato **c'era**, a un download di distanza e con licenza MIT;
+- il MusicXML **non avrebbe risolto questa casella** nemmeno una volta
+  scritto: nel più grande corpus libero (PDMX, 250 000 spartiti di pubblico
+  dominio) oltre il **90% ha meno di cinque parti** e più della metà sono
+  pezzi solistici — e niente batteria;
+- ⚠️ ed è la **quarta** volta che una casella scritta senza domanda manda a
+  cercare fuori qualcosa di già raggiungibile: le altre tre stanno in HANDOFF
+  §6-octodecies.
 
-*Nel frattempo, per comporre:* la domanda va **alla skill**, dal suo
+Il lettore MusicXML resta la strada per **classica, barocca e antica**, dove
+OpenScore Lieder e OpenScore String Quartets sono CC0 — non per il jazz.
+
+*Nel frattempo, per comporre:* sulla **spartizione fra batteria e sezione
+ritmica** questa casella adesso dice qualcosa, ma solo sui tempi e non sui
+pezzi del kit. Per il resto la domanda va **alla skill**, dal suo
 `references/00-navigation.md`: `genres/jazz-styles.md` per come comping,
 walking e solista si spartiscono la battuta, e `instrument-idiom/bass.md` per
 il walking. `[WEB]` a quello che ne esce. Il rapporto fra cassa e basso va
 comunque **dichiarato** e non subìto: il comune, «Cassa e basso sono una
-coppia, e va dichiarata». ⚠️ E con la consapevolezza che sulla **spartizione
-fra batteria e sezione ritmica** quella fonte non dice niente: ogni scelta lì
-è `[IPO]` finché il lettore non esiste.
+coppia, e va dichiarata».
 
 ## 6. Dinamica
 

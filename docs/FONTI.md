@@ -123,13 +123,13 @@ musicale è misurata**, e a differenza di tutto il resto di questo documento
 **portano obblighi di licenza.** Le fonti tecniche qui sopra si citano per
 onestà; queste si citano perché è richiesto.
 
-Nessuno dei due corpora è versionato — stanno in `to-read/`, fuori dal repo, e
+Nessuno dei tre corpora è versionato — stanno in `to-read/`, fuori dal repo, e
 non vengono ridistribuiti. Ma i **numeri** che ne escono stanno in
 `docs/MUSICA.md` e nelle schede di `docs/repertori/`, che sono pubblicati: è
 quello a far scattare l'attribuzione, non il file.
 
-⚠️ **Le due licenze sono diverse, e non è un dettaglio.** Una chiede
-l'attribuzione, l'altra ha anche una clausola di reciprocità — vedi in fondo.
+⚠️ **Le licenze sono diverse, e non è un dettaglio.** Due chiedono
+l'attribuzione, una ha anche una clausola di reciprocità — vedi in fondo.
 
 ### Groove MIDI Dataset — CC BY 4.0
 
@@ -150,6 +150,40 @@ template** della casella 6 del jazz, e il feel del primo pezzo jazz.
 
 La CC BY chiede **l'attribuzione e nient'altro**: si può usare per qualunque
 scopo, anche commerciale, purché si dica da dove viene.
+
+### Jazz Trio Database (JTD) — MIT
+
+1294 esecuzioni di trio jazz del 1947–2015 — **34 pianisti, 98 bassisti,
+106 batteristi** — con gli onset di **piano, basso e batteria allineati agli
+stessi beat**, la posizione metrica, e il MIDI del solo piano. Da qui vengono
+i numeri della **casella 5 del jazz**, «ruoli e spartizione».
+
+⚠️ **È l'unico corpus in casa che ha l'insieme che suona insieme.** Il Groove
+MIDI è batteria sola, WJazzD è la linea solista sola: nessuno dei due può dire
+come i tre si rispondono, e per questo l'handoff dava quella misura per
+impossibile fino al 1 settembre 2026.
+
+- **Licenza:** MIT — `The MIT License (MIT) Copyright (c) 2023, Huw Cheston`.
+  ⚠️ Presa dal **repository**, non da dentro l'archivio: a differenza del
+  Groove MIDI, lo zip delle annotazioni **non porta un file di licenza**. La
+  MIT chiede che la nota di copyright e la nota di permesso accompagnino
+  «copie o porzioni sostanziali» del materiale: qui non se ne ridistribuisce
+  nessuna, e la citazione resta comunque dovuta.
+- **Citazione richiesta:**
+
+      Huw Cheston, Joshua L. Schlichting, Ian Cross, Peter M. C. Harrison.
+      «Jazz Trio Database: Automated Annotation of Jazz Piano Trio Recordings
+      Processed Using Audio Source Separation.» Transactions of the
+      International Society for Music Information Retrieval, 2024.
+
+- <https://github.com/HuwCheston/Jazz-Trio-Database>
+
+⚠️ **Cosa NON porta, e va saputo prima di citarlo.** Gli onset di basso e
+batteria **non hanno altezze**, e quelli di batteria **non dicono quale pezzo
+del kit** ha suonato: un'affermazione del tipo «il rullante fa X» non è
+ricavabile da questa fonte. E le annotazioni sono **automatiche** — F-measure
+dichiarata 0,94 sugli onset — con **34 brani su 1294** validati a mano.
+L'audio, che va richiesto agli autori, **non serve e non è stato chiesto**.
 
 ### Weimar Jazz Database (WJazzD) — ODbL 1.0
 
