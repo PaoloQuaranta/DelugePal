@@ -113,12 +113,20 @@ ESECUZIONE = 'drummer10/session1/1'
 #:       era stata scritta a mano, e il criterio era che almeno la
 #:       eguagliasse.
 #:
+#:   08  6 settembre 2026. IL BASSO SPENDE LA CASELLA 5: quante note per
+#:       battuta si pesca dalla distribuzione misurata invece di essere
+#:       sempre quattro, il 15% dei movimenti non attacca -- piu' spesso il 2
+#:       e il 4 -- e la nota prima si allunga, e le note in piu' cadono sulla
+#:       croma come approccio cromatico.
+#:       ⚠️ LA BATTERIA NON CAMBIA, ed e' verificato da un test: se cambiasse,
+#:       il verdetto dell'ascolto non parlerebbe piu' del solo basso.
+#:
 #: ⚠️ E' il primo giro CHIUSO di questo progetto: una lamentela all'orecchio,
 #: una misura sul corpus, una correzione, e lo stesso orecchio che approva.
 #: Le tre versioni restano una coppia controllata a tre -- batteria, basso e
 #: comping hanno le stesse identiche note in tutte e tre -- quindi i tre
 #: verdetti parlano dell'assolo e di nient'altro.
-VERSIONE = 7
+VERSIONE = 8
 
 BPM = 128
 #: Casella 10 di `docs/repertori/jazz.md`, riga HARDBOP/BEBOP. `figura='1/8'`
@@ -1297,6 +1305,12 @@ def costruisci(p, prof):
     rapporti = []
     giro = _giro_esteso(p)
 
+    # ⚠️ La linea del basso si calcola QUI, prima della batteria, perche' dal
+    # 6 settembre 2026 la batteria ha bisogno di sapere dove il basso esce
+    # dalla griglia. La TRACCIA invece si aggiunge sotto, al suo posto di
+    # sempre: l'ordine delle tracce nel file non cambia.
+    linea = walking(giro, p.forme_basso, random.Random(SEME_BASSO))
+
     # --- batteria ---------------------------------------------------------
     kit, clip_kit = C.add_track(doc, KIT, name='KIT009', folder='KITS',
                                 length=lunghezza, playing=True)
@@ -1311,10 +1325,11 @@ def costruisci(p, prof):
     _, clip_basso = C.add_track(doc, PRESET_BASSO, name='Square Saw Bass',
                                 folder='SYNTHS', length=lunghezza,
                                 playing=True)
-    linea = walking(giro, p.forme_basso)
-    spec = ' '.join(MU.nome_altezza(n) for n in linea)
-    note = MU.melodia(spec, durata='1/4', articolazione='staccato',
-                      velocity=78)
+    # ⚠️ `MU.linea()` e non `MU.melodia()`: quest'ultima mette una nota per
+    # passo fisso, tutte della stessa lunghezza, e dalla versione 08 il basso
+    # tiene una nota per due movimenti e ne infila una in piu' su una croma.
+    note = MU.linea([(n.tick, n.altezza, n.durata) for n in linea],
+                    articolazione='staccato', velocity=78)
     rapporti.append(MU.scrivi(doc, clip_basso, note))
 
     # --- comping ----------------------------------------------------------

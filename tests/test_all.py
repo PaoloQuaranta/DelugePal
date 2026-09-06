@@ -7056,6 +7056,35 @@ def test_walking_variabile():
           GJ.walking(giro, GJ.FORME_BLUES, random.Random(1)) == linea)
 
 
+def _righe_di_kit(path):
+    """Le note della clip di kit di una song, per drum.
+
+    La clip di kit e' quella le cui righe portano `drumIndex` invece di `y`.
+    """
+    doc = parse_file(path)
+    for _, clip in S.clips(doc):
+        righe = S.note_rows(clip)
+        if righe and righe[0].get('drumIndex') is not None:
+            return {r.get('drumIndex'): S.read_notes(r) for r in righe}
+    raise ValueError(f'{path}: nessuna clip di kit')
+
+
+def test_jazz08_ha_la_batteria_della_07():
+    """La 08 cambia il basso e NIENT'ALTRO. SALTA senza i pezzi generati.
+
+    ⚠️ E' la guardia dell'attribuzione: se la batteria si muovesse, il
+    verdetto dell'ascolto sulla 08 non parlerebbe piu' del solo basso. `out/`
+    non e' versionato, quindi il test salta per chi non ha generato i pezzi.
+    """
+    a, b = ROOT / 'out' / 'JAZZ07.XML', ROOT / 'out' / 'JAZZ08.XML'
+    for x in (a, b):
+        if not x.exists():
+            raise FileNotFoundError(str(x))
+    sette, otto = _righe_di_kit(a), _righe_di_kit(b)
+    check('la 08 ha le stesse righe di batteria della 07', sette == otto,
+          'diverse: ' + str([d for d in sette if sette[d] != otto.get(d)]))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
