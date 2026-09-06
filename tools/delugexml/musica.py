@@ -326,6 +326,47 @@ def melodia(spec: str, *, durata: str | int = '1/8', da: int = 0,
     return out
 
 
+def linea(eventi, *, velocity: int = 80, articolazione: str = 'normale',
+          stacco: int | None = None) -> dict[int, list[Note]]:
+    """Da `[(tick, altezza, durata), ...]` alle note, raggruppate per altezza.
+
+    Il caso GENERALE di cui `melodia()` e' la scorciatoia a passo fisso: li'
+    una durata sola vale per tutta la stringa e le note stanno su una griglia
+    regolare, qui ognuna porta la sua posizione e la sua durata.
+
+    [LACUNA capitolato] Serve da quando il walking ha smesso di fare quattro
+    note per battuta (6 settembre 2026): una linea che TIENE una nota per due
+    movimenti e ne infila una in piu' su una croma non e' esprimibile a passo
+    fisso. `melodia()` resta com'e' -- e' la forma comoda per una frase, e
+    nessun chiamante si tocca.
+
+    `altezza` e' un numero di nota MIDI oppure un nome (`'do4'`, `'fa#2'`):
+    lo stesso vocabolario di `melodia()`. `durata` e' in tick oppure una
+    figura (`'1/8'`), ed e' lo SPAZIO che la nota occupa: quanto suona lo
+    decide `articolazione`, come li'. Gli eventi non devono essere in ordine.
+    """
+    if articolazione not in ARTICOLAZIONI:
+        raise ValueError(
+            f'articolazione {articolazione!r} sconosciuta, usare '
+            f'{sorted(ARTICOLAZIONI)}')
+    out: dict[int, list[Note]] = {}
+    for tick, alt, durata in eventi:
+        if not isinstance(tick, int) or tick < 0:
+            raise ValueError(f'tick {tick!r}: la posizione e un intero non '
+                             f'negativo, in tick')
+        passo = durata_in_tick(durata)
+        if stacco is not None:
+            lung = max(1, passo - stacco)
+        else:
+            lung = max(1, round(passo * ARTICOLAZIONI[articolazione]))
+        y = alt if isinstance(alt, int) else altezza(alt)
+        out.setdefault(y, []).append(
+            Note(pos=tick, length=lung, velocity=velocity))
+    for note in out.values():
+        note.sort(key=lambda n: n.pos)
+    return out
+
+
 #: Il separatore fra un accordo e il successivo, dentro `accordi()`.
 SEPARATORE_ACCORDI = '|'
 

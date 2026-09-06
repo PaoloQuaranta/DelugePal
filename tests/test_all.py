@@ -6885,6 +6885,53 @@ def test_jtd_battute():
               len(f.note) > 0, f'{len(f.note)} note')
 
 
+def test_musica_linea():
+    """`linea()`: ogni nota con la sua posizione e la sua durata.
+
+    E' il caso GENERALE di cui `melodia()` e' la scorciatoia a passo fisso.
+    Serve al walking, che dal 6 settembre 2026 tiene una nota per due
+    movimenti e ne infila una in piu' su una croma: `melodia()` non lo sa
+    esprimere perche' applica UNA durata a tutta la stringa.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    a = MU.linea([(0, 'do4', '1/4'), (96, 're4', '1/4')],
+                 velocity=78, articolazione='staccato')
+    b = MU.melodia('do4 re4', durata='1/4', velocity=78,
+                   articolazione='staccato')
+    check('a passo fisso linea() da le stesse note di melodia()', a == b,
+          f'{a} vs {b}')
+
+    c = MU.linea([(192, 60, 48), (0, 60, 192), (240, 61, 48)])
+    check('le note della stessa altezza stanno nella stessa riga',
+          sorted(c) == [60, 61] and len(c[60]) == 2, str(sorted(c)))
+    check('e in ordine di posizione anche se date sparse',
+          [n.pos for n in c[60]] == [0, 192], str([n.pos for n in c[60]]))
+    check('la durata e per nota, non per linea',
+          [n.length for n in c[60]] == [163, 41],
+          str([n.length for n in c[60]]))
+
+    d = MU.linea([(0, 60, 96)], articolazione='legato')
+    check('legato tiene tutta la durata', d[60][0].length == 96,
+          str(d[60][0].length))
+
+    for cattivo, perche in (
+            ([(-1, 60, 48)], 'tick negativo'),
+            ([(0, 60, 0)], 'durata nulla')):
+        try:
+            MU.linea(cattivo)
+            check(f'linea() rifiuta: {perche}', False, 'nessuna eccezione')
+        except ValueError:
+            check(f'linea() rifiuta: {perche}', True)
+
+    try:
+        MU.linea([(0, 60, 48)], articolazione='inventata')
+        check('linea() rifiuta un articolazione sconosciuta', False,
+              'nessuna eccezione')
+    except ValueError:
+        check('linea() rifiuta un articolazione sconosciuta', True)
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
