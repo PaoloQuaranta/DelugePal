@@ -134,6 +134,28 @@ def il_beat_saltato(z, brani) -> dict:
 FINESTRA_COINCIDENZA = 0.030
 
 
+def onset_fuori_griglia(x, strumento: str = 'bass') -> list[float]:
+    """Gli onset di `strumento` dentro la battuta che non stanno su un beat.
+
+    ⚠️ I confini da escludere sono i beat della battuta PIU' la sua fine, che
+    e' il movimento della battuta dopo. Senza quest'ultimo, gli attacchi
+    ANTICIPATI del battere successivo passano per note fuori griglia, ed e' un
+    errore che si vede: misurato il 6 settembre 2026 su 12 brani, il quarto
+    movimento portava 1112 onset contro i ~670 degli altri tre -- il 66% in
+    piu' -- col 17,4% di loro ammassato a fase 0,97, cioe' un centesimo di
+    movimento prima del battere.
+
+    ⚠️ La misura 3 ha usato la versione senza il confine di fine dal 1
+    settembre 2026: l'effetto sui suoi numeri e' dichiarato accanto a loro.
+
+    Una definizione sola per le misure 3 e 6: due misure che dicono «fuori
+    griglia» intendendo cose diverse non si possono confrontare.
+    """
+    confini = [bt.istante for bt in x.beat] + [x.fine]
+    return [o for o in x.onsets[strumento]
+            if all(abs(o - t) > FINESTRA_COINCIDENZA for t in confini)]
+
+
 def _correlazione(a, b) -> float:
     """Pearson, scritto a mano.
 
@@ -173,11 +195,9 @@ def accoppiamento(z, brani, finestre=(0.020, 0.030, 0.050)) -> dict:
         if st.pstdev(bassi) > 0 and st.pstdev(batterie) > 0:
             coppie.append(_correlazione(bassi, batterie))
         for x in d.battute:
-            sul_beat = [bt.istante for bt in x.beat]
             durata_totale += x.fine - x.inizio
             colpi_batteria += len(x.onsets['drums'])
-            fb = [o for o in x.onsets['bass']
-                  if all(abs(o - t) > FINESTRA_COINCIDENZA for t in sul_beat)]
+            fb = onset_fuori_griglia(x)
             fuori_basso += len(fb)
             for o in fb:
                 for f in finestre:
@@ -331,8 +351,185 @@ def il_piano(z, brani, finestre=(0.030, 0.050, 0.080)) -> dict:
             'esecuzioni': usati, 'esecutori': len(esecutori)}
 
 
+#: L'ampiezza degli intervalli dell'istogramma delle fasi. 0,02 vuol dire
+#: cinquanta intervalli dentro il movimento: abbastanza fini da distinguere
+#: 0,50 da 0,66, abbastanza larghi da non fare rumore su 170 mila onset.
+PASSO_FASE = 0.02
+
+#: Il criterio di lettura, FISSATO PRIMA DI MISURARE (spec del 6 settembre
+#: 2026). Un picco entro questa distanza da 0,66 dice croma swingata, entro
+#: questa da 0,50 dice croma dritta.
+TOLLERANZA_PICCO = 0.04
+
+#: La media di note per battuta del corpus, misura 1. La misura 7 tiene le
+#: esecuzioni che stanno entro `TOLLERANZA_MEDIA` da qui: sono bassisti che
+#: in media fanno quello che fara' il pezzo generato, e la loro distribuzione
+#: messa insieme e' quella di UNA esecuzione tipica.
+MEDIA_BERSAGLIO = 4.27
+TOLLERANZA_MEDIA = 0.2
+
+#: La dispersione DENTRO l'esecuzione, misura 1. La misura 7 controlla di
+#: ritrovarla: se la distribuzione selezionata non ce l'ha, e' un risultato da
+#: scrivere, non un intoppo da aggirare.
+DEVIAZIONE_ATTESA = 1.03
+TOLLERANZA_DEVIAZIONE = 0.10
+
+
+def dove_cade_la_nota_in_piu(z, brani) -> dict:
+    """MISURA 6. La FASE degli onset di basso che non stanno su un beat.
+
+    La misura 1 conta QUANTE note ci sono per battuta, non DOVE cadono quelle
+    in piu'. Il generatore ha bisogno del dove, e il dato c'e': la posizione
+    di ogni onset dentro il movimento in cui cade.
+
+    ⚠️ «Fuori dai beat» ha la stessa definizione della misura 3 -- piu' di
+    `FINESTRA_COINCIDENZA` da qualunque beat -- e non una nuova: due misure
+    che dicono «fuori griglia» intendendo cose diverse non si possono
+    confrontare.
+    """
+    istogramma = collections.Counter()
+    fasi: list[float] = []
+    esecutori, usati = set(), 0
+    for b in brani:
+        d = JT.battute(z, b.fname)
+        if len(d.battute) < MINIMO_BATTUTE:
+            continue
+        usati += 1
+        esecutori.add(b.bassista)
+        for x in d.battute:
+            fuori = onset_fuori_griglia(x)
+            for i, bt in enumerate(x.beat):
+                fine = (x.beat[i + 1].istante if i + 1 < len(x.beat)
+                        else x.fine)
+                if fine <= bt.istante:
+                    continue
+                for o in fuori:
+                    if not bt.istante < o < fine:
+                        continue
+                    fase = (o - bt.istante) / (fine - bt.istante)
+                    istogramma[int(fase / PASSO_FASE)] += 1
+                    fasi.append(fase)
+    tot = len(fasi)
+
+    print('\nMISURA 6 -- dove cade la nota in piu del basso')
+    print(f'   {tot} onset fuori dai beat, {usati} esecuzioni, '
+          f'{len(esecutori)} bassisti')
+    if not tot:
+        return {'istogramma': {}, 'onsets': 0, 'picco': 0.0, 'piatta': True,
+                'esecuzioni': usati, 'esecutori': len(esecutori)}
+    picco = max(istogramma, key=lambda k: istogramma[k])
+    centro = (picco + 0.5) * PASSO_FASE
+    media = tot / len(istogramma)
+    piatta = all(v < 2 * media for v in istogramma.values())
+    print('   fase      onset       %')
+    for k in sorted(istogramma):
+        print(f'   {k * PASSO_FASE:4.2f}   {istogramma[k]:8}   '
+              f'{100 * istogramma[k] / tot:5.1f}')
+    print(f'   picco a fase {centro:.3f} '
+          f'({100 * istogramma[picco] / tot:.1f}% degli onset)')
+
+    # ⚠️ IL PICCO DIPENDE DA COME SI SCEGLIE L'INTERVALLO, e l'ampiezza
+    # `PASSO_FASE` e' una decisione arbitraria. Se al variare dell'ampiezza il
+    # picco si sposta piu' della tolleranza del criterio, il criterio non puo'
+    # decidere: e' un fatto sulla statistica scelta, non sui dati, e va
+    # stampato invece che scoperto dopo.
+    picchi = []
+    for larghezza in (0.02, 0.04, 0.05, 0.10):
+        agg = collections.Counter()
+        for k, v in istogramma.items():
+            agg[int(k * PASSO_FASE / larghezza)] += v
+        p = max(agg, key=lambda x: agg[x])
+        picchi.append((p + 0.5) * larghezza)
+    print('   picco al variare dell ampiezza (0,02 0,04 0,05 0,10): '
+          + '  '.join(f'{p:.3f}' for p in picchi))
+    fragile = max(picchi) - min(picchi) > TOLLERANZA_PICCO
+
+    fasi.sort()
+    q = [fasi[int(len(fasi) * f)] for f in (0.25, 0.5, 0.75)]
+    print(f'   mediana {q[1]:.3f}, quartili {q[0]:.3f}-{q[2]:.3f} '
+          '(non dipendono dall ampiezza degli intervalli)')
+
+    if fragile:
+        print(f'   ATTENZIONE: IL PICCO SI SPOSTA DI {max(picchi) - min(picchi):.3f} '
+              f'al variare dell ampiezza, piu della tolleranza '
+              f'{TOLLERANZA_PICCO}: il criterio fissato sul picco NON PUO '
+              'DECIDERE, e la statistica da leggere e la mediana')
+    if piatta:
+        print('   -> PIATTA: nessun intervallo supera il doppio della media, '
+              'nessuna posizione preferita. La posizione resta [WEB]')
+    elif abs(centro - 0.66) <= TOLLERANZA_PICCO:
+        print('   -> CROMA SWINGATA [MIS]: il picco sta entro '
+              f'{TOLLERANZA_PICCO} da 0,66')
+    elif abs(centro - 0.50) <= TOLLERANZA_PICCO:
+        print('   -> CROMA DRITTA [MIS]: il picco sta entro '
+              f'{TOLLERANZA_PICCO} da 0,50')
+    else:
+        print(f'   -> il picco non e ne 0,50 ne 0,66: {centro:.3f}. '
+              'E un risultato, va scritto e non aggirato')
+    return {'istogramma': dict(istogramma), 'onsets': tot, 'picco': centro,
+            'piatta': piatta, 'fragile': fragile, 'picchi': picchi,
+            'mediana': q[1], 'quartili': (q[0], q[2]),
+            'esecuzioni': usati, 'esecutori': len(esecutori)}
+
+
+def dentro_una_esecuzione(z, brani) -> dict:
+    """MISURA 7. La distribuzione delle note per battuta di UNA esecuzione.
+
+    ⚠️ QUESTA E' LA DISTRIBUZIONE DA CUI IL GENERATORE DEVE PESCARE, non
+    quella della misura 1. La misura 1 mette insieme 1099 esecuzioni: la sua
+    dispersione somma quanto varia un bassista dentro un pezzo (1,03) e
+    quanto i bassisti differiscono fra loro. Un pezzo generato e' UNA
+    esecuzione, e pescare dall'aggregata gli darebbe piu' varieta' di quanta
+    ne abbia un bassista vero.
+
+    Selezionate le esecuzioni la cui media sta entro `TOLLERANZA_MEDIA` da
+    `MEDIA_BERSAGLIO`, e messe insieme le loro battute.
+    """
+    conti = collections.Counter()
+    medie, esecutori, guardati = [], set(), 0
+    for b in brani:
+        d = JT.battute(z, b.fname)
+        if len(d.battute) < MINIMO_BATTUTE:
+            continue
+        guardati += 1
+        per_battuta = [x.densita['bass'] for x in d.battute]
+        media = st.mean(per_battuta)
+        if abs(media - MEDIA_BERSAGLIO) > TOLLERANZA_MEDIA:
+            continue
+        medie.append(media)
+        esecutori.add(b.bassista)
+        conti.update(per_battuta)
+
+    tot = sum(conti.values())
+    print('\nMISURA 7 -- la distribuzione DENTRO una esecuzione')
+    print(f'   {len(medie)} esecuzioni su {guardati} hanno la media entro '
+          f'{TOLLERANZA_MEDIA} da {MEDIA_BERSAGLIO}, '
+          f'{len(esecutori)} bassisti, {tot} battute')
+    if not tot:
+        return {'distribuzione': {}, 'medie': [], 'esecuzioni': 0,
+                'esecutori': 0, 'battute': 0}
+    campione = [n for n, q in conti.items() for _ in range(q)]
+    media, dev = st.mean(campione), st.pstdev(campione)
+    print('   note per battuta   battute       %')
+    for n in sorted(conti):
+        print(f'   {n:16}   {conti[n]:7}   {100 * conti[n] / tot:5.1f}')
+    print(f'   media {media:.2f}, deviazione {dev:.2f}')
+    dentro = abs(dev - DEVIAZIONE_ATTESA) <= TOLLERANZA_DEVIAZIONE
+    print(f'   -> la deviazione {"STA" if dentro else "NON STA"} entro '
+          f'{TOLLERANZA_DEVIAZIONE} da {DEVIAZIONE_ATTESA}, che e la '
+          'deviazione dentro l esecuzione della misura 1')
+    if not dentro:
+        print('   ATTENZIONE: va scritto accanto al numero: vorrebbe dire '
+              'varieta dentro un esecuzione dipende da quanto denso suona')
+    print('   da incollare in tools/genera_jazz.py:')
+    print(f'   DISTRIBUZIONE_BASSO = {dict(sorted(conti.items()))}')
+    return {'distribuzione': dict(conti), 'medie': medie,
+            'esecuzioni': len(medie), 'esecutori': len(esecutori),
+            'battute': tot, 'media': media, 'deviazione': dev}
+
+
 def main() -> int:
-    """Le cinque misure, DUE volte: su tutto il corpus e sul solo JTD-300.
+    """Le sette misure, DUE volte: su tutto il corpus e sul solo JTD-300.
 
     Se le due passate divergono vince JTD-300 -- che e' il sottoinsieme su cui
     gli autori hanno lavorato di piu' -- e la divergenza si scrive. E' il modo
@@ -352,6 +549,8 @@ def main() -> int:
             accoppiamento(z, brani)
             chi_sta_avanti(z, brani)
             il_piano(z, brani)
+            dove_cade_la_nota_in_piu(z, brani)
+            dentro_una_esecuzione(z, brani)
     return 0
 
 

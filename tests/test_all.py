@@ -6932,6 +6932,55 @@ def test_musica_linea():
         check('linea() rifiuta un articolazione sconosciuta', True)
 
 
+def test_misura_fase_e_distribuzione():
+    """Le misure 6 e 7 di `misura_spartizione.py`. SALTA senza il corpus.
+
+    Non controlla i VALORI -- quelli sono il risultato, e fissarli qui
+    vorrebbe dire deciderli prima di misurarli -- ma le proprieta' che, se
+    saltassero, renderebbero sbagliata ogni cifra a valle senza far fallire
+    niente: le fasi stanno dentro (0,1), il totale torna, e il filtro sulla
+    media seleziona davvero.
+    """
+    import contextlib, io                                   # noqa: PLC0415
+    import misura_spartizione as MS                         # noqa: PLC0415
+    from delugexml import jtd as JT                         # noqa: PLC0415
+
+    zip_ = ROOT / 'to-read' / 'MIDI' / 'jazz-trio-database-v02.zip'
+    if not zip_.exists():
+        raise FileNotFoundError(str(zip_))
+
+    with JT.apri(zip_) as z:
+        brani = JT.elenco(z, metro=4, curati=True)[:12]
+        # le misure stampano tabelle intere: qui interessa il risultato, e
+        # sessanta righe di istogramma renderebbero illeggibile la suite
+        with contextlib.redirect_stdout(io.StringIO()):
+            sei = MS.dove_cade_la_nota_in_piu(z, brani)
+            sette = MS.dentro_una_esecuzione(z, brani)
+
+        istogramma = sei['istogramma']
+        check('la misura 6 ha contato qualcosa', sei['onsets'] > 0,
+              str(sei['onsets']))
+        check('e il totale dell istogramma torna',
+              sum(istogramma.values()) == sei['onsets'],
+              f"{sum(istogramma.values())} vs {sei['onsets']}")
+        check('le fasi stanno dentro (0, 1)',
+              all(0 <= k * MS.PASSO_FASE < 1 for k in istogramma),
+              f'{min(istogramma)}..{max(istogramma)}')
+        check('il picco e una fase, non un indice',
+              0.0 < sei['picco'] < 1.0, f"{sei['picco']:.3f}")
+
+        check('la misura 7 ha selezionato delle esecuzioni',
+              sette['esecuzioni'] > 0, str(sette['esecuzioni']))
+        check('la distribuzione e fatta di conteggi interi non negativi',
+              all(isinstance(k, int) and k >= 0 and v > 0
+                  for k, v in sette['distribuzione'].items()),
+              str(sorted(sette['distribuzione'])[:5]))
+        check('e le esecuzioni scelte hanno la media dentro la tolleranza',
+              all(abs(m - MS.MEDIA_BERSAGLIO) <= MS.TOLLERANZA_MEDIA
+                  for m in sette['medie']),
+              f"{len(sette['medie'])} esecuzioni")
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
