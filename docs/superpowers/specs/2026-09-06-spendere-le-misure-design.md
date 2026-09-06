@@ -63,10 +63,18 @@ delle esecuzioni). Un pezzo generato è **una** esecuzione, non 1099: pescare
 dalla distribuzione aggregata gli darebbe il 29% di variabilità in più di
 quella di un bassista vero.
 
-La stessa passata produce quindi anche la distribuzione **dentro**
-l'esecuzione: per ogni battuta lo scarto dal numero medio di note *della sua
-esecuzione*, messi tutti insieme. Ha per costruzione dispersione 1,03, ed è da
-lei che il generatore pesca, riaggiungendo la media 4,27.
+La stessa passata produce quindi anche una seconda distribuzione, definita
+così: **le note per battuta delle sole esecuzioni la cui media sta entro ±0,2
+da 4,27**. Sono bassisti che in media fanno quello che fa il pezzo generato, e
+la loro distribuzione messa insieme è quella di *una* esecuzione tipica, non
+della somma di 1099. È discreta, fatta di interi, e non richiede nessun
+ricentramento: è da lei che il generatore pesca.
+
+**Il controllo, fissato adesso:** la sua dispersione deve stare entro ±0,10 da
+**1,03**. Se ci sta, è la distribuzione giusta e si usa. Se non ci sta, si usa
+lo stesso ma il numero va scritto accanto, perché vorrebbe dire che la
+dispersione dentro un'esecuzione dipende da quanto quel bassista suona denso —
+che è un risultato, non un intoppo.
 
 **Il criterio, fissato adesso e prima di misurare:**
 
@@ -168,18 +176,36 @@ ricavabile da lì. Distinguere fra voci sarebbe una regola `[IPO]` messa sopra
 una misura. Il moltiplicatore non inventa colpi: alza la frequenza di quelli
 che quel batterista suona davvero su quel passo.
 
-### Il sorteggio diventa per cella, ed è il punto che tiene in piedi il metodo
+### Un secondo sorteggio invece di uno modificato, ed è il punto che tiene in piedi il metodo
 
-⚠️ Oggi `_voce_dal_profilo()` consuma un `random.Random` **sequenziale**:
-alzare una probabilità su una battuta sposta **tutti** i sorteggi successivi, e
-la batteria della 09 uscirebbe diversa da quella della 08 dappertutto, non solo
-dove c'è l'aggancio. **Il verdetto non sarebbe più attribuibile.**
+⚠️ `_voce_dal_profilo()` consuma un `random.Random` **sequenziale**: qualunque
+cosa cambi il numero o l'ordine delle estrazioni sposta **tutti** i sorteggi
+successivi, e la batteria uscirebbe diversa dappertutto invece che solo dove
+c'è l'aggancio. **Il verdetto non sarebbe più attribuibile.** Vale sia per
+alzare una probabilità dentro quel ciclo, sia — ed è l'errore che questa spec
+conteneva fino alla revisione — per sostituire il sorteggio sequenziale con
+uno per cella: anche uno schema per cella *equivalente in distribuzione*
+produce colpi diversi, e la batteria della 08 non sarebbe più quella della 07.
 
-Il sorteggio diventa quindi per cella:
-`random.Random((SEME_BATTERIA, battuta, voce, passo))`. Con questo, la batteria
-della **08 esce identica a quella della 07**, ed è verificabile byte per byte —
-la stessa guardia usata nel rifacimento del 30 agosto, quando il blues è uscito
-identico a `out/JAZZ06.XML`.
+Quindi **il sorteggio di base non si tocca**, e l'aggancio è un **secondo
+sorteggio indipendente**, con seme proprio `SEME_AGGANCIO` e stato per cella,
+che gira solo dove il basso ha una nota fuori griglia e la prima estrazione
+non ha messo il colpo. Perché la probabilità complessiva risulti 1,52 volte
+quella del profilo:
+
+    p_extra = min(1, 0,52 × p / (1 − p))      con p = colpi / battute
+
+così `p + (1 − p) × p_extra = 1,52 p`, con tetto a 1 quando `p ≥ 0,658`.
+
+Ne discendono tre proprietà, e sono tutte verificabili:
+
+1. la batteria della **08 è identica a quella della 07**, byte per byte — il
+   flusso sequenziale non è stato toccato;
+2. la **09 differisce dalla 08 solo per colpi in più**, mai in meno, e solo
+   sui passi dove il basso ha un evento fuori griglia;
+3. l'aggancio non inventa passi: il secondo sorteggio gira solo sui passi che
+   il profilo di quel batterista già contiene, con la soglia `minimo` di
+   `_voce_dal_profilo()` rispettata.
 
 ### L'aggancio è un passo condiviso, non una coincidenza garantita
 
@@ -242,9 +268,11 @@ TDD, un test che fallisce prima di ogni pezzo:
   4, la nota tenuta lunga il doppio, la nota in più cromatica alla successiva;
 - `MU.linea()`: le note raggruppate per altezza, le durate rispettate,
   `melodia()` invariata;
-- `batteria()`: la probabilità alzata **solo** dove il basso ha un evento
-  fuori griglia, il tetto a 1, e la **stabilità del sorteggio** — stesso seme e
-  stesso basso, stessa batteria.
+- `batteria()`: senza eventi fuori griglia il risultato è **identico** a
+  quello di oggi (il flusso sequenziale non si è mosso), con eventi i colpi
+  possono solo aumentare, mai diminuire, e solo sui passi del basso; il tetto
+  a 1 quando `p ≥ 0,658`; e `p_extra` che porta la probabilità complessiva a
+  1,52 p.
 
 **Pulizia, nel codice che si riscrive:** via `RIDE`, `PEDALE`, `CASSE`,
 `CASSA_PER_BATTUTA`, `RULLANTI` e `RULLANTE_PER_BATTUTA` (righe 915-950 di

@@ -340,6 +340,69 @@ l'1,8% e potrebbero essere in parte doppi rilevamenti dell'onset detector, che
 lavora su una traccia separata dal missaggio. Il numero che regge è la
 **dispersione**, non il massimo.
 
+### La distribuzione da cui si pesca non è quella qui sopra — `[MIS]`
+
+**Misurata il 6 settembre 2026, e serve a chi genera più della tabella
+precedente.** Quella mette insieme 1099 esecuzioni, e la sua dispersione vale
+**1,33** perché somma due cose diverse: quanto varia un bassista dentro un
+pezzo (**1,03**) e quanto i bassisti differiscono fra loro (**0,84** di scarto
+fra le medie). ⚠️ **Un pezzo generato è UNA esecuzione, non 1099**: pescare
+dall'aggregata gli darebbe il **29% di varietà in più** di quanta ne abbia un
+bassista vero.
+
+Prese le sole esecuzioni la cui media sta entro **±0,2 da 4,27** — bassisti che
+in media fanno quello che farebbe il pezzo — su **319 esecuzioni**, **65
+bassisti**, **34 048 battute**:
+
+| note per battuta | tutto il corpus | JTD-300 |
+|---|---|---|
+| 0 | 0,0% | 0,0% |
+| 1–2 | 2,0% | 2,3% |
+| 3 | 15,6% | 15,0% |
+| **4** | **48,7%** | **49,1%** |
+| 5 | 25,5% | 25,5% |
+| 6 | 6,5% | 6,5% |
+| 7 o più | 1,7% | 1,5% |
+
+**Media 4,24, deviazione 0,94** (4,23 e 0,94 su JTD-300). ⚠️ Il controllo era
+fissato prima di misurare — la deviazione doveva ritrovarsi entro ±0,10 da
+1,03 — e **ci sta**, in tutt'e due le passate.
+
+### Dove cade la nota in più, e un criterio che non ha potuto decidere — `[MIS]`
+
+La tabella delle note per battuta dice **quante** ne ha una battuta, non
+**dove** cadono quelle oltre le quattro. Misurata il 6 settembre 2026 la
+**fase** di ognuno dei 144 838 onset fuori dai beat — la posizione dentro il
+movimento in cui cade — su **1099 esecuzioni** e **96 bassisti**:
+
+| | tutto il corpus | JTD-300 |
+|---|---|---|
+| **mediana** | **0,651** | **0,636** |
+| quartili | 0,407–0,759 | 0,365–0,756 |
+| moda (intervalli da 0,02) | 0,710 | 0,710 |
+
+⚠️ **Il criterio fissato prima di misurare NON HA POTUTO DECIDERE, e non per
+colpa dei dati.** Era fissato sulla fase di **picco** — entro ±0,04 da 0,66 la
+croma swingata, entro ±0,04 da 0,50 la dritta — e il picco **si sposta di
+0,050 sul corpus e di 0,180 su JTD-300 solo cambiando l'ampiezza degli
+intervalli dell'istogramma**, che è una scelta arbitraria di chi misura. Con
+intervalli da 0,05 il criterio direbbe «croma swingata»; con quelli da 0,02
+direbbe «né l'una né l'altra». **La lezione vale oltre questa casella: una
+statistica pre-registrata dev'essere anche robusta, non solo dichiarata
+prima.** Lo strumento adesso stampa la fragilità da sé e riporta la mediana.
+
+**La mediana dice 0,65**, ed è il numero da citare. Tre cose indipendenti ci
+cadono sopra: la **terzina** (0,667), lo swing che la casella 4 misura sul
+solista in hardbop (**0,643**, su un altro corpus e con un altro metodo), e la
+posizione che il firmware del Deluge dà alla croma con `SWING = 64` (**0,640**).
+
+⚠️ **Ma i quartili sono larghissimi — 0,41–0,76 — e la moda sta più in alto
+della mediana.** Le note fuori movimento di un bassista **non sono una cosa
+sola**: il 16,8% cade sotto 0,20 e il 14,2% sopra 0,84, cioè subito dopo o
+subito prima di un movimento. Parte di quelle sono probabilmente attacchi
+sfasati che il rilevatore non ha allineato — lo stesso fenomeno che il
+controllo 2 misura sui beat taciuti — e questa casella **non le separa**.
+
 ### Il basso salta un beat su sei, e non a caso — `[MIS]`
 
 Su **472 073 beat**, **1109 esecuzioni**, **96 bassisti**: il basso **non
@@ -374,7 +437,7 @@ note di basso nella stessa battuta è **+0,058** (+0,062 su JTD-300): pressoché
 nulla. Chi generasse una batteria «che si infittisce dove si infittisce il
 basso» starebbe inventando una regola che il corpus non sostiene.
 
-**Nella coincidenza fuori griglia, sì.** Dei **170 394** onset di basso che
+**Nella coincidenza fuori griglia, sì.** Dei **144 838** onset di basso che
 cadono **fuori dai beat**, quelli che hanno un colpo di batteria vicino sono
 molti più di quanti ne darebbe il caso — e il riferimento casuale è calcolato
 con la stessa densità di colpi distribuita uniformemente, non stimato a
@@ -382,14 +445,36 @@ occhio:
 
 | finestra | coincidenze osservate | attese per caso | rapporto |
 |---|---|---|---|
-| **20 ms** | **30,6%** | 20,1% | **1,52×** |
-| 30 ms | 36,0% | 30,1% | 1,20× |
-| 50 ms | 60,5% | 50,2% | 1,21× |
+| **20 ms** | **32,1%** | 20,1% | **1,60×** |
+| 30 ms | 38,3% | 30,1% | 1,27× |
+| 50 ms | 66,6% | 50,2% | 1,33× |
 
 ⚠️ **L'eccesso è massimo alla finestra più stretta, ed è la forma che conta.**
 Se fosse un artefatto di densità crescerebbe con la finestra; cresce invece al
-restringerla, che è quello che fa una sincronia vera. Su JTD-300: 32,1% contro
-21,3%, cioè **1,51×** — lo stesso rapporto su un campione indipendente.
+restringerla, che è quello che fa una sincronia vera. Su JTD-300: 33,7% contro
+21,3%, cioè **1,58×** — lo stesso rapporto su un campione indipendente.
+
+#### ⚠️ Correzione del 6 settembre 2026: gli onset erano 170 394, e il 15% non lo erano
+
+Fino al 5 settembre questa tabella diceva **30,6% contro 20,1% = 1,52×** su
+**170 394** onset. I confini esclusi per dire «fuori dai beat» erano i quattro
+beat **della battuta**, e non la sua **fine** — che è il movimento della
+battuta successiva. Gli attacchi **anticipati del battere che viene** passavano
+quindi per note fuori griglia: erano **25 556**, il 15,0% del totale, e si
+vedevano perché il quarto movimento ne portava il **66% in più** degli altri
+tre, col 17,4% ammassato a fase 0,97 — un centesimo di movimento prima del
+battere.
+
+**La correzione rafforza il risultato invece di indebolirlo**, ed è l'opposto
+di quello che ci si aspettava: quegli onset avevano il **22,4%** di
+coincidenza, sotto la media, perché un anticipo del battere e un colpo *sul*
+battere distano più di 20 ms. Toglierli alza l'osservato e lascia fermo
+l'atteso.
+
+La definizione sta ora scritta una volta sola, in
+`misura_spartizione.onset_fuori_griglia()`, e la usano la misura 3 e la 6: due
+misure che dicono «fuori griglia» intendendo cose diverse non si possono
+confrontare.
 
 ### Chi sta avanti: la batteria è il riferimento — `[MIS]`
 
@@ -2691,6 +2776,69 @@ descritta in §7.
 
 Vale però come **declassamento della sua urgenza**: era una ragione per non
 scrivere sedicesimi, e non lo è più.
+
+### Il basso vario, e un aggancio che non aggancia — 6 settembre 2026
+
+**La 08 spende la casella 5 sul basso.** Fino alla 07 il walking faceva
+**4,00 note per battuta con deviazione 0,00** su 228 battute: non «meno vario
+di un bassista vero» ma **fuori dalla distribuzione**, perché il valore
+centrale del corpus copre metà delle battute. Adesso quante note fare si pesca
+dalla distribuzione dentro l'esecuzione, il 15% dei movimenti non attacca e la
+nota prima si allunga a coprirli, e le note in più cadono sulla croma come
+approcci cromatici.
+
+Su 360 battute di prova, contro il corpus: media **4,31** (4,24), deviazione
+**0,97** (0,94), battute diverse da quattro **53,6%** (51,3%), movimenti non
+attaccati **14,4%** (15,0%), e più frequenti sul 2 e sul 4 come nel corpus.
+
+⚠️ **I silenzi sono di DUE specie, e confonderle sbaglia tutt'e due le
+misure.** Una battuta da tre note ha per forza un movimento vuoto: è un
+silenzio **forzato** dal numero pescato, e la distribuzione ne impone già il
+**5,0%** dei movimenti. Il corpus però ne misura il **15,0%**: i restanti sono
+silenzi **in più**, dove il bassista lascia il movimento e suona altrove, e
+ognuno va compensato da una croma perché il conto delle note resti quello
+pescato. Le due strade sbagliate, misurate prima di scartarle: legare i
+silenzi al solo numero di note dà il **5,6%**; sorteggiarli indipendenti e poi
+far quadrare il conto togliendo altri movimenti dà il **19,4%**.
+
+⚠️ **E la 09 — l'aggancio della batteria — NON riproduce la misura per cui è
+stata scritta.** Dove il basso ha una nota fuori griglia, la batteria ha 1,60
+volte più probabilità di colpire: è il rapporto della misura 3, applicato alla
+probabilità del profilo. Ma la grandezza che la misura 3 conta è un'altra — la
+quota di onset di basso con un colpo **entro 20 ms** — e sul generatore quella
+non si comporta come nel corpus:
+
+| pezzo | batterista | senza aggancio | con aggancio | corpus |
+|---|---|---|---|---|
+| blues | drummer10/session1/1 | 2,40× | 3,38× | 1,60× |
+| rhythm changes | drummer1/session1/49 | 1,66× | 2,39× | 1,60× |
+| modale | drummer1/session1/52 | **0,00×** | **0,00×** | 1,60× |
+
+**Due ragioni, e nessuna delle due è l'aggancio.**
+
+La prima: nel generatore basso e batteria stanno sulla **stessa griglia a
+sedicesimi**, quindi o condividono il passo — e allora distano quanto lo
+scarto del groove — oppure distano almeno 117 ms. La coincidenza è
+**tutto-o-niente**, e infatti le finestre da 20, 30 e 50 ms danno la **stessa
+identica percentuale**. Nel corpus è continua.
+
+La seconda: quanto valga quel «tutto» lo decide il **groove template**, non
+l'aggancio. Il batterista del modale ha scarti da **+7,7 a +10,9 tick** sulla
+cassa e da **−6,1 a −12,6** sul rullante: nessun suo colpo può cadere entro i
+**4,1 tick** che valgono 20 ms a 128 BPM, qualunque cosa faccia l'aggancio.
+Distanza mediana fra nota di basso e colpo più vicino: **3 tick** sul blues,
+**2** sul rhythm changes, **14** sul modale.
+
+⚠️ **Sotto c'è un difetto più profondo, ed è del basso non della batteria:**
+il basso del generatore è quantizzato esatto, dispersione **zero**, mentre la
+misura 4 di questa casella dà al basso vero uno scarto di +2,3 ms con
+dispersione 6,4. Un basso senza microtiming **non può andare incontro** a una
+batteria che ce l'ha. Finché resta così, la misura 3 non è spendibile
+attraverso la sola batteria.
+
+L'aggancio resta scritto dietro il flag `--aggancio` e i suoi numeri stanno
+qui; **il verdetto dell'ascolto non è ancora stato dato**, e la decisione se
+tenerlo è rinviata a dopo che si sarà sentita la 08.
 
 ### La correzione del 24 agosto 2026 — che non è di questo repertorio
 

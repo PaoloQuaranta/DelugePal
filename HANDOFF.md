@@ -82,6 +82,20 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > changes AABA -- e' uscito giusto **alla prima versione** contro le sei del
 > blues.
 >
+> Il **6 settembre 2026** le misure della casella 5 sono state **spese sul
+> generatore** (§6-vicies), e il basso ha smesso di fare quattro note per
+> battuta. Misurando sono usciti **tre errori**: la misura 3 contava come
+> «fuori griglia» il 15% di onset che erano attacchi anticipati del battere
+> (**1,52× diventa 1,60×**, e la correzione rafforza il risultato); il criterio
+> pre-registrato della misura nuova era **fragile** — fissato sul picco di un
+> istogramma, che si sposta cambiando l'ampiezza degli intervalli — e non ha
+> potuto decidere; e nessun `print` può contenere `⚠️`, perché la console di
+> Windows è cp1252. ⚠️ **L'aggancio della batteria è scritto ma NON riproduce
+> la misura per cui esisteva**, e il difetto sotto è del basso: è quantizzato
+> esatto, dispersione zero, e non può andare incontro a una batteria che ha il
+> microtiming. **1096 test.** Il verdetto dell'ascolto sulla 08 non è ancora
+> stato dato.
+>
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
 > regole di quel documento non sono consigli: ognuna nasce da un errore pagato.
@@ -2527,6 +2541,127 @@ walking vero, e la batteria deve agganciarsi agli eventi fuori griglia del
 basso invece di essere campionata da un'esecuzione. ⚠️ E poi va fatto sentire:
 finché un pezzo non è stato ascoltato dall'utente, di queste misure si sa che
 sono giuste, non che servono.
+
+---
+
+## 6-vicies. Le misure spese sul basso, e tre errori trovati misurando — 6 settembre 2026
+
+**Il passo che §6-noviesdecies nominava — «spendere queste misure sul
+generatore» — è fatto per il basso, e non per la batteria.** Il basso della
+versione **08** pesca quante note fare dalla distribuzione misurata invece di
+farne sempre quattro; l'aggancio della batteria, la **09**, è scritto e
+misurato ma **non riproduce la misura per cui esisteva**, e il perché vale più
+del codice.
+
+⚠️ **Le tre cose che questa sessione ha trovato sono tutte errori miei o del
+lavoro precedente, e tutte e tre sono uscite da un controllo, non da un
+ascolto.** È la stessa forma delle quattro volte precedenti.
+
+### 1. La misura 3 contava 25 556 onset che non erano fuori griglia
+
+Il numero pubblicato il 1 settembre — **30,6% contro 20,1%, cioè 1,52×** su
+**170 394** onset — escludeva come «sul beat» i quattro beat **della battuta**
+ma non la sua **fine**, che è il movimento della battuta dopo. Gli attacchi
+**anticipati del battere successivo** passavano quindi per note fuori griglia:
+il **15,0%** del totale, e si vedevano perché il quarto movimento ne portava il
+**66% in più** degli altri tre, col 17,4% ammassato a fase 0,97.
+
+**La correzione rafforza il risultato**, che è l'opposto di quel che avevo
+previsto scrivendolo: quegli onset avevano il 22,4% di coincidenza, sotto la
+media, perché un anticipo del battere e un colpo *sul* battere distano più di
+20 ms. Il numero giusto è **32,1% contro 20,1% = 1,60×**, e **1,58×** su
+JTD-300.
+
+### 2. Il criterio fissato prima di misurare era fragile, e non ha potuto decidere
+
+La misura nuova — dove cade la nota in più — aveva il suo criterio scritto
+nella spec **prima** di guardare i dati, com'è regola qui. Ma era fissato sulla
+fase di **picco**, e il picco **si sposta di 0,05 (0,18 su JTD-300) solo
+cambiando l'ampiezza degli intervalli dell'istogramma**, che è una scelta
+arbitraria di chi misura: con intervalli da 0,05 direbbe «croma swingata», con
+quelli da 0,02 direbbe «nessuna delle due».
+
+⚠️ **La lezione vale oltre la casella: una statistica pre-registrata dev'essere
+anche ROBUSTA, non solo dichiarata prima.** Pre-registrare una statistica
+fragile dà l'illusione del rigore senza la sostanza. Lo strumento ora stampa da
+sé quanto il picco si sposta, e riporta la **mediana**, che non dipende dagli
+intervalli: **0,651** e **0,636**. Ci cadono sopra tre cose indipendenti — la
+terzina (0,667), lo swing del solista in hardbop della casella 4 (0,643), e la
+posizione che il firmware dà alla croma con `SWING = 64` (0,640).
+
+### 3. Nessun `print` può contenere `⚠️`
+
+La console di Windows è **cp1252**: `strumento.py > file.txt` fa fallire la
+scrittura con `UnicodeEncodeError`. È costato una passata di misura interrotta
+a metà **senza che il codice di uscita lo dicesse** (il `; echo` in coda al
+comando mascherava l'errore), e in `genera_jazz.py` colpiva proprio la riga che
+segnala `verifica()` non vuota — cioè l'errore da segnalare sarebbe diventato
+un errore diverso. Nei commenti e nei docstring l'emoji va bene: non si
+codifica mai.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `MU.linea()` | il caso generale di cui `melodia()` è la scorciatoia a passo fisso: ogni nota con la sua posizione e la sua durata. Serviva perché un basso che tiene una nota per due movimenti non è esprimibile a passo fisso |
+| `misura_spartizione` misure 6 e 7 | dove cade la nota in più, e la distribuzione **dentro** l'esecuzione |
+| `onset_fuori_griglia()` | la definizione di «fuori griglia», scritta una volta sola per le misure 3 e 6 |
+| `walking()` variabile | pesca quante note, i silenzi di due specie, gli approcci cromatici |
+| `_aggancia()` + `--aggancio` | il secondo sorteggio della batteria, e i numeri che dicono che non basta |
+| `confronto_col_corpus()` | il generatore misura il pezzo che ha appena scritto |
+
+**1096 test**, e due di loro sono guardie dell'attribuzione: la batteria della
+08 è identica a quella della 07, e la 09 alla 08 aggiunge colpi e non ne toglie
+nessuno.
+
+### La distribuzione giusta non è quella pubblicata, ed è il punto tecnico che conta
+
+⚠️ La tabella delle note per battuta della casella 5 mette insieme **1099
+esecuzioni**: la sua dispersione vale **1,33** perché somma quanto varia un
+bassista dentro un pezzo (**1,03**) e quanto i bassisti differiscono fra loro
+(**0,84**). **Un pezzo generato è UNA esecuzione**: pescare dall'aggregata gli
+darebbe il **29% di varietà in più** di un bassista vero. La misura 7 prende le
+sole esecuzioni la cui media sta entro 0,2 da 4,27 — 319 esecuzioni, 65
+bassisti, 34 048 battute — e la sua deviazione è **0,94**, dentro la tolleranza
+di ±0,10 da 1,03 fissata prima di misurare.
+
+**E i silenzi sono di due specie.** Una battuta da tre note ha per forza un
+movimento vuoto (il 5,0% dei movimenti viene da lì), ma il corpus ne misura il
+15,0%: i restanti sono silenzi dove il bassista lascia il movimento e suona
+altrove, e ognuno va compensato da una croma. Legarli al solo numero di note dà
+il 5,6%; sorteggiarli indipendenti e poi far quadrare il conto dà il 19,4%.
+
+### Perché l'aggancio della batteria non funziona, e cosa lo bloccherebbe davvero
+
+| pezzo | senza aggancio | con aggancio | corpus |
+|---|---|---|---|
+| blues | 2,40× | 3,38× | 1,60× |
+| rhythm changes | 1,66× | 2,39× | 1,60× |
+| modale | **0,00×** | **0,00×** | 1,60× |
+
+Nel generatore basso e batteria stanno sulla **stessa griglia a sedicesimi**:
+o condividono il passo o distano 117 ms, quindi la coincidenza è
+**tutto-o-niente** — le finestre da 20, 30 e 50 ms danno la stessa
+percentuale — mentre nel corpus è continua. E quanto valga quel «tutto» lo
+decide il **groove template**: il batterista del modale ha scarti fino a
+**+10,9 tick**, e 20 ms sono **4,1 tick**.
+
+⚠️ **Il difetto sotto è del basso, non della batteria: il basso del generatore
+è quantizzato esatto, dispersione zero**, mentre la misura 4 dà al basso vero
++2,3 ms con dispersione 6,4. Un basso senza microtiming non può andare incontro
+a una batteria che ce l'ha.
+
+### Cosa NON rifare
+
+- **non pre-registrare una statistica fragile.** Dichiararla prima non basta
+  se dipende da una scelta arbitraria di chi misura;
+- **non mettere emoji dentro un `print`**, e **non chiudere un comando con
+  `; echo`**: maschera il codice di uscita di quello che conta;
+- **non toccare il sorteggio sequenziale di `_voce_dal_profilo()`**, nemmeno
+  per renderlo più pulito: due versioni confrontabili dipendono da lui;
+- **non applicare un rapporto misurato alla grandezza sbagliata.** 1,60× sulla
+  probabilità del profilo non fa 1,60× sulla coincidenza a 20 ms, e la
+  differenza fra le due non si vede finché non si stampa il numero.
 
 ---
 
