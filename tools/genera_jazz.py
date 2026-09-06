@@ -1194,7 +1194,13 @@ def main() -> int:
 
     problemi = MU.verifica(doc)
     if problemi:
-        print('\n⚠️ verifica() NON e\' vuota: non si carica.')
+        # ⚠️ NIENTE EMOJI DENTRO UN print: su Windows la console e' cp1252 e
+        # `> file.txt` fa fallire la scrittura con UnicodeEncodeError, cioe'
+        # l'errore che si voleva segnalare diventa un errore diverso. Trovato
+        # il 6 settembre 2026 su `misura_spartizione.py`, che ci si e' fermato
+        # a meta' misura. Nei commenti e nei docstring va bene: non si
+        # codificano mai.
+        print('\nATTENZIONE: verifica() NON e\' vuota: non si carica.')
         for p in problemi:
             print(f'  {p}')
         return 1
