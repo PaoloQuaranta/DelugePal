@@ -472,7 +472,10 @@ def dove_cade_la_nota_in_piu(z, brani) -> dict:
             'esecuzioni': usati, 'esecutori': len(esecutori)}
 
 
-def dentro_una_esecuzione(z, brani) -> dict:
+def dentro_una_esecuzione(z, brani, strumento: str = 'bass',
+                          media_bersaglio: float = MEDIA_BERSAGLIO,
+                          deviazione_attesa: float = DEVIAZIONE_ATTESA,
+                          costante: str = 'DISTRIBUZIONE_BASSO') -> dict:
     """MISURA 7. La distribuzione delle note per battuta di UNA esecuzione.
 
     ⚠️ QUESTA E' LA DISTRIBUZIONE DA CUI IL GENERATORE DEVE PESCARE, non
@@ -492,19 +495,20 @@ def dentro_una_esecuzione(z, brani) -> dict:
         if len(d.battute) < MINIMO_BATTUTE:
             continue
         guardati += 1
-        per_battuta = [x.densita['bass'] for x in d.battute]
+        per_battuta = [x.densita[strumento] for x in d.battute]
         media = st.mean(per_battuta)
-        if abs(media - MEDIA_BERSAGLIO) > TOLLERANZA_MEDIA:
+        if abs(media - media_bersaglio) > TOLLERANZA_MEDIA:
             continue
         medie.append(media)
-        esecutori.add(b.bassista)
+        esecutori.add(b.bassista if strumento == 'bass' else b.batterista)
         conti.update(per_battuta)
 
     tot = sum(conti.values())
-    print('\nMISURA 7 -- la distribuzione DENTRO una esecuzione')
+    print(f'\nMISURA 7 -- la distribuzione DENTRO una esecuzione [{strumento}]')
     print(f'   {len(medie)} esecuzioni su {guardati} hanno la media entro '
-          f'{TOLLERANZA_MEDIA} da {MEDIA_BERSAGLIO}, '
-          f'{len(esecutori)} bassisti, {tot} battute')
+          f'{TOLLERANZA_MEDIA} da {media_bersaglio}, {len(esecutori)} '
+          f'{"bassisti" if strumento == "bass" else "batteristi"}, '
+          f'{tot} battute')
     if not tot:
         return {'distribuzione': {}, 'medie': [], 'esecuzioni': 0,
                 'esecutori': 0, 'battute': 0}
@@ -514,15 +518,15 @@ def dentro_una_esecuzione(z, brani) -> dict:
     for n in sorted(conti):
         print(f'   {n:16}   {conti[n]:7}   {100 * conti[n] / tot:5.1f}')
     print(f'   media {media:.2f}, deviazione {dev:.2f}')
-    dentro = abs(dev - DEVIAZIONE_ATTESA) <= TOLLERANZA_DEVIAZIONE
+    dentro = abs(dev - deviazione_attesa) <= TOLLERANZA_DEVIAZIONE
     print(f'   -> la deviazione {"STA" if dentro else "NON STA"} entro '
-          f'{TOLLERANZA_DEVIAZIONE} da {DEVIAZIONE_ATTESA}, che e la '
-          'deviazione dentro l esecuzione della misura 1')
+          f'{TOLLERANZA_DEVIAZIONE} da {deviazione_attesa}, che e la '
+          'deviazione dentro l esecuzione misurata a parte')
     if not dentro:
         print('   ATTENZIONE: va scritto accanto al numero: vorrebbe dire '
               'varieta dentro un esecuzione dipende da quanto denso suona')
     print('   da incollare in tools/genera_jazz.py:')
-    print(f'   DISTRIBUZIONE_BASSO = {dict(sorted(conti.items()))}')
+    print(f'   {costante} = {dict(sorted(conti.items()))}')
     return {'distribuzione': dict(conti), 'medie': medie,
             'esecuzioni': len(medie), 'esecutori': len(esecutori),
             'battute': tot, 'media': media, 'deviazione': dev}
@@ -603,6 +607,10 @@ def la_continuita(z, brani) -> dict:
         coda = [f'{n}:{100 * q / tot:.1f}%'
                 for n, q in sorted(r['istogramma'].items()) if q / tot >= 0.02]
         print(f'           distribuzione ({tot} battute): ' + '  '.join(coda))
+        if strumento == 'drums':
+            print('           da incollare in tools/genera_jazz.py:')
+            print('           DISTRIBUZIONE_BATTERIA = '
+                  + str(dict(sorted(r['istogramma'].items()))))
     return fuori
 
 
@@ -629,6 +637,11 @@ def main() -> int:
             il_piano(z, brani)
             dove_cade_la_nota_in_piu(z, brani)
             dentro_una_esecuzione(z, brani)
+            # ⚠️ anche per la BATTERIA, e per la stessa ragione: la
+            # distribuzione aggregata somma la varieta' di un batterista e le
+            # differenze fra batteristi. I bersagli vengono dalla misura 8.
+            dentro_una_esecuzione(z, brani, 'drums', 6.31, 1.37,
+                                  'DISTRIBUZIONE_BATTERIA')
             la_continuita(z, brani)
     return 0
 

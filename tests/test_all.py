@@ -7117,6 +7117,66 @@ def test_aggancio_batteria():
           str(GJ._probabilita_aggancio(0.8)))
 
 
+def test_batteria_densita_misurata():
+    """La batteria non fa piu' una binomiale larga. SALTA senza il Groove MIDI.
+
+    Il verdetto del 6 settembre 2026 sulla versione 08 -- «la batteria resta
+    discontinua» -- e' la seconda volta in una settimana, e la misura 8 dice
+    perche': un batterista di trio mette **6,31** attacchi in una battuta con
+    deviazione **1,37**, il generatore ne faceva **8,11** con **1,93**. Sei
+    voci che sorteggiano ogni passo per conto loro fanno una binomiale larga.
+
+    ⚠️ Si contano i GRAPPOLI a 30 ms e non le note: gli onset del JTD sono
+    rilevati su una traccia audio e due colpi insieme fanno un attacco solo.
+    E' la stessa trappola che sul piano dava «0% di accordi».
+
+    ⚠️ Le battute di FILL sono escluse: portano 15,7 colpi per costruzione
+    (casella 9), e sono una scelta dichiarata, non una densita' da correggere.
+    """
+    import genera_jazz as GJ                                # noqa: PLC0415
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    base = ROOT / 'to-read' / 'MIDI' / 'groove-v1.0.0-midionly' / 'groove'
+    if not base.exists():
+        raise FileNotFoundError(str(base))
+    prof = GR.profilo(base, GJ.BLUES.esecuzione)
+
+    righe = GJ.batteria(GJ.BLUES, prof)
+    battute = len(GJ.BLUES.giro) * GJ.GIRI
+    fill = {len(GJ.BLUES.giro) * (g + 1) - 1 for g in range(GJ.GIRI - 1)}
+
+    soglia = 30 / GJ.MS_PER_TICK
+    grappoli, ultimo = [], None
+    for t in sorted(n.pos for _, note, _ in righe for n in note):
+        if ultimo is None or t - ultimo > soglia:
+            grappoli.append(t)
+        ultimo = t
+    conti = [sum(1 for g in grappoli if g // GJ.TICK_BATTUTA == i)
+             for i in range(battute) if i not in fill]
+
+    media, dev = statistics.mean(conti), statistics.pstdev(conti)
+    check('gli attacchi per battuta stanno intorno ai 6,31 del corpus',
+          5.3 <= media <= 7.3, f'{media:.2f}')
+    check('e la deviazione intorno all 1,37, non quasi 2',
+          0.9 <= dev <= 1.8, f'{dev:.2f}')
+    check('la distribuzione della batteria e quella misurata',
+          bool(GJ.DISTRIBUZIONE_BATTERIA)
+          and sum(GJ.DISTRIBUZIONE_BATTERIA.values()) > 1000,
+          str(sorted(GJ.DISTRIBUZIONE_BATTERIA)[:4]))
+
+    passi_del_profilo = {x.passo for voce in GJ.VOCI
+                         for x in prof.passi.get(voce, []) if x.colpi >= 3}
+    fuori = [n.pos for _, note, _ in righe for n in note
+             if (n.pos // GJ.TICK_BATTUTA) not in fill
+             and round((n.pos % GJ.TICK_BATTUTA) / 24) % 16
+             not in passi_del_profilo]
+    check('e nessun colpo cade su un passo che quel batterista non suona',
+          not fuori, f'{len(fuori)} colpi')
+
+    check('a parita di seme la batteria e identica',
+          GJ.batteria(GJ.BLUES, prof) == righe)
+
+
 def _righe_di_kit(path):
     """Le note della clip di kit di una song, per drum.
 
@@ -7177,6 +7237,32 @@ def test_jazz09_aggiunge_e_basta():
 
     check('e il basso della 09 e identico a quello della 08',
           basso(otto) == basso(nove))
+
+
+def test_jazz10_cambia_solo_la_batteria():
+    """La 10 cambia la batteria e NIENT'ALTRO. SALTA senza i pezzi generati.
+
+    Terza guardia della serie, e la ragione e' sempre quella: un verdetto
+    dell'ascolto vale solo se una cosa sola e' cambiata.
+    """
+    otto, dieci = ROOT / 'out' / 'JAZZ08.XML', ROOT / 'out' / 'JAZZ10.XML'
+    for x in (otto, dieci):
+        if not x.exists():
+            raise FileNotFoundError(str(x))
+
+    def basso(path):
+        doc = parse_file(path)
+        return [[(r.get('y'), S.read_notes(r)) for r in S.note_rows(c)]
+                for _, c in S.clips(doc)
+                if S.clip_label(c) == 'Square Saw Bass']
+
+    check('il basso della 10 e identico a quello della 08',
+          basso(otto) == basso(dieci))
+    a, b = _righe_di_kit(otto), _righe_di_kit(dieci)
+    prima = sum(len(n) for n in a.values())
+    dopo = sum(len(n) for n in b.values())
+    check('e la batteria e piu rada, come dice la misura', dopo < prima,
+          f'{prima} colpi -> {dopo}')
 
 
 if __name__ == '__main__':

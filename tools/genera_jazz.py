@@ -129,12 +129,25 @@ ESECUZIONE = 'drummer10/session1/1'
 #:       questo, e solo in piu': mai un colpo in meno, e mai su un passo che
 #:       quel batterista non suoni. Si scrive con `--aggancio`.
 #:
+#:   10  6 settembre 2026. LA BATTERIA HA LA DENSITA' DI UN BATTERISTA VERO:
+#:       quanti attacchi mette in una battuta si pesca dalla distribuzione
+#:       misurata -- 6,31 con deviazione 1,32 -- e poi si sceglie QUALI passi
+#:       coi pesi del profilo, invece di lasciare che sei voci indipendenti
+#:       facciano una binomiale larga (7,94 attacchi, deviazione 1,85).
+#:       Nasce dal verdetto sulla 08: «la batteria resta discontinua», la
+#:       seconda volta in una settimana. ⚠️ IL BASSO NON CAMBIA rispetto alla
+#:       08, quindi il verdetto parla della sola batteria.
+#:
 #: ⚠️ E' il primo giro CHIUSO di questo progetto: una lamentela all'orecchio,
 #: una misura sul corpus, una correzione, e lo stesso orecchio che approva.
 #: Le tre versioni restano una coppia controllata a tre -- batteria, basso e
 #: comping hanno le stesse identiche note in tutte e tre -- quindi i tre
 #: verdetti parlano dell'assolo e di nient'altro.
-VERSIONE = 8
+VERSIONE = 10
+
+#: `--aggancio` scrive una versione a parte per non collidere col nome della
+#: 10. Restera' cosi' finche' l'aggancio non e' deciso: vedi la 09.
+VERSIONE_AGGANCIO = 11
 
 BPM = 128
 #: Casella 10 di `docs/repertori/jazz.md`, riga HARDBOP/BEBOP. `figura='1/8'`
@@ -1115,6 +1128,30 @@ VOCI = {
 #: in una schermata e chi deve guardare le posizioni non scrolla.
 TENUTI = tuple(VOCI.values())
 
+#: Quanti ATTACCHI mette in una battuta un batterista di trio -- i pesi sono
+#: i conteggi grezzi del corpus. `[MIS]` sul Jazz Trio Database, misura 8 di
+#: `tools/misura_spartizione.py`, 6 settembre 2026: 1099 esecuzioni, 103
+#: batteristi, 116 580 battute, mediana delle medie **6,31** e delle
+#: deviazioni **1,37**.
+#:
+#: ⚠️ Nasce da un ascolto, non da un'agenda: «la batteria resta discontinua»,
+#: detto due volte in una settimana. Prima del 6 settembre ogni voce
+#: sorteggiava ogni passo per conto suo, e sei voci indipendenti facevano
+#: 7,94 attacchi per battuta con deviazione 1,85 -- una binomiale larga.
+#:
+#: ⚠️ Sono ATTACCHI e non note: gli onset del JTD vengono da una traccia
+#: audio, quindi due colpi insieme fanno un attacco solo. Vedi
+#: `_battuta_di_batteria()`.
+#: ⚠️ E come per il basso, NON e' la distribuzione aggregata: quella somma la
+#: varieta' di un batterista e le differenze fra batteristi, e vale 1,96 di
+#: dispersione contro 1,32. Prese le sole esecuzioni la cui media sta entro
+#: 0,2 da 6,31 -- 167 esecuzioni, 18 748 battute -- la deviazione e' 1,32,
+#: dentro la tolleranza di 0,10 da 1,37 fissata prima. E' lo stesso errore
+#: gia' fatto e corretto sul basso, rifatto qui e ripreso dal test.
+DISTRIBUZIONE_BATTERIA = {1: 3, 2: 18, 3: 204, 4: 1088, 5: 3449, 6: 6168,
+                          7: 4795, 8: 2159, 9: 608, 10: 153, 11: 61, 12: 29,
+                          13: 11, 15: 2}
+
 #: Quante volte piu' del caso un colpo di batteria cade insieme a un onset di
 #: basso fuori griglia: 32,1% osservato contro 20,1% atteso, a 20 ms, su
 #: 144 838 onset. Misura 3 della casella 5, rifatta il 6 settembre 2026 dopo
@@ -1225,41 +1262,88 @@ def _giro_esteso(p) -> list[str]:
     return fuori
 
 
-def _voce_dal_profilo(prof, voce, rng, minimo=3):
-    """I passi che quella voce colpisce in UNA battuta, dal batterista vero.
-
-    ⚠️ FINO AL 30 AGOSTO 2026 QUI C'ERA UN PATTERN SCRITTO A MANO, uguale per
-    tutti i pezzi. L'utente l'ha sentito: «basso, batteria e in un certo modo
-    anche tastiere sono praticamente uguali a quelle dei pezzi precedenti».
-    Misurato: la batteria era IDENTICA -- le stesse 25 posizioni, gli stessi
-    colpi per battuta -- in tutti e tre i pezzi. E il dato per non farlo era
-    gia' in mano da dodici giorni: `GR.profilo()` porta, per ogni voce, QUALI
-    PASSI il batterista colpisce e quanti colpi ci mette.
+def _passi_possibili(prof, minimo: int = 3) -> dict[int, dict[str, float]]:
+    """passo -> {voce: probabilita'}, per i passi che il batterista suona.
 
     `Passo.colpi / Profilo.battute` e' la frequenza con cui quel batterista
-    colpisce quel passo. Qui e' usata come PROBABILITA' per battuta: un passo
-    che lui suona quasi sempre esce quasi sempre, uno raro esce raro. La
-    varieta' battuta-per-battuta viene percio' da lui e non da una tabella.
+    colpisce quel passo, ed e' usata come probabilita' per battuta: un passo
+    che lui suona quasi sempre esce quasi sempre, uno raro esce raro.
 
-    ⚠️ IL LIMITE, ed e' vero: riproduce la DENSITA' di ogni passo, non le
-    CORRELAZIONI fra passi nella stessa battuta. Un batterista che alterna due
-    figure intere qui esce con le due figure mescolate. Per averle davvero
-    servirebbe leggere le battute una per una, cioe' rifare in `GR` la catena
-    di origine, swing e taglio: e' un lavoro di libreria, non di generatore.
+    ⚠️ FINO AL 30 AGOSTO 2026 IL DISEGNO ERA UNA TABELLA SCRITTA A MANO,
+    uguale per tutti i pezzi, e l'utente l'aveva sentito: «basso, batteria e
+    in un certo modo anche tastiere sono praticamente uguali a quelle dei
+    pezzi precedenti». La varieta' viene da questo profilo, non da una
+    tabella.
 
     `minimo` scarta i passi con troppo pochi colpi perche' la quota significhi
     qualcosa: su un'esecuzione dove la cassa batte trenta volte in sessanta
     battute, un passo da due colpi e' rumore.
     """
-    ss = prof.passi.get(voce, [])
-    if not ss:
-        return None
-    scelti = [x.passo for x in ss
-              if x.colpi >= minimo
-              and rng.random() < min(1.0, x.colpi / max(1, prof.battute))]
-    if not scelti:
-        return None
-    return ''.join('x' if i in scelti else '.' for i in range(16))
+    fuori: dict[int, dict[str, float]] = {}
+    for voce in VOCI:
+        for x in prof.passi.get(voce, []):
+            if x.colpi >= minimo:
+                fuori.setdefault(x.passo, {})[voce] = min(
+                    1.0, x.colpi / max(1, prof.battute))
+    return fuori
+
+
+def _battuta_di_batteria(possibili, bersaglio: int, rng) -> dict[str, set]:
+    """Quali voci colpiscono quali passi, in UNA battuta.
+
+    ⚠️ FINO AL 6 SETTEMBRE 2026 OGNI VOCE SORTEGGIAVA OGNI PASSO PER CONTO
+    SUO, e l'utente lo ha sentito due volte in una settimana: «la batteria
+    resta discontinua». Sei voci indipendenti su venticinque passi fanno una
+    BINOMIALE LARGA -- 7,94 attacchi per battuta con deviazione 1,85 --
+    mentre un batterista di trio ne mette 6,31 con deviazione 1,37 (misura 8
+    di `tools/misura_spartizione.py`). Non era un problema di correlazione
+    fra battute: quella e' misurata nulla e pescare ogni battuta per conto
+    suo e' giusto. Era la LARGHEZZA del totale.
+
+    Quindi si sceglie prima QUANTI passi colpire -- il bersaglio, pescato
+    dalla distribuzione misurata -- e poi QUALI, coi pesi del profilo. Su
+    ogni passo scelto le voci entrano con la loro probabilita' condizionata,
+    cosi' cassa e ride possono ancora cadere insieme; se non entra nessuno,
+    entra la piu' probabile, perche' un passo scelto dev'essere colpito.
+
+    ⚠️ IL BERSAGLIO E' IN ATTACCHI, NON IN NOTE. Gli onset del JTD sono
+    rilevati su una traccia audio: due colpi insieme fanno un attacco solo, e
+    qui un passo con due voci conta uno. E' la stessa trappola che sul piano
+    dava «0% di accordi», e la corrispondenza fra un passo e un onset e' una
+    DECISIONE dichiarata, non una misura.
+
+    ⚠️ IL LIMITE che resta, ed era gia' scritto: riproduce la densita' di
+    ogni passo, non le CORRELAZIONI fra passi nella stessa battuta. Un
+    batterista che alterna due figure intere qui esce con le due figure
+    mescolate. La misura 8 ha escluso la correlazione FRA battute, non quella
+    DENTRO: sono due cose diverse e la seconda non e' stata misurata.
+    """
+    if not possibili:
+        return {}
+    pesi = {}
+    for passo, voci in possibili.items():
+        q = 1.0
+        for p in voci.values():
+            q *= 1 - p
+        pesi[passo] = 1 - q          # che QUALCHE voce colpisca quel passo
+
+    rimasti = [p for p in pesi if pesi[p] > 0]
+    scelti = []
+    for _ in range(min(bersaglio, len(rimasti))):
+        passo = rng.choices(rimasti, weights=[pesi[p] for p in rimasti])[0]
+        rimasti.remove(passo)
+        scelti.append(passo)
+
+    fuori: dict[str, set] = {}
+    for passo in scelti:
+        voci = possibili[passo]
+        attive = [v for v, p in voci.items()
+                  if rng.random() < min(1.0, p / pesi[passo])]
+        if not attive:
+            attive = [max(voci, key=voci.get)]
+        for v in attive:
+            fuori.setdefault(v, set()).add(passo)
+    return fuori
 
 
 def _aggancia(prof, voce: str, pattern: str, passi, battuta: int,
@@ -1315,6 +1399,7 @@ def batteria(p, prof, fuori_griglia=None) -> list[tuple[str, list, dict]]:
     # dove il giro si chiude e ne comincia un altro. Con la forma cablata era
     # `(11, 23)`, che valeva per il solo blues.
     fill_battute = {len(p.giro) * (g + 1) - 1 for g in range(GIRI - 1)}
+    possibili = _passi_possibili(prof)
 
     for battuta in range(battute):
         da = battuta * TICK_BATTUTA
@@ -1322,13 +1407,17 @@ def batteria(p, prof, fuori_griglia=None) -> list[tuple[str, list, dict]]:
             for drum, pattern in FILL.items():
                 per_drum[drum].extend(MU.passi(pattern, da=da))
             continue
+        scelta = _battuta_di_batteria(
+            possibili, _pesca(rng, DISTRIBUZIONE_BATTERIA), rng)
         for voce, drum in VOCI.items():
             if drum not in per_drum:
                 continue
-            pattern = _voce_dal_profilo(prof, voce, rng)
-            if pattern:
-                pattern = _aggancia(prof, voce, pattern,
-                                    fuori_griglia.get(battuta, ()), battuta)
+            passi_voce = scelta.get(voce, set())
+            pattern = ''.join('x' if i in passi_voce else '.'
+                              for i in range(16))
+            pattern = _aggancia(prof, voce, pattern,
+                                fuori_griglia.get(battuta, ()), battuta)
+            if 'x' in pattern:
                 per_drum[drum].extend(MU.passi(pattern, da=da))
 
     fuori = []
@@ -1559,7 +1648,7 @@ def main() -> int:
     avvisi = MU.avvertenze(doc)
     print(f'avvertenze(): {avvisi if avvisi else "nessuna"}')
 
-    remoto = MU.destinazione(p.nome, 9 if aggancio else VERSIONE)
+    remoto = MU.destinazione(p.nome, VERSIONE_AGGANCIO if aggancio else VERSIONE)
     locale = RADICE / 'out' / Path(remoto).name
     write_file(doc, locale, FormatTable.load(TABELLA))
     print(f'\nscritto {locale}')
