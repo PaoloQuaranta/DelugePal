@@ -528,6 +528,84 @@ def dentro_una_esecuzione(z, brani) -> dict:
             'battute': tot, 'media': media, 'deviazione': dev}
 
 
+#: Il criterio della misura 8, FISSATO PRIMA DI GUARDARE (6 settembre 2026,
+#: dopo il verdetto sulla versione 08). Sopra questa autocorrelazione a
+#: distanza 1 una linea NON e' una sequenza di battute indipendenti, e il
+#: generatore -- che pesca ogni battuta per conto suo -- sbaglia struttura pur
+#: avendo le marginali giuste. Sotto, l'indipendenza regge e «troppe
+#: variazioni» vuol dire un'altra cosa, da cercare altrove.
+SOGLIA_AUTOCORRELAZIONE = 0.10
+
+
+def la_continuita(z, brani) -> dict:
+    """MISURA 8. Una battuta somiglia a quella prima?
+
+    Nasce da un ascolto, non da un'agenda: sulla versione 08 del blues
+    l'utente ha detto «il basso ora ha un po' troppe variazioni» e «la
+    batteria resta discontinua», mentre i numeri dicevano che il pezzo era
+    MENO vario del corpus. Se un bassista vero varia in modo correlato da una
+    battuta all'altra, allora pescare ogni battuta indipendente e' sbagliato
+    anche quando la distribuzione e' giusta -- e sarebbe lo stesso difetto
+    gia' dichiarato per la batteria in `_voce_dal_profilo()`.
+
+    Due numeri per strumento: l'autocorrelazione a distanza 1 dei conti per
+    battuta, e la quota di battute che hanno lo STESSO conto della precedente
+    -- il secondo perche' e' leggibile, il primo perche' e' confrontabile.
+    """
+    fuori = {}
+    for strumento in ('bass', 'drums'):
+        auto, uguali, medie, devi = [], [], [], []
+        esecutori, usati = set(), 0
+        istogramma = collections.Counter()
+        for b in brani:
+            d = JT.battute(z, b.fname)
+            if len(d.battute) < MINIMO_BATTUTE:
+                continue
+            conti = [x.densita[strumento] for x in d.battute]
+            if st.pstdev(conti) == 0:
+                continue
+            usati += 1
+            esecutori.add(b.bassista if strumento == 'bass' else b.batterista)
+            auto.append(_correlazione(conti[:-1], conti[1:]))
+            uguali.append(sum(1 for a, c in zip(conti, conti[1:]) if a == c)
+                          / (len(conti) - 1))
+            medie.append(st.mean(conti))
+            devi.append(st.pstdev(conti))
+            istogramma.update(conti)
+        fuori[strumento] = {
+            'autocorrelazione': st.median(auto) if auto else None,
+            'uguali': st.median(uguali) if uguali else None,
+            'media': st.median(medie) if medie else None,
+            'deviazione': st.median(devi) if devi else None,
+            'istogramma': dict(istogramma),
+            'esecuzioni': usati, 'esecutori': len(esecutori)}
+
+    print('\nMISURA 8 -- la continuita fra una battuta e la successiva')
+    for strumento, r in fuori.items():
+        if r['autocorrelazione'] is None:
+            print(f'   {strumento}: n/d')
+            continue
+        print(f'   {strumento:6}  {r["esecuzioni"]} esecuzioni, '
+              f'{r["esecutori"]} esecutori')
+        print(f'           autocorrelazione a distanza 1: mediana '
+              f'{r["autocorrelazione"]:+.3f}')
+        print(f'           battute con lo stesso conto della precedente: '
+              f'{100 * r["uguali"]:.1f}%')
+        oltre = abs(r['autocorrelazione']) > SOGLIA_AUTOCORRELAZIONE
+        print(f'           -> {"NON e" if oltre else "e"} una sequenza di '
+              f'battute indipendenti (soglia {SOGLIA_AUTOCORRELAZIONE})')
+        print(f'           colpi per battuta: mediana delle medie '
+              f'{r["media"]:.2f}, delle deviazioni {r["deviazione"]:.2f}')
+        # ⚠️ Sotto indipendenza la quota di battute uguali alla precedente e'
+        # decisa SOLO dalla forma della distribuzione, quindi la si stampa
+        # accanto: e' li' che il generatore diverge, non nella correlazione.
+        tot = sum(r['istogramma'].values())
+        coda = [f'{n}:{100 * q / tot:.1f}%'
+                for n, q in sorted(r['istogramma'].items()) if q / tot >= 0.02]
+        print(f'           distribuzione ({tot} battute): ' + '  '.join(coda))
+    return fuori
+
+
 def main() -> int:
     """Le sette misure, DUE volte: su tutto il corpus e sul solo JTD-300.
 
@@ -551,6 +629,7 @@ def main() -> int:
             il_piano(z, brani)
             dove_cade_la_nota_in_piu(z, brani)
             dentro_una_esecuzione(z, brani)
+            la_continuita(z, brani)
     return 0
 
 
