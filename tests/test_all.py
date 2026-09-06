@@ -7056,6 +7056,67 @@ def test_walking_variabile():
           GJ.walking(giro, GJ.FORME_BLUES, random.Random(1)) == linea)
 
 
+def test_aggancio_batteria():
+    """L'aggancio puo' solo AGGIUNGERE colpi, e solo dove il basso esce.
+
+    ⚠️ E' la proprieta' su cui poggia l'attribuzione: se il sorteggio di base
+    si muovesse, la 09 differirebbe dalla 08 dappertutto invece che solo dove
+    c'e' l'aggancio, e il verdetto dell'ascolto non direbbe piu' niente.
+    """
+    import genera_jazz as GJ                                # noqa: PLC0415
+    from delugexml import groove as GR                      # noqa: PLC0415
+
+    base = ROOT / 'to-read' / 'MIDI' / 'groove-v1.0.0-midionly' / 'groove'
+    if not base.exists():
+        raise FileNotFoundError(str(base))
+    prof = GR.profilo(base, GJ.BLUES.esecuzione)
+
+    senza = GJ.batteria(GJ.BLUES, prof)
+    check('senza eventi fuori griglia la batteria e quella di sempre',
+          GJ.batteria(GJ.BLUES, prof, {}) == senza)
+
+    battute = len(GJ.BLUES.giro) * GJ.GIRI
+    tutti = {b: {2, 6, 10, 14} for b in range(battute)}
+    con = GJ.batteria(GJ.BLUES, prof, tutti)
+
+    def per_drum(uscita):
+        return {d: {n.pos for n in note} for d, note, _ in uscita}
+
+    prima, dopo = per_drum(senza), per_drum(con)
+    check('l aggancio non toglie mai un colpo',
+          all(prima[d] <= dopo.get(d, set()) for d in prima),
+          str({d: len(prima[d] - dopo.get(d, set())) for d in prima}))
+    aggiunti = sum(len(dopo[d] - prima.get(d, set())) for d in dopo)
+    check('e ne aggiunge almeno uno', aggiunti > 0, f'{aggiunti} colpi')
+
+    # ⚠️ il passo si prende col PIU' VICINO e non con la divisione intera:
+    # `applica_groove()` sposta i colpi fino a +-11 tick, cioe' meno di mezzo
+    # passo (12), quindi il piu' vicino resta quello voluto mentre la
+    # divisione intera li butta nella cella accanto. E' anche il motivo per
+    # cui mettere il colpo sullo stesso passo del basso NON garantisce che i
+    # due eventi cadano dentro i 20 ms della misura.
+    nuovi = [pos for d in dopo for pos in dopo[d] - prima.get(d, set())]
+
+    def passo_di(pos):
+        return round((pos % GJ.TICK_BATTUTA) / 24) % 16
+
+    check('i colpi in piu stanno solo sui passi del basso',
+          all(passo_di(pos) in {2, 6, 10, 14} for pos in nuovi),
+          str(sorted({passo_di(pos) for pos in nuovi})))
+
+    check('e a parita di seme l aggancio e riproducibile',
+          per_drum(GJ.batteria(GJ.BLUES, prof, tutti)) == dopo)
+
+    p = 0.30
+    atteso = GJ._probabilita_aggancio(p)
+    check('p_extra porta la probabilita complessiva al rapporto misurato',
+          abs((p + (1 - p) * atteso) - GJ.RAPPORTO_AGGANCIO * p) < 1e-9,
+          f'{p + (1 - p) * atteso:.4f} vs {GJ.RAPPORTO_AGGANCIO * p:.4f}')
+    check('e ha il tetto a 1 quando p e alta',
+          GJ._probabilita_aggancio(0.8) == 1.0,
+          str(GJ._probabilita_aggancio(0.8)))
+
+
 def _righe_di_kit(path):
     """Le note della clip di kit di una song, per drum.
 
@@ -7083,6 +7144,39 @@ def test_jazz08_ha_la_batteria_della_07():
     sette, otto = _righe_di_kit(a), _righe_di_kit(b)
     check('la 08 ha le stesse righe di batteria della 07', sette == otto,
           'diverse: ' + str([d for d in sette if sette[d] != otto.get(d)]))
+
+
+def test_jazz09_aggiunge_e_basta():
+    """La 09 cambia la batteria e NIENT'ALTRO, e solo in piu'.
+
+    SALTA senza i pezzi generati. ⚠️ Se qualche colpo SPARISCE, il secondo
+    sorteggio ha toccato il primo: e' il difetto che tutto l'impianto e' fatto
+    per rendere impossibile, e va corretto, non accettato.
+    """
+    otto, nove = ROOT / 'out' / 'JAZZ08.XML', ROOT / 'out' / 'JAZZ09.XML'
+    for x in (otto, nove):
+        if not x.exists():
+            raise FileNotFoundError(str(x))
+    a, b = _righe_di_kit(otto), _righe_di_kit(nove)
+
+    persi = aggiunti = 0
+    for d, note in a.items():
+        prima = {n.pos for n in note}
+        dopo = {n.pos for n in b.get(d, [])}
+        persi += len(prima - dopo)
+        aggiunti += len(dopo - prima)
+    check('la 09 non perde nessun colpo rispetto alla 08', persi == 0,
+          f'{persi} persi')
+    check('e ne aggiunge', aggiunti > 0, f'{aggiunti} colpi in piu')
+
+    def basso(path):
+        doc = parse_file(path)
+        return [[(r.get('y'), S.read_notes(r)) for r in S.note_rows(c)]
+                for _, c in S.clips(doc)
+                if S.clip_label(c) == 'Square Saw Bass']
+
+    check('e il basso della 09 e identico a quello della 08',
+          basso(otto) == basso(nove))
 
 
 if __name__ == '__main__':

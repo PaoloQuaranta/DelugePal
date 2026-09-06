@@ -121,6 +121,12 @@ ESECUZIONE = 'drummer10/session1/1'
 #:       ⚠️ LA BATTERIA NON CAMBIA, ed e' verificato da un test: se cambiasse,
 #:       il verdetto dell'ascolto non parlerebbe piu' del solo basso.
 #:
+#:   09  6 settembre 2026. LA BATTERIA SI AGGANCIA AL BASSO: dove lui ha una
+#:       nota fuori griglia, lei ha 1,60 volte piu' probabilita' di colpire --
+#:       il rapporto misurato sulla casella 5. Rispetto alla 08 cambia SOLO
+#:       questo, e solo in piu': mai un colpo in meno, e mai su un passo che
+#:       quel batterista non suoni. Si scrive con `--aggancio`.
+#:
 #: ⚠️ E' il primo giro CHIUSO di questo progetto: una lamentela all'orecchio,
 #: una misura sul corpus, una correzione, e lo stesso orecchio che approva.
 #: Le tre versioni restano una coppia controllata a tre -- batteria, basso e
@@ -1107,44 +1113,46 @@ VOCI = {
 #: in una schermata e chi deve guardare le posizioni non scrolla.
 TENUTI = tuple(VOCI.values())
 
-#: Spang-a-lang: i sei passi su cui sta l'83% dei colpi di ride
-#: dell'esecuzione (181 su 219). Il template ci mette sopra la forma
-#: dinamica: 127 sui movimenti, 70 sulle crome swingate.
-RIDE = 'x...x.x.x...x.x.'
+#: Quante volte piu' del caso un colpo di batteria cade insieme a un onset di
+#: basso fuori griglia: 32,1% osservato contro 20,1% atteso, a 20 ms, su
+#: 144 838 onset. Misura 3 della casella 5, rifatta il 6 settembre 2026 dopo
+#: aver corretto il difetto di bordo. `[MIS]`, e confermato su JTD-300
+#: (33,7% contro 21,3%, cioe' 1,58x).
+#:
+#: ⚠️ Il corpus da' il RAPPORTO, non il meccanismo: usarlo come moltiplicatore
+#: di probabilita' e' una decisione. E ⚠️ QUALE pezzo del kit risponda il
+#: corpus NON lo puo' dire -- gli onset di batteria del JTD sono aggregati --
+#: quindi si agganciano tutte le voci, ed e' un'altra decisione dichiarata.
+RAPPORTO_AGGANCIO = 1.60
 
-#: Il piede sul 2 e sul 4. Velocity 55-56 dal template, e uno scarto di
-#: -10,75 e -11,17 tick: e' la STRATIFICAZIONE misurata, ed e' la prima
-#: volta che finisce dentro un pezzo invece che dentro una coppia di prova.
-PEDALE = '....x.......x...'
+#: ⚠️ Un seme a parte, con stato per cella. E' il punto su cui poggia
+#: l'attribuzione: il sorteggio di base NON si tocca. Toccarlo, anche solo
+#: cambiandone lo schema in uno equivalente in distribuzione, sposterebbe ogni
+#: estrazione successiva, e la batteria della 09 non sarebbe piu' confrontabile
+#: con quella della 08.
+SEME_AGGANCIO = 55
 
-#: Cassa rada. Il template da' 96 sul passo 0 e 86 sull'8 -- il feathering
-#: -- e 118-127 sui passi 4 e 12, che sono le bombe.
-CASSE = (
-    'x.......x.......',   # solo il feathering
-    'x.......x.....x.',   # con una bomba sul levare del 4
-    'x.....x.x.......',   # con una bomba sul levare del 2
-    'x.......x...x...',   # con la bomba sul 4
-)
-CASSA_PER_BATTUTA = (
-    0, 0, 1, 0, 0, 2, 0, 3, 0, 1, 0, 0,
-    0, 1, 0, 2, 0, 0, 3, 0, 0, 1, 0, 0,
-    0, 2, 0, 0, 1, 0, 0, 3, 0, 0, 1, 0,
-)
 
-#: Comping di rullante, irregolare. Tutti i passi usati stanno nel profilo.
-RULLANTI = (
-    '................',   # tace
-    '.......x....x...',
-    '..........x.....',
-    '....x.......x...',
-    '.......x..x.....',
-    '..........x...x.',
-)
-RULLANTE_PER_BATTUTA = (
-    0, 1, 0, 2, 1, 0, 3, 0, 1, 2, 4, 0,
-    2, 1, 4, 0, 1, 3, 2, 5, 1, 4, 2, 0,
-    0, 1, 2, 0, 4, 1, 3, 0, 1, 2, 5, 0,
-)
+def _probabilita_aggancio(p: float) -> float:
+    """La probabilita' del SECONDO sorteggio, data quella del profilo.
+
+    Il primo sorteggio mette il colpo con probabilita' `p`. Perche' quella
+    complessiva sia `RAPPORTO_AGGANCIO * p` serve `p + (1 - p) * q = r p`,
+    cioe' `q = (r - 1) p / (1 - p)`, col tetto a 1 che scatta da
+    `p >= 1 / r` in su.
+    """
+    if p >= 1:
+        return 1.0
+    return min(1.0, (RAPPORTO_AGGANCIO - 1) * p / (1 - p))
+
+#: Le costanti RIDE, PEDALE, CASSE, CASSA_PER_BATTUTA, RULLANTI e
+#: RULLANTE_PER_BATTUTA stavano qui: erano i pattern di batteria scritti a
+#: mano, sostituiti nella versione 07 dal profilo del batterista vero
+#: (`_voce_dal_profilo()`) e da allora definiti e mai usati. Tolte il 6
+#: settembre 2026. Il loro contenuto -- lo spang-a-lang sui sei passi,
+#: il piede sul 2 e sul 4, le bombe di cassa -- non e' perso: e' descritto
+#: nella casella 6 di `docs/repertori/jazz.md`, che e' la fonte da cui erano
+#: stati scritti.
 
 #: Il FILL, sulle battute 12 e 24 -- il turnaround. Casella 9: un fill dura
 #: UNA battuta, sta sui 15,7 colpi, il ride cade dal 20,4% al 3,3% e i tom
@@ -1252,9 +1260,53 @@ def _voce_dal_profilo(prof, voce, rng, minimo=3):
     return ''.join('x' if i in scelti else '.' for i in range(16))
 
 
-def batteria(p, prof) -> list[tuple[str, list, dict]]:
-    """Le righe di batteria, tutte le battute, col template posato sopra."""
+def _aggancia(prof, voce: str, pattern: str, passi, battuta: int,
+              minimo: int = 3) -> str:
+    """I colpi in piu' dove il basso esce dalla griglia.
+
+    ⚠️ NON inventa passi: gira solo su quelli che il profilo di quel
+    batterista contiene davvero, con la stessa soglia `minimo` di
+    `_voce_dal_profilo()`. Un passo che lui non suona resta vuoto.
+
+    ⚠️ E non tocca il sorteggio di base: e' un SECONDO sorteggio, con seme e
+    stato propri per ogni cella, che puo' solo trasformare un punto in una x.
+    """
+    if not passi:
+        return pattern
+    per_passo = {x.passo: x for x in prof.passi.get(voce, [])}
+    fuori = list(pattern)
+    for passo in sorted(passi):
+        if passo >= len(fuori) or fuori[passo] == 'x':
+            continue
+        x = per_passo.get(passo)
+        if x is None or x.colpi < minimo:
+            continue
+        p = min(1.0, x.colpi / max(1, prof.battute))
+        # ⚠️ il seme e' una STRINGA e non una tupla: `random.Random` accetta
+        # int, float, str e bytes, e una tupla solleva TypeError
+        rng = random.Random(f'{SEME_AGGANCIO}|{battuta}|{voce}|{passo}')
+        if rng.random() < _probabilita_aggancio(p):
+            fuori[passo] = 'x'
+    return ''.join(fuori)
+
+
+def batteria(p, prof, fuori_griglia=None) -> list[tuple[str, list, dict]]:
+    """Le righe di batteria, tutte le battute, col template posato sopra.
+
+    `fuori_griglia` e' battuta -> i passi su cui il BASSO ha una nota fuori
+    dai movimenti. Dove ce n'e' una, la batteria ha `RAPPORTO_AGGANCIO` volte
+    piu' probabilita' di colpire: e' la misura 3 della casella 5, l'unico
+    punto in cui il corpus dice che i due si rispondono davvero -- nella
+    densita' per battuta non lo fanno (+0,058, cioe' niente), e generare una
+    batteria «che si infittisce dove si infittisce il basso» sarebbe inventare
+    una regola che il corpus nega.
+
+    ⚠️ Senza `fuori_griglia` questa funzione da' ESATTAMENTE cio' che dava
+    prima del 6 settembre 2026, ed e' voluto: e' la guardia che rende
+    attribuibile il verdetto dell'ascolto sulla versione 08.
+    """
     per_drum: dict[str, list] = {d: [] for d in TENUTI}
+    fuori_griglia = fuori_griglia or {}
     rng = random.Random(SEME_BATTERIA)
     battute = len(p.giro) * GIRI
     # ⚠️ il fill sta sull'ULTIMA battuta dei giri che non sono l'ultimo: e'
@@ -1273,6 +1325,8 @@ def batteria(p, prof) -> list[tuple[str, list, dict]]:
                 continue
             pattern = _voce_dal_profilo(prof, voce, rng)
             if pattern:
+                pattern = _aggancia(prof, voce, pattern,
+                                    fuori_griglia.get(battuta, ()), battuta)
                 per_drum[drum].extend(MU.passi(pattern, da=da))
 
     fuori = []
@@ -1285,8 +1339,24 @@ def batteria(p, prof) -> list[tuple[str, list, dict]]:
     return fuori
 
 
-def costruisci(p, prof):
-    """La song intera. Ritorna (doc, rapporti)."""
+def passi_fuori_griglia(linea) -> dict[int, set[int]]:
+    """Battuta -> i passi su cui il basso ha una nota FUORI dai movimenti.
+
+    Il passo e' quello della griglia a sedicesimi che usa la batteria: 16 per
+    battuta, 24 tick l'uno. Un passo multiplo di 4 e' un movimento e non
+    conta: l'aggancio riguarda gli eventi fuori griglia, non i battere.
+    """
+    fuori: dict[int, set[int]] = {}
+    for n in linea:
+        passo = (n.tick % TICK_BATTUTA) // 24
+        if passo % 4 == 0:
+            continue
+        fuori.setdefault(n.tick // TICK_BATTUTA, set()).add(passo)
+    return fuori
+
+
+def costruisci(p, prof, aggancio: bool = False):
+    """La song intera. Ritorna (doc, rapporti, linea, righe_batteria)."""
     lunghezza = TICK_BATTUTA * len(p.giro) * GIRI
     doc = parse_file(TEMPL)
     S.set_bpm(doc.root, BPM)
@@ -1317,7 +1387,9 @@ def costruisci(p, prof):
     for nome in [S.nome_drum(d) for d in S.drums(kit)]:
         if nome and nome not in TENUTI:
             K.remove_drum(doc, kit, nome)
-    for drum, note, rapporto in batteria(p, prof):
+    righe_batteria = batteria(
+        p, prof, passi_fuori_griglia(linea) if aggancio else None)
+    for drum, note, rapporto in righe_batteria:
         rapporti.append(rapporto)
         rapporti.append(MU.scrivi(doc, clip_kit, note, dove=drum))
 
@@ -1368,7 +1440,7 @@ def costruisci(p, prof):
             note.setdefault(altezza, []).extend(ns)
     rapporti.append(MU.scrivi(doc, clip_tema, note))
 
-    return doc, rapporti
+    return doc, rapporti, linea, righe_batteria
 
 
 def main() -> int:
@@ -1380,7 +1452,12 @@ def main() -> int:
             print(f'manca: {p}')
         return 1
 
-    quale = sys.argv[1] if len(sys.argv) > 1 else 'jazz'
+    # ⚠️ il flag si toglie PRIMA di leggere il nome del pezzo, o
+    # `genera_jazz.py jazz --aggancio` cercherebbe un pezzo `--aggancio`
+    argomenti = [a for a in sys.argv[1:] if not a.startswith('--')]
+    aggancio = '--aggancio' in sys.argv[1:]
+
+    quale = argomenti[0] if argomenti else 'jazz'
     if quale not in PEZZI:
         print(f'pezzo {quale!r} sconosciuto, usare {sorted(PEZZI)}')
         return 1
@@ -1391,7 +1468,11 @@ def main() -> int:
     print(f'template: {prof.id}  {prof.style}  {prof.bpm} BPM  '
           f'BUR {prof.bur:.2f}  {prof.battute} battute')
 
-    doc, rapporti = costruisci(p, prof)
+    if aggancio:
+        print('con --aggancio: la batteria segue gli eventi fuori griglia '
+              f'del basso ({RAPPORTO_AGGANCIO}x la probabilita del profilo)')
+    doc, rapporti, linea, righe_batteria = costruisci(p, prof,
+                                                      aggancio=aggancio)
 
     print('\n--- rapporti (regola 4) ---')
     for r in rapporti:
@@ -1414,7 +1495,7 @@ def main() -> int:
     avvisi = MU.avvertenze(doc)
     print(f'avvertenze(): {avvisi if avvisi else "nessuna"}')
 
-    remoto = MU.destinazione(p.nome, VERSIONE)
+    remoto = MU.destinazione(p.nome, 9 if aggancio else VERSIONE)
     locale = RADICE / 'out' / Path(remoto).name
     write_file(doc, locale, FormatTable.load(TABELLA))
     print(f'\nscritto {locale}')
