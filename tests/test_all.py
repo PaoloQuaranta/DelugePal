@@ -5,6 +5,8 @@ alla fine viene restituito un exit code diverso da zero se qualcosa e' rotto.
 """
 from __future__ import annotations
 
+import collections
+import statistics
 import sys
 from pathlib import Path
 
@@ -6979,6 +6981,79 @@ def test_misura_fase_e_distribuzione():
               all(abs(m - MS.MEDIA_BERSAGLIO) <= MS.TOLLERANZA_MEDIA
                   for m in sette['medie']),
               f"{len(sette['medie'])} esecuzioni")
+
+
+def test_walking_variabile():
+    """Il basso non fa piu' quattro note per battuta.
+
+    I bersagli vengono dalla casella 5: la distribuzione dentro l'esecuzione
+    (media 4,24, deviazione 0,94), i silenzi piu' frequenti sul 2 e sul 4. Le
+    tolleranze sono larghe apposta -- si controlla che il generatore stia
+    DENTRO la distribuzione misurata, non che la riproduca al decimo.
+    """
+    import random                                           # noqa: PLC0415
+    import genera_jazz as GJ                                # noqa: PLC0415
+
+    giro = list(GJ.GIRO_BLUES) * 30       # 360 battute, per avere statistica
+    linea = GJ.walking(giro, GJ.FORME_BLUES, random.Random(1))
+
+    check('walking() ritorna NotaBasso, non numeri',
+          all(isinstance(n, GJ.NotaBasso) for n in linea), str(linea[0]))
+    check('le note sono in ordine di tick',
+          all(a.tick < b.tick for a, b in zip(linea, linea[1:])))
+    check('nessuna nota esce dal registro del basso',
+          all(GJ.BASSO_MIN <= n.altezza <= GJ.BASSO_MAX for n in linea))
+
+    per_battuta = collections.Counter(n.tick // GJ.TICK_BATTUTA for n in linea)
+    conti = [per_battuta.get(i, 0) for i in range(len(giro))]
+    media = sum(conti) / len(conti)
+    dev = statistics.pstdev(conti)
+    check('la media sta vicino a 4,24 del corpus', 4.0 <= media <= 4.6,
+          f'{media:.2f}')
+    check('la deviazione sta vicino a 0,94 e non e zero', 0.7 <= dev <= 1.2,
+          f'{dev:.2f}')
+    diverse = 100 * sum(1 for c in conti if c != 4) / len(conti)
+    check('le battute diverse da quattro sono circa la meta',
+          42 <= diverse <= 62, f'{diverse:.1f}%')
+
+    # i movimenti non attaccati, e su quale cadono
+    muti = collections.Counter()
+    ticks = {n.tick for n in linea}
+    for i in range(len(giro)):
+        for m in range(4):
+            if i * GJ.TICK_BATTUTA + m * 96 not in ticks:
+                muti[m + 1] += 1
+    quota = 100 * sum(muti.values()) / (4 * len(giro))
+    check('i movimenti non attaccati sono circa il 15%',
+          11 <= quota <= 19, f'{quota:.1f}%')
+    check('e sono piu frequenti sul 2 e sul 4 che sull 1 e sul 3',
+          muti[2] + muti[4] > muti[1] + muti[3],
+          f'2+4={muti[2] + muti[4]}, 1+3={muti[1] + muti[3]}')
+
+    # la nota tenuta: chi salta un movimento allunga quella prima
+    lunghe = [n for n in linea if n.durata >= 192]
+    check('le note tenute ci sono, e durano almeno due movimenti',
+          bool(lunghe), f'{len(lunghe)} note')
+    check('nessuna nota si sovrappone alla successiva',
+          all(a.tick + a.durata <= b.tick for a, b in zip(linea, linea[1:])))
+
+    # le note in piu': stanno fuori dal movimento e vanno per grado
+    in_piu = [n for n in linea if n.tick % 96]
+    check('ci sono note fuori dal movimento', bool(in_piu),
+          f'{len(in_piu)} note')
+    check('e stanno tutte alla posizione dichiarata',
+          all(n.tick % 96 == GJ.TICK_NOTA_IN_PIU for n in in_piu),
+          str({n.tick % 96 for n in in_piu}))
+    cromatiche = 0
+    for n in in_piu:
+        seguenti = [x for x in linea if x.tick > n.tick]
+        if seguenti and abs(seguenti[0].altezza - n.altezza) == 1:
+            cromatiche += 1
+    check('e sono approcci cromatici alla nota che viene',
+          cromatiche == len(in_piu), f'{cromatiche} su {len(in_piu)}')
+
+    check('a parita di seme la linea e identica',
+          GJ.walking(giro, GJ.FORME_BLUES, random.Random(1)) == linea)
 
 
 if __name__ == '__main__':

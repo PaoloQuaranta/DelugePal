@@ -230,6 +230,93 @@ FORME_BLUES = (
 #: walking resta chiaro. `[WEB]`.
 BASSO_MIN, BASSO_MAX = 28, 48
 
+#: Quante note per battuta, e con che frequenza -- i pesi sono i conteggi
+#: grezzi del corpus. `[MIS]` sul Jazz Trio Database, misura 7 di
+#: `tools/misura_spartizione.py`, 6 settembre 2026: 319 esecuzioni, 65
+#: bassisti, 34 048 battute, media 4,24 e deviazione 0,94.
+#:
+#: ⚠️ NON E' LA DISTRIBUZIONE CHE LA CASELLA 5 PUBBLICA. Quella mette insieme
+#: 1099 esecuzioni e vale 1,33 di dispersione perche' somma la varieta' di un
+#: bassista dentro un pezzo (1,03) e le differenze fra bassisti (0,84). Un
+#: pezzo generato e' UNA esecuzione: pescare dall'aggregata gli darebbe il 29%
+#: di varieta' in piu' di quanta ne abbia un bassista vero. Questa tiene le
+#: sole esecuzioni la cui media sta entro 0,2 da 4,27.
+DISTRIBUZIONE_BASSO = {0: 10, 1: 103, 2: 589, 3: 5308, 4: 16577,
+                       5: 8690, 6: 2209, 7: 455, 8: 87, 9: 19, 10: 1}
+
+#: Su quale movimento cade il silenzio, in percentuale di beat non attaccati.
+#: Misura 2 della casella 5: il basso tace di piu' sul 2 e sul 4, in tutt'e
+#: due le passate. `[MIS]`. Qui servono come PESI relativi fra i quattro
+#: movimenti; il livello assoluto lo da' `QUOTA_SILENZIO`.
+QUOTE_SILENZIO = (16.0, 18.5, 15.0, 17.4)
+
+#: Quanti movimenti non attaccati in tutto, in percentuale. Misura 2 della
+#: casella 5, gia' corretta del 10,1% di allineamenti mancati che il controllo
+#: 2 ha trovato. `[MIS]`.
+QUOTA_SILENZIO = 15.0
+
+
+def _quota_silenzi_in_piu() -> float:
+    """La probabilita' dei silenzi che NON sono imposti dal numero di note.
+
+    ⚠️ I silenzi sono di due specie, e confonderle sbaglia tutt'e due le
+    misure. Una battuta da tre note ha per forza un movimento non attaccato:
+    e' un silenzio FORZATO dal numero pescato, e la distribuzione ne impone
+    gia' 0,20 per battuta, cioe' il 5,0% dei movimenti. Il corpus pero' ne
+    misura il 15,0%: i restanti sono silenzi IN PIU', dove il bassista lascia
+    il movimento e suona altrove nella battuta, e ognuno va compensato da una
+    croma perche' il conto delle note resti quello pescato.
+
+    Questa quota si RICAVA dalla distribuzione invece di essere tarata a mano,
+    quindi se un giorno la distribuzione cambia il 15,0% continua a uscire.
+
+    Il perche' di questa costruzione, misurato il 6 settembre 2026: legare i
+    silenzi al solo numero di note da' il 5,6% invece del 15,0%; sorteggiarli
+    indipendenti e poi far quadrare il conto togliendo altri movimenti da' il
+    19,4%. Cosi' escono giuste tutt'e due.
+    """
+    tot = sum(DISTRIBUZIONE_BASSO.values())
+    forzati = sum(max(0, 4 - k) * v for k, v in DISTRIBUZIONE_BASSO.items()) / tot
+    bersaglio = 4 * QUOTA_SILENZIO / 100
+    vivi = 4 - forzati
+    return max(0.0, (bersaglio - forzati) / vivi) if vivi else 0.0
+
+#: Dove cade la nota in piu' dentro il movimento, in tick su 96. 48 e' la
+#: croma DRITTA, che il firmware poi swinga: `set_swing()` documenta che il
+#: display E' la posizione percentuale del levare, quindi con `SWING = 64` la
+#: croma atterra a fase 0,64.
+#:
+#: ⚠️ IL CRITERIO FISSATO PRIMA DI MISURARE NON HA POTUTO DECIDERE, e non per
+#: colpa dei dati: era fissato sulla fase di PICCO, che si sposta di 0,05 solo
+#: cambiando l'ampiezza degli intervalli dell'istogramma. La statistica che
+#: non ne dipende e' la MEDIANA, e vale 0,651 su tutto il corpus e 0,636 su
+#: JTD-300 -- cioe' 0,64 sta in mezzo alle due, e la differenza dalla prima e'
+#: 4,7 ms a 128 BPM, MENO DI UN TICK: non sarebbe scrivibile nemmeno volendo.
+#: ⚠️ Il picco pero' sta piu' in alto (0,70-0,75) e i quartili sono
+#: larghissimi (0,41-0,76): le note fuori movimento di un bassista NON sono
+#: una cosa sola, e questo numero ne sceglie una. `[MIS]` sulla mediana,
+#: decisione su cosa farne.
+TICK_NOTA_IN_PIU = 48
+
+#: ⚠️ Un seme a parte per il basso, come `SEME_BATTERIA` per la batteria:
+#: cambiare il basso non deve muovere l'assolo, e viceversa. Senza, un pezzo
+#: non e' piu' confrontabile col precedente.
+SEME_BASSO = 34
+
+
+class NotaBasso(NamedTuple):
+    """Una nota del walking: dove sta, che altezza ha, quanto spazio occupa.
+
+    ⚠️ Fino al 6 settembre 2026 `walking()` ritornava numeri di nota e basta,
+    perche' le note erano quattro per battuta a durata fissa. Adesso una nota
+    puo' tenere due movimenti e un'altra durare mezzo, quindi la posizione e
+    la durata sono parte del risultato e non piu' del chiamante.
+    """
+
+    tick: int
+    altezza: int
+    durata: int
+
 
 def _vicino(classe: int, riferimento: int) -> int:
     """La nota di quella classe di altezza piu' vicina a `riferimento`,
@@ -245,15 +332,60 @@ def _vicino(classe: int, riferimento: int) -> int:
     return migliore if migliore is not None else riferimento
 
 
-def walking(giro_esteso: list[str], forme_basso) -> list[int]:
-    """La linea di walking: una nota per movimento, 4 per battuta.
+def _approccio(da: int, a: int) -> int:
+    """Il vicino cromatico di `a` piu' vicino a `da`, dentro il registro.
 
-    Fondamentale sul primo movimento, due gradi dell'accordo, e sul quarto
-    l'AVVICINAMENTO alla fondamentale della battuta successiva -- cromatico
-    da sopra o da sotto secondo quale dei due e' piu' vicino a dove si e'
-    arrivati. Non e' un'invenzione: e' la costruzione che la skill descrive.
+    E' l'idioma che il quarto movimento usa da sempre -- `bass.md` della
+    skill, «stepwise/chromatic connection», `[WEB]` -- e dal 6 settembre 2026
+    lo usa anche la nota in piu'.
+
+    ⚠️ Che altezza abbia la nota in piu' e' una DECISIONE e non una misura:
+    JTD porta gli onset del basso ma NON le altezze. Scelto questo perche' non
+    introduce nessun principio nuovo: la costruzione del walking resta una
+    sola, e la nota in piu' tira verso quella dopo invece di stare ferma.
     """
-    note, precedente = [], 41       # fa2, da cui si parte
+    sopra, sotto = a + 1, a - 1
+    scelto = sopra if abs(sopra - da) <= abs(sotto - da) else sotto
+    return max(BASSO_MIN, min(BASSO_MAX, scelto))
+
+
+def _pesca(rng, distribuzione: dict[int, int]) -> int:
+    """Un valore pescato dalla distribuzione, dove i pesi sono conteggi."""
+    if not distribuzione:
+        raise ValueError('DISTRIBUZIONE_BASSO e vuota: va riempita con la '
+                         'riga che stampa la misura 7 di misura_spartizione')
+    chiavi = sorted(distribuzione)
+    return rng.choices(chiavi, weights=[distribuzione[k] for k in chiavi])[0]
+
+
+def walking(giro_esteso: list[str], forme_basso, rng) -> list[NotaBasso]:
+    """La linea di walking, che NON e' quattro note per battuta.
+
+    Le ALTEZZE sono quelle di sempre: fondamentale sul primo movimento, due
+    gradi dell'accordo, e sul quarto l'AVVICINAMENTO cromatico alla
+    fondamentale della battuta successiva. Non e' un'invenzione: e' la
+    costruzione che la skill descrive.
+
+    Sopra ci stanno tre cose misurate sul Jazz Trio Database, casella 5 di
+    `docs/repertori/jazz.md`:
+
+      - QUANTE note per battuta si pesca da `DISTRIBUZIONE_BASSO`. Fino alla
+        versione 07 erano 4,00 con deviazione 0,00 su 228 battute, cioe'
+        FUORI dalla distribuzione del corpus e non «un po' meno varie»;
+      - i movimenti NON attaccati sono il 15,0%, piu' spesso il 2 e il 4
+        (`QUOTE_SILENZIO`), e la nota precedente si allunga a coprirli;
+      - le note IN PIU' cadono a `TICK_NOTA_IN_PIU` dentro il movimento.
+
+    ⚠️ DUE COSE QUI DENTRO SONO DECISIONI, non misure, perche' JTD porta
+    onset senza altezze e senza note-off:
+
+      - che la nota in piu' sia un approccio cromatico (vedi `_approccio()`);
+      - che il movimento saltato sia una nota TENUTA e non un silenzio.
+        «Nessun attacco» non e' «silenzio»: la corda puo' ancora suonare, e il
+        corpus non puo' distinguere le due cose. La casella 5 scrive «il basso
+        tace» ed e' la lettura che il dato consente, non un fatto osservato.
+    """
+    per_battuta, precedente = [], 41       # fa2, da cui si parte
     for i, casella in enumerate(giro_esteso):
         parti = casella.split('|')
         dopo = giro_esteso[(i + 1) % len(giro_esteso)].split('|')[0]
@@ -277,14 +409,72 @@ def walking(giro_esteso: list[str], forme_basso) -> list[int]:
                 battuta.append(_vicino((fond + grado) % 12, battuta[-1]))
 
         # il quarto movimento: cromatico verso la fondamentale che viene
-        bersaglio = _vicino(prossima, battuta[-1])
-        sopra, sotto = bersaglio + 1, bersaglio - 1
-        avvicinamento = sopra if abs(sopra - battuta[-1]) <= abs(sotto - battuta[-1]) else sotto
-        battuta.append(max(BASSO_MIN, min(BASSO_MAX, avvicinamento)))
+        battuta.append(_approccio(battuta[-1], _vicino(prossima, battuta[-1])))
 
-        note.extend(battuta)
+        per_battuta.append(battuta)
         precedente = battuta[-1]
-    return note
+
+    # --- quali movimenti attaccano, e dove vanno le note in piu' -----------
+    grezzi: list[tuple[int, int]] = []
+    aggiunte: list[int] = []                      # i tick delle note in piu'
+    quota_in_piu = _quota_silenzi_in_piu()
+    media_quote = sum(QUOTE_SILENZIO) / 4
+    for i, altezze in enumerate(per_battuta):
+        base = i * TICK_BATTUTA
+        quante = _pesca(rng, DISTRIBUZIONE_BASSO)
+
+        # ⚠️ La primissima nota del pezzo non si toglie mai: «tenere la nota
+        # precedente» richiede che ce ne sia una, e all'inizio non c'e'.
+        vivi = [0, 1, 2, 3]
+        togliibili = [m for m in vivi if not (i == 0 and m == 0)]
+
+        # i silenzi FORZATI dal numero di note pescato, e quelli IN PIU'
+        # (vedi `_quota_silenzi_in_piu()`). Un silenzio in piu' si prende solo
+        # se resta abbastanza spazio per compensarlo con una croma: le
+        # aggiunte stanno una per movimento vivo, quindi servono almeno
+        # `quante / 2` movimenti in piedi.
+        da_togliere = max(0, 4 - quante)
+        for m in togliibili:
+            if len(vivi) - da_togliere <= (quante + 1) // 2:
+                break
+            if rng.random() < quota_in_piu * QUOTE_SILENZIO[m] / media_quote:
+                da_togliere += 1
+
+        for _ in range(min(da_togliere, len(togliibili))):
+            scelto = rng.choices(
+                togliibili, weights=[QUOTE_SILENZIO[m] for m in togliibili])[0]
+            vivi.remove(scelto)
+            togliibili.remove(scelto)
+
+        for m in vivi:
+            grezzi.append((base + m * 96, altezze[m]))
+        # Le aggiunte colmano la differenza fra le note pescate e i movimenti
+        # rimasti vivi, una per movimento al massimo: per costruzione sono
+        # tante quanti i silenzi IN PIU', ed e' il motivo per cui il conto
+        # delle note resta quello pescato mentre i silenzi arrivano al 15%.
+        # ⚠️ SU QUALE movimento cada la nota in piu' e' una decisione: la
+        # misura c'e' a portata di mano -- la stessa passata che calcola la
+        # fase sa in quale movimento ogni onset cade -- ma e' stata lasciata
+        # fuori per non allargare il lavoro. Se l'ascolto dice che cadono nel
+        # posto sbagliato, il dato e' a una passata di distanza.
+        for m in rng.sample(vivi, min(max(0, quante - len(vivi)), len(vivi))):
+            aggiunte.append(base + m * 96 + TICK_NOTA_IN_PIU)
+
+    # --- le altezze delle aggiunte, e le durate ---------------------------
+    per_tick = dict(grezzi)
+    for tick in aggiunte:
+        seguente = min((t for t in per_tick if t > tick), default=None)
+        if seguente is None:
+            continue           # una aggiunta dopo l'ultima nota del pezzo
+        precede = max(t for t in per_tick if t < tick)
+        per_tick[tick] = _approccio(per_tick[precede], per_tick[seguente])
+
+    fine = len(per_battuta) * TICK_BATTUTA
+    ordinati = sorted(per_tick)
+    return [NotaBasso(tick=t, altezza=per_tick[t],
+                      durata=(ordinati[k + 1] if k + 1 < len(ordinati)
+                              else fine) - t)
+            for k, t in enumerate(ordinati)]
 
 
 # --------------------------------------------------------------------------
