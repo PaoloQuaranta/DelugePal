@@ -51,7 +51,9 @@ Senza, si ferma dicendolo.
 """
 from __future__ import annotations
 
+import collections
 import random
+import statistics as st
 import sys
 from typing import NamedTuple
 from pathlib import Path
@@ -1339,6 +1341,68 @@ def batteria(p, prof, fuori_griglia=None) -> list[tuple[str, list, dict]]:
     return fuori
 
 
+#: Millisecondi per tick al tempo del pezzo: 60000 / (BPM * 96). A 128 BPM
+#: sono 4,883 ms, quindi la finestra di 20 ms della casella 5 vale 4,1 tick.
+MS_PER_TICK = 60000 / (BPM * 96)
+
+
+def confronto_col_corpus(linea, righe) -> str:
+    """I numeri del pezzo appena scritto, accanto a quelli del corpus.
+
+    Le cifre del corpus vengono dalla casella 5 di `docs/repertori/jazz.md`,
+    misure 2, 3 e 7, nella versione rifatta il 6 settembre 2026.
+
+    ⚠️ Il riferimento casuale della coincidenza e' calcolato come lo calcola
+    `tools/misura_spartizione.py` -- densita' di colpi al secondo per
+    l'ampiezza della finestra nei due versi -- e non stimato a occhio.
+    """
+    battute = max(n.tick for n in linea) // TICK_BATTUTA + 1
+    conti = collections.Counter(n.tick // TICK_BATTUTA for n in linea)
+    per_battuta = [conti.get(i, 0) for i in range(battute)]
+
+    ticks = {n.tick for n in linea}
+    muti = collections.Counter()
+    for i in range(battute):
+        for m in range(4):
+            if i * TICK_BATTUTA + m * 96 not in ticks:
+                muti[m + 1] += 1
+
+    colpi = sorted(n.pos for _, note, _ in righe for n in note)
+    fuori = sorted(t for t in ticks if t % 96)
+    durata_s = battute * TICK_BATTUTA * MS_PER_TICK / 1000
+    densita = len(colpi) / durata_s if durata_s else 0
+
+    r = ['--- il pezzo, accanto al corpus (casella 5) ---',
+         f'   note per battuta: media {st.mean(per_battuta):.2f} '
+         f'(corpus 4,24), deviazione {st.pstdev(per_battuta):.2f} '
+         f'(corpus 0,94, generatore fino alla 07: 0,00)',
+         '   quante note        battute       %']
+    d = collections.Counter(per_battuta)
+    for n in sorted(d):
+        r.append(f'   {n:16}   {d[n]:7}   {100 * d[n] / battute:5.1f}')
+    diverse = 100 * sum(1 for c in per_battuta if c != 4) / battute
+    r.append(f'   battute diverse da quattro: {diverse:.1f}% (corpus 51,3%)')
+    r.append(f'   movimenti non attaccati: '
+             f'{100 * sum(muti.values()) / (4 * battute):.1f}% '
+             '(corpus 15,0%)')
+    r.append('   per movimento: ' + ', '.join(
+        f'{m}: {100 * muti[m] / battute:.1f}%' for m in (1, 2, 3, 4))
+        + '   (corpus 16,0 / 18,5 / 15,0 / 17,4)')
+    r.append(f'   note di basso fuori dai movimenti: {len(fuori)}')
+    for ms, atteso_corpus, visto_corpus in ((20, 20.1, 32.1), (30, 30.1, 38.3),
+                                            (50, 50.2, 66.6)):
+        soglia = ms / MS_PER_TICK
+        vicini = sum(1 for t in fuori
+                     if any(abs(t - c) <= soglia for c in colpi))
+        atteso = 100 * min(1.0, densita * 2 * ms / 1000)
+        quota = 100 * vicini / len(fuori) if fuori else 0
+        rapporto = f'{quota / atteso:.2f}x' if atteso else 'n/d'
+        r.append(f'   entro {ms:2} ms: {quota:5.1f}% contro {atteso:5.1f}% '
+                 f'attesi = {rapporto:>6}   (corpus {visto_corpus} contro '
+                 f'{atteso_corpus} = {visto_corpus / atteso_corpus:.2f}x)')
+    return '\n'.join(r)
+
+
 def passi_fuori_griglia(linea) -> dict[int, set[int]]:
     """Battuta -> i passi su cui il basso ha una nota FUORI dai movimenti.
 
@@ -1500,6 +1564,9 @@ def main() -> int:
     write_file(doc, locale, FormatTable.load(TABELLA))
     print(f'\nscritto {locale}')
     print(f'destinazione: {remoto}')
+
+    print()
+    print(confronto_col_corpus(linea, righe_batteria))
 
     print('\n--- racconta() ---')
     print(MU.racconta(doc))
