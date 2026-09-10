@@ -177,16 +177,28 @@ ESECUZIONE = 'drummer10/session1/1'
 #:       praticamente assente per intere battute».
 #:       ⚠️ IL BASSO NON CAMBIA rispetto alla 12.
 #:
+#:   15  10 settembre 2026. LA BATTERIA LASCIA SPAZIO. Verdetto sulla 14:
+#:       «va molto meglio, ora abbiamo un ritmo... in generale suona un po'
+#:       pesante. e' giusto variare aggiungendo piuttosto che togliere, ma non
+#:       si puo' applicare come una regola assoluta: un buon groove deve
+#:       lasciare anche spazio agli altri strumenti».
+#:       Due cose: la cassa fa il feathering pieno solo sotto l'assolo e batte
+#:       1 e 3 sotto i temi (le assenze del batterista vero sono sezionali,
+#:       non sparse), e le aggiunte RISPONDONO ai buchi della melodia invece
+#:       di raddoppiarla -- niente aggiunte alle battute 21-22, dove l'assolo
+#:       fa dodici note. 447 colpi contro 513.
+#:       ⚠️ IL BASSO NON CAMBIA rispetto alla 12.
+#:
 #: ⚠️ E' il primo giro CHIUSO di questo progetto: una lamentela all'orecchio,
 #: una misura sul corpus, una correzione, e lo stesso orecchio che approva.
 #: Le tre versioni restano una coppia controllata a tre -- batteria, basso e
 #: comping hanno le stesse identiche note in tutte e tre -- quindi i tre
 #: verdetti parlano dell'assolo e di nient'altro.
-VERSIONE = 14
+VERSIONE = 15
 
 #: `--aggancio` scrive una versione a parte per non collidere col nome della
 #: 10. Restera' cosi' finche' l'aggancio non e' deciso: vedi la 09.
-VERSIONE_AGGANCIO = 15
+VERSIONE_AGGANCIO = 16
 
 BPM = 128
 #: Casella 10 di `docs/repertori/jazz.md`, riga HARDBOP/BEBOP. `figura='1/8'`

@@ -29,6 +29,14 @@ scritta il 10 settembre 2026:
      ride il resto e' troppo rarefatto, praticamente assente per intere
      battute».
 
+⚠️ E UNA TERZA, dopo il verdetto sulla versione 14: «quasi sempre» non e'
+«sempre». Il batterista suona la cassa in 70 battute su 85 e il rullante in
+77, e le sue assenze sono SEZIONALI -- nelle battute 1-8 la cassa non c'e'
+affatto. Riempire ogni battuta ha dato una batteria «un po' pesante», e
+«un buon groove deve lasciare anche spazio agli altri strumenti». Da qui le
+`SEZIONI`, e le aggiunte che rispondono ai buchi della melodia invece di
+raddoppiarla.
+
 I passi, sulla griglia a sedicesimi: 0 = movimento 1, 4 = movimento 2,
 8 = movimento 3, 12 = movimento 4. I dispari 2, 6, 10, 14 sono i levare, che
 il firmware swinga.
@@ -54,47 +62,63 @@ STRATI = {
     'kick': 'x...x...x...x...',
 }
 
+#: LE SEZIONI: dove lo strato cambia. `(prima, ultima, nome, sostituzioni)`.
+#:
+#: ⚠️ Nasce dal verdetto sulla versione 14: «in generale è giusto variare
+#: aggiungendo piuttosto che togliere, ma non si può applicare come una regola
+#: assoluta. un buon groove di batteria deve lasciare anche spazio agli altri
+#: strumenti, non può riempire sempre tutto».
+#:
+#: Avevo trasformato «quasi sempre» in «sempre»: il batterista vero suona la
+#: cassa in 70 battute su 85 e il rullante in 77, non in tutte. E `[OSS]` le
+#: sue assenze sono SEZIONALI, non sparse: nelle battute 1-8 la cassa non c'e'
+#: affatto, poi entra e resta.
+#:
+#: Qui la cassa fa il feathering pieno solo sotto l'assolo. Sotto i due temi
+#: batte 1 e 3, che e' meta' del peso, perche' li' la melodia ha bisogno di
+#: spazio.
+SEZIONI = (
+    (1,  12, 'tema',   {'kick': 'x.......x.......'}),
+    (13, 24, 'assolo', {}),
+    (25, 36, 'tema',   {'kick': 'x.......x.......'}),
+)
+
 #: LE AGGIUNTE, battuta per battuta (da 1). Si sommano allo strato.
 #:
 #: Il vocabolario e' quello che il batterista usa davvero: i levare (passi 6,
-#: 10, 14) e i movimenti 3 e 4 (8, 12). Esempi osservati: `....x.....x.....`
-#: (2 + levare del 3), `....x.......x.x.` (2 + 4 + levare del 4),
-#: `....x...x...x.x.` (2 + 3 + 4 + levare del 4).
+#: 10, 14) e i movimenti 3 e 4 (8, 12).
 #:
-#: QUANTE aggiunte segue l'arco del pezzo. `[LIB]` Riley p. 30: il solista
-#: sale verso un culmine, scende, o sta in piano, e il batterista sta in
-#: sincronia. Qui la forma la sappiamo in anticipo: tema in piano, assolo che
-#: sale fino alle battute 21-22, tema che scende.
+#: ⚠️ DOVE vanno le ha decise la melodia, non un arco astratto. La batteria
+#: RISPONDE dove il tema o l'assolo lasciano un buco, e TACE dove sono pieni.
+#: Nella versione 14 era il contrario: le aggiunte piu' fitte stavano alle
+#: battute 21-22, che sono le due in cui l'assolo fa dodici note. Era un muro.
+#:
+#: Densita' del tema, battuta per battuta:  4 3 1 2 4 3 1 0 4 4 3 2
+#: Densita' dell'assolo (battute 13-24):    5 6 6 2 5 7 6 1 12 12 5 0
+#:
+#: ⚠️ Le battute 12 e 24 non compaiono: le sovrascrive il fill del turnaround.
 AGGIUNTE = {
-    # --- primo giro, il TEMA: una aggiunta ogni due battute --------------
-    2:  {'rullante': '..........x.....'},
-    4:  {'rullante': '............x...'},
-    6:  {'rullante': '..............x.'},
-    8:  {'rullante': '............x.x.'},
-    10: {'rullante': '......x.........'},
-    11: {'rullante': '..........x.....'},
+    # --- primo giro, il TEMA: si risponde dove il tema respira -------------
+    3:  {'rullante': '..........x.....'},   # il tema ha UNA nota
+    4:  {'rullante': '......x.........'},   # il tema entra solo alla fine
+    7:  {'rullante': '..........x...x.'},   # una nota sola
+    8:  {'rullante': '......x...x.....'},   # il tema TACE: e' il posto piu' libero
+    11: {'rullante': '............x...'},
 
-    # --- secondo giro, l'ASSOLO: sale fino alla 21-22 ---------------------
-    13: {'rullante': '..........x.....'},
-    14: {'rullante': '......x.........'},
-    15: {'rullante': '............x.x.'},
-    16: {'rullante': '........x.......', 'kick': '..............x.'},
-    17: {'rullante': '......x.......x.'},
-    18: {'rullante': '........x...x...'},
-    19: {'rullante': '..........x...x.', 'kick': '...........x....'},
-    20: {'rullante': '......x...x...x.'},
-    21: {'rullante': '........x...x.x.', 'kick': '..............x.'},
-    22: {'rullante': '......x...x...x.'},
-    23: {'rullante': '..........x.x.x.'},
+    # --- secondo giro, l'ASSOLO -------------------------------------------
+    16: {'rullante': '......x.....x.x.'},   # assolo a 2 note: si risponde
+    17: {'rullante': '..........x.....'},
+    19: {'rullante': '............x...'},
+    20: {'rullante': '..x...x...x...x.',    # assolo a 1 nota: la risposta piena
+         'kick':     '..............x.'},
+    # 21 e 22: l'assolo fa DODICI note. La batteria non aggiunge niente
+    23: {'rullante': '..........x.x...'},
 
-    # --- terzo giro, il TEMA di nuovo: scende -----------------------------
-    25: {'rullante': '............x...'},
-    26: {'rullante': '..........x.....'},
-    27: {'rullante': '..............x.'},
-    28: {'rullante': '............x...'},
-    30: {'rullante': '..........x.....'},
-    32: {'rullante': '............x.x.'},
-    34: {'rullante': '..........x.....'},
+    # --- terzo giro, il TEMA di nuovo -------------------------------------
+    27: {'rullante': '..........x.....'},
+    28: {'rullante': '......x.........'},
+    31: {'rullante': '..........x...x.'},
+    32: {'rullante': '......x...x.....'},   # il tema tace
     35: {'rullante': '............x...'},
     36: {'rullante': 'x...............', 'kick': 'x...............'},
 }
@@ -104,6 +128,24 @@ def _somma(*patterns: str) -> str:
     """Sovrappone piu' pattern: un passo suona se lo suona almeno uno."""
     return ''.join('x' if any(p[i] == 'x' for p in patterns) else '.'
                    for i in range(16))
+
+
+def _strato(battuta: int) -> dict[str, str]:
+    """Lo strato di quella battuta: il default, con le sostituzioni della
+    sezione in cui cade."""
+    fuori = dict(STRATI)
+    for prima, ultima, _nome, sostituzioni in SEZIONI:
+        if prima <= battuta <= ultima:
+            fuori.update(sostituzioni)
+    return fuori
+
+
+def sezione(battuta: int) -> str:
+    """Come si chiama la sezione in cui cade quella battuta."""
+    for prima, ultima, nome, _ in SEZIONI:
+        if prima <= battuta <= ultima:
+            return nome
+    return ''
 
 
 def per_battuta(battute: int) -> list[dict[str, str]]:
@@ -116,12 +158,16 @@ def per_battuta(battute: int) -> list[dict[str, str]]:
             if voce not in STRATI:
                 raise ValueError(f'battuta {b}: voce {voce!r} sconosciuta, '
                                  f'ci sono {sorted(STRATI)}')
+    for _, _, _nome, sostituzioni in SEZIONI:
+        for voce in sostituzioni:
+            if voce not in STRATI:
+                raise ValueError(f'sezione: voce {voce!r} sconosciuta')
 
     fuori = []
     for b in range(1, battute + 1):
         extra = AGGIUNTE.get(b, {})
         fuori.append({voce: _somma(base, extra.get(voce, '.' * 16))
-                      for voce, base in STRATI.items()})
+                      for voce, base in _strato(b).items()})
     return fuori
 
 
@@ -131,7 +177,7 @@ def racconta(battute: int = 36) -> str:
     righe = []
     for i, parte in enumerate(per_battuta(battute), 1):
         colpi = sum(parte[v].count('x') for v in voci)
-        segno = ' <-' if i in AGGIUNTE else ''
+        segno = f'  {sezione(i)}' + (' <-' if i in AGGIUNTE else '')
         righe.append(f'{i:3}  ' + '  '.join(f'{parte[v]:16}' for v in voci)
                      + f'  {colpi:2}{segno}')
     return '\n'.join(righe)

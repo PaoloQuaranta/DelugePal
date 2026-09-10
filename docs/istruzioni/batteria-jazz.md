@@ -38,6 +38,14 @@ hh pedale  ....x.......x...    2 e 4
 rullante   ....x...........    il movimento 2
 ```
 
+⚠️ **«Quasi sempre» non e' «sempre», e la differenza si sente.** Riempire
+ogni battuta ha prodotto una batteria «un po' pesante»: *«un buon groove di
+batteria deve lasciare anche spazio agli altri strumenti, non puo' riempire
+sempre tutto»* (verdetto sulla versione 14). E le assenze del batterista vero
+sono **sezionali**, non sparse: nelle battute 1-8 la cassa non c'e' affatto,
+poi entra e resta. Quindi lo strato si alleggerisce **per sezione** -- sotto i
+temi la cassa batte 1 e 3 invece di quattro -- non a caso battuta per battuta.
+
 ⚠️ **La varieta' sono AGGIUNTE SOPRA quello strato, non presenza o assenza.**
 Il rullante tiene il 2 e ci mette sopra da zero a tre colpi, sui levare
 (passi 6, 10, 14) e sui movimenti 3 e 4. Esempi presi dalle battute vere:
@@ -150,8 +158,19 @@ dice «che bello… mmh… ciao» e riattacca. *«Quale delle due musiche ti
 piacerebbe di più?»*
 
 `[DEC]` Su un pezzo generato non c'è un solista che ascolta in tempo reale, ma
-la forma la conosciamo: **si decide l'arco in anticipo**, giro per giro, e la
-densità del comping lo segue.
+**la melodia la conosciamo già, nota per nota**. Quindi la regola diventa
+eseguibile: la batteria **risponde dove la melodia lascia un buco** e **tace
+dove è piena**.
+
+⚠️ È l'errore della versione 14: le aggiunte più fitte stavano alle battute
+21-22, che sono le due in cui l'assolo fa dodici note. Raddoppiare invece di
+rispondere fa un muro. Le densità del tema e dell'assolo si contano prima di
+scrivere un colpo:
+
+```
+tema     4 3 1 2 4 3 1 0 4 4 3 2      <- si risponde su 3, 4, 7, 8
+assolo   5 6 6 2 5 7 6 1 12 12 5 0    <- si risponde su 16 e 20, si tace su 21-22
+```
 
 ---
 

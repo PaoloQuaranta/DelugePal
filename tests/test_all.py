@@ -7198,24 +7198,34 @@ def test_batteria_scritta():
           all(set(v) == set(BS.STRATI) for v in parti))
     check('il ride e uguale in ogni battuta',
           all(v['ride'] == BS.STRATI['ride'] for v in parti))
-    check('la cassa fa i quattro movimenti in ogni battuta',
-          all(all(v['kick'][s] == 'x' for s in (0, 4, 8, 12)) for v in parti),
-          str([i + 1 for i, v in enumerate(parti)
-               if not all(v['kick'][s] == 'x' for s in (0, 4, 8, 12))]))
+    # ⚠️ la cassa fa i quattro movimenti SOTTO L'ASSOLO e meta' sotto i temi:
+    # «quasi sempre» non e' «sempre», ed e' il verdetto sulla versione 14
+    quattro = [i + 1 for i, v in enumerate(parti)
+               if all(v['kick'][s] == 'x' for s in (0, 4, 8, 12))]
+    check('la cassa fa i quattro movimenti sotto l assolo',
+          all(b in quattro for b in range(13, 24)), str(quattro))
+    check('e sotto i temi ne fa meno, per lasciare spazio',
+          not any(b in quattro for b in (1, 5, 9, 25, 29, 33)), str(quattro))
+    check('ma la cassa non tace mai del tutto',
+          all('x' in v['kick'] for v in parti))
     check('il rullante ha il movimento 2 in ogni battuta',
           all(v['rullante'][4] == 'x' for v in parti))
     check('il charleston sta su 2 e 4 in ogni battuta',
           all(v['charleston a pedale'][4] == 'x'
               and v['charleston a pedale'][12] == 'x' for v in parti))
 
-    # le aggiunte AGGIUNGONO e basta: nessun passo dello strato sparisce
+    # le aggiunte AGGIUNGONO e basta: nessun passo sparisce dallo strato
+    # DELLA SUA SEZIONE. ⚠️ non da `STRATI`: le sezioni lo sostituiscono
+    # apposta, ed e' il modo in cui la batteria lascia spazio.
     perse = []
     for i, parte in enumerate(parti, 1):
-        for voce, base in BS.STRATI.items():
+        for voce, base in BS._strato(i).items():
             if any(base[s] == 'x' and parte[voce][s] != 'x' for s in range(16)):
                 perse.append((i, voce))
-    check('nessuna aggiunta toglie un colpo allo strato', not perse,
-          str(perse[:4]))
+    check('nessuna aggiunta toglie un colpo allo strato della sezione',
+          not perse, str(perse[:4]))
+    check('e le sezioni sono tre, tema-assolo-tema',
+          [n for _, _, n, _ in BS.SEZIONI] == ['tema', 'assolo', 'tema'])
 
     con = [i + 1 for i, v in enumerate(parti)
            if any(v[k] != BS.STRATI[k] for k in BS.STRATI)]
@@ -7223,9 +7233,12 @@ def test_batteria_scritta():
           len(con) >= battute // 3, f'{len(con)} su {battute}')
 
     colpi = [sum(v[k].count('x') for k in BS.STRATI) for v in parti]
-    check('i colpi per battuta stanno fra dodici e venti',
-          all(12 <= c <= 20 for c in colpi),
+    check('i colpi per battuta stanno fra dieci e diciotto',
+          all(10 <= c <= 18 for c in colpi),
           f'min {min(colpi)}, max {max(colpi)}')
+    # dove la melodia e' piu' fitta la batteria NON aggiunge
+    check('alle battute 21-22, dove l assolo fa dodici note, nessuna aggiunta',
+          21 not in BS.AGGIUNTE and 22 not in BS.AGGIUNTE)
 
     # una voce inventata deve fermare tutto
     BS.AGGIUNTE[1] = {'tromba': 'x...............'}
