@@ -7139,9 +7139,11 @@ def test_batteria_tiene_il_tempo():
         raise FileNotFoundError(str(base))
     prof = GR.profilo(base, GJ.BLUES.esecuzione)
 
-    righe = GJ.batteria(GJ.BLUES, prof)
-    battute = len(GJ.BLUES.giro) * GJ.GIRI
-    fill = {len(GJ.BLUES.giro) * (g + 1) - 1 for g in range(GJ.GIRI - 1)}
+    pezzo = GJ.RHYTHM       # non ha parte scritta: usa le quote
+    prof = GR.profilo(base, pezzo.esecuzione)
+    righe = GJ.batteria(pezzo, prof)
+    battute = len(pezzo.giro) * GJ.GIRI
+    fill = {len(pezzo.giro) * (g + 1) - 1 for g in range(GJ.GIRI - 1)}
     normali = [b for b in range(battute) if b not in fill]
 
     def passo_di(pos):
@@ -7176,7 +7178,52 @@ def test_batteria_tiene_il_tempo():
     check('e la deviazione intorno ai 2,08', 1.1 <= dev <= 2.7, f'{dev:.2f}')
 
     check('a parita di seme la batteria e identica',
-          GJ.batteria(GJ.BLUES, prof) == righe)
+          GJ.batteria(pezzo, prof) == righe)
+
+
+def test_batteria_scritta():
+    """La batteria scritta segue il «pacing» di Riley. SALTA senza Groove MIDI.
+
+    Non controlla che sia bella -- quello lo dice l'orecchio -- ma le tre
+    proprieta' che l'istruzione prescrive e che il generatore a sorteggio non
+    poteva avere: il ride non si buca mai, le figure si RIPETONO, e fra una
+    frase e l'altra si TACE.
+    """
+    import batteria_scritta as BS                           # noqa: PLC0415
+    import genera_jazz as GJ                                # noqa: PLC0415
+
+    battute = len(GJ.BLUES.giro) * GJ.GIRI
+    parti = BS.per_battuta(battute)
+
+    check('il ride c e in tutte le battute',
+          all(v.get('ride') == BS.RIDE for v in parti))
+    check('e il charleston pure',
+          all(v.get('charleston a pedale') == BS.PEDALE for v in parti))
+
+    parlano = [i for i, v in enumerate(parti)
+               if 'rullante' in v or 'kick' in v]
+    tacciono = battute - len(parlano)
+    check('ci sono battute di solo tempo, e sono la meta o piu',
+          tacciono >= battute // 2, f'{tacciono} su {battute}')
+
+    # le figure si ripetono: ogni figura del piano compare almeno due volte,
+    # tranne la chiusa che per definizione succede una volta sola
+    usi = collections.Counter(BS.PIANO.values())
+    ripetute = [n for n, q in usi.items() if q >= 2 or n == 'chiusa']
+    check('ogni figura del piano si ripete',
+          len(ripetute) == len(usi), str(dict(usi)))
+
+    # una figura occupa due battute consecutive
+    for prima, nome in BS.PIANO.items():
+        coppia = [parti[prima - 1], parti[prima]]
+        check(f'la figura {nome!r} alla battuta {prima} occupa due battute',
+              any('rullante' in v or 'kick' in v for v in coppia))
+
+    # la cassa non suona mai i quarti (Riley p. 24)
+    quarti = [i + 1 for i, v in enumerate(parti)
+              if all(v.get('kick', '.' * 16)[s] == 'x' for s in (0, 4, 8, 12))]
+    check('la cassa non suona mai i quattro movimenti', not quarti,
+          str(quarti))
 
 
 def _righe_di_kit(path):

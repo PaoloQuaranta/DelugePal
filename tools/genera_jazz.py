@@ -65,7 +65,8 @@ from delugexml import song as S, create as C                 # noqa: E402
 from delugexml import kit as K, musica as MU                 # noqa: E402
 from delugexml import groove as GR                           # noqa: E402
 from delugexml.writer import FormatTable
-import walking_scritto as WS                     # noqa: E402
+import walking_scritto as WS
+import batteria_scritta as BS                     # noqa: E402
 
 RADICE = Path(__file__).resolve().parent.parent
 TEMPL = RADICE / 'refs' / 'songs' / 'TEMPL0.XML'
@@ -159,16 +160,23 @@ ESECUZIONE = 'drummer10/session1/1'
 #:       ⚠️ LA BATTERIA NON CAMBIA rispetto alla 11: il verdetto parla del
 #:       solo basso. E i tre giri sono diversi apposta: tema, assolo, tema.
 #:
+#:   13  10 settembre 2026. LA BATTERIA E' SCRITTA, non generata. Ride e
+#:       charleston tengono il tempo e non cambiano mai; rullante e cassa
+#:       parlano a figure di DUE battute, ripetute, con quattro battute di
+#:       silenzio in mezzo -- il «pacing» di Riley, p. 20. 17 battute su 36
+#:       hanno comping, 19 sono solo tempo.
+#:       ⚠️ IL BASSO NON CAMBIA rispetto alla 12.
+#:
 #: ⚠️ E' il primo giro CHIUSO di questo progetto: una lamentela all'orecchio,
 #: una misura sul corpus, una correzione, e lo stesso orecchio che approva.
 #: Le tre versioni restano una coppia controllata a tre -- batteria, basso e
 #: comping hanno le stesse identiche note in tutte e tre -- quindi i tre
 #: verdetti parlano dell'assolo e di nient'altro.
-VERSIONE = 12
+VERSIONE = 13
 
 #: `--aggancio` scrive una versione a parte per non collidere col nome della
 #: 10. Restera' cosi' finche' l'aggancio non e' deciso: vedi la 09.
-VERSIONE_AGGANCIO = 13
+VERSIONE_AGGANCIO = 14
 
 BPM = 128
 #: Casella 10 di `docs/repertori/jazz.md`, riga HARDBOP/BEBOP. `figura='1/8'`
@@ -755,6 +763,10 @@ class Pezzo(NamedTuple):
     #: Se c'e', il basso non si genera: si legge. `None` vuol dire che quel
     #: pezzo usa ancora il vecchio `walking()` a sorteggio.
     linea_scritta: str | None = None
+    #: Se vero, la batteria non si genera: si legge da
+    #: `tools/batteria_scritta.py`. Come `linea_scritta`, ma la parte di
+    #: batteria e' una sola e sta tutta li'.
+    batteria_scritta: bool = False
 
 
 #: ⚠️ IL BLUES E' RIMASTO IDENTICO NEL RIFACIMENTO, e non e' un'affermazione:
@@ -781,6 +793,7 @@ BLUES = Pezzo(
     forme_basso=FORME_BLUES,
     registro='do3',
     linea_scritta=WS.LINEA_BLUES,
+    batteria_scritta=True,
 )
 
 # --------------------------------------------------------------------------
@@ -1357,11 +1370,13 @@ def batteria(p, prof, fuori_griglia=None,
     cadono SOPRA i colpi del ride: cassa 61% sul passo 0 e 33% sull'8,
     rullante 44% sul 4 e sul 12, charleston a pedale 57% e 54% sugli stessi.
     """
-    if quote is None:
+    battute = len(p.giro) * GIRI
+    scritta = BS.per_battuta(battute) if p.batteria_scritta else None
+    if quote is None and scritta is None:
         quote = GR.quote_per_voce(BASE_GROOVE, p.esecuzione)
+    quote = quote or {}
     per_drum: dict[str, list] = {d: [] for d in TENUTI}
     rng = random.Random(SEME_BATTERIA)
-    battute = len(p.giro) * GIRI
     fill_battute = {len(p.giro) * (g + 1) - 1 for g in range(GIRI - 1)}
     fuori_griglia = fuori_griglia or {}
 
@@ -1374,16 +1389,22 @@ def batteria(p, prof, fuori_griglia=None,
         for voce, drum in VOCI.items():
             if drum not in per_drum:
                 continue
-            q = quote.get(voce)
-            if q is None:
-                continue
-            if voce != VOCE_TEMPO and rng.random() >= q.presenza:
-                continue                # questa battuta la voce tace
-            fisso = voce == VOCE_TEMPO
-            pattern = ''.join(
-                'x' if (fisso and quota >= SOGLIA_TEMPO)
-                or rng.random() < quota else '.'
-                for quota in q.passi)
+            if scritta is not None:
+                pattern = scritta[battuta].get(voce)
+                if not pattern:
+                    continue            # questa voce tace: e' il silenzio
+                                        # che fa la frase, non un buco
+            else:
+                q = quote.get(voce)
+                if q is None:
+                    continue
+                if voce != VOCE_TEMPO and rng.random() >= q.presenza:
+                    continue            # questa battuta la voce tace
+                fisso = voce == VOCE_TEMPO
+                pattern = ''.join(
+                    'x' if (fisso and quota >= SOGLIA_TEMPO)
+                    or rng.random() < quota else '.'
+                    for quota in q.passi)
             pattern = _aggancia(prof, voce, pattern,
                                 fuori_griglia.get(battuta, ()), battuta)
             if 'x' in pattern:
