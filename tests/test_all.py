@@ -7267,6 +7267,45 @@ def test_jazz10_cambia_solo_la_batteria():
           f'{prima} colpi -> {dopo}')
 
 
+def test_walking_scritto():
+    """La linea di basso scritta a mano sta in piedi.
+
+    Non controlla che sia bella -- quello lo dice l'orecchio -- ma che sia
+    scrivibile: note in registro, niente sovrapposizioni, battute giuste.
+    """
+    import walking_scritto as WS                            # noqa: PLC0415
+    import genera_jazz as GJ                                # noqa: PLC0415
+
+    eventi = WS.leggi()
+    check('la linea ha 36 battute come il pezzo',
+          WS.battute() == len(GJ.BLUES.giro) * GJ.GIRI, str(WS.battute()))
+    check('tutte le note stanno nel registro del basso',
+          all(WS.BASSO_MIN <= y <= WS.BASSO_MAX for _, y, _ in eventi))
+    check('le note sono in ordine e non si sovrappongono',
+          all(a[0] + a[2] <= b[0] for a, b in zip(eventi, eventi[1:])))
+    check('ogni nota dura almeno mezza croma',
+          all(d >= 48 for _, _, d in eventi), str(min(d for _, _, d in eventi)))
+
+    ticks = {t for t, _, _ in eventi}
+    fuori = {t % 96 for t in ticks} - {0, 48}
+    check('gli attacchi cadono sui movimenti o sulle crome', not fuori,
+          str(fuori))
+
+    lunghe = [d for _, _, d in eventi if d > 96]
+    check('i respiri ci sono: qualche nota dura piu di un movimento',
+          bool(lunghe), f'{len(lunghe)} note tenute')
+
+    # una riga malformata deve fermare tutto, non passare in silenzio
+    for cattiva, perche in (('do2 re2 mi2', 'tre gettoni invece di quattro'),
+                            ('- do2 re2 mi2', 'il pezzo comincia con un respiro'),
+                            ('do0 re2 mi2 fa2', 'nota fuori registro')):
+        try:
+            WS.leggi(cattiva)
+            check(f'leggi() rifiuta: {perche}', False, 'nessuna eccezione')
+        except ValueError:
+            check(f'leggi() rifiuta: {perche}', True)
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

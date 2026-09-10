@@ -64,7 +64,8 @@ from delugexml import parse_file, write_file                 # noqa: E402
 from delugexml import song as S, create as C                 # noqa: E402
 from delugexml import kit as K, musica as MU                 # noqa: E402
 from delugexml import groove as GR                           # noqa: E402
-from delugexml.writer import FormatTable                     # noqa: E402
+from delugexml.writer import FormatTable
+import walking_scritto as WS                     # noqa: E402
 
 RADICE = Path(__file__).resolve().parent.parent
 TEMPL = RADICE / 'refs' / 'songs' / 'TEMPL0.XML'
@@ -151,16 +152,23 @@ ESECUZIONE = 'drummer10/session1/1'
 #:       Verdetto sulla 10: «suona a grappoli di eventi discontinui, manca il
 #:       flow di un ritmo costante mantenuto da qualche parte».
 #:
+#:   12  10 settembre 2026. IL BASSO E' SCRITTO, non generato. Ogni nota
+#:       viene dalla procedura di `docs/istruzioni/walking.md` -- Jazz Theory
+#:       Justified cap. IV -- e sta in `tools/walking_scritto.py` con accanto
+#:       la regola che l'ha prodotta. Zero sorteggi.
+#:       ⚠️ LA BATTERIA NON CAMBIA rispetto alla 11: il verdetto parla del
+#:       solo basso. E i tre giri sono diversi apposta: tema, assolo, tema.
+#:
 #: ⚠️ E' il primo giro CHIUSO di questo progetto: una lamentela all'orecchio,
 #: una misura sul corpus, una correzione, e lo stesso orecchio che approva.
 #: Le tre versioni restano una coppia controllata a tre -- batteria, basso e
 #: comping hanno le stesse identiche note in tutte e tre -- quindi i tre
 #: verdetti parlano dell'assolo e di nient'altro.
-VERSIONE = 11
+VERSIONE = 12
 
 #: `--aggancio` scrive una versione a parte per non collidere col nome della
 #: 10. Restera' cosi' finche' l'aggancio non e' deciso: vedi la 09.
-VERSIONE_AGGANCIO = 12
+VERSIONE_AGGANCIO = 13
 
 BPM = 128
 #: Casella 10 di `docs/repertori/jazz.md`, riga HARDBOP/BEBOP. `figura='1/8'`
@@ -743,6 +751,10 @@ class Pezzo(NamedTuple):
     forme_basso: tuple      #: una forma di walking per battuta, per i tre giri
     tema_chiusa: tuple      #: l'ultima battuta del pezzo, che non gira
     registro: str           #: l'ancora del comping
+    #: La linea di basso SCRITTA, nel formato di `tools/walking_scritto.py`.
+    #: Se c'e', il basso non si genera: si legge. `None` vuol dire che quel
+    #: pezzo usa ancora il vecchio `walking()` a sorteggio.
+    linea_scritta: str | None = None
 
 
 #: ⚠️ IL BLUES E' RIMASTO IDENTICO NEL RIFACIMENTO, e non e' un'affermazione:
@@ -768,6 +780,7 @@ BLUES = Pezzo(
     comping=COMPING_BLUES,
     forme_basso=FORME_BLUES,
     registro='do3',
+    linea_scritta=WS.LINEA_BLUES,
 )
 
 # --------------------------------------------------------------------------
@@ -1488,7 +1501,16 @@ def costruisci(p, prof, aggancio: bool = False):
     # 6 settembre 2026 la batteria ha bisogno di sapere dove il basso esce
     # dalla griglia. La TRACCIA invece si aggiunge sotto, al suo posto di
     # sempre: l'ordine delle tracce nel file non cambia.
-    linea = walking(giro, p.forme_basso, random.Random(SEME_BASSO))
+    if p.linea_scritta:
+        eventi = WS.leggi(p.linea_scritta)
+        attese = len(p.giro) * GIRI
+        if WS.battute(p.linea_scritta) != attese:
+            raise ValueError(
+                f'la linea scritta ha {WS.battute(p.linea_scritta)} battute, '
+                f'il pezzo ne vuole {attese}')
+        linea = [NotaBasso(tick=t, altezza=y, durata=d) for t, y, d in eventi]
+    else:
+        linea = walking(giro, p.forme_basso, random.Random(SEME_BASSO))
 
     # --- batteria ---------------------------------------------------------
     kit, clip_kit = C.add_track(doc, KIT, name='KIT009', folder='KITS',
