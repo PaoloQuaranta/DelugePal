@@ -1,23 +1,33 @@
-"""La batteria del blues, SCRITTA seguendo `docs/istruzioni/batteria-jazz.md`.
+"""La batteria del blues, SCRITTA guardando le battute di un batterista vero.
 
-⚠️ Nessun sorteggio. Ogni colpo viene dai principi di John Riley, *The Art of
-Bop Drumming*, e accanto a ogni riga c'e' scritto quale.
+⚠️ NESSUN SORTEGGIO, e nessuna statistica. La struttura viene dall'aver
+guardato una per una le 85 battute di `drummer10/session1/1` nel Groove MIDI
+Dataset -- lo stesso batterista da cui il pezzo prende il tocco -- con
+`GR.battute_per_voce()`. `[OSS]` su un esecutore.
 
-LA STRUTTURA DEL FILE RIFLETTE LA DIVISIONE DEI RUOLI, ed e' il punto:
+COSA MOSTRANO QUELLE BATTUTE, ed e' l'opposto di come questa parte era
+scritta il 10 settembre 2026:
 
-  - `RIDE` e `PEDALE` TENGONO IL TEMPO. Sono due stringhe sole, uguali in
-    ogni battuta, e non cambiano mai. Riley p. 8: le quattro semiminime di
-    uguale intensita' piu' la nota di skip, il charleston su 2 e 4, e ogni
-    nota che scorre nella successiva -- quindi il ride NON si buca;
-  - `FIGURE` e `PIANO` PARLANO. Il rullante e' la voce principale del
-    comping, la cassa fa le bombe sulla stessa figura (p. 24, «come una terza
-    mano», e «non suonare le semiminime con la cassa»).
+  - le quattro voci suonano QUASI SEMPRE. Su 85 battute: charleston a pedale
+    80, rullante 77, cassa 70, ride 54. Nessuna di loro «entra ogni tanto»;
+  - sotto c'e' uno STRATO COSTANTE, uguale in ogni battuta di tempo normale:
+    il ride fa il giggidi', la cassa fa QUATTRO MOVIMENTI (il feathering), il
+    charleston sta su 2 e 4, il rullante sta sul MOVIMENTO 2;
+  - la varieta' sono AGGIUNTE SOPRA quello strato, non presenza o assenza. Il
+    rullante tiene il 2 e ci mette sopra da zero a tre colpi, sui levare e sui
+    movimenti 3 e 4.
 
-L'UNITA' NON E' LA BATTUTA, E' LA FRASE DI DUE BATTUTE. Riley p. 20: si suona
-una frase di due battute, la si RIPETE, e poi si TACE tenendo solo il tempo.
-Quando un'idea si ripete cosi' si chiama «riff». Il generatore a sorteggio
-non ripeteva mai e non taceva mai, ed e' il difetto sentito il 10 settembre:
-«suona a grappoli di eventi discontinui».
+⚠️ DUE COSE CHE AVEVO SCRITTO E SONO SBAGLIATE:
+
+  1. «la cassa non suona i quarti» -- lo dice Riley a p. 24, ma e' un
+     ESERCIZIO per sviluppare la cassa come terza mano. Questo batterista
+     suona `x...x...x...x...` per decine di battute di fila. E' il
+     *feathering*, e le velocity del groove template lo rendono leggero;
+  2. «due battute di frase, poi quattro di silenzio» -- Riley p. 20, ed e'
+     anche quello un esercizio di pacing, non una descrizione. Preso alla
+     lettera ha prodotto una batteria che l'orecchio ha respinto: «a parte il
+     ride il resto e' troppo rarefatto, praticamente assente per intere
+     battute».
 
 I passi, sulla griglia a sedicesimi: 0 = movimento 1, 4 = movimento 2,
 8 = movimento 3, 12 = movimento 4. I dispari 2, 6, 10, 14 sono i levare, che
@@ -25,110 +35,114 @@ il firmware swinga.
 """
 from __future__ import annotations
 
-#: IL RIDE, in ogni battuta e senza eccezioni. Sei colpi: i quattro movimenti
-#: piu' i levare del 2 e del 4. `[MIS]` che siano proprio questi sei: sono i
-#: soli passi che il ride colpisce in piu' di meta' delle battute su 21
-#: esecuzioni jazz del Groove MIDI (78, 76, 65, 75, 71, 61 per cento).
-RIDE = 'x...x.x.x...x.x.'
-
-#: IL CHARLESTON A PEDALE, sui movimenti 2 e 4. `[LIB]` Riley p. 8.
-PEDALE = '....x.......x...'
-
-#: Il vocabolario del comping: figure di DUE battute, (rullante, cassa).
-#: ⚠️ Sono scritte qui, non campionate: le figure di Riley (pp. 18-29) sono in
-#: notazione e la notazione non e' ancora stata letta. `[DEC]`, e vanno
-#: sostituite quando quelle pagine saranno trascritte.
-FIGURE = {
-    # domanda corta: un colpo sul levare del 2, risposta sul 4 con la bomba
-    'corta': (('......x.........', '................'),
-              ('............x...', '......x.........')),
-
-    # domanda su due colpi, risposta che anticipa: comincia sul levare di 1
-    'anticipa': (('....x.....x.....', '..............x.'),
-                 ('..x.............', '........x.......')),
-
-    # la piu' densa, per il culmine dell'assolo: quattro colpi e due bombe
-    'culmine': (('..x...x...x.....', '....x.......x...'),
-                ('......x.....x.x.', 'x...............')),
-
-    # la chiusa: un accento solo sul primo movimento, e poi silenzio
-    'chiusa': (('x...............', 'x...............'),
-               ('................', '................')),
+#: LO STRATO COSTANTE: cosa suona ogni voce in OGNI battuta.
+#: Osservato sulle battute 13-20 e 29-44 di `drummer10/session1/1`, dove il
+#: tempo e' normale. `[OSS]`.
+STRATI = {
+    #: il giggidi'. `[MIS]` che siano proprio questi sei passi: sono i soli
+    #: che il ride colpisce in piu' di meta' delle battute su 21 esecuzioni
+    #: jazz del Groove MIDI.
+    'ride': 'x...x.x.x...x.x.',
+    #: 2 e 4. `[LIB]` Riley p. 8, e `[OSS]` in 80 battute su 85.
+    'charleston a pedale': '....x.......x...',
+    #: il movimento 2, che questo batterista tiene quasi ovunque. E' l'ancora
+    #: del rullante, non il suo comping: quello sta nelle aggiunte.
+    'rullante': '....x...........',
+    #: IL FEATHERING: quattro movimenti, leggeri. Le velocity le mette il
+    #: groove template, che su questo esecutore da' colpi bassi sui movimenti
+    #: 1 e 3.
+    'kick': 'x...x...x...x...',
 }
 
-#: DOVE vanno le figure: battuta di partenza (da 1) -> nome della figura.
-#: Ogni figura occupa DUE battute. Le battute che non compaiono qui sono
-#: «tempo»: suonano solo ride e charleston.
+#: LE AGGIUNTE, battuta per battuta (da 1). Si sommano allo strato.
 #:
-#: L'arco segue Riley p. 30, «il solista puo' fare tre cose: salire verso un
-#: culmine, scendere, o stare in piano», e le frasi si appoggiano sulle TRE
-#: FRASI DA QUATTRO in cui si divide il blues (p. 32).
-PIANO = {
-    # --- primo giro, il TEMA: sta in piano, lascia spazio -----------------
-    3:  'corta',        # chiude la prima frase di quattro
-    7:  'corta',        # la stessa figura RIPETUTA: e' il «riff» di Riley
-    # 9-12: tempo. Alla 12 c'e' il fill del turnaround
+#: Il vocabolario e' quello che il batterista usa davvero: i levare (passi 6,
+#: 10, 14) e i movimenti 3 e 4 (8, 12). Esempi osservati: `....x.....x.....`
+#: (2 + levare del 3), `....x.......x.x.` (2 + 4 + levare del 4),
+#: `....x...x...x.x.` (2 + 3 + 4 + levare del 4).
+#:
+#: QUANTE aggiunte segue l'arco del pezzo. `[LIB]` Riley p. 30: il solista
+#: sale verso un culmine, scende, o sta in piano, e il batterista sta in
+#: sincronia. Qui la forma la sappiamo in anticipo: tema in piano, assolo che
+#: sale fino alle battute 21-22, tema che scende.
+AGGIUNTE = {
+    # --- primo giro, il TEMA: una aggiunta ogni due battute --------------
+    2:  {'rullante': '..........x.....'},
+    4:  {'rullante': '............x...'},
+    6:  {'rullante': '..............x.'},
+    8:  {'rullante': '............x.x.'},
+    10: {'rullante': '......x.........'},
+    11: {'rullante': '..........x.....'},
 
-    # --- secondo giro, l'ASSOLO: sale -------------------------------------
-    13: 'anticipa',
-    15: 'anticipa',     # ripetuta
-    # 17-18: tempo, il respiro che Riley chiede fra una frase e l'altra
-    19: 'culmine',
-    21: 'culmine',      # ripetuta: e' il punto piu' alto del pezzo
-    # 23: tempo. Alla 24 il fill
+    # --- secondo giro, l'ASSOLO: sale fino alla 21-22 ---------------------
+    13: {'rullante': '..........x.....'},
+    14: {'rullante': '......x.........'},
+    15: {'rullante': '............x.x.'},
+    16: {'rullante': '........x.......', 'kick': '..............x.'},
+    17: {'rullante': '......x.......x.'},
+    18: {'rullante': '........x...x...'},
+    19: {'rullante': '..........x...x.', 'kick': '...........x....'},
+    20: {'rullante': '......x...x...x.'},
+    21: {'rullante': '........x...x.x.', 'kick': '..............x.'},
+    22: {'rullante': '......x...x...x.'},
+    23: {'rullante': '..........x.x.x.'},
 
-    # --- terzo giro, il TEMA di nuovo: scende ------------------------------
-    # 25-26: tempo
-    27: 'corta',
-    # 29-32: tempo, la discesa
-    33: 'corta',
-    35: 'chiusa',       # 35 l'accento, 36 silenzio sotto il ride
+    # --- terzo giro, il TEMA di nuovo: scende -----------------------------
+    25: {'rullante': '............x...'},
+    26: {'rullante': '..........x.....'},
+    27: {'rullante': '..............x.'},
+    28: {'rullante': '............x...'},
+    30: {'rullante': '..........x.....'},
+    32: {'rullante': '............x.x.'},
+    34: {'rullante': '..........x.....'},
+    35: {'rullante': '............x...'},
+    36: {'rullante': 'x...............', 'kick': 'x...............'},
 }
 
-#: Le voci che parlano, nell'ordine in cui `FIGURE` le porta.
-PARLANO = ('rullante', 'kick')
+
+def _somma(*patterns: str) -> str:
+    """Sovrappone piu' pattern: un passo suona se lo suona almeno uno."""
+    return ''.join('x' if any(p[i] == 'x' for p in patterns) else '.'
+                   for i in range(16))
 
 
 def per_battuta(battute: int) -> list[dict[str, str]]:
-    """Per ogni battuta, `{voce: pattern}`. Le voci sono quelle del profilo.
+    """Per ogni battuta, `{voce: pattern}`. Le voci sono quelle del profilo."""
+    for b, voci in AGGIUNTE.items():
+        if not 1 <= b <= battute:
+            raise ValueError(f'aggiunta alla battuta {b}, fuori dal pezzo '
+                             f'che ne ha {battute}')
+        for voce in voci:
+            if voce not in STRATI:
+                raise ValueError(f'battuta {b}: voce {voce!r} sconosciuta, '
+                                 f'ci sono {sorted(STRATI)}')
 
-    Ride e charleston ci sono sempre. Rullante e cassa solo dove il piano
-    mette una figura: altrove tacciono, ed e' il silenzio che fa la frase.
-    """
-    fuori = [{'ride': RIDE, 'charleston a pedale': PEDALE}
-             for _ in range(battute)]
-    for prima, nome in PIANO.items():
-        figura = FIGURE.get(nome)
-        if figura is None:
-            raise ValueError(f'battuta {prima}: figura {nome!r} sconosciuta, '
-                             f'ci sono {sorted(FIGURE)}')
-        for scarto, (rullante, cassa) in enumerate(figura):
-            b = prima - 1 + scarto
-            if b >= battute:
-                raise ValueError(f'la figura {nome!r} alla battuta {prima} '
-                                 f'esce dal pezzo, che ha {battute} battute')
-            if 'x' in rullante:
-                fuori[b]['rullante'] = rullante
-            if 'x' in cassa:
-                fuori[b]['kick'] = cassa
+    fuori = []
+    for b in range(1, battute + 1):
+        extra = AGGIUNTE.get(b, {})
+        fuori.append({voce: _somma(base, extra.get(voce, '.' * 16))
+                      for voce, base in STRATI.items()})
     return fuori
 
 
 def racconta(battute: int = 36) -> str:
     """Una riga per battuta, per guardare la forma invece di immaginarla."""
+    voci = ('ride', 'charleston a pedale', 'rullante', 'kick')
     righe = []
-    for i, voci in enumerate(per_battuta(battute), 1):
-        parla = [v for v in PARLANO if v in voci]
-        righe.append(f'{i:3}  {voci["ride"]}  '
-                     f'{voci.get("rullante", "." * 16)}  '
-                     f'{voci.get("kick", "." * 16)}'
-                     + ('' if parla else '   (tempo)'))
+    for i, parte in enumerate(per_battuta(battute), 1):
+        colpi = sum(parte[v].count('x') for v in voci)
+        segno = ' <-' if i in AGGIUNTE else ''
+        righe.append(f'{i:3}  ' + '  '.join(f'{parte[v]:16}' for v in voci)
+                     + f'  {colpi:2}{segno}')
     return '\n'.join(righe)
 
 
 if __name__ == '__main__':
-    print('  b  ride              rullante          cassa')
+    print('  b  ride              hh-pedale         rullante          '
+          'cassa             colpi')
     print(racconta())
-    parlate = sum(1 for v in per_battuta(36) if 'rullante' in v or 'kick' in v)
-    print(f'\n{parlate} battute su 36 hanno comping, '
-          f'{36 - parlate} sono solo tempo')
+    parti = per_battuta(36)
+    tot = sum(p[v].count('x') for p in parti
+              for v in ('ride', 'charleston a pedale', 'rullante', 'kick'))
+    print(f'\n{tot} colpi in 36 battute = {tot / 36:.1f} per battuta')
+    print(f'{len(AGGIUNTE)} battute su 36 hanno aggiunte sopra lo strato')

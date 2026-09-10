@@ -21,20 +21,66 @@ istruzione dice **chi fa cosa**, **quando**, e soprattutto **quando tacere**.
 
 ---
 
-## I quattro ruoli, e non sono intercambiabili
+## Prima di tutto: quattro strati che suonano SEMPRE
+
+`[OSS]` Guardate una per una le 85 battute di `drummer10/session1/1` nel
+Groove MIDI Dataset, con `GR.battute_per_voce()`. Un esecutore solo, quindi
+`[OSS]` e non `[MIS]`.
+
+Su 85 battute: **charleston a pedale 80, rullante 77, cassa 70, ride 54**.
+Nessuna voce «entra ogni tanto». Nelle battute di tempo normale c'e' uno
+strato costante, uguale ovunque:
+
+```
+ride       x...x.x.x...x.x.    il giggidi'
+cassa      x...x...x...x...    quattro movimenti, leggeri: il feathering
+hh pedale  ....x.......x...    2 e 4
+rullante   ....x...........    il movimento 2
+```
+
+⚠️ **La varieta' sono AGGIUNTE SOPRA quello strato, non presenza o assenza.**
+Il rullante tiene il 2 e ci mette sopra da zero a tre colpi, sui levare
+(passi 6, 10, 14) e sui movimenti 3 e 4. Esempi presi dalle battute vere:
+
+```
+....x.....x.....    2 + levare del 3
+....x.......x.x.    2 + 4 + levare del 4
+....x...x...x.x.    2 + 3 + 4 + levare del 4
+```
+
+⚠️ **E il ride puo' migrare.** Alle battute 29-44 di quell'esecuzione il ride
+tace e il giggidi' lo suona il **tom basso**. Il nome GM non e' il ruolo
+musicale: e' la stessa lezione gia' scritta nella casella 10.
+
+## Chi tiene e chi parla, e perche' non basta
 
 `[LIB]` John Riley, *The Art of Bop Drumming*, pp. 8 e 24.
 
-| voce | cosa fa | cosa NON fa |
-|---|---|---|
-| **ride** | tiene il tempo: quattro quarti di **uguale intensità**, più la nota di *skip* sui movimenti 2 e 4, suonata **più piano** | non segue mai il comping. Riley: «tieni il ride fermo, perché vorrà andare dietro alla cassa» |
-| **charleston a pedale** | sui movimenti **2 e 4**, e basta | non commenta |
-| **rullante** | è la voce **principale** del comping | non tiene il tempo |
-| **cassa** | **bombe**: accenti isolati, e la stessa figura di due battute del rullante — «come una terza mano» | ⚠️ **non suona i quarti.** Riley lo dice in chiaro: *«non suonare le semiminime con la cassa»* |
+| voce | funzione |
+|---|---|
+| **ride** | tiene il tempo: quattro quarti di **uguale intensita**, piu' la nota di *skip* sui movimenti 2 e 4, suonata **piu' piano**. Non segue il comping: Riley, «tieni il ride fermo, perche' vorra' andare dietro alla cassa» |
+| **charleston a pedale** | 2 e 4 |
+| **rullante** | l'ancora sul 2, e sopra il comping |
+| **cassa** | il feathering sui quattro movimenti, e sopra le **bombe** -- accenti isolati |
 
-Il ride e il charleston tengono. Il rullante e la cassa parlano. **Sono due
-mestieri diversi che succedono insieme**, ed è la cosa che una batteria
-generata sbaglia per prima.
+⚠️ **DUE COSE CHE QUESTA ISTRUZIONE DICEVA E SONO SBAGLIATE**, corrette il
+10 settembre 2026 dopo che l'orecchio ha respinto la versione 13:
+
+1. *«la cassa non suona le semiminime»*. Riley lo scrive a p. 24, ma e' un
+   **esercizio** per sviluppare la cassa come terza mano. Questo batterista
+   suona `x...x...x...x...` per decine di battute di fila: e' il feathering,
+   e le velocity del groove template lo rendono leggero.
+2. *«due battute di frase, poi quattro di silenzio»*. Riley p. 20, ed e'
+   anche quello un **esercizio di pacing**. Preso alla lettera ha prodotto
+   una batteria respinta cosi': «a parte il ride il resto e' troppo
+   rarefatto, praticamente assente per intere battute. non e' che nel jazz il
+   ride e' un clock e il resto suona ogni tanto, anche le altre parti di
+   batteria hanno una funzione ritmica».
+
+⚠️ **La lezione di metodo, e vale piu' delle due correzioni:** un libro
+didattico insegna con esercizi che ISOLANO una cosa alla volta. Un esercizio
+non e' una descrizione di come suona la musica. Quando un libro dice «non
+fare X», controlla sul corpus se davvero non lo fanno.
 
 ### Il peso: 1 e 3, non 2 e 4
 
@@ -58,26 +104,22 @@ mancante è un silenzio, e il tempo si spezza.
 
 ---
 
-## La frase: due battute, ripetute, poi si tace
+## La frase: il comping si muove a gruppi, e non e' regolare
 
-`[LIB]` p. 20, il capitolo «Pacing». È la cosa più importante di questa
-istruzione.
+`[LIB]` Riley p. 20, il capitolo «Pacing»:
 
-> «Un buon modo per imparare ad accompagnare musicalmente è suonare ogni frase
-> di **due battute due volte**, e poi suonare **quattro battute di solo tempo,
-> senza comping**. Questo esercizio ti mostra un tipo di *ritmo* o *densità*
-> fra l'accompagnare e il tenere il tempo. Ricorda che le tue idee di comping
-> devono **accompagnare** e **completare** quello che suonano gli altri.»
+> «Un buon modo per imparare ad accompagnare musicalmente e' suonare ogni
+> frase di **due battute due volte**, e poi suonare **quattro battute di solo
+> tempo, senza comping**. Questo esercizio ti mostra un tipo di *ritmo* o
+> *densita'* fra l'accompagnare e il tenere il tempo. Ricorda che le tue idee
+> di comping devono **accompagnare** e **completare** quello che suonano gli
+> altri.»
 
-Quando un'idea si ripete così, si chiama **riff**.
-
-Quindi l'unità dell'accompagnamento **non è la battuta**: è la frase di due
-battute. E fra una frase e l'altra la batteria **tace**, cioè tiene solo il
-tempo col ride e il charleston.
-
-⚠️ **Questa è la ragione per cui una batteria generata battuta per battuta non
-avrà mai senso**, per quanto giuste siano le sue statistiche: non ripete mai e
-non si ferma mai.
+⚠️ **E' un esercizio, non una ricetta.** Quello che va preso e' il principio:
+il comping ha una **densita' che cambia**, e non e' uniforme battuta per
+battuta. Quello che NON va preso alla lettera e' il silenzio di quattro
+battute: nelle battute vere il rullante e la cassa continuano a suonare il
+loro strato, e a cambiare e' solo quanto ci mettono sopra.
 
 ### Dove cadono le frasi
 
@@ -174,11 +216,16 @@ Ognuna di queste è stata provata e respinta all'ascolto, fra il 30 agosto e il
   discontinui»;
 - **non spalmare un budget di attacchi su tutte le voci.** Il ride ne vuole
   sei per sé;
-- **non far suonare tutte le voci in tutte le battute.** Senza silenzio non
-  c'è frase;
+- ⚠️ **non far tacere le voci per intere battute.** È il difetto della
+  versione 13: il ride diventa un orologio e il resto entra ogni tanto. Nelle
+  battute vere tutte e quattro le voci suonano il loro strato, e a cambiare è
+  solo quanto ci mettono sopra;
 - **non far cambiare il ride battuta per battuta.** È il metronomo: se si
   buca, non tiene niente;
-- **non far suonare i quarti alla cassa;**
+- ⚠️ **non prendere un esercizio per una descrizione.** I libri didattici
+  isolano una cosa alla volta: «non suonare i quarti con la cassa» e «quattro
+  battute di silenzio» sono esercizi, e presi alla lettera hanno prodotto due
+  versioni respinte;
 - **non copiare un pattern intero dal corpus.** Il più frequente del ride
   copre il 15% delle battute: ripeterlo dà una batteria a stampo, che è il
   difetto sentito il 30 agosto.

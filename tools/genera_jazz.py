@@ -167,16 +167,26 @@ ESECUZIONE = 'drummer10/session1/1'
 #:       hanno comping, 19 sono solo tempo.
 #:       ⚠️ IL BASSO NON CAMBIA rispetto alla 12.
 #:
+#:   14  10 settembre 2026. LA BATTERIA A STRATI, e la 13 e' respinta.
+#:       Guardate una per una le 85 battute di `drummer10/session1/1` invece
+#:       di ridurle a percentuali: le quattro voci suonano QUASI SEMPRE, e la
+#:       varieta' sono aggiunte sopra uno strato costante -- ride col
+#:       giggidi', cassa sui quattro movimenti (il feathering), charleston su
+#:       2 e 4, rullante sul movimento 2. 511 colpi contro i 342 della 13.
+#:       Verdetto sulla 13: «a parte il ride il resto e' troppo rarefatto,
+#:       praticamente assente per intere battute».
+#:       ⚠️ IL BASSO NON CAMBIA rispetto alla 12.
+#:
 #: ⚠️ E' il primo giro CHIUSO di questo progetto: una lamentela all'orecchio,
 #: una misura sul corpus, una correzione, e lo stesso orecchio che approva.
 #: Le tre versioni restano una coppia controllata a tre -- batteria, basso e
 #: comping hanno le stesse identiche note in tutte e tre -- quindi i tre
 #: verdetti parlano dell'assolo e di nient'altro.
-VERSIONE = 13
+VERSIONE = 14
 
 #: `--aggancio` scrive una versione a parte per non collidere col nome della
 #: 10. Restera' cosi' finche' l'aggancio non e' deciso: vedi la 09.
-VERSIONE_AGGANCIO = 14
+VERSIONE_AGGANCIO = 15
 
 BPM = 128
 #: Casella 10 di `docs/repertori/jazz.md`, riga HARDBOP/BEBOP. `figura='1/8'`

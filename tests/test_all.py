@@ -7182,12 +7182,11 @@ def test_batteria_tiene_il_tempo():
 
 
 def test_batteria_scritta():
-    """La batteria scritta segue il «pacing» di Riley. SALTA senza Groove MIDI.
+    """La batteria scritta ha i quattro strati costanti.
 
-    Non controlla che sia bella -- quello lo dice l'orecchio -- ma le tre
-    proprieta' che l'istruzione prescrive e che il generatore a sorteggio non
-    poteva avere: il ride non si buca mai, le figure si RIPETONO, e fra una
-    frase e l'altra si TACE.
+    ⚠️ Controlla la proprieta' che la versione 13 non aveva e per cui e' stata
+    respinta: tutte e quattro le voci suonano in OGNI battuta. La varieta'
+    sono aggiunte sopra, mai assenze.
     """
     import batteria_scritta as BS                           # noqa: PLC0415
     import genera_jazz as GJ                                # noqa: PLC0415
@@ -7195,35 +7194,49 @@ def test_batteria_scritta():
     battute = len(GJ.BLUES.giro) * GJ.GIRI
     parti = BS.per_battuta(battute)
 
-    check('il ride c e in tutte le battute',
-          all(v.get('ride') == BS.RIDE for v in parti))
-    check('e il charleston pure',
-          all(v.get('charleston a pedale') == BS.PEDALE for v in parti))
+    check('ogni battuta ha tutte e quattro le voci',
+          all(set(v) == set(BS.STRATI) for v in parti))
+    check('il ride e uguale in ogni battuta',
+          all(v['ride'] == BS.STRATI['ride'] for v in parti))
+    check('la cassa fa i quattro movimenti in ogni battuta',
+          all(all(v['kick'][s] == 'x' for s in (0, 4, 8, 12)) for v in parti),
+          str([i + 1 for i, v in enumerate(parti)
+               if not all(v['kick'][s] == 'x' for s in (0, 4, 8, 12))]))
+    check('il rullante ha il movimento 2 in ogni battuta',
+          all(v['rullante'][4] == 'x' for v in parti))
+    check('il charleston sta su 2 e 4 in ogni battuta',
+          all(v['charleston a pedale'][4] == 'x'
+              and v['charleston a pedale'][12] == 'x' for v in parti))
 
-    parlano = [i for i, v in enumerate(parti)
-               if 'rullante' in v or 'kick' in v]
-    tacciono = battute - len(parlano)
-    check('ci sono battute di solo tempo, e sono la meta o piu',
-          tacciono >= battute // 2, f'{tacciono} su {battute}')
+    # le aggiunte AGGIUNGONO e basta: nessun passo dello strato sparisce
+    perse = []
+    for i, parte in enumerate(parti, 1):
+        for voce, base in BS.STRATI.items():
+            if any(base[s] == 'x' and parte[voce][s] != 'x' for s in range(16)):
+                perse.append((i, voce))
+    check('nessuna aggiunta toglie un colpo allo strato', not perse,
+          str(perse[:4]))
 
-    # le figure si ripetono: ogni figura del piano compare almeno due volte,
-    # tranne la chiusa che per definizione succede una volta sola
-    usi = collections.Counter(BS.PIANO.values())
-    ripetute = [n for n, q in usi.items() if q >= 2 or n == 'chiusa']
-    check('ogni figura del piano si ripete',
-          len(ripetute) == len(usi), str(dict(usi)))
+    con = [i + 1 for i, v in enumerate(parti)
+           if any(v[k] != BS.STRATI[k] for k in BS.STRATI)]
+    check('ma le aggiunte ci sono, su parecchie battute',
+          len(con) >= battute // 3, f'{len(con)} su {battute}')
 
-    # una figura occupa due battute consecutive
-    for prima, nome in BS.PIANO.items():
-        coppia = [parti[prima - 1], parti[prima]]
-        check(f'la figura {nome!r} alla battuta {prima} occupa due battute',
-              any('rullante' in v or 'kick' in v for v in coppia))
+    colpi = [sum(v[k].count('x') for k in BS.STRATI) for v in parti]
+    check('i colpi per battuta stanno fra dodici e venti',
+          all(12 <= c <= 20 for c in colpi),
+          f'min {min(colpi)}, max {max(colpi)}')
 
-    # la cassa non suona mai i quarti (Riley p. 24)
-    quarti = [i + 1 for i, v in enumerate(parti)
-              if all(v.get('kick', '.' * 16)[s] == 'x' for s in (0, 4, 8, 12))]
-    check('la cassa non suona mai i quattro movimenti', not quarti,
-          str(quarti))
+    # una voce inventata deve fermare tutto
+    BS.AGGIUNTE[1] = {'tromba': 'x...............'}
+    try:
+        BS.per_battuta(battute)
+        check('per_battuta() rifiuta una voce sconosciuta', False,
+              'nessuna eccezione')
+    except ValueError:
+        check('per_battuta() rifiuta una voce sconosciuta', True)
+    finally:
+        del BS.AGGIUNTE[1]
 
 
 def _righe_di_kit(path):
