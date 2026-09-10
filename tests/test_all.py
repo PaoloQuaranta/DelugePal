@@ -7117,21 +7117,19 @@ def test_aggancio_batteria():
           str(GJ._probabilita_aggancio(0.8)))
 
 
-def test_batteria_densita_misurata():
-    """La batteria non fa piu' una binomiale larga. SALTA senza il Groove MIDI.
+def test_batteria_tiene_il_tempo():
+    """Il ride tiene il giggidi', e la densita' e' quella di un batterista.
 
-    Il verdetto del 6 settembre 2026 sulla versione 08 -- «la batteria resta
-    discontinua» -- e' la seconda volta in una settimana, e la misura 8 dice
-    perche': un batterista di trio mette **6,31** attacchi in una battuta con
-    deviazione **1,37**, il generatore ne faceva **8,11** con **1,93**. Sei
-    voci che sorteggiano ogni passo per conto loro fanno una binomiale larga.
+    SALTA senza il Groove MIDI. Nasce dal verdetto del 10 settembre 2026
+    sulla versione 10: «suona a grappoli di eventi discontinui, manca il flow
+    di un ritmo costante mantenuto da qualche parte».
 
-    ⚠️ Si contano i GRAPPOLI a 30 ms e non le note: gli onset del JTD sono
-    rilevati su una traccia audio e due colpi insieme fanno un attacco solo.
-    E' la stessa trappola che sul piano dava «0% di accordi».
-
-    ⚠️ Le battute di FILL sono escluse: portano 15,7 colpi per costruzione
-    (casella 9), e sono una scelta dichiarata, non una densita' da correggere.
+    ⚠️ IL BERSAGLIO E' IL GROOVE MIDI, NON JTD, e la differenza e' il punto:
+    un batterista jazz del Groove MIDI mette 8,73 attacchi per battuta con
+    deviazione 2,08, contati come passi distinti su tutte le voci; JTD ne da'
+    6,31, ma li conta con un rilevatore di onset su una registrazione di trio
+    missata, che ne trova meno. La versione 10 inseguiva il numero di JTD ed
+    e' per questo che spezzava il ride.
     """
     import genera_jazz as GJ                                # noqa: PLC0415
     from delugexml import groove as GR                      # noqa: PLC0415
@@ -7144,34 +7142,38 @@ def test_batteria_densita_misurata():
     righe = GJ.batteria(GJ.BLUES, prof)
     battute = len(GJ.BLUES.giro) * GJ.GIRI
     fill = {len(GJ.BLUES.giro) * (g + 1) - 1 for g in range(GJ.GIRI - 1)}
+    normali = [b for b in range(battute) if b not in fill]
 
-    soglia = 30 / GJ.MS_PER_TICK
-    grappoli, ultimo = [], None
-    for t in sorted(n.pos for _, note, _ in righe for n in note):
-        if ultimo is None or t - ultimo > soglia:
-            grappoli.append(t)
-        ultimo = t
-    conti = [sum(1 for g in grappoli if g // GJ.TICK_BATTUTA == i)
-             for i in range(battute) if i not in fill]
+    def passo_di(pos):
+        return round((pos % GJ.TICK_BATTUTA) / 24) % 16
 
+    # 1. il ride c'e' in OGNI battuta, ed e' la cosa che mancava
+    ride = [n.pos for drum, note, _ in righe if drum == 'RIDE' for n in note]
+    per_battuta = collections.Counter(p // GJ.TICK_BATTUTA for p in ride)
+    vuote = [b for b in normali if not per_battuta.get(b)]
+    check('il ride suona in ogni battuta che non sia un fill', not vuote,
+          f'{len(vuote)} battute senza ride: {vuote[:6]}')
+
+    # 2. e batte i sei passi del giggidi' in gran parte delle battute
+    quote = {i: sum(1 for p in ride if passo_di(p) == i) / len(normali)
+             for i in (0, 4, 6, 8, 12, 14)}
+    deboli = {i: round(q, 2) for i, q in quote.items() if q < 0.30}
+    check('e batte i sei passi del giggidi in almeno il 30% delle battute',
+          not deboli, f'sotto soglia: {deboli}')
+    check('col passo forte del battere sopra la meta',
+          quote[0] >= 0.4 or quote[8] >= 0.4,
+          f'0: {quote[0]:.0%}, 8: {quote[8]:.0%}')
+
+    # 3. la densita' complessiva, contata come nel Groove MIDI
+    conti = []
+    for b in normali:
+        passi = {passo_di(n.pos) for _, note, _ in righe for n in note
+                 if n.pos // GJ.TICK_BATTUTA == b}
+        conti.append(len(passi))
     media, dev = statistics.mean(conti), statistics.pstdev(conti)
-    check('gli attacchi per battuta stanno intorno ai 6,31 del corpus',
-          5.3 <= media <= 7.3, f'{media:.2f}')
-    check('e la deviazione intorno all 1,37, non quasi 2',
-          0.9 <= dev <= 1.8, f'{dev:.2f}')
-    check('la distribuzione della batteria e quella misurata',
-          bool(GJ.DISTRIBUZIONE_BATTERIA)
-          and sum(GJ.DISTRIBUZIONE_BATTERIA.values()) > 1000,
-          str(sorted(GJ.DISTRIBUZIONE_BATTERIA)[:4]))
-
-    passi_del_profilo = {x.passo for voce in GJ.VOCI
-                         for x in prof.passi.get(voce, []) if x.colpi >= 3}
-    fuori = [n.pos for _, note, _ in righe for n in note
-             if (n.pos // GJ.TICK_BATTUTA) not in fill
-             and round((n.pos % GJ.TICK_BATTUTA) / 24) % 16
-             not in passi_del_profilo]
-    check('e nessun colpo cade su un passo che quel batterista non suona',
-          not fuori, f'{len(fuori)} colpi')
+    check('gli attacchi per battuta stanno intorno agli 8,73 del Groove MIDI',
+          7.3 <= media <= 10.2, f'{media:.2f}')
+    check('e la deviazione intorno ai 2,08', 1.1 <= dev <= 2.7, f'{dev:.2f}')
 
     check('a parita di seme la batteria e identica',
           GJ.batteria(GJ.BLUES, prof) == righe)

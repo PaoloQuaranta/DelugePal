@@ -667,3 +667,127 @@ def scala(base: Path | str, *, style: str | None = None,
             colpi=len(vs), esecuzioni=len(quali[nome]),
             batteristi=len(chi[nome]))
     return dict(sorted(fuori.items(), key=lambda kv: -kv[1].colpi))
+
+
+# --------------------------------------------------------------------------
+# Le battute una per una -- 10 settembre 2026
+# --------------------------------------------------------------------------
+
+#: Note GM che sono lo STESSO pezzo del kit suonato in zone diverse. Tenerle
+#: separate spezza il disegno che si cerca: sul batterista del blues il `ride`
+#: da solo copre 53 battute su 80 e il resto sta in `ride 2` e `campana del
+#: ride`. ⚠️ E' una DECISIONE dichiarata, ed e' la stessa lezione gia' scritta
+#: nella casella 10 di `docs/repertori/jazz.md`: il nome GM non e' il ruolo
+#: musicale.
+FAMIGLIE = {
+    'ride': ('ride', 'ride 2', 'campana del ride'),
+    'charleston': ('charleston chiuso', 'charleston aperto'),
+}
+
+
+def battute_per_voce(base: Path | str, id: str, *,
+                     taglio: str = 'voce') -> dict[str, list[str]]:
+    """Per ogni voce, il pattern a 16 passi di OGNI battuta dell'esecuzione.
+
+    ⚠️ E' la cosa che `Profilo` NON porta, e che era dichiarata mancante dal
+    30 agosto 2026: «riproduce la densita' di ogni passo, non le correlazioni
+    fra passi nella stessa battuta... per averle davvero servirebbe leggere
+    le battute una per una, cioe' rifare qui la catena di origine, swing e
+    taglio». Questa funzione rifa' quella catena, la stessa di
+    `profilo_da_colpi()` e nello stesso ordine: origine, swing, taglio per
+    voce, e solo alla fine il passo.
+
+    ⚠️ IL PASSO SI DECIDE DOPO AVER TOLTO LO SWING. Tagliando prima, un
+    levare swingato sta a 2,67 passi e si arrotonda al 3: misurato il 10
+    settembre 2026, il giggidi' completo usciva nell'11,0% delle battute di
+    ride invece che nel 29,9%, ed era un artefatto del taglio.
+
+    Una voce che in una battuta non suona porta una riga di soli punti: e'
+    un'informazione, non un buco.
+    """
+    e = _una(base, id)
+    f = MI.leggi(Path(base) / e.midi_filename)
+    fattore = MI.TICK_PER_MOVIMENTO_DELUGE / f.ppq
+    ppq = float(MI.TICK_PER_MOVIMENTO_DELUGE)
+    passo_tick = ppq / 4
+
+    inverso = {n: fam for fam, nomi in FAMIGLIE.items() for n in nomi}
+    colpi: dict[str, list[float]] = {}
+    for t in f.tracce:
+        for n in t.note:
+            nome = MI.GM_PERCUSSIONI.get(n.y)
+            if nome is None:
+                continue                # una percussione fuori dalla mappa GM
+            colpi.setdefault(inverso.get(nome, nome), []).append(
+                n.pos * fattore)
+    if not colpi:
+        return {}
+
+    tutte = [p for v in colpi.values() for p in v]
+    off = origine(tutte, passo_tick)
+    bur = bur_da_posizioni([p - off for p in tutte], ppq)
+    levare = da_bur(bur) if bur is not None else 0.5
+
+    dritte: dict[str, list[float]] = {}
+    for nome, posizioni in colpi.items():
+        for pos in posizioni:
+            movimento, resto = divmod(pos - off, ppq)
+            dritte.setdefault(nome, []).append(
+                (movimento + _senza_swing(resto / ppq, levare)) * ppq)
+
+    per_voce: dict[str, dict[int, set[int]]] = {}
+    ultima = 0
+    for nome, note in dritte.items():
+        sp = spostamento_del_taglio(note, passo_tick, taglio)
+        for dritta in note:
+            passo = round((dritta - sp) / passo_tick)
+            if passo < 0:
+                continue                # prima dell'origine: fuori griglia
+            battuta, dentro = divmod(passo, 16)
+            per_voce.setdefault(nome, {}).setdefault(battuta, set()).add(dentro)
+            ultima = max(ultima, battuta)
+
+    return {voce: [''.join('x' if i in per_battuta.get(b, ()) else '.'
+                           for i in range(16))
+                   for b in range(ultima + 1)]
+            for voce, per_battuta in per_voce.items()}
+
+
+class Quote(NamedTuple):
+    """Quanto una voce suona, e dove, in UNA esecuzione.
+
+    ⚠️ `passi` e' condizionato alle battute in cui quella voce SUONA, e la
+    differenza non e' piccola: sul ride del blues le battute suonate sono 54
+    su 80, quindi una quota calcolata su tutte le battute sarebbe i due terzi
+    di quella vera. `Passo.colpi / Profilo.battute` fa esattamente quello, ed
+    e' il motivo per cui il ride del generatore si bucava.
+    """
+
+    presenza: float             #: quota di battute in cui la voce suona
+    passi: tuple[float, ...]    #: 16 quote, condizionate a quelle battute
+    colpi: float                #: colpi per battuta suonata
+
+
+def quote_per_voce(base: Path | str, id: str, *,
+                   taglio: str = 'voce') -> dict[str, Quote]:
+    """Da `battute_per_voce()` alle quote che un generatore puo' usare.
+
+    ⚠️ Un PATTERN INTERO non si copia: il piu' frequente del ride copre il
+    15% delle battute e ripeterlo darebbe una batteria a stampo, che e'
+    esattamente il difetto sentito il 30 agosto 2026. Sedici quote si', e
+    tengono il disegno perche' i passi del giggidi' stanno fra il 61% e il
+    78% mentre gli altri stanno sotto il 33%.
+    """
+    fuori = {}
+    for voce, righe in battute_per_voce(base, id, taglio=taglio).items():
+        if not righe:
+            continue
+        suonate = [p for p in righe if 'x' in p]
+        if not suonate:
+            continue
+        fuori[voce] = Quote(
+            presenza=len(suonate) / len(righe),
+            passi=tuple(sum(1 for p in suonate if p[i] == 'x') / len(suonate)
+                        for i in range(16)),
+            colpi=sum(p.count('x') for p in suonate) / len(suonate))
+    return fuori
