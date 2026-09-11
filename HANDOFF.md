@@ -96,6 +96,18 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > microtiming. **1096 test.** Il verdetto dell'ascolto sulla 08 non è ancora
 > stato dato.
 >
+> ⚠️ **Il 10-11 settembre 2026 il livello musicale ha cambiato natura, e
+> quella è la cosa da leggere per prima** (§6-unetvicies, e il progetto in
+> `docs/superpowers/specs/2026-09-10-skill-compositiva-design.md`). Il
+> generatore a dadi è stato buttato: *«una distribuzione descrive com'è fatto
+> un insieme di dischi, non come si scrive una battuta»*. Al suo posto ci
+> sono **istruzioni compositive** in `docs/istruzioni/`, fatte di
+> **vocabolario e vincoli** e non di leggi — perché leggi compositive
+> generalizzabili, nel jazz, non esistono. Le parti si **compongono battuta
+> per battuta**, e le primitive fanno i conti. Basso e batteria del blues sono
+> scritti così e sono stati approvati: *«la linea regge»*, *«molto meglio»*.
+> **1124 test.**
+>
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
 > regole di quel documento non sono consigli: ognuna nasce da un errore pagato.
@@ -2662,6 +2674,135 @@ a una batteria che ce l'ha.
 - **non applicare un rapporto misurato alla grandezza sbagliata.** 1,60× sulla
   probabilità del profilo non fa 1,60× sulla coincidenza a 20 ms, e la
   differenza fra le due non si vede finché non si stampa il numero.
+
+---
+
+## 6-unetvicies. Il livello musicale cambia natura — 10-11 settembre 2026
+
+⚠️ **È la sessione più importante del progetto, e non perché abbia prodotto
+codice: perché ha cambiato cosa il livello musicale è.** Chi riprende da qui
+legga prima
+`docs/superpowers/specs/2026-09-10-skill-compositiva-design.md`.
+
+### Il generatore a dadi è stato buttato, e l'utente ha detto perché
+
+> «hai creato un generatore random con parametri presi da analisi statistiche
+> di un corpus enorme. come potrebbe mai produrre risultati accettabili?
+> questo non è assolutamente quello che volevo. io immaginavo una skill
+> compositiva più approfondita, con istruzioni teoriche armoniche e ritmiche
+> e "groove template", il tutto basato su una analisi del corpus.»
+
+In una riga: **una distribuzione descrive com'è fatto un insieme di dischi,
+non come si scrive una battuta.**
+
+⚠️ E la regola che lo avrebbe evitato era scritta dal 30 agosto — *«il corpus
+dà RELAZIONI, non superfici»* — ed è stata violata per tre settimane senza che
+nessuno se ne accorgesse.
+
+### Le tre decisioni di metodo, che il codice non racconta
+
+1. **L'unità di lavoro è UNA PARTE sopra materiale dato**, poi il pezzo
+   intero, poi le risposte a domande. Il progetto faceva il secondo senza che
+   nessuno l'avesse deciso.
+2. **Le note le decide l'AI, le primitive eseguono.** Il codice calcola e non
+   pesca: condotta delle parti, posizioni, durate, groove template.
+3. **Il mestiere viene dalla letteratura didattica**, verificata sul corpus
+   dove ha senso. Il materiale è in `to-read/`, che **non è versionato**.
+
+### Il walking: ha funzionato al primo colpo
+
+`docs/istruzioni/walking.md` + `tools/walking_scritto.py`. La procedura viene
+dal *Jazz Theory Justified* cap. IV: fondamentali sui movimenti dove l'accordo
+entra, nell'ottava più vicina, poi si riempie **guardando l'intervallo fra le
+fondamentali**. È relazionale: cosa metti dipende da cosa è appena successo.
+
+Verdetto: *«la linea regge»*. I numeri misurati stanno accanto come **limiti,
+non come motore**, e la linea esce di proposito più regolare dei dischi.
+
+### La batteria: dieci versioni, e la lezione sta lì
+
+| versione | cosa cambiava | verdetto |
+|---|---|---|
+| 13 | frasi di due battute con quattro di silenzio, da Riley p. 20 | «troppo rarefatta, praticamente assente per intere battute» |
+| 14 | quattro strati costanti, dai pattern di un batterista vero | «va molto meglio, ora abbiamo un ritmo… un po' pesante» |
+| 15 | cassa alleggerita per sezione, aggiunte che rispondono alla melodia | «un po' meglio, ma le parti meno peggio restano quelle di jazz 1-6» |
+| **16** | **composta a mano, 36 battute una per una** | **«molto meglio»** |
+
+⚠️ **La 13, la 14 e la 15 erano generatori travestiti.** Pur essendo
+«scritte», erano una regola più le sue eccezioni applicate a tutte e 36 le
+battute. La 16 no: ogni battuta è una decisione, col motivo scritto accanto, e
+la sequenza non ha una formula.
+
+**La prova interna sta dentro questa stessa sessione:** il walking ha
+funzionato perché l'istruzione dà una procedura per una decisione **locale** e
+poi si compone; la batteria non funzionava perché l'istruzione dava una
+procedura per **l'intera parte**.
+
+### La frase che decide cosa una skill può contenere
+
+> «usare statistiche su tutto il corpus non funziona, e anche l'analisi
+> formale di una singola fonte non può funzionare per astrarre leggi
+> compositive generalizzabili, che soprattutto nel jazz di fatto non esistono»
+
+Da qui la forma che `docs/istruzioni/batteria-jazz.md` ha adesso, e che vale
+per tutte le istruzioni future:
+
+- **vocabolario** — le figure idiomatiche, come catalogo;
+- **vincoli** — cosa NON si fa, ognuno con la versione che l'ha violato;
+- **il tocco** — il groove template, misurato;
+- **una procedura LOCALE** — come si decide *una* battuta;
+- **un esempio lavorato** — una parte intera commentata, da leggere non da
+  copiare.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `docs/istruzioni/` | le istruzioni compositive: walking, batteria |
+| `tools/walking_scritto.py` | la linea di basso, 36 battute scritte |
+| `tools/batteria_scritta.py` | la parte di batteria, 36 battute composte |
+| `GR.battute_per_voce()` | i pattern battuta per battuta dal Groove MIDI — il lavoro di libreria dichiarato mancante dal 30 agosto |
+| `GR.quote_per_voce()` | le quote condizionate alle battute in cui la voce suona |
+| `MU.linea()` | il caso generale di `melodia()`, a durate proprie |
+| `tools/misura_pattern.py` | chi tiene il tempo, misurato sui pattern |
+
+**1124 test.**
+
+### Come si leggono i PDF scansionati, che serve e non è ovvio
+
+Riley e Crook sono **scansioni**: zero caratteri estraibili. Le pagine sono
+CCITT G4 dentro il PDF. Si estraggono avvolgendo i byte grezzi in
+un'intestazione TIFF — senza decodificare niente — e `System.Drawing` di .NET
+le converte in PNG. **Non serve installare nulla.** Lo strumento sta nella
+cartella di lavoro della sessione; se serve di nuovo, va rifatto o promosso.
+
+⚠️ Piston in edizione leggibile è arrivato (600 pagine col testo). Le
+scansioni vecchie sono state sostituite.
+
+### Cosa NON rifare
+
+- **non trasformare una distribuzione in un motore**;
+- **non dedurre una legge generale da un esecutore solo.** «Questo batterista
+  batte il movimento 2 quasi sempre» è vero di lui e falso come regola:
+  applicato a 36 battute ha prodotto un metronomo;
+- **non prendere un esercizio di un libro per una descrizione.** Riley scrive
+  «non suonare le semiminime con la cassa» e «quattro battute di silenzio» per
+  far isolare una cosa alla volta a chi studia. Presi alla lettera hanno
+  prodotto due versioni respinte;
+- **non scrivere una regola che valga per tutte le battute.** Se la sequenza
+  ha una formula, si sente;
+- **non trattare i verdetti come parametri da tarare.** «Troppo rada» →
+  aggiungo, «troppo pesante» → tolgo è salire una collina a tentoni: tre giri
+  così hanno prodotto tre «un po' meglio».
+
+### Il prossimo passo
+
+**Il comping del piano**, con lo stesso metodo: si guardano i pattern di una o
+due fonti, si scrive l'istruzione come vocabolario e vincoli, si compone la
+parte, si ascolta.
+
+⚠️ Restano senza parte scritta il **rhythm changes** e il **modale**, che
+usano ancora il generatore a sorteggio per basso e batteria.
 
 ---
 
