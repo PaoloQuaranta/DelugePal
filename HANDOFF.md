@@ -118,6 +118,21 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 
 ## Il prossimo lavoro
 
+⚠️ **Il perimetro è stato DECISO l'11 settembre 2026, e questa è la cosa da
+leggere per prima** (§6-duetvicies, e il progetto in
+`docs/superpowers/specs/2026-09-10-skill-compositiva-design.md`). In breve:
+supporto compositivo, priorità **1) armonia** (ampia + jazz + modale),
+**2) forma** (voicing, contrappunto, comping, struttura), **3) ritmo** (solo
+jazz-in-poi, con groove template). Niente filologia: si attinge al bagaglio
+espressivo, non si replica un genere. Il flusso è armonizzare/arrangiare
+un'idea → creare da zero → l'utente rifinisce sul Deluge. **L'armonia non
+dipende dai corpus di performance: dipende dalla teoria.** Il prossimo passo
+concreto sta in fondo a §6-duetvicies.
+
+Il testo qui sotto è la formulazione ORIGINALE del lavoro, tenuta perché resta
+vera nel merito — «serie competenze compositive» — ma ora ha una direzione
+precisa.
+
 **Le competenze compositive.** L'utente lo ha detto in chiaro dopo aver
 ascoltato il terzo tentativo di dub:
 
@@ -2803,6 +2818,104 @@ parte, si ascolta.
 
 ⚠️ Restano senza parte scritta il **rhythm changes** e il **modale**, che
 usano ancora il generatore a sorteggio per basso e batteria.
+
+---
+
+## 6-duetvicies. Il perimetro, e la prima armonia — 11 settembre 2026
+
+**Due cose in questa sessione: è stato deciso COSA deve fare lo strumento, e
+l'armonia ha superato la sua prima prova al primo colpo.**
+
+### Il perimetro, che mancava dal primo giorno
+
+Alla domanda diretta «che lavoro deve fare lo strumento», l'utente:
+
+> «competenze musicali limitate, approccio sperimentale ed eclettico.
+> Supporto compositivo innanzi tutto **armonico** — spettro ampio e jazz
+> approfondito, la musica modale mi piace molto — e **ritmico**, ma solo dal
+> jazz in poi e solo alcuni generi, con groove template. Anche l'aspetto
+> **formale** (voicing, contrappunto, comping, struttura). Mi interessa poco
+> replicare filologicamente un genere: piuttosto attingere al **bagaglio
+> espressivo** di un genere per le mie composizioni. Il supporto va da
+> armonizzare-arrangiare un'idea esistente a creare un pezzo da zero che poi
+> modifico sul Deluge.»
+
+Sta per esteso nel design doc, sezione «Il perimetro», e in memoria
+(`perimetro-deluge-pal`). ⚠️ Senza questa definizione il progetto aveva
+inseguito i corpus disponibili (c'era `wjazzd` → si è fatto jazz) invece della
+musica da fare — e nessuna delle 43 song dell'utente è jazz: sono elettronica,
+jungle, industrial, modale, cromatico.
+
+**La conseguenza sulla «grande limitazione del corpus».** La preoccupazione
+dell'utente — *«se abbiamo solo swing, che senso ha il lavoro sul corpus»* — si
+scioglie con le priorità: la limitazione (il Jazz Trio Database è tutto
+walking; per l'insieme jazz manca il resto) tocca **solo la priorità 3, e solo
+il jazz dentro di essa**. L'armonia — il centro — dipende dalla teoria, non da
+quei corpus. Il jazz-swing fatto finora (fino a JAZZ16) non era sbagliato come
+lavoro, era sbagliato come **centro**.
+
+### La casella 1 del jazz, compilata
+
+Le etichette di `wjazzd.db`, mai lette prima se non per lo swing, dicono che il
+jazz non è un feel solo: **tradizionale al 100% in due**, **fusion al 100%
+funk**, latin dentro cool/hardbop/postbop, e il postbop è lo stile più
+numeroso. Le due istruzioni di batteria e basso sono state **ridelimitate**:
+coprono lo swing con walking, una casella sola della griglia feel × strumento.
+⚠️ E i corpus in casa insegnano quel solo feel — sta scritto accanto ai numeri
+delle altre caselle, che descrivono lo swing-con-walking, non «il jazz».
+
+### La prima istruzione armonica, e funziona
+
+`docs/istruzioni/armonia-modale.md`, scritta leggendo **Piston** (*Harmony* 5ª
+ed., cap. 5 e 30 — ora in edizione col testo estraibile) e il **Jazz Theory
+Justified** (cap. IX). Il principio: l'armonia modale è **colore statico, non
+funzione** — parte dalla scala, non dalla progressione, l'opposto del ii-V-I.
+Il meccanismo, da Piston: i gradi III e VI **definiscono il modo**, e la
+**dominante minore** al posto del V7 toglie la sensibile → il tritono → la
+spinta che riporterebbe al tonale. Le affermazioni `[CALC]` (note
+caratteristiche, triadi) sono **verificate da un test** contro `song.MODI`.
+
+### PERCHE: il primo «armonizzare un'idea esistente» riuscito
+
+Su una song dell'utente: riarmonizzato **solo l'arpeggio** (melodia e pad
+intatti), richiesta «misterioso e alieno». La versione **Re frigio** —
+oscillazione I ↔ ♭II (Re m ↔ Mi♭ maggiore), il suono andaluso, niente
+sensibile, finale sospeso — è stata approvata: *«frigio mi piace molto»*.
+L'esempio è documentato nell'istruzione; lo script sta in scratchpad (dipende
+da `refs/songs/Perche.XML`, non versionato).
+
+⚠️ **L'armonia ha funzionato al primo colpo**, contro le dieci versioni della
+batteria: conferma che è terreno più fermo del ritmo, come dice il perimetro.
+
+⚠️ **Una lezione: il voicing quartale NON è automaticamente meglio.** Provato
+su PERCHE (più Mi♭, quarte impilate, tritono Mi♭–La), l'utente ha preferito le
+triadi — le quarte aprono ma tolgono corpo. È un colore del vocabolario, non
+un traguardo.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `docs/istruzioni/armonia-modale.md` | la prima istruzione armonica: vocabolario dei sette modi, vincoli, come si decide, esempio lavorato |
+| casella 1 di `jazz.md` | il perimetro stilistico: stili, feel, cosa i corpus in casa NON coprono |
+| test `armonia_modale_note_caratteristiche` | blinda le affermazioni `[CALC]` dell'istruzione contro `song.MODI` |
+
+**1136 test.**
+
+### Il prossimo passo
+
+Due strade, in ordine di vicinanza a quello che l'utente cerca:
+
+1. **il modal interchange** — prendere in prestito un accordo da un modo
+   parallelo. È il ponte diretto verso l'eclettismo dichiarato, e sta nel Jazz
+   Theory p. 66 (già estratto, da leggere);
+2. **un pezzo modale da zero** — l'istruzione ha superato l'armonizzare
+   un'idea esistente, non ancora il creare dal nulla.
+
+⚠️ Restano fuori dal perimetro coperto: i feel non-swing del jazz (in due,
+latin, funk), le scale non diatoniche che l'utente usa (ottatoniche,
+cromatiche), e tutta la priorità 2 (voicing, contrappunto, comping, struttura)
+salvo `MU.armonia()` che già conduce le parti.
 
 ---
 
