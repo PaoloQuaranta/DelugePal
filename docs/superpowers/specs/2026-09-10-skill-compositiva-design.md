@@ -192,13 +192,64 @@ documentazione.
 Se la forma funziona su una parte, si replica sulle altre. Se non funziona, lo
 si sa dopo una parte e non dopo tre settimane.
 
-## Cosa NON è stato deciso
+## Il perimetro — deciso l'11 settembre 2026
+
+⚠️ **Questa è la definizione che mancava dal primo giorno, e senza cui il
+progetto ha inseguito i corpus disponibili invece della musica da fare.**
+L'utente, alla domanda diretta su cosa lo strumento debba fare:
+
+> «le mie competenze musicali sono limitate e ho un approccio molto
+> sperimentale ed eclettico. mi interessa un supporto compositivo innanzi
+> tutto **armonico**, e soprattutto dal punto di vista armonico mi interessa
+> uno **spettro molto ampio e una sezione jazz approfondita** (sì la musica
+> modale mi piace molto), e **ritmico** (la parte ritmica deve essere
+> approfondita solo dal **jazz incluso in poi e solo alcuni generi**, con
+> groove templates). Mi interessa anche l'aspetto **formale** (voicing,
+> contrappunto, comping, struttura). Mi interessa poco replicare
+> filologicamente un genere: vorrei piuttosto attingere al **bagaglio
+> espressivo** di un dato genere per le mie composizioni. Il supporto va da
+> **armonizzare-arrangiare un'idea esistente**, a **creare un pezzo da zero**
+> che poi io modificherei sul Deluge.»
+
+Ne discende un ordine di priorità, e una regola su cosa dipende dal corpus.
+
+### Le tre priorità
+
+1. **Armonia** — è il centro. Spettro ampio (tonale, da Piston), jazz
+   approfondito, modale. ⚠️ **Non dipende da un corpus di performance**:
+   dipende dalla teoria. È anche l'unica area con una vittoria netta —
+   `MU.armonia()`, 29 agosto, *«ora il voicing è meglio di prima»*.
+2. **Forma** — voicing, contrappunto, comping, struttura. Teoria più le
+   primitive già scritte.
+3. **Ritmo** — solo «dal jazz in poi» e solo alcuni generi, con groove
+   template. ⚠️ È **l'unica priorità che dipende dal corpus di performance**,
+   ed è servita da Groove MIDI (funk, latin, hiphop, afrocuban, jazz…) più
+   JTD per lo swing.
+
+### La conseguenza sulla «grande limitazione del corpus»
+
+La preoccupazione — *«se abbiamo solo swing, che senso ha il lavoro sul
+corpus»* — si scioglie con le priorità: la limitazione (JTD è walking, e per
+l'insieme jazz manca il resto) tocca **solo la priorità 3, e solo il jazz
+dentro di essa**. L'armonia, che è il centro, non tocca quei corpus.
+
+### Due invarianti che cambiano come si lavora
+
+- ⚠️ **niente filologia.** Non si replica un genere: si attinge al suo
+  bagaglio espressivo per una composizione dell'utente, che è eclettica. Un
+  gesto idiomatico è un colore disponibile, non un obbligo;
+- **il flusso primario è armonizzare/arrangiare un'idea esistente**, non
+  generare da zero. Generare da zero è il caso estremo, non quello centrale.
+
+⚠️ **E ribalta l'ordine del primo design:** quel documento partiva dal walking
+(ritmo, priorità 3) perché era il più misurato. Il centro è invece l'armonia,
+e da lì si riparte.
+
+## Cosa resta NON deciso
 
 - **se la skill sia universale o legata al Deluge.** Oggi le primitive
-  scrivono file del Deluge. Renderla universale vuol dire farle scrivere anche
-  MIDI. La proposta è: costruirla sul Deluge, dove si ascolta subito, e
-  astrarla se funziona;
-- **quali repertori**, oltre al jazz che è il più misurato;
+  scrivono file del Deluge. La proposta resta: costruirla sul Deluge, dove si
+  ascolta subito, e astrarla se funziona;
 - **come si sa che funziona**, oltre all'ascolto di una persona sola. È il
   punto debole di tutto il progetto: il ciclo è lento e non scala.
 
