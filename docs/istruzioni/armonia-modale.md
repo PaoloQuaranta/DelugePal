@@ -173,6 +173,39 @@ non contiene la terza che deciderebbe maggiore/minore. `MU.voci()` lo fa già:
 
 ---
 
+## Esempio lavorato: PERCHE
+
+`[OSS]` Il primo «armonizzare un'idea esistente» andato a segno, su una song
+dell'utente — 11 settembre 2026.
+
+**L'idea data:** una melodia acuta (pentatonica, sol la sib do re) e un
+arpeggio che la accompagnava con triadi diatoniche di Sol minore — Sol m,
+Re m, La dim, Sol m: funzionali, «normali». Richiesta: *«qualcosa di
+misterioso e alieno»*.
+
+**Cosa si è toccato:** solo l'arpeggio. Melodia e pad intatti.
+
+**La lettura del modo:** la melodia martella il **re**, quindi il centro
+naturale è **Re frigio** — stesse sette note di Sol minore, centro spostato.
+Re frigio dà la 2ª minore (mi♭) come colore, ed è scuro.
+
+**La progressione**, tenendo il gesto (quattro arpeggi ascendenti):
+
+```
+Re m (la-re-fa)  →  Mi♭ (sol-sib-mib)  →  Si♭ (sib-re-fa)  →  Mi♭ (sol-sib-mib)
+```
+
+Il cuore è l'oscillazione **I ↔ ♭II** (Re m ↔ Mi♭ maggiore), il suono
+frigio/andaluso. Niente sensibile, niente V funzionale, finale sospeso sul
+♭II. **Verdetto: «frigio mi piace molto».**
+
+⚠️ **E una lezione sul quartale, che non è automaticamente "meglio".** Provata
+dopo una versione quartale (quarte impilate al posto delle triadi, più Mi♭ e
+il tritono Mi♭–La), l'utente ha preferito **le triadi**: *«non male, ma
+preferisco la [triadica]»*. Le quarte aprono il suono ma tolgono corpo, e per
+questo pezzo il corpo delle triadi serviva. Il voicing quartale è un colore
+del vocabolario, non un traguardo.
+
 ## Cosa manca a questa istruzione
 
 - **il ritmo armonico** — ogni quanto cambia l'accordo. Nel modale spesso è
@@ -183,5 +216,6 @@ non contiene la terza che deciderebbe maggiore/minore. `MU.voci()` lo fa già:
 - **le scale non-modali** che l'utente usa (le sue song hanno scale a otto
   note, ottatoniche, cromatiche): questo documento copre i sette modi
   diatonici, non quelle;
-- **la verifica all'ascolto.** Nessun pezzo modale è ancora stato scritto con
-  questa istruzione.
+- **la verifica su un pezzo DA ZERO.** L'istruzione ha superato la prova
+  sull'armonizzare un'idea esistente (vedi PERCHE sopra), non ancora sul
+  creare un pezzo modale dal nulla.
