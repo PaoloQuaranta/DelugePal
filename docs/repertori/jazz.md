@@ -23,19 +23,118 @@ jazz ma del metodo, quindi stanno nel comune. La casella 11 lo argomenta.
 
 ## 1. Cos'è, e cosa non è
 
-**Vuota.** Servirebbe la delimitazione fra gli stili, che `wjazzd.db` ha già
-come etichette — TRADITIONAL, SWING, BEBOP, COOL, HARDBOP, POSTBOP, FREE,
-FUSION — e che nessuno ha ancora letto se non per filtrare la misura dello
-swing.
+**Compilata l'11 settembre 2026**, dopo che una domanda dell'utente ha reso
+evidente perché serviva:
 
-*Nel frattempo, per comporre:* la domanda va **alla skill**, e qui — al
-contrario che sul reggae — il jazz lo copre davvero:
-`genres/jazz-styles.md` di `music-composition`, raggiunto come sempre dal suo
-`references/00-navigation.md`. Ha una sezione per stile, ma **non per il
-POSTBOP**, che lì non ha un nome suo (verificato il 18 agosto 2026) ed è
-invece lo stile più numeroso della casella 4: se il pezzo è postbop, la
-delimitazione resta da chiedere all'utente. Quello che esce dalla skill si
-segna `[WEB]`.
+> «finora tutta la tua produzione jazz conteneva walking bass e spangalang sul
+> ride. entrambi questi gesti musicali, seppur molto iconici, non sono
+> assolutamente l'unica forma di questi strumenti e rappresentano un singolo
+> circoscritto momento storico del jazz, che è molto più vasto.»
+
+⚠️ **Aveva ragione, e questa casella era vuota dal primo giorno.** Tre pezzi
+sono stati scritti senza porla, e tutti e tre usano walking più spang-a-lang.
+
+### Gli otto stili e i cinque feel — `[MIS]`
+
+Le etichette di `wjazzd.db`, lette per la prima volta l'11 settembre 2026 su
+**456 assoli**. Il database porta due assi indipendenti, `style` e
+`rhythmfeel`, e la seconda è quella che decide cosa suonano basso e batteria:
+
+| stile | swing | in due | latin | funk | ballad | tot | tempo mediano |
+|---|---|---|---|---|---|---|---|
+| TRADITIONAL | 0 | **32** | 0 | 0 | 0 | 32 | 184 |
+| SWING | 65 | 0 | 0 | 0 | 1 | 66 | 178 |
+| BEBOP | 54 | 0 | 1 | 0 | 1 | 56 | 182 |
+| COOL | 44 | 0 | 8 | 0 | 2 | 54 | 175 |
+| HARDBOP | 71 | 0 | 4 | 0 | 0 | 76 | 164 |
+| **POSTBOP** | 122 | 0 | 14 | 0 | 6 | **147** | 172 |
+| FREE | 5 | 0 | 0 | 0 | 0 | 5 | 233 |
+| FUSION | 0 | 0 | 0 | **20** | 0 | 20 | 118 |
+
+**Tre cose che questa tabella dice e che il generatore ignorava:**
+
+1. il **tradizionale è al 100% in due**, mai in quattro. Il walking lì non
+   esiste;
+2. il **fusion è al 100% funk**. Niente swing;
+3. il **latin** compare dentro cool, hardbop e postbop: anche negli stili che
+   chiamiamo «swing» ci sono pezzi che non swingano.
+
+E il **postbop è lo stile più numeroso** (147 su 456), con lo swing più basso
+di tutti gli stili «classici» — BUR 1,49 contro 1,80 dell'hardbop (casella 4).
+
+⚠️ **Gli anni della tabella sono date di pubblicazione, non di registrazione**
+(`record_info.releasedate`), e infatti il tradizionale risulta 1990-2007:
+sono incisioni di revival. Per datare uno stile questa colonna non serve.
+
+### Cosa cambia fra un feel e l'altro
+
+| feel | il basso | la batteria |
+|---|---|---|
+| **swing** | walking, quattro note per battuta con le sue variazioni (casella 5) | ride col giggidì, charleston su 2 e 4 |
+| **in due** | **1 e 3**, figure basate sulla minima `[LIB]` | groove più rilassato, **meno figure di semiminima sul ride**; oppure il tempo sul charleston, chiuso a mano su 2 e 4 `[LIB]` |
+| **latin** | ⚠️ non misurato, non documentato qui | ⚠️ idem |
+| **funk** | ⚠️ non misurato | ⚠️ idem |
+| **ballad** | ⚠️ non misurato | spazzole, `[LIB]` cap. «Brushes» |
+
+`[LIB]` John Riley, *The Art of Bop Drumming*, p. 57, «Playing in "2"»:
+
+> «Quando un capobanda o un membro del gruppo chiede un "2-feel", il bassista
+> suona ritmi basati sulla minima (movimenti 1 e 3) invece di una pulsazione
+> di semiminime in walking. Il batterista a sua volta suona un groove più
+> rilassato, il che si può fare suonando meno figure basate sulla semiminima
+> sul piatto ride. [...] Siccome suonare in "2" è meno attivo, devi
+> assicurarti di tenere le cose vive — suona con un po' di scatto e non
+> lasciare che la musica suoni addormentata. Tieni il charleston croccante.»
+
+⚠️ **E il feel cambia DENTRO il pezzo.** Riley cita un suo brano in cui il
+ponte è in due e il resto no. La forma standard AABA cambia spesso feel sul
+ponte (p. 32). Quindi il feel è una proprietà **della sezione**, non solo del
+pezzo.
+
+### ⚠️ Il limite dei corpus in casa, e pesa su tutto quello che c'è scritto
+
+**I corpus di questo progetto insegnano UN feel solo.**
+
+- il **Jazz Trio Database** è un corpus di walking: su **1099 esecuzioni** la
+  distribuzione delle note di basso per battuta è unimodale intorno a 4-4,5, e
+  **solo il 4,2% sta sotto le 3 note per battuta**. Non c'è una popolazione in
+  due. E non ha etichette di stile: solo l'anno;
+- il **Groove MIDI** ha una sola etichetta `jazz`, ed è un batterista moderno
+  che suona a un click. I suoi feel diversi dallo swing non sono separabili;
+- **wjazzd** ha le etichette ma porta **solo la linea del solista**: non può
+  dire cosa fanno basso e batteria in nessun feel.
+
+**Ne segue una cosa che va scritta accanto a ogni numero delle altre caselle:**
+tutte le misure di questo repertorio — la casella 5 sulla spartizione, la 6
+sulla dinamica, la 8 sulla melodia — sono state prese **mescolando gli stili**
+e descrivono di fatto lo **swing con walking**, non «il jazz».
+
+⚠️ In particolare, «il 59,7% delle battute di un walking non ha quattro note»
+(casella 5) mette insieme esecuzioni dal 1947 al 2015 senza etichette: parte
+di quella dispersione non è varietà dentro uno stile, è **mescolanza fra stili
+ed epoche**.
+
+### Come si usa questa casella per comporre
+
+**Il feel si dichiara prima delle parti**, per pezzo e per sezione, e seleziona
+il vocabolario di ogni strumento. Quello che il progetto ha scritto finora —
+`docs/istruzioni/walking.md` e `docs/istruzioni/batteria-jazz.md` — copre
+**una sola casella della griglia**: swing con walking, idioma bebop/hardbop.
+
+```
+                 walking   in due   pedale/ostinato   tempo rotto
+ride swing          si       --           --              --
+charleston          --       --           --              --
+spazzole            --       --           --              --
+latin / funk        --       --           --              --
+```
+
+*Per gli altri feel, nel frattempo:* la domanda va alla skill
+`music-composition`, `genres/jazz-styles.md`, raggiunta dal suo
+`references/00-navigation.md`. Ha una sezione per stile ma **non per il
+POSTBOP**, che lì non ha un nome suo (verificato il 18 agosto 2026) ed è lo
+stile più numeroso: se il pezzo è postbop, la delimitazione resta da chiedere
+all'utente. Quello che esce dalla skill si segna `[WEB]`.
 
 ## 2. Metro e griglia
 

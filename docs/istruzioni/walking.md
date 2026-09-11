@@ -1,4 +1,20 @@
-# Scrivere una linea di walking
+# Scrivere una linea di walking — feel SWING
+
+⚠️ **PERIMETRO, e va letto prima di tutto.** Questa istruzione copre **un
+feel solo**: lo swing con basso in walking, cioè l'idioma bebop/hardbop, grosso
+modo 1945-1965. **Non è «il basso nel jazz».**
+
+Nel jazz il basso fa anche altro, e la casella 1 di `docs/repertori/jazz.md`
+lo misura: il **tradizionale è al 100% in due** (1 e 3, non quattro note), il
+**fusion è al 100% funk**, e il **latin** compare dentro cool, hardbop e
+postbop. Il feel si dichiara **prima** di scrivere una nota, e può cambiare da
+una sezione all'altra.
+
+⚠️ E i numeri misurati qui sotto vengono dal Jazz Trio Database, che è **un
+corpus di walking**: su 1099 esecuzioni solo il 4,2% sta sotto le tre note per
+battuta. Descrivono questo feel, non il jazz.
+
+---
 
 **A cosa serve.** Hai un giro di accordi e ti serve il basso sotto. Questa
 istruzione dice come costruire la linea, nota per nota, e quanto scostarsi

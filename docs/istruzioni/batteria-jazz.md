@@ -1,4 +1,19 @@
-# Scrivere una parte di batteria jazz
+# Scrivere una parte di batteria — feel SWING con ride
+
+⚠️ **PERIMETRO.** Questa istruzione copre **un feel solo**: lo swing col
+giggidì sul ride, idioma bebop/hardbop. **Non è «la batteria nel jazz».**
+
+Gli altri feel vogliono altri gesti, e la casella 1 di
+`docs/repertori/jazz.md` li elenca. Riley stesso ne ha un capitolo intero
+(«More Jazz Essentials», pp. 55-61): in due, shuffle, valzer in 3/4, samba,
+12/8, mambo, uptempo. Nel **2-feel**, per esempio, il batterista *«suona meno
+figure basate sulla semiminima sul ride»* (p. 57) — cioè il giggidì di questo
+documento non si usa.
+
+⚠️ E il feel cambia **dentro** il pezzo: la forma AABA spesso cambia feel sul
+ponte.
+
+---
 
 ⚠️ **Questo documento NON dà una procedura che produce la parte.** Dà un
 vocabolario, dei vincoli e il tocco. La parte la componi tu, battuta per
@@ -125,22 +140,42 @@ rapporto = MU.applica_groove(note, profilo, dove='ride')
 
 Non c'è una regola per l'intera parte. C'è una domanda da farsi ogni volta:
 
-**«Cosa sta facendo la melodia in questa battuta, e cosa serve?»**
+**«Cosa stanno facendo TUTTE le altre voci in questa battuta, e cosa serve?»**
 
-Conta le note della melodia in quella battuta, e usa questo come punto di
-partenza — non come legge:
+⚠️ **Non basta guardare la melodia.** Una battuta in cui il tema tace ma il
+basso corre e il piano accompagna è piena lo stesso. Le voci da guardare sono
+tutte: tema o assolo, basso, comping.
 
-| la melodia fa | il rullante |
+### Come si guardano, e non è «raddoppiarle»
+
+Il corpus dice due cose precise su come la batteria sta con le altre voci, e
+sono opposte fra loro:
+
+| | |
 |---|---|
-| 0-2 note | parla: due o tre colpi. È lì che c'è posto |
-| 3-5 note | un colpo, o niente |
-| 6 o più | tace |
+| la **densità** della batteria **non segue** quella del basso | correlazione **+0,058** su 1099 esecuzioni: praticamente nulla. `[MIS]` |
+| ma i loro eventi **fuori griglia coincidono** | **1,60 volte** più del caso a 20 ms, e l'eccesso cresce al restringersi della finestra. `[MIS]` |
+
+Quindi la relazione **non è di quantità, è di collocazione**: non infittire
+dove infittiscono gli altri — il corpus lo nega — ma metti i tuoi accenti
+**dove cadono i loro**, fuori dal movimento.
+
+### Il punto di partenza
+
+Conta le note di **tutte** le altre voci in quella battuta, e usa questo come
+punto di partenza — non come legge:
+
+| le altre voci fanno | il rullante |
+|---|---|
+| poco, e lasciano un buco | parla: due o tre colpi. È lì che c'è posto |
+| una quantità media | un colpo, o niente |
+| tanto, e in mezzo alla battuta | tace |
 
 `[LIB]` Riley p. 30: il solista può fare tre cose — salire verso un culmine,
 scendere, o stare in piano — e il batterista sta in sincronia con quella
-forma. Su un pezzo scritto la melodia la conosci già nota per nota, quindi la
-regola diventa eseguibile: **rispondi dove la melodia lascia un buco, tieniti
-fuori dove è piena**.
+forma. Su un pezzo scritto le altre parti le conosci già nota per nota, quindi
+la regola diventa eseguibile: **rispondi dove lasciano un buco, tieniti fuori
+dove sono piene**.
 
 Poi guarda anche:
 
@@ -151,6 +186,11 @@ Poi guarda anche:
   sotto un assolo;
 - **cosa hai fatto due battute fa.** Se ripeti troppo diventa uno stampo, se
   non ripeti mai diventa rumore.
+
+⚠️ **Un limite dell'esempio lavorato, dichiarato:** la parte in
+`tools/batteria_scritta.py` è stata decisa guardando **solo la melodia**,
+perché quando è stata scritta questa sezione diceva così. Le sue scelte
+reggono all'ascolto, ma vanno riviste contro il basso e il comping.
 
 ### Il peso: 1 e 3, non 2 e 4
 
