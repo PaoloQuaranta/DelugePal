@@ -7365,6 +7365,46 @@ def test_walking_scritto():
             check(f'leggi() rifiuta: {perche}', True)
 
 
+def test_armonia_modale_note_caratteristiche():
+    """Le affermazioni [CALC] di docs/istruzioni/armonia-modale.md.
+
+    Se qualcuno cambia song.MODI, questo test prende il documento che mente.
+    """
+    from delugexml import song as S                         # noqa: PLC0415
+    MODI = S.MODI
+    mag, minn = set(MODI['maggiore']), set(MODI['minore'])
+
+    # nota caratteristica = ciò che il modo ha e il suo riferimento no
+    attese = {'dorico': (9, 'min'), 'frigio': (1, 'min'),
+              'lidio': (6, 'mag'), 'misolidio': (10, 'mag')}
+    for modo, (nota, tipo) in attese.items():
+        iv = set(MODI[modo])
+        rif = mag if tipo == 'mag' else minn
+        agg = iv - rif
+        check(f'{modo}: la nota caratteristica e {nota}',
+              agg == {nota}, f'{sorted(agg)}')
+
+    def triade(iv, grado):
+        n = len(iv)
+        r, tz, q = iv[(grado-1) % n], iv[(grado+1) % n], iv[(grado+3) % n]
+        return ((tz - r) % 12, (q - r) % 12)
+
+    # la triade sul V: dorico e misolidio minore, frigio diminuita (Piston)
+    for modo, atteso in (('dorico', (3, 7)), ('misolidio', (3, 7)),
+                         ('frigio', (3, 6))):
+        iv = sorted(MODI[modo])
+        check(f'{modo}: la triade sul V grado e {atteso}',
+              triade(iv, 5) == atteso, str(triade(iv, 5)))
+
+    # la tonica: dorico/frigio minore, lidio/misolidio maggiore, locrio dim.
+    for modo, atteso in (('dorico', (3, 7)), ('frigio', (3, 7)),
+                         ('lidio', (4, 7)), ('misolidio', (4, 7)),
+                         ('locrio', (3, 6))):
+        iv = sorted(MODI[modo])
+        check(f'{modo}: la triade di tonica e {atteso}',
+              triade(iv, 1) == atteso, str(triade(iv, 1)))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
