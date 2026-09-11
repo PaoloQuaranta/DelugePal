@@ -1,12 +1,20 @@
 # Scrivere una parte di batteria jazz
 
-**A cosa serve.** Hai un pezzo con una forma e ti serve la batteria. Questa
-istruzione dice **chi fa cosa**, **quando**, e soprattutto **quando tacere**.
+⚠️ **Questo documento NON dà una procedura che produce la parte.** Dà un
+vocabolario, dei vincoli e il tocco. La parte la componi tu, battuta per
+battuta, e ogni battuta è una decisione.
+
+La ragione sta scritta qui perché è costata dieci versioni:
+
+> «usare statistiche su tutto il corpus non funziona, e anche l'analisi
+> formale di una singola fonte non può funzionare per astrarre leggi
+> compositive generalizzabili, che soprattutto nel jazz di fatto non
+> esistono»
 
 **Cosa ti serve prima di cominciare:**
 
-- la forma, e dove cominciano e finiscono le frasi;
-- quale sezione è (tema, assolo, ultimo giro): la batteria cambia;
+- la forma, e dove cominciano e finiscono le sezioni;
+- **la melodia, nota per nota** — è il contesto di ogni decisione;
 - un groove template, cioè un batterista nominato da cui prendere il tocco.
 
 ---
@@ -17,78 +25,132 @@ istruzione dice **chi fa cosa**, **quando**, e soprattutto **quando tacere**.
 |---|---|
 | `[LIB]` | letteratura didattica, con libro e pagina |
 | `[MIS]` | misurato su un corpus, con quale e quante esecuzioni |
+| `[OSS]` | osservato su un esecutore solo |
 | `[DEC]` | decisione presa qui, con la ragione |
 
 ---
 
-## Prima di tutto: quattro strati che suonano SEMPRE
+## 1. Il vocabolario
 
-`[OSS]` Guardate una per una le 85 battute di `drummer10/session1/1` nel
-Groove MIDI Dataset, con `GR.battute_per_voce()`. Un esecutore solo, quindi
-`[OSS]` e non `[MIS]`.
+Quali posizioni sono idiomatiche. **È un catalogo, non una regola**: nessuna
+di queste va usata sempre.
 
-Su 85 battute: **charleston a pedale 80, rullante 77, cassa 70, ride 54**.
-Nessuna voce «entra ogni tanto». Nelle battute di tempo normale c'e' uno
-strato costante, uguale ovunque:
+### Il ride
 
 ```
-ride       x...x.x.x...x.x.    il giggidi'
-cassa      x...x...x...x...    quattro movimenti, leggeri: il feathering
-hh pedale  ....x.......x...    2 e 4
-rullante   ....x...........    il movimento 2
+x...x.x.x...x.x.    il giggidì (spang-a-lang)
 ```
 
-⚠️ **«Quasi sempre» non e' «sempre», e la differenza si sente.** Riempire
-ogni battuta ha prodotto una batteria «un po' pesante»: *«un buon groove di
-batteria deve lasciare anche spazio agli altri strumenti, non puo' riempire
-sempre tutto»* (verdetto sulla versione 14). E le assenze del batterista vero
-sono **sezionali**, non sparse: nelle battute 1-8 la cassa non c'e' affatto,
-poi entra e resta. Quindi lo strato si alleggerisce **per sezione** -- sotto i
-temi la cassa batte 1 e 3 invece di quattro -- non a caso battuta per battuta.
+I quattro movimenti più i levare del 2 e del 4. `[MIS]` che siano proprio
+questi sei passi: su 21 esecuzioni jazz del Groove MIDI sono i soli che il
+ride colpisce in più di metà delle battute (78, 76, 65, 75, 71, 61 per cento);
+tutti gli altri stanno sotto il 33%.
 
-⚠️ **La varieta' sono AGGIUNTE SOPRA quello strato, non presenza o assenza.**
-Il rullante tiene il 2 e ci mette sopra da zero a tre colpi, sui levare
-(passi 6, 10, 14) e sui movimenti 3 e 4. Esempi presi dalle battute vere:
+`[LIB]` Riley p. 8: quattro semiminime di **uguale intensità**, e la nota di
+*skip* **non accentata**. Il groove template lo conferma da solo — 127 sui
+movimenti, 70 sulle crome — quindi il tocco è già a posto.
+
+### Il charleston a pedale
 
 ```
-....x.....x.....    2 + levare del 3
-....x.......x.x.    2 + 4 + levare del 4
-....x...x...x.x.    2 + 3 + 4 + levare del 4
+....x.......x...    2 e 4
 ```
 
-⚠️ **E il ride puo' migrare.** Alle battute 29-44 di quell'esecuzione il ride
-tace e il giggidi' lo suona il **tom basso**. Il nome GM non e' il ruolo
-musicale: e' la stessa lezione gia' scritta nella casella 10.
+`[LIB]` Riley p. 8, `[OSS]` in 80 battute su 85.
 
-## Chi tiene e chi parla, e perche' non basta
+### La cassa
 
-`[LIB]` John Riley, *The Art of Bop Drumming*, pp. 8 e 24.
+```
+x.......x.......    il feathering: 1 e 3, leggeri
+```
 
-| voce | funzione |
+più una **bomba**, che è un colpo in più, sempre su un levare o sul 4:
+
+```
+..............x.    levare del 4
+......x.........    levare del 2
+............x...    sul 4
+```
+
+`[OSS]` Il template dà 96 sul passo 0 e 86 sull'8: colpi leggeri.
+
+### Il rullante
+
+Sui **levare**, più i movimenti 2 e 4:
+
+```
+.......x....x...    levare del 2 + movimento 4
+..........x.....    levare del 3
+....x.......x...    2 e 4
+.......x..x.....    levare del 2 + levare del 3
+..........x...x.    levare del 3 + levare del 4
+.......x..x...x.    tre colpi, per le battute più libere
+```
+
+⚠️ Il rullante **tace spesso**: circa un terzo delle battute.
+
+---
+
+## 2. I vincoli
+
+Cosa **non** si fa. Ognuno è stato violato e l'orecchio l'ha respinto: accanto
+c'è quale versione e cosa ne è venuto fuori.
+
+| vincolo | cosa succede se lo violi |
 |---|---|
-| **ride** | tiene il tempo: quattro quarti di **uguale intensita**, piu' la nota di *skip* sui movimenti 2 e 4, suonata **piu' piano**. Non segue il comping: Riley, «tieni il ride fermo, perche' vorra' andare dietro alla cassa» |
-| **charleston a pedale** | 2 e 4 |
-| **rullante** | l'ancora sul 2, e sopra il comping |
-| **cassa** | il feathering sui quattro movimenti, e sopra le **bombe** -- accenti isolati |
+| **il ride non si buca mai** | il tempo si spezza. `[LIB]` Riley p. 8: ogni nota ha un inizio definito ma nessuna fine, e deve scorrere nella successiva |
+| **nessuna voce tace per intere battute** | versione **13**: «a parte il ride il resto è troppo rarefatto, praticamente assente per intere battute. non è che nel jazz il ride è un clock e il resto suona ogni tanto» |
+| **non riempire ogni battuta** | versione **14**: «suona un po' pesante. un buon groove deve lasciare anche spazio agli altri strumenti» |
+| **il rullante non batte lo stesso movimento del charleston in ogni battuta** | versione **15**: due voci sullo stesso colpo per 36 battute è un metronomo, non una conversazione |
+| **la cassa resta leggera**: 1 e 3, mai quattro movimenti fissi | versione **14**, di nuovo il peso |
+| **la batteria non raddoppia la melodia dove è fitta** | versione **14**: le aggiunte più dense stavano dove l'assolo fa dodici note. Un muro |
+| **nessuna regola applicata uniformemente a tutte le battute** | versioni **13, 14, 15**: erano generatori travestiti, con dati scritti a mano al posto dei dadi. Il regolare suona male |
 
-⚠️ **DUE COSE CHE QUESTA ISTRUZIONE DICEVA E SONO SBAGLIATE**, corrette il
-10 settembre 2026 dopo che l'orecchio ha respinto la versione 13:
+---
 
-1. *«la cassa non suona le semiminime»*. Riley lo scrive a p. 24, ma e' un
-   **esercizio** per sviluppare la cassa come terza mano. Questo batterista
-   suona `x...x...x...x...` per decine di battute di fila: e' il feathering,
-   e le velocity del groove template lo rendono leggero.
-2. *«due battute di frase, poi quattro di silenzio»*. Riley p. 20, ed e'
-   anche quello un **esercizio di pacing**. Preso alla lettera ha prodotto
-   una batteria respinta cosi': «a parte il ride il resto e' troppo
-   rarefatto, praticamente assente per intere battute. non e' che nel jazz il
-   ride e' un clock e il resto suona ogni tanto, anche le altre parti di
-   batteria hanno una funzione ritmica».
+## 3. Il tocco
 
-⚠️ **La lezione di metodo, e vale piu' delle due correzioni:** un libro
-didattico insegna con esercizi che ISOLANO una cosa alla volta. Un esercizio
-non e' una descrizione di come suona la musica. Quando un libro dice «non
-fare X», controlla sul corpus se davvero non lo fanno.
+`MU.applica_groove()` posa sul pattern il microtiming e le velocity di un
+batterista nominato. **Si applica dopo aver scritto le note**, e non si
+discute: è misurato.
+
+```python
+note = MU.passi('x...x.x.x...x.x.', da=0)
+rapporto = MU.applica_groove(note, profilo, dove='ride')
+```
+
+---
+
+## 4. Come si decide UNA battuta
+
+Non c'è una regola per l'intera parte. C'è una domanda da farsi ogni volta:
+
+**«Cosa sta facendo la melodia in questa battuta, e cosa serve?»**
+
+Conta le note della melodia in quella battuta, e usa questo come punto di
+partenza — non come legge:
+
+| la melodia fa | il rullante |
+|---|---|
+| 0-2 note | parla: due o tre colpi. È lì che c'è posto |
+| 3-5 note | un colpo, o niente |
+| 6 o più | tace |
+
+`[LIB]` Riley p. 30: il solista può fare tre cose — salire verso un culmine,
+scendere, o stare in piano — e il batterista sta in sincronia con quella
+forma. Su un pezzo scritto la melodia la conosci già nota per nota, quindi la
+regola diventa eseguibile: **rispondi dove la melodia lascia un buco, tieniti
+fuori dove è piena**.
+
+Poi guarda anche:
+
+- **dove sei nella forma.** `[LIB]` p. 32: il blues è 12 battute in **tre
+  frasi da quattro**; la forma standard è 32 battute AABA. La fine di una
+  frase chiede qualcosa di diverso dal mezzo;
+- **in che sezione sei.** Sotto un tema la batteria sta più indietro che
+  sotto un assolo;
+- **cosa hai fatto due battute fa.** Se ripeti troppo diventa uno stampo, se
+  non ripeti mai diventa rumore.
 
 ### Il peso: 1 e 3, non 2 e 4
 
@@ -96,169 +158,64 @@ fare X», controlla sul corpus se davvero non lo fanno.
 
 > «Per anni si è detto che 2 e 4 fossero i movimenti più importanti da sentire
 > nel jazz. **L'idea è sbagliata.** In tutta la musica, jazz compreso, 1 e 3
-> sono i movimenti "mamma" e "papà". La gente balla su 1 e 3, non su 2 e 4.
-> [...] Serve un equilibrio, perché se 1 e 3 oppure 2 e 4 pesano troppo, la
-> musica non groova.»
-
-### Il suono: le note si tengono per mano
-
-`[LIB]` p. 8. Ogni nota del ride deve avere **un inizio definito ma nessuna
-fine**: il suono di ogni colpo deve **scorrere** in quello dopo, non stare
-separato. Riley lo fa provare suonando il pattern sul rullante (suona rigido,
-il suono finisce) e poi sul tom (suona meglio, le note si legano).
-
-⚠️ In pratica, su una batteria scritta: **il ride non si buca**. Una nota
-mancante è un silenzio, e il tempo si spezza.
+> sono i movimenti "mamma" e "papà". [...] Serve un equilibrio, perché se 1 e
+> 3 oppure 2 e 4 pesano troppo, la musica non groova.»
 
 ---
 
-## La frase: il comping si muove a gruppi, e non e' regolare
+## 5. L'esempio lavorato
 
-`[LIB]` Riley p. 20, il capitolo «Pacing»:
+`tools/batteria_scritta.py` è una parte intera per un blues di 36 battute, con
+**il motivo scritto accanto a ogni battuta**. Non è da copiare: è da leggere,
+come si legge una partitura per capire come si fa.
 
-> «Un buon modo per imparare ad accompagnare musicalmente e' suonare ogni
-> frase di **due battute due volte**, e poi suonare **quattro battute di solo
-> tempo, senza comping**. Questo esercizio ti mostra un tipo di *ritmo* o
-> *densita'* fra l'accompagnare e il tenere il tempo. Ricorda che le tue idee
-> di comping devono **accompagnare** e **completare** quello che suonano gli
-> altri.»
-
-⚠️ **E' un esercizio, non una ricetta.** Quello che va preso e' il principio:
-il comping ha una **densita' che cambia**, e non e' uniforme battuta per
-battuta. Quello che NON va preso alla lettera e' il silenzio di quattro
-battute: nelle battute vere il rullante e la cassa continuano a suonare il
-loro strato, e a cambiare e' solo quanto ci mettono sopra.
-
-### Dove cadono le frasi
-
-`[LIB]` p. 32. Il **blues** è 12 battute divise in **tre frasi da quattro**.
-La **forma standard** è 32 battute in quattro frasi da otto, AABA, e il *feel*
-cambia spesso sul ponte.
-
-Le frasi di due battute del comping si appoggiano su questa griglia: non
-cominciano dove capita.
-
----
-
-## L'arco: il solista fa tre cose sole
-
-`[LIB]` p. 30, «Accompanying a Soloist».
-
-Alla domanda «quando accompagno?» Riley risponde che decidono le orecchie, e
-che devi **sempre sapere dove sei nella forma**. Gli assoli hanno una forma
-fatta di **picchi e valli**, e il solista può fare solo tre cose:
-
-- **salire verso un culmine**
-- **scendere da un culmine**
-- **stare in piano**
-
-Il batterista sta in sincronia con quella forma. Riley lo spiega con due
-telefonate: in una i due si ascoltano e si rispondono; nell'altra il secondo
-dice «che bello… mmh… ciao» e riattacca. *«Quale delle due musiche ti
-piacerebbe di più?»*
-
-`[DEC]` Su un pezzo generato non c'è un solista che ascolta in tempo reale, ma
-**la melodia la conosciamo già, nota per nota**. Quindi la regola diventa
-eseguibile: la batteria **risponde dove la melodia lascia un buco** e **tace
-dove è piena**.
-
-⚠️ È l'errore della versione 14: le aggiunte più fitte stavano alle battute
-21-22, che sono le due in cui l'assolo fa dodici note. Raddoppiare invece di
-rispondere fa un muro. Le densità del tema e dell'assolo si contano prima di
-scrivere un colpo:
+Qualche riga, per dare l'idea:
 
 ```
-tema     4 3 1 2 4 3 1 0 4 4 3 2      <- si risponde su 3, 4, 7, 8
-assolo   5 6 6 2 5 7 6 1 12 12 5 0    <- si risponde su 16 e 20, si tace su 21-22
+   3   .......x..x.....  x.......x.......   il tema ha UNA nota: qui c'è posto
+   8   .......x..x...x.  x.....x.x.......   IL TEMA TACE: la battuta più libera
+  20   ....x.......x.x.  x.............x.   UNA NOTA nell'assolo: la risposta piena
+  21   ................  x.......x.......   DODICI note: la batteria esce di scena
 ```
 
----
-
-## I numeri misurati, come limite
-
-`[MIS]` Groove MIDI Dataset, 37 esecuzioni jazz in 4/4.
-
-| | valore |
-|---|---|
-| attacchi per battuta, tutte le voci insieme | **8,73**, deviazione 2,08 |
-| passi che il ride colpisce in più di metà delle battute | **0, 4, 6, 8, 12, 14** — il giggidì |
-| quanto spesso il ride colpisce quei passi | 78, 76, 65, 75, 71, 61 per cento |
-| tutti gli altri passi del ride | sotto il 33% |
-
-⚠️ **Non confondere questo numero con quello del Jazz Trio Database**, che dà
-6,31 attacchi per battuta: JTD li conta con un rilevatore di onset su una
-registrazione di trio missata, che ne trova meno. Inseguire quel numero ha
-prodotto una versione intera da buttare — la 10 — perché un budget di sei
-attacchi spalmato su sei voci **spezza il ride**, che da solo ne vale sei.
-
-`[MIS]` Jazz Trio Database, 1099 esecuzioni: la densità della batteria **non
-segue** quella del basso (correlazione +0,058, cioè niente). Non infittire la
-batteria dove si infittisce il basso: il corpus lo nega.
+Numeri di quella parte: **402 colpi in 36 battute**, rullante muto in **11**.
+Le parti scritte a mano che l'orecchio preferiva prima ne avevano 415 e 11.
 
 ---
 
-## Il tocco, che non si scrive a mano
+## 6. A cosa serve il corpus, e a cosa no
 
-Il **groove template** (`GR.profilo()` + `MU.applica_groove()`) prende un
-batterista nominato e ne estrae, passo per passo, di quanto un colpo anticipa
-o ritarda e con che forza cade. Si applica al pattern **dopo** averlo scritto.
+Questa sezione vale oltre la batteria, ed è la lezione più cara del progetto.
 
-⚠️ E conferma il libro: sul template del blues i quarti del ride stanno a
-velocity 127 e le crome swingate a 70. Riley, p. 8: *«assicurati che le quattro
-semiminime siano suonate allo stesso volume e che la nota di skip **non** sia
-accentata»*.
+**Serve a:**
 
----
+- dare il **vocabolario** — quali posizioni esistono davvero;
+- dare il **tocco** — microtiming e velocity, che sono misurabili;
+- **prendere gli errori** — un pattern che nessun batterista suona è
+  probabilmente sbagliato.
 
-## Come si scrive, materialmente
+**Non serve a:**
 
-```python
-from delugexml import musica as MU, groove as GR
+- ⚠️ **produrre la parte.** Le statistiche su tutto il corpus danno rumore con
+  la forma giusta: sono state respinte tre volte (versioni 07-11);
+- ⚠️ **dare leggi generali da una fonte sola.** «Questo batterista batte il
+  movimento 2 quasi sempre» è vero di lui e falso come regola: applicato a 36
+  battute ha prodotto un metronomo (versione 15). *Un esecutore non è un
+  repertorio*.
 
-# un pattern e' una stringa di 16 passi: 'x' colpisce, '.' tace
-note = MU.passi('x...x.x.x...x.x.', da=0)      # il giggidi', battuta 1
-rapporto = MU.applica_groove(note, profilo, dove='ride')
-```
-
-`MU.passi()` mette i colpi sulla griglia a sedicesimi;
-`MU.applica_groove()` ci posa sopra il tocco del batterista vero.
-
----
-
-## Cosa NON fare
-
-Ognuna di queste è stata provata e respinta all'ascolto, fra il 30 agosto e il
-10 settembre 2026. Stanno nella casella 11 di `docs/repertori/jazz.md`.
-
-- **non sorteggiare ogni passo per conto suo.** Sei voci indipendenti fanno
-  una binomiale larga, e all'orecchio è «una batteria a grappoli di eventi
-  discontinui»;
-- **non spalmare un budget di attacchi su tutte le voci.** Il ride ne vuole
-  sei per sé;
-- ⚠️ **non far tacere le voci per intere battute.** È il difetto della
-  versione 13: il ride diventa un orologio e il resto entra ogni tanto. Nelle
-  battute vere tutte e quattro le voci suonano il loro strato, e a cambiare è
-  solo quanto ci mettono sopra;
-- **non far cambiare il ride battuta per battuta.** È il metronomo: se si
-  buca, non tiene niente;
-- ⚠️ **non prendere un esercizio per una descrizione.** I libri didattici
-  isolano una cosa alla volta: «non suonare i quarti con la cassa» e «quattro
-  battute di silenzio» sono esercizi, e presi alla lettera hanno prodotto due
-  versioni respinte;
-- **non copiare un pattern intero dal corpus.** Il più frequente del ride
-  copre il 15% delle battute: ripeterlo dà una batteria a stampo, che è il
-  difetto sentito il 30 agosto.
+E lo stesso vale per i libri: **un esercizio non è una descrizione**. Riley
+scrive «non suonare le semiminime con la cassa» (p. 24) e «due battute di
+frase, poi quattro di silenzio» (p. 20) per far isolare una cosa alla volta a
+chi studia. Presi alla lettera hanno prodotto due versioni respinte.
 
 ---
 
-## Cosa manca a questa istruzione
+## Cosa manca a questo documento
 
-- **il vocabolario delle figure di comping.** Riley ne dà quattro serie
-  (Comp Example 1-4, pp. 18-29) in notazione, e la notazione non è ancora
-  stata letta;
-- **il fill.** Dove va, quanto dura, cosa cambia. Nel generatore oggi è una
-  decisione arbitraria messa sul turnaround;
-- **le spazzole**, e i feel diversi dallo swing (`More Jazz Essentials`,
-  pp. 55-61);
-- **la risposta in tempo reale**, che su un pezzo scritto non esiste per
-  definizione.
+- **il vocabolario delle figure di Riley** (pp. 18-29): sono in notazione, e
+  la notazione non è ancora stata trascritta;
+- **il fill**: dove va, quanto dura. Oggi è una decisione arbitraria messa sul
+  turnaround;
+- **le spazzole** e i feel diversi dallo swing (pp. 55-61);
+- **le terzine**: la griglia a sedicesimi non le rappresenta, e per questo
+  alcuni batteristi del corpus non si possono leggere.
