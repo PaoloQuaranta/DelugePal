@@ -189,16 +189,25 @@ ESECUZIONE = 'drummer10/session1/1'
 #:       fa dodici note. 447 colpi contro 513.
 #:       ⚠️ IL BASSO NON CAMBIA rispetto alla 12.
 #:
+#:   16  11 settembre 2026. LA BATTERIA E' COMPOSTA, non generata. 36 righe
+#:       scritte una per una, ognuna col motivo accanto, senza nessuna regola
+#:       applicata uniformemente -- che e' cio' che le versioni 13, 14 e 15
+#:       facevano pur essendo «scritte». Verdetto sulla 15: «musicalmente le
+#:       parti meno peggio restano quelle di jazz 1-6», cioe' quelle scritte
+#:       a mano. 402 colpi, rullante muto in 11 battute: la stessa forma di
+#:       quelle, ma decisa guardando la melodia.
+#:       ⚠️ IL BASSO NON CAMBIA rispetto alla 12.
+#:
 #: ⚠️ E' il primo giro CHIUSO di questo progetto: una lamentela all'orecchio,
 #: una misura sul corpus, una correzione, e lo stesso orecchio che approva.
 #: Le tre versioni restano una coppia controllata a tre -- batteria, basso e
 #: comping hanno le stesse identiche note in tutte e tre -- quindi i tre
 #: verdetti parlano dell'assolo e di nient'altro.
-VERSIONE = 15
+VERSIONE = 16
 
 #: `--aggancio` scrive una versione a parte per non collidere col nome della
 #: 10. Restera' cosi' finche' l'aggancio non e' deciso: vedi la 09.
-VERSIONE_AGGANCIO = 16
+VERSIONE_AGGANCIO = 17
 
 BPM = 128
 #: Casella 10 di `docs/repertori/jazz.md`, riga HARDBOP/BEBOP. `figura='1/8'`

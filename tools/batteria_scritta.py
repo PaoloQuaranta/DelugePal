@@ -1,194 +1,176 @@
-"""La batteria del blues, SCRITTA guardando le battute di un batterista vero.
+"""La batteria del blues, COMPOSTA battuta per battuta.
 
-⚠️ NESSUN SORTEGGIO, e nessuna statistica. La struttura viene dall'aver
-guardato una per una le 85 battute di `drummer10/session1/1` nel Groove MIDI
-Dataset -- lo stesso batterista da cui il pezzo prende il tocco -- con
-`GR.battute_per_voce()`. `[OSS]` su un esecutore.
+⚠️ NON C'E' NESSUNA REGOLA APPLICATA UNIFORMEMENTE, ed e' il punto. Le tre
+versioni precedenti erano generatori travestiti: uno strato costante piu' una
+regola per le aggiunte, applicati a tutte e 36 le battute. Producevano
+qualcosa di regolare, e il regolare suona male.
 
-COSA MOSTRANO QUELLE BATTUTE, ed e' l'opposto di come questa parte era
-scritta il 10 settembre 2026:
+Il verdetto dell'11 settembre 2026, sulla versione 15: *«musicalmente le parti
+di batteria meno peggio restano quelle di jazz 1-6»* -- cioe' quelle scritte a
+mano. Guardate a confronto, la differenza non era la densita' (415 colpi
+contro 447) ma il fatto che le loro sequenze NON HANNO UNA FORMULA: sono
+irregolari come e' irregolare una persona che decide battuta per battuta.
 
-  - le quattro voci suonano QUASI SEMPRE. Su 85 battute: charleston a pedale
-    80, rullante 77, cassa 70, ride 54. Nessuna di loro «entra ogni tanto»;
-  - sotto c'e' uno STRATO COSTANTE, uguale in ogni battuta di tempo normale:
-    il ride fa il giggidi', la cassa fa QUATTRO MOVIMENTI (il feathering), il
-    charleston sta su 2 e 4, il rullante sta sul MOVIMENTO 2;
-  - la varieta' sono AGGIUNTE SOPRA quello strato, non presenza o assenza. Il
-    rullante tiene il 2 e ci mette sopra da zero a tre colpi, sui levare e sui
-    movimenti 3 e 4.
+E la ragione di fondo, detta dal proprietario:
 
-⚠️ DUE COSE CHE AVEVO SCRITTO E SONO SBAGLIATE:
+    «usare statistiche su tutto il corpus non funziona, e anche l'analisi
+    formale di una singola fonte non puo' funzionare per astrarre leggi
+    compositive generalizzabili, che soprattutto nel jazz di fatto non
+    esistono»
 
-  1. «la cassa non suona i quarti» -- lo dice Riley a p. 24, ma e' un
-     ESERCIZIO per sviluppare la cassa come terza mano. Questo batterista
-     suona `x...x...x...x...` per decine di battute di fila. E' il
-     *feathering*, e le velocity del groove template lo rendono leggero;
-  2. «due battute di frase, poi quattro di silenzio» -- Riley p. 20, ed e'
-     anche quello un esercizio di pacing, non una descrizione. Preso alla
-     lettera ha prodotto una batteria che l'orecchio ha respinto: «a parte il
-     ride il resto e' troppo rarefatto, praticamente assente per intere
-     battute».
+DA DOVE VIENE QUELLO CHE C'E' QUI DENTRO:
 
-⚠️ E UNA TERZA, dopo il verdetto sulla versione 14: «quasi sempre» non e'
-«sempre». Il batterista suona la cassa in 70 battute su 85 e il rullante in
-77, e le sue assenze sono SEZIONALI -- nelle battute 1-8 la cassa non c'e'
-affatto. Riempire ogni battuta ha dato una batteria «un po' pesante», e
-«un buon groove deve lasciare anche spazio agli altri strumenti». Da qui le
-`SEZIONI`, e le aggiunte che rispondono ai buchi della melodia invece di
-raddoppiarla.
+  - il VOCABOLARIO -- quali posizioni sono idiomatiche -- dal profilo di
+    `drummer10/session1/1` e dalle parti di jazz 01-06;
+  - i VINCOLI -- cosa non si fa -- da `docs/istruzioni/batteria-jazz.md`;
+  - il TOCCO -- velocity e microtiming -- dal groove template, che si applica
+    dopo;
+  - la SEQUENZA -- quale figura in quale battuta -- da una decisione, una per
+    battuta, col motivo scritto accanto.
 
-I passi, sulla griglia a sedicesimi: 0 = movimento 1, 4 = movimento 2,
-8 = movimento 3, 12 = movimento 4. I dispari 2, 6, 10, 14 sono i levare, che
-il firmware swinga.
+I passi: 0 = movimento 1, 4 = movimento 2, 8 = movimento 3, 12 = movimento 4.
+I dispari 2, 6, 10, 14 sono i levare, che il firmware swinga.
 """
 from __future__ import annotations
 
-#: LO STRATO COSTANTE: cosa suona ogni voce in OGNI battuta.
-#: Osservato sulle battute 13-20 e 29-44 di `drummer10/session1/1`, dove il
-#: tempo e' normale. `[OSS]`.
-STRATI = {
-    #: il giggidi'. `[MIS]` che siano proprio questi sei passi: sono i soli
-    #: che il ride colpisce in piu' di meta' delle battute su 21 esecuzioni
-    #: jazz del Groove MIDI.
+#: Le due voci che NON variano, e sono costanti per decisione dichiarata.
+#:
+#: ⚠️ Il ride non si buca mai: `[LIB]` Riley p. 8, «ogni nota deve avere un
+#: inizio definito ma nessuna fine, il suono deve scorrere nel successivo».
+#: Una nota mancante e' un silenzio, e il tempo si spezza. I sei passi sono
+#: `[MIS]`: i soli che il ride colpisce in piu' di meta' delle battute su 21
+#: esecuzioni jazz del Groove MIDI.
+COSTANTI = {
     'ride': 'x...x.x.x...x.x.',
-    #: 2 e 4. `[LIB]` Riley p. 8, e `[OSS]` in 80 battute su 85.
     'charleston a pedale': '....x.......x...',
-    #: il movimento 2, che questo batterista tiene quasi ovunque. E' l'ancora
-    #: del rullante, non il suo comping: quello sta nelle aggiunte.
-    'rullante': '....x...........',
-    #: IL FEATHERING: quattro movimenti, leggeri. Le velocity le mette il
-    #: groove template, che su questo esecutore da' colpi bassi sui movimenti
-    #: 1 e 3.
-    'kick': 'x...x...x...x...',
 }
 
-#: LE SEZIONI: dove lo strato cambia. `(prima, ultima, nome, sostituzioni)`.
+#: Il rullante e la cassa, battuta per battuta. Due colonne, sedici passi
+#: ciascuna, e un motivo.
 #:
-#: ⚠️ Nasce dal verdetto sulla versione 14: «in generale è giusto variare
-#: aggiungendo piuttosto che togliere, ma non si può applicare come una regola
-#: assoluta. un buon groove di batteria deve lasciare anche spazio agli altri
-#: strumenti, non può riempire sempre tutto».
+#: ⚠️ LA CASSA STA SU 1 E 3, non su quattro movimenti: e' il feathering, e il
+#: template gli da' 96 e 86 di velocity, cioe' colpi leggeri. Le bombe sono
+#: i colpi in piu', sempre sui levare o sul 4.
 #:
-#: Avevo trasformato «quasi sempre» in «sempre»: il batterista vero suona la
-#: cassa in 70 battute su 85 e il rullante in 77, non in tutte. E `[OSS]` le
-#: sue assenze sono SEZIONALI, non sparse: nelle battute 1-8 la cassa non c'e'
-#: affatto, poi entra e resta.
+#: ⚠️ IL RULLANTE STA SUI LEVARE, e tace in nove battute su trentaquattro.
+#: Nella versione 15 batteva il movimento 2 in tutte e 36, insieme al
+#: charleston che batte lo stesso movimento: due voci sullo stesso colpo,
+#: trentasei volte di fila. Era un metronomo.
 #:
-#: Qui la cassa fa il feathering pieno solo sotto l'assolo. Sotto i due temi
-#: batte 1 e 3, che e' meta' del peso, perche' li' la melodia ha bisogno di
-#: spazio.
-SEZIONI = (
-    (1,  12, 'tema',   {'kick': 'x.......x.......'}),
-    (13, 24, 'assolo', {}),
-    (25, 36, 'tema',   {'kick': 'x.......x.......'}),
-)
+#: Le densita' della melodia, che sono il contesto di ogni decisione:
+#:   tema (giri 1 e 3)   4 3 1 2 4 3 1 0 4 4 3 2
+#:   assolo (giro 2)     5 6 6 2 5 7 6 1 12 12 5 0
+#:
+#: ⚠️ Le battute 12 e 24 le sovrascrive il fill del turnaround: qui sono
+#: scritte come tempo, e non si sentiranno.
+PARTE = '''
+# --- primo giro: il TEMA. La batteria si siede e lascia entrare il pezzo. ---
+#  b   rullante          cassa
+   1   ................  x.......x.......   il tema entra, la batteria non commenta
+   2   ..........x.....  x.......x.......   una prima risposta, piccola
+   3   .......x..x.....  x.......x.......   il tema ha UNA nota: qui c'e' posto
+   4   ..........x.....  x.............x.   la bomba sul levare spinge dentro la battuta 5
+   5   ................  x.......x.......   il tema e' pieno: fuori dai piedi
+   6   ............x...  x.......x.......   un segno solo, sul quattro
+   7   .......x....x...  x.......x.......   una nota sola nel tema
+   8   .......x..x...x.  x.....x.x.......   IL TEMA TACE: la battuta piu' libera del giro
+   9   ................  x.......x.......   si rientra in silenzio
+  10   ..........x.....  x.......x.......   il tema e' fitto, un colpo e basta
+  11   ....x.......x...  x.......x.......   due e quattro: ci si prepara al turnaround
+  12   ................  x.......x.......   (fill)
 
-#: LE AGGIUNTE, battuta per battuta (da 1). Si sommano allo strato.
-#:
-#: Il vocabolario e' quello che il batterista usa davvero: i levare (passi 6,
-#: 10, 14) e i movimenti 3 e 4 (8, 12).
-#:
-#: ⚠️ DOVE vanno le ha decise la melodia, non un arco astratto. La batteria
-#: RISPONDE dove il tema o l'assolo lasciano un buco, e TACE dove sono pieni.
-#: Nella versione 14 era il contrario: le aggiunte piu' fitte stavano alle
-#: battute 21-22, che sono le due in cui l'assolo fa dodici note. Era un muro.
-#:
-#: Densita' del tema, battuta per battuta:  4 3 1 2 4 3 1 0 4 4 3 2
-#: Densita' dell'assolo (battute 13-24):    5 6 6 2 5 7 6 1 12 12 5 0
-#:
-#: ⚠️ Le battute 12 e 24 non compaiono: le sovrascrive il fill del turnaround.
-AGGIUNTE = {
-    # --- primo giro, il TEMA: si risponde dove il tema respira -------------
-    3:  {'rullante': '..........x.....'},   # il tema ha UNA nota
-    4:  {'rullante': '......x.........'},   # il tema entra solo alla fine
-    7:  {'rullante': '..........x...x.'},   # una nota sola
-    8:  {'rullante': '......x...x.....'},   # il tema TACE: e' il posto piu' libero
-    11: {'rullante': '............x...'},
+# --- secondo giro: l'ASSOLO. Qui la batteria diventa un interlocutore. ------
+  13   ..........x.....  x.......x.......   l assolo parte, si accompagna e basta
+  14   ................  x.......x.......   lo si lascia correre
+  15   ..............x.  x.......x.......   una spinta sola, in fondo alla battuta
+  16   .......x..x...x.  x...........x...   l assolo respira (due note): si risponde
+  17   ..........x.....  x.......x.......   si torna indietro
+  18   ................  x.......x.......   l assolo e' fitto: niente
+  19   ............x...  x.......x.......   un segno per non sparire
+  20   ....x.......x.x.  x.............x.   UNA NOTA nell assolo: la risposta piena
+  21   ................  x.......x.......   DODICI note: la batteria esce di scena
+  22   ................  x.......x.......   e ci resta
+  23   ..........x...x.  x.......x.......   l assolo scende, si rientra
+  24   ................  x.......x.......   (fill)
 
-    # --- secondo giro, l'ASSOLO -------------------------------------------
-    16: {'rullante': '......x.....x.x.'},   # assolo a 2 note: si risponde
-    17: {'rullante': '..........x.....'},
-    19: {'rullante': '............x...'},
-    20: {'rullante': '..x...x...x...x.',    # assolo a 1 nota: la risposta piena
-         'kick':     '..............x.'},
-    # 21 e 22: l'assolo fa DODICI note. La batteria non aggiunge niente
-    23: {'rullante': '..........x.x...'},
-
-    # --- terzo giro, il TEMA di nuovo -------------------------------------
-    27: {'rullante': '..........x.....'},
-    28: {'rullante': '......x.........'},
-    31: {'rullante': '..........x...x.'},
-    32: {'rullante': '......x...x.....'},   # il tema tace
-    35: {'rullante': '............x...'},
-    36: {'rullante': 'x...............', 'kick': 'x...............'},
-}
-
-
-def _somma(*patterns: str) -> str:
-    """Sovrappone piu' pattern: un passo suona se lo suona almeno uno."""
-    return ''.join('x' if any(p[i] == 'x' for p in patterns) else '.'
-                   for i in range(16))
+# --- terzo giro: il TEMA torna. Piu' assestata del primo giro, poi chiude. --
+  25   ............x...  x.......x.......   piu' presente della battuta 1: siamo dentro
+  26   ..........x.....  x.......x.......
+  27   .......x..x.....  x.......x.......   una nota nel tema
+  28   ..........x...x.  x.............x.   la bomba, come alla 4
+  29   ................  x.......x.......
+  30   ....x.......x...  x.......x.......   due e quattro, la meta' del giro
+  31   .......x....x...  x.......x.......   una nota nel tema
+  32   .......x..x...x.  x.....x.x.......   IL TEMA TACE di nuovo
+  33   ................  x.......x.......
+  34   ..........x.....  x.......x.......
+  35   ............x...  x.......x.......   verso la chiusa
+  36   x...............  x...............   un accento sul primo movimento, e via
+'''
 
 
-def _strato(battuta: int) -> dict[str, str]:
-    """Lo strato di quella battuta: il default, con le sostituzioni della
-    sezione in cui cade."""
-    fuori = dict(STRATI)
-    for prima, ultima, _nome, sostituzioni in SEZIONI:
-        if prima <= battuta <= ultima:
-            fuori.update(sostituzioni)
+def leggi(testo: str = PARTE) -> list[dict[str, str]]:
+    """Da testo a `[{voce: pattern}, ...]`, una voce per battuta.
+
+    Le due voci costanti si aggiungono a ogni battuta. Il rullante compare
+    solo dove parla: dove tace non c'e' la chiave, e il chiamante non scrive
+    niente.
+    """
+    fuori = []
+    for riga in testo.splitlines():
+        riga = riga.split('#')[0].strip()
+        if not riga:
+            continue
+        gettoni = riga.split()
+        if len(gettoni) < 3:
+            raise ValueError(f'riga {riga!r}: servono numero, rullante, cassa')
+        numero, rullante, cassa = gettoni[0], gettoni[1], gettoni[2]
+        if not numero.isdigit() or int(numero) != len(fuori) + 1:
+            raise ValueError(f'battuta {numero}: attesa la '
+                             f'{len(fuori) + 1}, le battute vanno in ordine')
+        for nome, p in (('rullante', rullante), ('cassa', cassa)):
+            if len(p) != 16 or set(p) - set('x.'):
+                raise ValueError(f'battuta {numero}, {nome}: {p!r} non e un '
+                                 f'pattern di sedici passi fatto di x e .')
+        parte = dict(COSTANTI)
+        if 'x' in rullante:
+            parte['rullante'] = rullante
+        if 'x' in cassa:
+            parte['kick'] = cassa
+        fuori.append(parte)
     return fuori
-
-
-def sezione(battuta: int) -> str:
-    """Come si chiama la sezione in cui cade quella battuta."""
-    for prima, ultima, nome, _ in SEZIONI:
-        if prima <= battuta <= ultima:
-            return nome
-    return ''
 
 
 def per_battuta(battute: int) -> list[dict[str, str]]:
-    """Per ogni battuta, `{voce: pattern}`. Le voci sono quelle del profilo."""
-    for b, voci in AGGIUNTE.items():
-        if not 1 <= b <= battute:
-            raise ValueError(f'aggiunta alla battuta {b}, fuori dal pezzo '
-                             f'che ne ha {battute}')
-        for voce in voci:
-            if voce not in STRATI:
-                raise ValueError(f'battuta {b}: voce {voce!r} sconosciuta, '
-                                 f'ci sono {sorted(STRATI)}')
-    for _, _, _nome, sostituzioni in SEZIONI:
-        for voce in sostituzioni:
-            if voce not in STRATI:
-                raise ValueError(f'sezione: voce {voce!r} sconosciuta')
-
-    fuori = []
-    for b in range(1, battute + 1):
-        extra = AGGIUNTE.get(b, {})
-        fuori.append({voce: _somma(base, extra.get(voce, '.' * 16))
-                      for voce, base in _strato(b).items()})
-    return fuori
+    """Come `leggi()`, ma controlla che il pezzo sia lungo quanto la parte."""
+    parte = leggi()
+    if len(parte) != battute:
+        raise ValueError(f'la parte di batteria ha {len(parte)} battute, '
+                         f'il pezzo ne vuole {battute}')
+    return parte
 
 
-def racconta(battute: int = 36) -> str:
+def racconta() -> str:
     """Una riga per battuta, per guardare la forma invece di immaginarla."""
     voci = ('ride', 'charleston a pedale', 'rullante', 'kick')
+    vuoto = '.' * 16
     righe = []
-    for i, parte in enumerate(per_battuta(battute), 1):
-        colpi = sum(parte[v].count('x') for v in voci)
-        segno = f'  {sezione(i)}' + (' <-' if i in AGGIUNTE else '')
-        righe.append(f'{i:3}  ' + '  '.join(f'{parte[v]:16}' for v in voci)
-                     + f'  {colpi:2}{segno}')
+    for i, parte in enumerate(leggi(), 1):
+        colpi = sum(parte.get(v, vuoto).count('x') for v in voci)
+        righe.append(f'{i:3}  '
+                     + '  '.join(f'{parte.get(v, vuoto):16}' for v in voci)
+                     + f'  {colpi:2}')
     return '\n'.join(righe)
 
 
 if __name__ == '__main__':
+    parte = leggi()
     print('  b  ride              hh-pedale         rullante          '
           'cassa             colpi')
     print(racconta())
-    parti = per_battuta(36)
-    tot = sum(p[v].count('x') for p in parti
-              for v in ('ride', 'charleston a pedale', 'rullante', 'kick'))
-    print(f'\n{tot} colpi in 36 battute = {tot / 36:.1f} per battuta')
-    print(f'{len(AGGIUNTE)} battute su 36 hanno aggiunte sopra lo strato')
+    voci = ('ride', 'charleston a pedale', 'rullante', 'kick')
+    tot = sum(p.get(v, '.' * 16).count('x') for p in parte for v in voci)
+    muti = sum(1 for p in parte if 'rullante' not in p)
+    print(f'\n{len(parte)} battute, {tot} colpi = {tot / len(parte):.1f} per battuta')
+    print(f'il rullante tace in {muti} battute')
+    print('   (jazz 01-06, le parti preferite: 415 colpi, rullante muto in 11)')
