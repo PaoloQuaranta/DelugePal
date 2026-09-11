@@ -23,7 +23,11 @@ jazz ma del metodo, quindi stanno nel comune. La casella 11 lo argomenta.
 
 ## 1. Cos'è, e cosa non è
 
-**Compilata l'11 settembre 2026**, dopo che una domanda dell'utente ha reso
+**Parziale.** Il feel `latin`, il `funk` e la `ballad` sono **nominati ma non
+descritti**: di loro non si sa cosa facciano basso e batteria, e nessun corpus
+in casa lo può dire.
+
+Compilata l'11 settembre 2026, dopo che una domanda dell'utente ha reso
 evidente perché serviva:
 
 > «finora tutta la tua produzione jazz conteneva walking bass e spangalang sul
