@@ -93,8 +93,46 @@ def basso_min():
     return MU.melodia(BASSO_MIN, durata='1/1')
 
 
+# --- il terzo pezzo: i colori del minore JAZZ (line cliche') + Piccardia finale
+#
+#   battuta  accordo   grado      melodia  perche'
+#   1        Am        i           la4     tonica, l'inizio del cliche'
+#   2        Am(maj7)  i(maj7)    sol#4    il nat7 (G#), preso dal maggiore
+#   3        Am7       i7          sol4    il b7 (G), la discesa continua
+#   4        Am6       i6         fa#4     il nat6 (F#): il colore della minore melodica
+#   5        Dm7       iv          fa4     ci si muove
+#   6        E7        V7          mi4     la dominante (NON un prestito)
+#   7        Am        i           mi4     tonica minore
+#   8        A         I (Picc.)  do#4     la Piccardia: la tonica diventa MAGGIORE
+#
+#: Bat. 1-4: il line cliche', la discesa A-G#-G-F# su pedale di La -- il nat7 e
+#: il nat6 presi dal maggiore parallelo, il suono della minore melodica/jazz.
+#: Bat. 8: la terza di Piccardia, il finale che si apre su La maggiore.
+PROGRESSIONE_JAZZMIN = 'Am | Am(maj7) | Am7 | Am6 | Dm7 | E7 | Am | A'
+MELODIA_JAZZMIN = 'la4 sol#4 sol4 fa#4 fa4 mi4 mi4 do#4'
+BASSO_JAZZMIN = 'la1 la1 la1 la1 re2 mi2 la1 la1'
+
+
+def comping_jazzmin():
+    """Gli accordi del terzo pezzo, voicing per terze."""
+    return MU.armonia(PROGRESSIONE_JAZZMIN, voicing='chiuso', registro='la2',
+                      durata='1/1')
+
+
+def tema_jazzmin():
+    """La melodia del terzo pezzo (il line cliche' in cima)."""
+    return MU.melodia(MELODIA_JAZZMIN, durata='1/1')
+
+
+def basso_jazzmin():
+    """Il basso del terzo pezzo: pedale di La sotto il cliche'."""
+    return MU.melodia(BASSO_JAZZMIN, durata='1/1')
+
+
 if __name__ == '__main__':
     print('=== pezzo in Do maggiore (il iv minore) ===')
     print(MU.racconta_armonia(PROGRESSIONE, voicing='chiuso', registro='do3'))
     print('\n=== pezzo in La minore (il IV maggiore) ===')
     print(MU.racconta_armonia(PROGRESSIONE_MIN, voicing='chiuso', registro='la2'))
+    print('\n=== pezzo in La minore jazz (line cliche + Piccardia) ===')
+    print(MU.racconta_armonia(PROGRESSIONE_JAZZMIN, voicing='chiuso', registro='la2'))

@@ -7521,6 +7521,29 @@ def test_prestito_scritto_minore():
           6 in per_battuta.get(3, set()), str(sorted(per_battuta.get(3, set()))))
 
 
+def test_prestito_scritto_jazzmin():
+    """Il terzo pezzo: il line cliche' jazz-minore e la Piccardia finale."""
+    import prestito_scritto as PR                              # noqa: PLC0415
+    from delugexml import musica as MU                         # noqa: PLC0415
+
+    accordi = [a.strip() for a in PR.PROGRESSIONE_JAZZMIN.split('|')]
+    check('il giro ha 8 battute', len(accordi) == 8, str(len(accordi)))
+    check('il line cliche e Am->Am(maj7)->Am7->Am6',
+          accordi[:4] == ['Am', 'Am(maj7)', 'Am7', 'Am6'], str(accordi[:4]))
+    check('chiude in Piccardia su La maggiore', accordi[-1] == 'A', accordi[-1])
+
+    per_battuta: dict[int, set[int]] = {}
+    for y, note in MU.melodia(PR.MELODIA_JAZZMIN, durata='1/1').items():
+        for n in note:
+            per_battuta.setdefault(n.pos // 384, set()).add(y % 12)
+    check('battuta 2 (Am-maj7): la melodia ha il sol# (8), il nat7',
+          8 in per_battuta.get(1, set()), str(sorted(per_battuta.get(1, set()))))
+    check('battuta 4 (Am6): la melodia ha il fa# (6), il nat6',
+          6 in per_battuta.get(3, set()), str(sorted(per_battuta.get(3, set()))))
+    check('battuta 8 (A): la melodia ha il do# (1), la Piccardia',
+          1 in per_battuta.get(7, set()), str(sorted(per_battuta.get(7, set()))))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
