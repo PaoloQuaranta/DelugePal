@@ -211,8 +211,8 @@ del vocabolario, non un traguardo.
 - **il ritmo armonico** — ogni quanto cambia l'accordo. Nel modale spesso è
   lentissimo (un accordo per intere battute), ma qui non è detto;
 - **il modal interchange** — prendere in prestito un accordo da un modo
-  parallelo, che è il ponte verso l'eclettismo che l'utente cerca. Sta nel
-  Jazz Theory p. 66 e va letto;
+  parallelo, che è il ponte verso l'eclettismo che l'utente cerca: ora c'è, in
+  [`armonia-prestito.md`](armonia-prestito.md);
 - **le scale non-modali** che l'utente usa (le sue song hanno scale a otto
   note, ottatoniche, cromatiche): questo documento copre i sette modi
   diatonici, non quelle;
