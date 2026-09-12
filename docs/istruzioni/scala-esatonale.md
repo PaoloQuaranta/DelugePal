@@ -104,10 +104,28 @@ comuni fra un accordo e il successivo.
 
 ## Esempio lavorato: il ciclo che sale per tono
 
-⚠️ **In costruzione.** Il pezzo di prova è il ciclo `C7#5 | D7#5 | E7#5 | F#7#5
-| G#7#5 | A#7#5 | …` con una melodia ondeggiante whole-tone in cima:
-`tools/esatonale_scritto.py`. L'esempio e il verdetto dell'utente vanno qui
-appena ascoltato sul Deluge.
+`[OSS]` La seconda scala simmetrica provata — 12 settembre 2026. In
+[`tools/esatonale_scritto.py`](../../tools/esatonale_scritto.py).
+
+**L'idea:** il colore sospeso puro, da zero. Otto battute, tre voci, niente
+batteria.
+
+**La progressione** — i dom7♯5 che salgono per tono, i sei distinti più il
+ritorno:
+
+```
+C7#5 | D7#5 | E7#5 | F#7#5 | G#7#5 | A#7#5 | C7#5 | D7#5
+```
+
+tutti dentro una sola esatonale. In cima, una **melodia ondeggiante whole-tone**
+(sol#-la#-do-re-mi-re-do-la#).
+
+**Dove si gioca:** il ciclo sale per toni e **non si posa** — niente quinta
+giusta, niente cadenza, niente casa. Il colore sta nel galleggiare.
+
+**Verdetto: approvato.** La whole-tone regge come colore, costruita dal nulla.
+Con questo il progetto ha **tutt'e due le scale simmetriche** — l'ottatonica
+tesa e l'esatonale sospesa — ognuna provata all'ascolto.
 
 ---
 
