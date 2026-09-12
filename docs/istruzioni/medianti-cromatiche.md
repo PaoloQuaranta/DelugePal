@@ -93,10 +93,29 @@ note = MU.armonia('C | Ab | C | E | C', registro='do3', durata='1/1')
 
 ## Esempio lavorato: Do fra le sue medianti
 
-⚠️ **In costruzione.** Il pezzo di prova è Do che oscilla con le sue due medianti
-maggiori — `C | Ab | C | E | C | Ab | E | C` — con la melodia che tocca le note
-cromatiche nuove (il mi♭ di La♭, il sol# di Mi): `tools/medianti_scritto.py`.
-L'esempio e il verdetto dell'utente vanno qui appena ascoltato sul Deluge.
+`[OSS]` La seconda faccia del cromatismo provata — 13 settembre 2026. In
+[`tools/medianti_scritto.py`](../../tools/medianti_scritto.py).
+
+**L'idea:** il colore cinematografico puro, da zero. Otto battute, tre voci,
+niente batteria.
+
+**La progressione** — Do fra le sue due medianti maggiori, con ritorno a casa:
+
+```
+C | Ab | C | E | C | Ab | E | C
+```
+
+`condotta=True`: su ogni salto una nota resta ferma (il **do** su Do↔La♭, il
+**mi** su Do↔Mi), e le altre si muovono di poco. La tromba tocca le note
+cromatiche nuove (il mi♭ di La♭, il sol# di Mi).
+
+**Dove si gioca:** lo **scarto di terza** morbido-ma-sorprendente. La♭ scende
+scuro/eroico, Mi sale luminoso; la casa (Do) resta il riferimento, e nessuna
+mediante risolve per dominante.
+
+**Verdetto: approvato.** Con questo il cromatismo ha due facce provate — il
+**planing** (lo stream parallelo) e la **mediante** (lo scarto di terza). Anche
+qui l'armonia ha retto al primo colpo.
 
 ---
 
