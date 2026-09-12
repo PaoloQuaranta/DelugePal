@@ -93,6 +93,36 @@ cambia `song.MODI`, il test prende il documento che mente.
 
 ---
 
+## La direzione inversa: una casa minore
+
+Funziona anche al contrario: una **casa minore** prende in prestito dal
+**maggiore** parallelo. `[LIB]` Smith p. 74: in minore i gradi **6 e 7** si
+possono alzare, e i gradi alzati sono *«presi in prestito dal maggiore
+parallelo»* (la notazione a frecce ↑6, ↑7 serve a ricordare quale forma usare).
+Il maggiore parallelo porta tre note che il minore non ha: la **3ª**, la **6ª**
+e la **7ª maggiori** (in La minore: do#, fa#, sol#).
+
+| prestito | in La minore | nota di colore | fonte |
+|---|---|---|---|
+| **IV maggiore** | Re (D F# A) | fa# (♮6) | `[LIB]` Smith p. 74 — la schiaritura dorica |
+| **ii minore** | Bm (B D F#) | fa# (♮6) | `[CALC]` dal maggiore |
+| **I maggiore (Piccardia)** | La (A C# E) | do# (♮3) | `[LIB]` Piston, cap. 26 e dintorni |
+
+⚠️ **Il IV maggiore è il contrario simmetrico del iv minore** di sopra: là una
+casa maggiore prendeva la sottodominante minore (il la♭); qui una casa minore
+prende la sottodominante maggiore (il fa#). Stesso grado, il IV, colorato
+nell'altro verso.
+
+⚠️ **Il V maggiore NON è un prestito.** In La minore l'E7 (col sol#) è la normale
+dominante del minore armonico: il sol# è la sensibile che riporta a casa, non un
+colore preso dal maggiore. Chiamarlo prestito vorrebbe dire chiamare prestito
+ogni accordo del minore armonico.
+
+`[CALC]` Il test `test_armonia_prestito_casa_minore` blinda questa tabella:
+maggiore − minore parallelo = {♮3, ♮6, ♮7}.
+
+---
+
 ## I vincoli: cosa lo tiene un prestito, e non una modulazione
 
 | non fare | perché |
@@ -184,9 +214,10 @@ armonica aveva ancora toccato.
 
 ## Cosa manca a questa istruzione
 
-- **la direzione inversa** — una casa **minore** che prende in prestito dal
-  **maggiore** parallelo (il IV maggiore che schiarisce, la terza di Piccardia
-  sul finale). Nominata qui, non ancora provata;
+- **la direzione inversa** — una casa **minore** che prende dal **maggiore** — è
+  ora nel vocabolario (§«La direzione inversa: una casa minore»). Restano
+  nominate ma non provate a fondo la **terza di Piccardia** e il colore ♮6/♮7 del
+  minore jazz;
 - **le scale non diatoniche** che l'utente usa (ottatoniche, cromatiche): questo
   documento copre il prestito fra i modi diatonici paralleli, non quelle;
 - **il ritmo armonico** — ogni quanto cambia l'accordo, e quanto dura il
