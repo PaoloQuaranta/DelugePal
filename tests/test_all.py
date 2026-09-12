@@ -7675,6 +7675,35 @@ def test_planing_scritto():
           all(abs(x - y) == 1 for x, y in zip(ys, ys[1:])), str(ys))
 
 
+def test_medianti_scritto():
+    """Il pezzo di medianti sta in piedi: Do oscilla con le sue medianti
+    cromatiche (una nota in comune a ogni cambio), la melodia tocca le note
+    cromatiche nuove."""
+    import medianti_scritto as MD                              # noqa: PLC0415
+    from delugexml import musica as MU                         # noqa: PLC0415
+
+    accordi = [a.strip() for a in MD.PROGRESSIONE.split('|')]
+    check('il giro ha 8 battute', len(accordi) == 8, str(len(accordi)))
+    check('oscilla fra Do e le sue medianti (Ab, E), torna a casa',
+          accordi[0] == 'C' and accordi[-1] == 'C'
+          and set(accordi) == {'C', 'Ab', 'E'}, str(accordi))
+    # ogni cambio d'accordo condivide una sola nota (mediante cromatica)
+    for a, b in zip(accordi, accordi[1:]):
+        na = {y % 12 for y in MU.voci(a)}
+        nb = {y % 12 for y in MU.voci(b)}
+        check(f'{a}->{b}: una sola nota in comune',
+              len(na & nb) == 1, str(sorted(na & nb)))
+    # la melodia tocca le note cromatiche: mib (3) sul Lab, sol# (8) sul Mi
+    per_b: dict[int, set[int]] = {}
+    for y, note in MU.melodia(MD.MELODIA, durata='1/1').items():
+        for n in note:
+            per_b.setdefault(n.pos // 384, set()).add(y % 12)
+    check('battuta 2 (Ab): la melodia ha il mib (3)',
+          3 in per_b.get(1, set()), str(sorted(per_b.get(1, set()))))
+    check('battuta 4 (E): la melodia ha il sol# (8)',
+          8 in per_b.get(3, set()), str(sorted(per_b.get(3, set()))))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
