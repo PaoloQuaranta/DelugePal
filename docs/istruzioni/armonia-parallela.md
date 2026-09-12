@@ -97,10 +97,26 @@ in cui la condotta va **spenta**.
 
 ## Esempio lavorato: l'onda cromatica
 
-⚠️ **In costruzione.** Il pezzo di prova è un'onda di dom7 paralleli — `C7 | Db7
-| D7 | Eb7 | E7` e ritorno — con la tromba che cavalca la settima, una linea
-cromatica: `tools/planing_scritto.py`. L'esempio e il verdetto dell'utente vanno
-qui appena ascoltato sul Deluge.
+`[OSS]` Il primo pezzo di cromatismo del progetto — 12 settembre 2026. In
+[`tools/planing_scritto.py`](../../tools/planing_scritto.py).
+
+**L'idea:** il planing puro, da zero. Otto battute, tre voci, niente batteria.
+
+**La progressione** — la stessa forma di dom7 che scivola per semitoni, su e giù:
+
+```
+C7 | Db7 | D7 | Eb7 | E7 | Eb7 | D7 | Db7
+```
+
+con `condotta=False`, così la forma resta rigida e parallela. La tromba cavalca
+la settima di ogni accordo — una **linea cromatica** (sib-si-do-reb-re…).
+
+**Dove si gioca:** niente risolve. Il blocco si sposta tutto insieme, per
+semitoni, e non punta a nessuna casa — è lo stream parallelo di Debussy.
+
+**Verdetto: approvato.** Il planing regge come colore, costruito dal nulla. Con
+questo il progetto ha il suo primo **cromatismo** — una condotta, non una scala
+— dopo le due scale simmetriche.
 
 ---
 
