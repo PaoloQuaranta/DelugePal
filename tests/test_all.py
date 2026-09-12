@@ -7564,6 +7564,23 @@ def test_prestito_scritto_jazzmin():
           1 in per_battuta.get(7, set()), str(sorted(per_battuta.get(7, set()))))
 
 
+def test_ottatonica_scritto():
+    """Il pezzo ottatonico sta in piedi: il ciclo di dom7 a terza minore, e
+    la melodia tutta dentro l'ottatonica."""
+    import ottatonica_scritto as OT                            # noqa: PLC0415
+    from delugexml import musica as MU, song as S              # noqa: PLC0415
+
+    accordi = [a.strip() for a in OT.PROGRESSIONE.split('|')]
+    check('il giro ha 8 battute', len(accordi) == 8, str(len(accordi)))
+    check('il ciclo e C7-Eb7-Gb7-A7',
+          accordi[:4] == ['C7', 'Eb7', 'Gb7', 'A7'], str(accordi[:4]))
+
+    ott = set(S.MODI['ottatonica'])
+    classi = {MU.altezza(n) % 12 for n in OT.MELODIA.split()}
+    check("la melodia sta tutta dentro l'ottatonica",
+          classi <= ott, str(sorted(classi - ott)))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
