@@ -7449,6 +7449,29 @@ def test_armonia_prestito_accordi_dal_parallelo():
               colore not in mag, f'{colore} in {sorted(mag)}')
 
 
+def test_armonia_prestito_casa_minore():
+    """Le affermazioni [CALC] della sezione 'casa minore' di armonia-prestito.md.
+
+    In una casa minore i prestiti vengono dal maggiore parallelo: le note di
+    colore -- 3, 6, 7 alzate -- sono quelle che il maggiore ha e il minore no.
+    """
+    from delugexml import musica as MU, song as S              # noqa: PLC0415
+    mag, minn = set(S.MODI['maggiore']), set(S.MODI['minore'])
+
+    check('il maggiore parallelo alza 3, 6, 7',
+          mag - minn == {4, 9, 11}, str(sorted(mag - minn)))
+
+    # casa La minore: tonica La (classe 9), note di colore relative alla tonica
+    TON = 9
+    prestiti = {'D': 9, 'Bm': 9, 'A': 4}  # IV magg (nat6), ii min (nat6), I magg/Piccardia (nat3)
+    for testo, colore in prestiti.items():
+        rel = {(y - TON) % 12 for y in MU.voci(testo)}
+        check(f'{testo}: porta la nota di colore {colore} (rel. alla tonica)',
+              colore in rel, str(sorted(rel)))
+        check(f'{testo}: quella nota viene dal maggiore',
+              colore in (mag - minn), f'{colore} in {sorted(mag - minn)}')
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 
