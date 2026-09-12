@@ -7636,6 +7636,28 @@ def test_esatonale_scritto():
           classi <= wt, str(sorted(classi - wt)))
 
 
+def test_planing_scritto():
+    """Il pezzo di planing sta in piedi: i dom7 scivolano in parallelo per
+    semitono, e la melodia e' una linea cromatica."""
+    import planing_scritto as PL                               # noqa: PLC0415
+    from delugexml import musica as MU                         # noqa: PLC0415
+
+    accordi = [a.strip() for a in PL.PROGRESSIONE.split('|')]
+    check('il giro ha 8 battute', len(accordi) == 8, str(len(accordi)))
+    check('parte col planing C7-Db7-D7',
+          accordi[:3] == ['C7', 'Db7', 'D7'], str(accordi[:3]))
+    # i primi quattro passi salgono in parallelo di 1 semitono
+    for i in range(4):
+        a = sorted(MU.voci(accordi[i], registro='do3'))
+        b = sorted(MU.voci(accordi[i + 1], registro='do3'))
+        check(f'{accordi[i]}->{accordi[i + 1]}: scivola di +1 (parallelo)',
+              b == [y + 1 for y in a], f'{a} -> {b}')
+    # la melodia e' una linea cromatica (passi di 1 semitono)
+    ys = [MU.altezza(n) for n in PL.MELODIA.split()]
+    check('la melodia e cromatica (passi di 1 semitono)',
+          all(abs(x - y) == 1 for x, y in zip(ys, ys[1:])), str(ys))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
