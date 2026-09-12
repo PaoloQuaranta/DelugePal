@@ -7515,6 +7515,22 @@ def test_scala_esatonale():
               note <= wt, str(sorted(note - wt)))
 
 
+def test_planing_cromatico():
+    """Le affermazioni [CALC] di docs/istruzioni/armonia-parallela.md.
+
+    Il planing e' una forma rigida che scivola in parallelo: il dom7 spostato
+    di N semitoni e' voci() della base + N. E la cromatica ha 12 note.
+    """
+    from delugexml import musica as MU, song as S              # noqa: PLC0415
+    check("la cromatica ha 12 note",
+          len(S.MODI['cromatica']) == 12, str(len(S.MODI['cromatica'])))
+    base = sorted(MU.voci('C7', registro='do3'))
+    for sem, sigla in enumerate(['C7', 'Db7', 'D7', 'Eb7', 'E7']):
+        got = sorted(MU.voci(sigla, registro='do3'))
+        check(f'{sigla} = C7 + {sem} semitoni (forma parallela rigida)',
+              got == [y + sem for y in base], str(got))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 

@@ -188,6 +188,10 @@ MODI = {
     # l'esatonale (whole-tone): tutti toni, nessuna quinta giusta -> solo triadi
     # aumentate; simmetrica per tono, 2 forme distinte. Piston cap. 31 p. 490
     'esatonale':     (0, 2, 4, 6, 8, 10),
+    # la cromatica: tutte e 12 le note. Non e' un campo armonico con un centro
+    # ma "nessuna tonalita'": serve a set_scale per il planing (movimento per
+    # semitoni). Il cromatismo e' una condotta, non una scala.
+    'cromatica':     (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11),
 }
 
 NOTE_NOMI = ('C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B')
