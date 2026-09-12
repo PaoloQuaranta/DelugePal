@@ -185,6 +185,9 @@ MODI = {
     # l'ottatonica (diminuita): semitono-tono (HW), la forma per i dom7b9; la
     # tono-semitono (WH) e' la stessa scala su un'altra nota. Smith p. 75-77
     'ottatonica':    (0, 1, 3, 4, 6, 7, 9, 10),
+    # l'esatonale (whole-tone): tutti toni, nessuna quinta giusta -> solo triadi
+    # aumentate; simmetrica per tono, 2 forme distinte. Piston cap. 31 p. 490
+    'esatonale':     (0, 2, 4, 6, 8, 10),
 }
 
 NOTE_NOMI = ('C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B')

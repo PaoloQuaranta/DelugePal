@@ -7493,6 +7493,28 @@ def test_scala_ottatonica():
               note <= ott, str(sorted(note - ott)))
 
 
+def test_scala_esatonale():
+    """Le affermazioni [CALC] di docs/istruzioni/scala-esatonale.md.
+
+    L'esatonale e' simmetrica per tono, e i dom7#5 del ciclo stanno tutti
+    dentro la stessa scala.
+    """
+    from delugexml import musica as MU, song as S              # noqa: PLC0415
+    wt = set(S.MODI['esatonale'])
+
+    check("l'esatonale ha 6 note", len(S.MODI['esatonale']) == 6, str(len(wt)))
+    check("l'esatonale e simmetrica per tono (+2 semitoni)",
+          {(p + 2) % 12 for p in wt} == wt,
+          str(sorted({(p + 2) % 12 for p in wt})))
+    check("ci sono 2 esatonali distinte (trasposta di 1 semitono e' l'altra)",
+          {(p + 1) % 12 for p in wt} != wt, 'identica a se stessa?!')
+    # i dom7#5 del ciclo, tutti dentro l'esatonale di Do
+    for sigla in ('C7#5', 'D7#5', 'E7#5', 'F#7#5'):
+        note = {y % 12 for y in MU.voci(sigla)}
+        check(f'{sigla} sta dentro l\'esatonale di Do',
+              note <= wt, str(sorted(note - wt)))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 
