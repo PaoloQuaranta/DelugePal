@@ -159,9 +159,9 @@ l'«armonizzare» non aveva (una melodia che non c'era, una forma da inventare).
 
 ## Cosa resta fuori da questo giro
 
-- **la direzione inversa**: una casa **minore** che prende in prestito dal
-  maggiore parallelo (il IV maggiore, la terza di Piccardia). Nominata nel
-  vocabolario, non provata. Va in «cosa manca» dell'istruzione.
+- ~~**la direzione inversa**: una casa **minore** che prende in prestito dal
+  maggiore parallelo~~ — **presa in carico il 12 settembre 2026**, vedi
+  l'addendum in fondo.
 - **le scale non diatoniche** che l'utente usa (ottatoniche, cromatiche): questo
   documento copre il prestito fra i sette modi diatonici, non quelle.
 - **il ritmo armonico** (ogni quanto cambia l'accordo) resta una scelta del caso,
@@ -175,3 +175,49 @@ l'«armonizzare» non aveva (una melodia che non c'era, una forma da inventare).
   letto, Piston si legge sui capitoli del mixture prima di scrivere la tabella;
 - **non incatenare i prestiti.** È il vincolo che separa il prestito dalla
   modulazione, e va rispettato anche nel pezzo di prova.
+
+---
+
+## Addendum — la direzione inversa: casa minore (12 settembre 2026)
+
+Dopo che il pezzo in Do maggiore è stato approvato all'ascolto, si chiude la
+«cosa resta fuori» numero 1: una casa **minore** che prende in prestito dal
+**maggiore** parallelo.
+
+**La scelta (brainstorming, 12 settembre):** il colore protagonista è il **IV
+maggiore** — il contrario simmetrico del iv minore del primo pezzo (IV↔iv).
+
+**La fonte.** Smith p. 74: in minore i gradi **6 e 7 alzati** sono «presi in
+prestito dal maggiore parallelo» (la notazione a frecce ↑6, ↑7). Da lì il
+vocabolario di una casa minore:
+
+| prestito | in La minore | nota di colore | fonte |
+|---|---|---|---|
+| **IV maggiore** | Re (D F# A) | fa# (♮6) | `[LIB]` Smith p. 74 — la schiaritura dorica |
+| **ii minore** | Bm (B D F#) | fa# (♮6) | `[CALC]` dal maggiore |
+| **I maggiore (Piccardia)** | La (A C# E) | do# (♮3) | `[LIB]` Piston, cap. 26 e dintorni |
+
+⚠️ Il **V maggiore** (E7, col sol#) **non** è un prestito: è la normale
+dominante del minore armonico. Va detto nell'istruzione, per non confondere le
+due cose.
+
+**Il test `[CALC]`** rispecchia quello già fatto, sull'altro verso: maggiore −
+minore parallelo = {♮3, ♮6, ♮7} = {4, 9, 11}.
+
+**Il pezzo di prova**, in La minore, da zero, col iv→IV come star:
+
+```
+Am | Em | Dm | D | Am | Dm | E7 | Am
+ i    v   iv   IV   i   iv   V7   i
+```
+
+La melodia canta il **fa naturale** sul Dm (battuta 3) e lo alza al **fa#** sul
+Re maggiore (battuta 4): il ♮6 in cima, simmetrico al la→la♭ del pezzo in Do.
+Rhodes / tromba / basso, niente batteria.
+
+**Codice:** si estende `tools/prestito_scritto.py` con la seconda progressione
+(`PROGRESSIONE_MIN`, `MELODIA_MIN`, `BASSO_MIN`, e `comping_min()/tema_min()/
+basso_min()`), non un file nuovo.
+
+**Cosa resta fuori ancora:** la terza di Piccardia e il ♮6/♮7 jazz restano
+nominati ma non provati; le scale non diatoniche idem.
