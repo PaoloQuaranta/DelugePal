@@ -7603,6 +7603,23 @@ def test_ottatonica_scritto():
           classi <= ott, str(sorted(classi - ott)))
 
 
+def test_esatonale_scritto():
+    """Il pezzo esatonale sta in piedi: il ciclo di dom7#5 che sale per tono,
+    e la melodia tutta dentro l'esatonale."""
+    import esatonale_scritto as ES                             # noqa: PLC0415
+    from delugexml import musica as MU, song as S              # noqa: PLC0415
+
+    accordi = [a.strip() for a in ES.PROGRESSIONE.split('|')]
+    check('il giro ha 8 battute', len(accordi) == 8, str(len(accordi)))
+    check('il ciclo parte C7#5-D7#5-E7#5',
+          accordi[:3] == ['C7#5', 'D7#5', 'E7#5'], str(accordi[:3]))
+
+    wt = set(S.MODI['esatonale'])
+    classi = {MU.altezza(n) % 12 for n in ES.MELODIA.split()}
+    check("la melodia sta tutta dentro l'esatonale",
+          classi <= wt, str(sorted(classi - wt)))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
