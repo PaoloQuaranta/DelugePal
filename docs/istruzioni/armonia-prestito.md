@@ -106,7 +106,7 @@ e la **7ª maggiori** (in La minore: do#, fa#, sol#).
 |---|---|---|---|
 | **IV maggiore** | Re (D F# A) | fa# (♮6) | `[LIB]` Smith p. 74 — la schiaritura dorica |
 | **ii minore** | Bm (B D F#) | fa# (♮6) | `[CALC]` dal maggiore |
-| **I maggiore (Piccardia)** | La (A C# E) | do# (♮3) | `[LIB]` Piston, cap. 26 e dintorni |
+| **I maggiore (Piccardia)** | La (A C# E) | do# (♮3) | `[LIB]` Piston, cap. 5 «The Picardy Third», p. 64 |
 
 ⚠️ **Il IV maggiore è il contrario simmetrico del iv minore** di sopra: là una
 casa maggiore prendeva la sottodominante minore (il la♭); qui una casa minore
@@ -118,8 +118,41 @@ dominante del minore armonico: il sol# è la sensibile che riporta a casa, non u
 colore preso dal maggiore. Chiamarlo prestito vorrebbe dire chiamare prestito
 ogni accordo del minore armonico.
 
-`[CALC]` Il test `test_armonia_prestito_casa_minore` blinda questa tabella:
-maggiore − minore parallelo = {♮3, ♮6, ♮7}.
+### Il colore del minore jazz
+
+Il ♮6 e il ♮7 non colorano solo altri gradi: colorano la **tonica stessa**, e
+danno il suono della **minore melodica** (la «minore jazz»). Due accordi di
+tonica:
+
+| accordo | in La minore | nota | cos'è |
+|---|---|---|---|
+| **i6** | Am6 (A C E F#) | fa# (♮6) | la tonica con la 6ª maggiore |
+| **i(maj7)** | Am(maj7) (A C E G#) | sol# (♮7) | la tonica con la 7ª maggiore |
+
+⚠️ **Il modo di sentirli è il *line cliché*:** sopra un pedale di tonica, una
+voce scende per semitoni dalla fondamentale —
+
+```
+Am → Am(maj7) → Am7 → Am6     (la → sol# → sol → fa#)
+ i    i(maj7)    i7    i6
+```
+
+— `[DEC]` un'applicazione idiomatica nota (il giro d'apertura di *My Funny
+Valentine*, il colore dei temi «spia»). Il sol# e il fa# sono il ♮7 e il ♮6
+presi dal maggiore; la discesa li fa sentire uno dopo l'altro, su una casa che
+non si muove.
+
+### La Piccardia come chiusura
+
+Il ♮3 (il do# in La minore) preso dal maggiore fa la **terza di Piccardia**: un
+pezzo in minore che **chiude su una tonica maggiore**. `[LIB]` Piston, cap. 5,
+p. 64: *«fin dal Cinquecento era una convenzione accettata chiudere un'opera con
+una triade maggiore, anche se l'opera era inequivocabilmente in minore.»* È un
+effetto di **finale**, non un colore a metà: la casa si apre proprio mentre
+finisce.
+
+`[CALC]` Il test `test_armonia_prestito_casa_minore` blinda sia i prestiti sui
+gradi sia questi colori di tonica: maggiore − minore parallelo = {♮3, ♮6, ♮7}.
 
 ---
 
@@ -247,9 +280,8 @@ come il iv minore in maggiore — al primo colpo, in tutt'e due i versi.
 ## Cosa manca a questa istruzione
 
 - **la direzione inversa** — una casa **minore** che prende dal **maggiore** — è
-  nel vocabolario e **provata sul IV maggiore** (secondo esempio lavorato).
-  Restano nominate ma non provate la **terza di Piccardia** e il colore ♮6/♮7 del
-  minore jazz;
+  ora nel vocabolario in tutt'e tre le forme: il **IV maggiore**, il **colore del
+  minore jazz** (m6, m(maj7)) e la **terza di Piccardia**;
 - **le scale non diatoniche** che l'utente usa (ottatoniche, cromatiche): questo
   documento copre il prestito fra i modi diatonici paralleli, non quelle;
 - **il ritmo armonico** — ogni quanto cambia l'accordo, e quanto dura il
