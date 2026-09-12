@@ -121,10 +121,28 @@ note comuni fra un dom7 e il successivo — è la simmetria che te le regala.
 
 ## Esempio lavorato: il ciclo simmetrico
 
-⚠️ **In costruzione.** Il pezzo di prova è il ciclo `C7 | Eb7 | Gb7 | A7` su due
-rotazioni, con una linea ottatonica discendente in cima:
-`tools/ottatonica_scritto.py`. L'esempio e il verdetto dell'utente vanno qui
-appena ascoltato sul Deluge.
+`[OSS]` La prima prova di una scala non diatonica del progetto — 12 settembre
+2026. In [`tools/ottatonica_scritto.py`](../../tools/ottatonica_scritto.py).
+
+**L'idea:** il colore simmetrico puro, da zero. Otto battute, tre voci, niente
+batteria.
+
+**La progressione** — il ciclo dei quattro dom7 a terza minore, su due rotazioni:
+
+```
+C7 | Eb7 | Gb7 | A7 | C7 | Eb7 | Gb7 | A7
+```
+
+tutti dentro una sola ottatonica. In cima, una **linea ottatonica discendente**
+(do-sib-la-sol-solb-mi-mib-reb), la scala per intero.
+
+**Dove si gioca:** il ciclo gira per terze minori e **non torna mai a una
+tonica** — è la simmetria resa udibile. Niente cadenza, niente casa: il colore
+sta nel non posarsi.
+
+**Verdetto: approvato.** La scala simmetrica regge come colore, costruita dal
+nulla — il primo terreno non diatonico del progetto, e l'armonia ha tenuto anche
+qui al primo colpo.
 
 ---
 
