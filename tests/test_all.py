@@ -7463,7 +7463,8 @@ def test_armonia_prestito_casa_minore():
 
     # casa La minore: tonica La (classe 9), note di colore relative alla tonica
     TON = 9
-    prestiti = {'D': 9, 'Bm': 9, 'A': 4}  # IV magg (nat6), ii min (nat6), I magg/Piccardia (nat3)
+    # IV magg (nat6), ii min (nat6), I magg/Piccardia (nat3), m6 (nat6), m(maj7) (nat7)
+    prestiti = {'D': 9, 'Bm': 9, 'A': 4, 'Am6': 9, 'AmMaj7': 11}
     for testo, colore in prestiti.items():
         rel = {(y - TON) % 12 for y in MU.voci(testo)}
         check(f'{testo}: porta la nota di colore {colore} (rel. alla tonica)',
