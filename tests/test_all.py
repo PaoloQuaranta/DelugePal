@@ -7473,6 +7473,26 @@ def test_armonia_prestito_casa_minore():
               colore in (mag - minn), f'{colore} in {sorted(mag - minn)}')
 
 
+def test_scala_ottatonica():
+    """Le affermazioni [CALC] di docs/istruzioni/scala-ottatonica.md.
+
+    L'ottatonica e' simmetrica per terza minore, e i quattro dom7 a terza
+    minore stanno tutti dentro la stessa scala.
+    """
+    from delugexml import musica as MU, song as S              # noqa: PLC0415
+    ott = set(S.MODI['ottatonica'])
+
+    check("l'ottatonica ha 8 note", len(S.MODI['ottatonica']) == 8, str(len(ott)))
+    check("l'ottatonica e simmetrica per terza minore (+3 semitoni)",
+          {(p + 3) % 12 for p in ott} == ott,
+          str(sorted({(p + 3) % 12 for p in ott})))
+    # i quattro dom7 a terza minore, tutti dentro l'ottatonica di Do (tonica 0)
+    for sigla in ('C7', 'Eb7', 'Gb7', 'A7'):
+        note = {y % 12 for y in MU.voci(sigla)}
+        check(f'{sigla} sta dentro l\'ottatonica di Do',
+              note <= ott, str(sorted(note - ott)))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 

@@ -182,6 +182,9 @@ MODI = {
     'locrio':        (0, 1, 3, 5, 6, 8, 10),
     'minore armonica': (0, 2, 3, 5, 7, 8, 11),
     'minore melodica': (0, 2, 3, 5, 7, 9, 11),
+    # l'ottatonica (diminuita): semitono-tono (HW), la forma per i dom7b9; la
+    # tono-semitono (WH) e' la stessa scala su un'altra nota. Smith p. 75-77
+    'ottatonica':    (0, 1, 3, 4, 6, 7, 9, 10),
 }
 
 NOTE_NOMI = ('C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B')
