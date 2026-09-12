@@ -7449,6 +7449,33 @@ def test_armonia_prestito_accordi_dal_parallelo():
               colore not in mag, f'{colore} in {sorted(mag)}')
 
 
+def test_prestito_scritto():
+    """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
+
+    docs/istruzioni/armonia-prestito.md, esempio lavorato: un giro in Do
+    maggiore col iv minore (Fm7) alla battuta 4, e la melodia che ci canta
+    sopra il la bemolle.
+    """
+    import prestito_scritto as PR                              # noqa: PLC0415
+    from delugexml import musica as MU                         # noqa: PLC0415
+
+    accordi = [a.strip() for a in PR.PROGRESSIONE.split('|')]
+    check('il giro ha 8 battute', len(accordi) == 8, str(len(accordi)))
+    check('il iv minore (Fm7) e alla battuta 4', accordi[3] == 'Fm7', accordi[3])
+    check('il giro torna a casa sul Cmaj7', accordi[-1] == 'Cmaj7', accordi[-1])
+
+    # la melodia: la naturale (9) sulla battuta 3 (Fmaj7), la bemolle (8) sulla
+    # 4 (Fm7) -- e' il colore IV->iv portato in cima
+    per_battuta: dict[int, set[int]] = {}
+    for y, note in MU.melodia(PR.MELODIA, durata='1/1').items():
+        for n in note:
+            per_battuta.setdefault(n.pos // 384, set()).add(y % 12)
+    check('battuta 3 (Fmaj7): la melodia ha il la naturale (9)',
+          9 in per_battuta.get(2, set()), str(sorted(per_battuta.get(2, set()))))
+    check('battuta 4 (Fm7): la melodia ha il la bemolle (8)',
+          8 in per_battuta.get(3, set()), str(sorted(per_battuta.get(3, set()))))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
