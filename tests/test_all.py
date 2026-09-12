@@ -7548,6 +7548,24 @@ def test_medianti_cromatiche():
           len(do & em) == 2, str(sorted(do & em)))
 
 
+def test_accordi_di_passaggio():
+    """Le affermazioni [CALC] di docs/istruzioni/accordi-di-passaggio.md.
+
+    La diminuita di passaggio ha la fondamentale un semitono fra i due accordi
+    (basso cromatico); il tritone sub condivide il tritono col V7.
+    """
+    from delugexml import musica as MU                         # noqa: PLC0415
+    # diminuita di passaggio: Do(0) -> C#dim7(1) -> Re m(2), basso cromatico
+    fond = [MU.sigla(s).fondamentale for s in ('C', 'C#dim7', 'Dm7')]
+    check('C#dim7 passa col basso cromatico fra Do (0) e Re (2)',
+          fond == [0, 1, 2], str(fond))
+    # tritone sub: Db7 (bII7) e G7 (V7) condividono il tritono fa-si
+    g7 = {y % 12 for y in MU.voci('G7')}
+    db7 = {y % 12 for y in MU.voci('Db7')}
+    check('Db7 (tritone sub) e G7 condividono il tritono (fa=5, si=11)',
+          {5, 11} <= g7 and {5, 11} <= db7, f'G7 {sorted(g7)}, Db7 {sorted(db7)}')
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 
