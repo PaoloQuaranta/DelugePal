@@ -277,11 +277,44 @@ come il iv minore in maggiore — al primo colpo, in tutt'e due i versi.
 
 ---
 
+## Esempio lavorato: il minore jazz e la Piccardia
+
+`[OSS]` Il terzo pezzo, che chiude la casa minore — 12 settembre 2026. Due
+colori in uno, il *line cliché* e la Piccardia. In
+[`tools/prestito_scritto.py`](../../tools/prestito_scritto.py) (le costanti
+`*_JAZZMIN`).
+
+**L'idea:** una casa in La minore, dal nulla, tinta di **minore melodica** e
+chiusa in **Piccardia**. Otto battute, tre voci, niente batteria.
+
+**La progressione:**
+
+```
+Am | Am(maj7) | Am7 | Am6 | Dm7 | E7 | Am | A
+ i    i(maj7)   i7    i6    iv   V7   i    I(Picc.)
+```
+
+**Dove si gioca, due volte:**
+- **battute 1-4, il line cliché:** su un pedale di La la voce scende
+  **la → sol# → sol → fa#**; il sol# (♮7) e il fa# (♮6) presi dal maggiore danno
+  il suono della minore melodica;
+- **battuta 8, la Piccardia:** il pezzo chiude su La **maggiore** (il do#, ♮3) —
+  la casa minore si apre proprio mentre finisce.
+
+La tromba canta il cliché in cima e si posa sul do#.
+
+**Verdetto: approvato.** Con questo la **casa minore è completa**: il IV
+maggiore, il colore del minore jazz e la terza di Piccardia, ognuno provato
+all'ascolto. L'armonia ha retto ogni colore al primo colpo — il terreno fermo
+del perimetro.
+
+---
+
 ## Cosa manca a questa istruzione
 
-- **la direzione inversa** — una casa **minore** che prende dal **maggiore** — è
-  ora nel vocabolario in tutt'e tre le forme: il **IV maggiore**, il **colore del
-  minore jazz** (m6, m(maj7)) e la **terza di Piccardia**;
+- ~~**la direzione inversa**~~ — **chiusa**: il **IV maggiore**, il **colore del
+  minore jazz** (m6, m(maj7)) e la **terza di Piccardia**, ognuno nel vocabolario
+  e con un esempio lavorato provato all'ascolto;
 - **le scale non diatoniche** che l'utente usa (ottatoniche, cromatiche): questo
   documento copre il prestito fra i modi diatonici paralleli, non quelle;
 - **il ritmo armonico** — ogni quanto cambia l'accordo, e quanto dura il
