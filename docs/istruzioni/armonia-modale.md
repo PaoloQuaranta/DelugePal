@@ -28,7 +28,7 @@ frigio, misolidio, locrio.
 
 ## Il principio: colore statico, non funzione
 
-`[LIB]` *Jazz Theory Justified*, cap. IX «Modal Jazz», p. 81:
+`[LIB]` Smith, *Jazz Theory* (4ª ed.), cap. X «Other Systems», sez. «Modal Jazz», p. 81:
 
 > «Il jazz "modale" fornisce un impianto per l'improvvisazione basato sulle
 > **scale invece che sulle progressioni di accordi**. [...] Poiché tutte le

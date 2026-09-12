@@ -46,7 +46,7 @@ scritto qui invece di scegliere in silenzio.
 
 ## La procedura
 
-`[LIB]` *Jazz Theory Justified*, cap. IV «Developing a Bass Line», pp. 27-28.
+`[LIB]` Smith, *Jazz Theory* (4ª ed.), cap. IV «Developing a Bass Line», pp. 27-28.
 
 ### Passo 1 — lo scheletro: le fondamentali
 
