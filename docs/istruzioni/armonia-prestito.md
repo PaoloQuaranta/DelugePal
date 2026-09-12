@@ -212,11 +212,43 @@ armonica aveva ancora toccato.
 
 ---
 
+## Esempio lavorato: il pezzo in La minore
+
+`[OSS]` Il gemello in minore del pezzo in Do, e la prova della direzione
+inversa — 12 settembre 2026. Stesso script,
+[`tools/prestito_scritto.py`](../../tools/prestito_scritto.py) (le costanti
+`*_MIN`).
+
+**L'idea:** una casa in La minore, dal nulla, col *IV maggiore* come colore — la
+schiaritura dorica presa dal La maggiore parallelo. Otto battute, tre voci,
+niente batteria, come il primo.
+
+**La progressione**, col prestito alla battuta 4:
+
+```
+Am | Em | Dm | D | Am | Dm | E7 | Am
+ i    v   iv   IV   i   iv   V7   i
+```
+
+**Dove si gioca:** il iv→IV delle battute 3-4. La tromba canta il **fa naturale**
+sul Dm e lo alza al **fa#** sul Re maggiore, mentre l'armonia fa la
+sottodominante maggiore; poi si rientra a casa. ⚠️ L'E7 della battuta 7 è la
+normale dominante del minore (col sol#), **non** un prestito.
+
+**È il contrario simmetrico del pezzo in Do:** là una casa maggiore scuriva il
+IV in iv (il la che scende al la♭); qui una casa minore schiarisce il iv in IV
+(il fa che sale al fa#). Stesso grado, i due versi.
+
+**Verdetto: «sento la schiaritura, approvato».** Il IV maggiore in minore regge
+come il iv minore in maggiore — al primo colpo, in tutt'e due i versi.
+
+---
+
 ## Cosa manca a questa istruzione
 
 - **la direzione inversa** — una casa **minore** che prende dal **maggiore** — è
-  ora nel vocabolario (§«La direzione inversa: una casa minore»). Restano
-  nominate ma non provate a fondo la **terza di Piccardia** e il colore ♮6/♮7 del
+  nel vocabolario e **provata sul IV maggiore** (secondo esempio lavorato).
+  Restano nominate ma non provate la **terza di Piccardia** e il colore ♮6/♮7 del
   minore jazz;
 - **le scale non diatoniche** che l'utente usa (ottatoniche, cromatiche): questo
   documento copre il prestito fra i modi diatonici paralleli, non quelle;
