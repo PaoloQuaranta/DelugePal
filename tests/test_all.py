@@ -7531,6 +7531,23 @@ def test_planing_cromatico():
               got == [y + sem for y in base], str(got))
 
 
+def test_medianti_cromatiche():
+    """Le affermazioni [CALC] di docs/istruzioni/medianti-cromatiche.md.
+
+    Una mediante cromatica condivide UNA sola nota con la casa; una mediante
+    diatonica ne condivide due.
+    """
+    from delugexml import musica as MU                         # noqa: PLC0415
+    do = {y % 12 for y in MU.voci('C')}
+    for sigla in ('Ab', 'E', 'Eb', 'A'):
+        m = {y % 12 for y in MU.voci(sigla)}
+        check(f'Do e {sigla}: una sola nota in comune (mediante cromatica)',
+              len(do & m) == 1, str(sorted(do & m)))
+    em = {y % 12 for y in MU.voci('Em')}
+    check('Do e Em (mediante diatonica): due note in comune',
+          len(do & em) == 2, str(sorted(do & em)))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 
