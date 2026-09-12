@@ -7499,6 +7499,27 @@ def test_prestito_scritto():
           8 in per_battuta.get(3, set()), str(sorted(per_battuta.get(3, set()))))
 
 
+def test_prestito_scritto_minore():
+    """Il pezzo in minore sta in piedi: iv->IV (Dm->D) alla battuta 4, la
+    melodia che alza il fa al fa# sopra."""
+    import prestito_scritto as PR                              # noqa: PLC0415
+    from delugexml import musica as MU                         # noqa: PLC0415
+
+    accordi = [a.strip() for a in PR.PROGRESSIONE_MIN.split('|')]
+    check('il giro minore ha 8 battute', len(accordi) == 8, str(len(accordi)))
+    check('il IV maggiore (D) e alla battuta 4', accordi[3] == 'D', accordi[3])
+    check('il giro torna a casa su Am', accordi[-1] == 'Am', accordi[-1])
+
+    per_battuta: dict[int, set[int]] = {}
+    for y, note in MU.melodia(PR.MELODIA_MIN, durata='1/1').items():
+        for n in note:
+            per_battuta.setdefault(n.pos // 384, set()).add(y % 12)
+    check('battuta 3 (Dm): la melodia ha il fa naturale (5)',
+          5 in per_battuta.get(2, set()), str(sorted(per_battuta.get(2, set()))))
+    check('battuta 4 (D): la melodia ha il fa# (6)',
+          6 in per_battuta.get(3, set()), str(sorted(per_battuta.get(3, set()))))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

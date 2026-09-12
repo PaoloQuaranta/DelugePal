@@ -58,5 +58,43 @@ def basso():
     return MU.melodia(BASSO, durata='1/1')
 
 
+# --- il secondo pezzo: casa MINORE, il IV maggiore preso dal maggiore parallelo
+#
+#   battuta  accordo  grado  melodia  perche'
+#   1        Am       i       mi4     la casa minore
+#   2        Em       v       sol4    diatonico
+#   3        Dm       iv       fa4     il iv, col fa NATURALE (b6)
+#   4        D        IV      fa#4    il PRESTITO: il fa sale al fa# (nat6), la schiaritura
+#   5        Am       i       mi4     si rientra
+#   6        Dm       iv       fa4     di nuovo il iv
+#   7        E7       V7      mi4     la dominante (il sol# e' la sensibile, NON un prestito)
+#   8        Am       i       la4     a casa
+#
+#: Il cuore e' il iv->IV delle battute 3-4: Dm -> D maggiore, il fa che sale al
+#: fa#. E' il contrario simmetrico del IV->iv (la -> la bemolle) del pezzo in Do.
+PROGRESSIONE_MIN = 'Am | Em | Dm | D | Am | Dm | E7 | Am'
+MELODIA_MIN = 'mi4 sol4 fa4 fa#4 mi4 fa4 mi4 la4'
+BASSO_MIN = 'la2 mi2 re2 re2 la2 re2 mi2 la2'
+
+
+def comping_min():
+    """Gli accordi del pezzo in minore, voicing per terze."""
+    return MU.armonia(PROGRESSIONE_MIN, voicing='chiuso', registro='la2',
+                      durata='1/1')
+
+
+def tema_min():
+    """La melodia del pezzo in minore."""
+    return MU.melodia(MELODIA_MIN, durata='1/1')
+
+
+def basso_min():
+    """Il basso del pezzo in minore."""
+    return MU.melodia(BASSO_MIN, durata='1/1')
+
+
 if __name__ == '__main__':
+    print('=== pezzo in Do maggiore (il iv minore) ===')
     print(MU.racconta_armonia(PROGRESSIONE, voicing='chiuso', registro='do3'))
+    print('\n=== pezzo in La minore (il IV maggiore) ===')
+    print(MU.racconta_armonia(PROGRESSIONE_MIN, voicing='chiuso', registro='la2'))
