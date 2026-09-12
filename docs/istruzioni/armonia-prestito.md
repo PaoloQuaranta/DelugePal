@@ -148,11 +148,37 @@ triadi. Il quartale è un colore del vocabolario, non un traguardo.
 
 ## Esempio lavorato: il pezzo in Do
 
-⚠️ **In costruzione.** Il pezzo di prova è un giro in Do maggiore costruito da
-zero col *iv* minore come colore centrale (il IV→iv→I alla battuta 3-4, e la
-melodia che ci canta sopra il la♭): `tools/prestito_scritto.py`. L'esempio e il
-verdetto dell'utente vanno scritti qui appena ascoltato sul Deluge — come
-*«frigio mi piace molto»* ha chiuso l'armonia modale.
+`[OSS]` Il primo pezzo armonico del progetto **creato da zero**, e il primo
+«creare dal nulla» andato a segno — 12 settembre 2026. Lo script è
+[`tools/prestito_scritto.py`](../../tools/prestito_scritto.py); ogni nota è una
+scelta, col motivo accanto.
+
+**L'idea:** una casa in Do maggiore, dal nulla, col *iv* minore come colore
+centrale. Otto battute, un accordo per battuta, tre voci — Rhodes per gli
+accordi, tromba per la melodia, basso sulle fondamentali. Niente batteria.
+
+**La progressione**, col prestito alla battuta 4:
+
+```
+Cmaj7 | Em7 | Fmaj7 | Fm7 | Em7 | Dm7 | G7 | Cmaj7
+  I     iii    IV     iv    iii   ii    V     I
+```
+
+**Dove si gioca:** il IV→iv→I delle battute 3-4-5. La tromba canta il **la
+naturale** sul Fmaj7 e lo abbassa al **la♭** sul Fm7, mentre l'armonia fa la
+sottodominante minore; poi il Do torna a casa. Il colore è tutto in quel
+semitono che scende, in cima.
+
+**Verdetto: «sento la modulazione correttamente» — approvato.** ⚠️ E il fatto
+che l'utente l'abbia chiamata «modulazione» è un dato, non un errore da
+correggere: il iv preso in prestito è un colore così netto da sentirsi come un
+cambio di tonalità, **pur risolvendo a casa**. È precisamente l'effetto cercato
+— il prestito che colora senza che la casa se ne vada.
+
+⚠️ **Ha funzionato al primo colpo**, come l'armonia modale e contro le dieci
+versioni della batteria: conferma di nuovo che l'armonia è terreno più fermo del
+ritmo, come dice il perimetro. E supera il «da zero», che nessuna istruzione
+armonica aveva ancora toccato.
 
 ---
 
@@ -166,6 +192,6 @@ verdetto dell'utente vanno scritti qui appena ascoltato sul Deluge — come
 - **il ritmo armonico** — ogni quanto cambia l'accordo, e quanto dura il
   prestito prima di risolvere: qui è una scelta del caso, non una regola, come
   già in `armonia-modale.md`;
-- **la verifica su un pezzo DA ZERO.** È la prova che questo pezzo tenta per
-  primo fra le istruzioni armoniche: finché non è ascoltato, il «creare dal
-  nulla» resta non superato.
+- ~~**la verifica su un pezzo DA ZERO**~~ — **superata il 12 settembre 2026**
+  (vedi l'esempio lavorato): è la prima istruzione armonica a passare il «creare
+  dal nulla», non solo l'armonizzare un'idea esistente.
