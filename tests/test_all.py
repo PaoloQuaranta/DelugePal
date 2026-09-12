@@ -7722,6 +7722,29 @@ def test_medianti_scritto():
           8 in per_b.get(3, set()), str(sorted(per_b.get(3, set()))))
 
 
+def test_passaggio_scritto():
+    """Il pezzo di passaggio sta in piedi: la diminuita di passaggio e il
+    tritone sub, la melodia su note d'accordo."""
+    import passaggio_scritto as PS                             # noqa: PLC0415
+    from delugexml import musica as MU                         # noqa: PLC0415
+
+    accordi = [a.strip() for a in PS.PROGRESSIONE.split('|')]
+    check('il giro ha 8 battute', len(accordi) == 8, str(len(accordi)))
+    check('la diminuita di passaggio (C#dim7) e alla battuta 2',
+          accordi[1] == 'C#dim7', accordi[1])
+    check('il tritone sub (Db7) e alla battuta 4', accordi[3] == 'Db7', accordi[3])
+    fond = [MU.sigla(accordi[i]).fondamentale for i in (0, 1, 2)]
+    check('il basso sale cromatico do->do#->re (bat. 1-3)',
+          fond == [0, 1, 2], str(fond))
+    per_b: dict[int, set[int]] = {}
+    for y, note in MU.melodia(PS.MELODIA, durata='1/1').items():
+        for n in note:
+            per_b.setdefault(n.pos // 384, set()).add(y % 12)
+    ok = all(per_b.get(i, set()) <= {y % 12 for y in MU.voci(accordi[i])}
+             for i in range(8))
+    check('ogni nota della melodia e una nota del suo accordo', ok, '')
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
