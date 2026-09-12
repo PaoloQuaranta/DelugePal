@@ -126,8 +126,10 @@ supporto compositivo, priorità **1) armonia** (ampia + jazz + modale),
 jazz-in-poi, con groove template). Niente filologia: si attinge al bagaglio
 espressivo, non si replica un genere. Il flusso è armonizzare/arrangiare
 un'idea → creare da zero → l'utente rifinisce sul Deluge. **L'armonia non
-dipende dai corpus di performance: dipende dalla teoria.** Il prossimo passo
-concreto sta in fondo a §6-duetvicies.
+dipende dai corpus di performance: dipende dalla teoria.** ⚠️ **Il 12-13
+settembre l'armonia si è allargata molto** — prestito modale (due case), le due
+scale simmetriche, il cromatismo (planing e medianti): lo stato e il prossimo
+passo stanno in fondo a **§6-tervicies**, non più a §6-duetvicies.
 
 Il testo qui sotto è la formulazione ORIGINALE del lavoro, tenuta perché resta
 vera nel merito — «serie competenze compositive» — ma ora ha una direzione
@@ -2916,6 +2918,111 @@ Due strade, in ordine di vicinanza a quello che l'utente cerca:
 latin, funk), le scale non diatoniche che l'utente usa (ottatoniche,
 cromatiche), e tutta la priorità 2 (voicing, contrappunto, comping, struttura)
 salvo `MU.armonia()` che già conduce le parti.
+
+---
+
+## 6-tervicies. L'armonia si allarga — prestito, scale simmetriche, cromatismo — 12-13 settembre 2026
+
+**In due giorni l'armonia è passata dalla prima prova del prestito a una
+copertura ampia dello spettro espressivo.** Cinque istruzioni nuove, otto pezzi
+costruiti da zero e caricati sul Deluge, **tutti approvati al primo colpo**. Il
+metodo è quello di §6-unetvicies (istruzioni, non generatore); il flusso quello
+di PERCHE — scrivi una parte → carica via SysEx → l'utente ascolta → il verdetto
+chiude l'istruzione con l'esempio lavorato.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `docs/istruzioni/armonia-prestito.md` | il **prestito modale** (modal interchange), due case. **Maggiore:** iv, ♭VI, ♭VII, ♭III, I→Im, ♭II napoletano (dal minore parallelo). **Minore:** IV maggiore (schiaritura dorica), colore del minore jazz (m6, m(maj7), il line cliché), Piccardia (dal maggiore parallelo). Tre esempi lavorati |
+| `docs/istruzioni/scala-ottatonica.md` | la **diminuita**: simmetrica per terza minore, tesa (dim7, dom7♭9), il ciclo dei quattro dom7 a terza minore |
+| `docs/istruzioni/scala-esatonale.md` | la **whole-tone**: simmetrica per tono, sospesa (aumentate, dom7♯5), il ciclo per tono |
+| `docs/istruzioni/armonia-parallela.md` | il **planing cromatico**: una forma che scivola parallela, `condotta=False` |
+| `docs/istruzioni/medianti-cromatiche.md` | le **medianti cromatiche**: scarto di terza con una nota in comune, `condotta=True` |
+| `song.MODI` | tre scale nominate nuove: **ottatonica**, **esatonale**, **cromatica** |
+| `tools/*_scritto.py` | i pezzi composti (materiale, con la ragione accanto): `prestito_scritto` (3 pezzi), `ottatonica_/esatonale_/planing_/medianti_scritto` |
+| `tests/test_all.py` | un guardiano `[CALC]` per ogni istruzione + un test per ogni pezzo. Suite **1136 → 1226** |
+
+### Il metodo ha retto, e lo dice un numero
+
+Otto pezzi, **zero versioni respinte** — contro le dieci della batteria
+(§6-unetvicies). Conferma quello che il perimetro diceva in teoria: **l'armonia
+è terreno più fermo del ritmo**, e dipende dalla teoria, non da un corpus di
+performance. L'unica correzione chiesta dall'utente in due giorni è stata di
+scope (quale colore), mai «suona male».
+
+### La leva tecnica: `condotta` accesa o spenta
+
+⚠️ **È il punto che un agente deve sapere.** `MU.armonia(..., condotta=...)`:
+
+- **`True`** (default) tiene la nota comune e muove poco le voci — serve
+  all'armonia **modale**, al **prestito**, alle **medianti** (la morbidezza È la
+  nota tenuta);
+- **`False`** voicizza ogni accordo rigido, in fondamentale — serve **solo** al
+  **planing** (la forma deve restare parallela; la condotta la romperebbe).
+
+È l'unico posto in cui la condotta va spenta. Sta scritto in
+`armonia-parallela.md` e nella docstring del pezzo.
+
+### Le fonti, e una cosa onesta
+
+| cosa | fonte |
+|---|---|
+| ottatonica | Smith, *Jazz Theory* (4ª ed.), p. 75-77 |
+| whole-tone | Piston, *Harmony* (5ª ed.), cap. 31, p. 490 |
+| planing | Piston, cap. 31 «Parallel and Antiparallel Harmony», p. 496 |
+| Piccardia | Piston, cap. 5 «The Picardy Third», p. 64 |
+| napoletana (♭II) | Piston, cap. 26 «The Neapolitan Sixth», p. 407 |
+| minore jazz (↑6/↑7) | Smith, p. 74 |
+
+⚠️ **Smith NON copre la whole-tone** (verificato: zero occorrenze): per quella si
+cambia libro (Piston). ⚠️ **Le medianti cromatiche non hanno una fonte che le
+NOMINI** (il termine è neo-riemanniano): il rigore sta nel `[CALC]` — il fatto
+della nota comune, testato — dichiarato esplicitamente nell'istruzione, con
+Piston cap. 28 come solo contesto. **Non si è forzata una citazione**, ed è una
+regola: se la fonte non nomina la cosa, lo si dice.
+
+⚠️ **Una citazione corretta verificando sul PDF** (§ commit `0d71210`): il libro
+è **Smith, "Jazz Theory"** — non "Jazz Theory Justified" come dicevano
+`armonia-modale.md` e `walking.md` — e la sezione «Modal Jazz» è nel cap. X, non
+nel cap. IX. La Piccardia è Piston cap. 5, non cap. 26.
+
+### Come si costruisce e si carica un pezzo di prova
+
+I **material scripts** (`tools/*_scritto.py`) sono **versionati** e tengono le
+note con la ragione accanto (come `walking_scritto.py`). L'**assemblaggio** — da
+`refs/songs/TEMPL0.XML`, via il track di default, tre tracce da `refs/synths/`
+(Tal Rhodes / 062 Trumpet / Square Saw Bass), `MU.scrivi`, `set_scale`,
+`verifica`, `write_file` — più il `put` SysEx stanno in **scratchpad**, **non
+versionati** (dipendono da `refs/`, escluso). Il template carica di default il
+patch a pagamento BOD: si toglie con `MU.togli` e si parte puliti.
+
+⚠️ **`dsysex put` va lanciato da PowerShell, non da Git Bash:** da Git Bash il
+percorso remoto `/SONGS/DelugePal/...` viene storpiato in `C:/Program
+Files/Git/SONGS/...` e l'`open` fallisce. Vedi la memoria `dsysex-da-powershell`.
+
+### Cosa NON rifare
+
+- **non sbagliare la `condotta`:** spenta per il planing, accesa per tutto il
+  resto;
+- **non forzare una citazione** quando la fonte non nomina la cosa: `[CALC]` +
+  contesto, dichiarato;
+- **non lanciare `dsysex put` da Git Bash** (storpia il path remoto);
+- **non chiamare "modo" una scala simmetrica o cromatica:** va in `MODI` come
+  intervalli, ma non è un modo del maggiore.
+
+### Il prossimo passo
+
+1. **chiudere il cromatismo** con l'ultima faccia: gli **accordi di
+   passaggio/approccio** cromatici (la dominante di tritono, la diminuita di
+   passaggio) — la colla funzionale fra accordi diatonici;
+2. poi uscire dall'armonia verso la **priorità 2, la forma**: voicing,
+   contrappunto, comping, struttura (`MU.armonia()` già conduce le parti; il
+   resto è da scrivere).
+
+⚠️ Restano comunque fuori, sull'armonia: le **doppie medianti** (terza senza
+nota in comune), il **diatonic planing** (scivolare dentro una scala), i **feel
+non-swing del jazz** (in due, latin, funk).
 
 ---
 
