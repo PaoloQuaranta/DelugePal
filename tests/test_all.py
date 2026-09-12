@@ -7405,6 +7405,50 @@ def test_armonia_modale_note_caratteristiche():
               triade(iv, 1) == atteso, str(triade(iv, 1)))
 
 
+def test_armonia_prestito_accordo_fuori_scala():
+    """La premessa di docs/istruzioni/armonia-prestito.md.
+
+    Il iv minore (Fm in Do maggiore) ha il la bemolle, che non e' nel Do
+    maggiore. voci()/armonia() lo calcolano dalla sigla, non dalla scala --
+    e set_scale() non tocca le note gia' scritte (e' scritto nella sua
+    docstring): sul Deluge la scala e' il layout della griglia, non un filtro.
+    """
+    from delugexml import musica as MU                         # noqa: PLC0415
+
+    classi = {y % 12 for y in MU.voci('Fm7')}
+    check('Fm7 contiene il la bemolle (classe 8)',
+          8 in classi, str(sorted(classi)))
+
+    note = MU.armonia('Cmaj7 | Fm7 | Cmaj7', registro='do3', durata='1/1')
+    altezze = {y % 12 for y in note}
+    check('il giro col iv minore porta il la bemolle',
+          8 in altezze, str(sorted(altezze)))
+
+
+def test_armonia_prestito_accordi_dal_parallelo():
+    """Le affermazioni [CALC] di docs/istruzioni/armonia-prestito.md.
+
+    In una casa maggiore i prestiti vengono dal minore parallelo: le note di
+    colore -- b3, b6, b7 -- sono esattamente quelle che il minore ha e il
+    maggiore no. Se qualcuno cambia song.MODI, questo prende il documento che
+    mente.
+    """
+    from delugexml import musica as MU, song as S              # noqa: PLC0415
+    mag, minn = set(S.MODI['maggiore']), set(S.MODI['minore'])
+
+    check('il minore parallelo abbassa b3, b6, b7',
+          minn - mag == {3, 8, 10}, str(sorted(minn - mag)))
+
+    # prestito -> la sua nota di colore, classe relativa alla tonica (Do = 0)
+    prestiti = {'Fm': 8, 'Ab': 8, 'Bb': 10, 'Eb': 3, 'Cm': 3, 'Dm7b5': 8}
+    for testo, colore in prestiti.items():
+        classi = {y % 12 for y in MU.voci(testo)}
+        check(f'{testo}: porta la nota di colore {colore}',
+              colore in classi, str(sorted(classi)))
+        check(f'{testo}: quella nota e fuori dal Do maggiore',
+              colore not in mag, f'{colore} in {sorted(mag)}')
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
