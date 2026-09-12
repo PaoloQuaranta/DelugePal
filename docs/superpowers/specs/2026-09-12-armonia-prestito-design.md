@@ -221,3 +221,36 @@ basso_min()`), non un file nuovo.
 
 **Cosa resta fuori ancora:** la terza di Piccardia e il ♮6/♮7 jazz restano
 nominati ma non provati; le scale non diatoniche idem.
+
+---
+
+## Addendum 2 — i colori del minore jazz e la Piccardia (12 settembre 2026)
+
+Si chiudono gli ultimi due colori della casa minore, entrambi presi dal
+maggiore parallelo e mostrati in **un solo pezzo**.
+
+- **il colore del minore jazz** — gli accordi di tonica **m6** (col ♮6) e
+  **m(maj7)** (col ♮7), cioè il sapore della minore melodica. Mostrato col
+  *line cliché*: `Am → Am(maj7) → Am7 → Am6`, la discesa A-G#-G-F# su un pedale
+  di tonica. `[LIB]` Smith p. 74 (il ♮6/♮7 «presi dal maggiore parallelo»); il
+  line cliché è `[DEC]`, un'applicazione idiomatica nota.
+- **la terza di Piccardia** — il finale che si apre: un pezzo in minore che
+  chiude su una tonica **maggiore** (in La minore, La maggiore col do#, ♮3).
+  `[LIB]` Piston (la pagina esatta si pinna scrivendo l'istruzione).
+
+**Il pezzo**, in La minore, da zero, con entrambi i colori:
+
+```
+Am | Am(maj7) | Am7 | Am6 | Dm7 | E7 | Am | A
+ i    i(maj7)   i7    i6    iv   V7   i    I(Picc.)
+```
+
+La melodia canta il line cliché in cima (la→sol#→sol→fa#, battute 1-4) e chiude
+sul **do#** (battuta 8), così la Piccardia si sente anche in cima.
+
+⚠️ **Fattibilità verificata:** `MU.sigla` legge nativamente `Am6`,
+`Am(maj7)`/`AmMaj7` e `A` (maggiore). Nessuna sigla nuova da aggiungere.
+
+**Il test** estende `test_armonia_prestito_casa_minore` con `Am6` (♮6=9) e
+`AmMaj7` (♮7=11). **Il codice** aggiunge il terzo pezzo a `prestito_scritto.py`
+(`*_JAZZMIN`). **Cosa resta fuori dopo:** le scale non diatoniche.
