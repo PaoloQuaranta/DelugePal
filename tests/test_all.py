@@ -7566,6 +7566,90 @@ def test_accordi_di_passaggio():
           {5, 11} <= g7 and {5, 11} <= db7, f'G7 {sorted(g7)}, Db7 {sorted(db7)}')
 
 
+def test_armonia_funzionale():
+    """Le affermazioni [CALC] di docs/istruzioni/armonia-funzionale.md.
+
+    Il ii-V-I e' fatto di accordi diatonici; il tritone del V7 risolve per
+    semitono sul I (e' quello che tira); il ii-V-i minore ha il iiø7 diatonico
+    e il V7 con la sensibile fuori dal minore naturale; l'inganno va a un vi che
+    contiene la tonica; il turnaround I-vi-ii-V e' diatonico.
+    """
+    from delugexml import musica as MU, song as S              # noqa: PLC0415
+    magg = set(S.MODI['maggiore'])          # Do maggiore, tonica 0
+    minn = set(S.MODI['minore'])            # Do minore naturale, tonica 0
+
+    # Il cuore: il tritone del V7 (si-fa) e la sua risoluzione sul I
+    g7 = {y % 12 for y in MU.voci('G7')}
+    cmaj7 = {y % 12 for y in MU.voci('Cmaj7')}
+    check('il V7 (G7) porta il tritono 3a-7a (si=11, fa=5)',
+          {5, 11} <= g7, str(sorted(g7)))
+    check('il tritono risolve per semitono sul I: si->do (11->0), fa->mi (5->4)',
+          (11 + 1) % 12 in cmaj7 and (5 - 1) in cmaj7, str(sorted(cmaj7)))
+
+    # ii-V-I maggiore: tutti diatonici al Do maggiore
+    for sigla in ('Dm7', 'G7', 'Cmaj7'):
+        pcs = {y % 12 for y in MU.voci(sigla)}
+        check(f'ii-V-I maggiore: {sigla} e diatonico al Do maggiore',
+              pcs <= magg, str(sorted(pcs - magg)))
+
+    # ii-V-i minore: il iiø7 e diatonico, il V7 porta la sensibile (11) di fuori
+    d_hd = {y % 12 for y in MU.voci('Dm7b5')}
+    check('ii-V-i minore: il iiø7 (Dm7b5) e diatonico al Do minore naturale',
+          d_hd <= minn, str(sorted(d_hd - minn)))
+    g7b9 = {y % 12 for y in MU.voci('G7b9')}
+    check('il V7 di minore porta la sensibile si=11',
+          11 in g7b9, str(sorted(g7b9)))
+    check('la sensibile (11) NON e nel Do minore naturale',
+          11 not in minn, f'11 in {sorted(minn)}')
+
+    # cadenza d'inganno: il vi (La m) contiene la tonica del I (do, mi)
+    do_triade = {y % 12 for y in MU.voci('C')}
+    am = {y % 12 for y in MU.voci('Am')}
+    check('inganno V->vi: il vi (Am) contiene due note del I (do, mi)',
+          len(do_triade & am) == 2, str(sorted(do_triade & am)))
+
+    # turnaround I-vi-ii-V: tutto diatonico al Do maggiore
+    for sigla in ('C', 'Am', 'Dm7', 'G7'):
+        pcs = {y % 12 for y in MU.voci(sigla)}
+        check(f'turnaround: {sigla} e diatonico al Do maggiore',
+              pcs <= magg, str(sorted(pcs - magg)))
+
+
+def test_dominanti_secondarie():
+    """Le affermazioni [CALC] di docs/istruzioni/dominanti-secondarie.md.
+
+    La V7/x e' un dom7 una quinta giusta sopra il grado x; il ii-V/x e il ciclo
+    delle quinte sono catene di fondamentali che salgono di quarta (quinta giu).
+    """
+    from delugexml import musica as MU                         # noqa: PLC0415
+
+    # Le cinque dominanti secondarie: fondamentale = grado + 7 (quinta sopra),
+    # qualita' dom7 (3a maggiore = +4, 7a minore = +10 dalla fondamentale)
+    #   grado bersaglio (in Do) -> la sua dominante
+    secondarie = {'A7': 2, 'B7': 4, 'C7': 5, 'D7': 7, 'E7': 9}  # sigla -> grado x
+    for sigla, grado in secondarie.items():
+        s = MU.sigla(sigla)
+        r = s.fondamentale
+        check(f'{sigla}: la fondamentale sta una quinta sopra il grado {grado}',
+              r == (grado + 7) % 12, f'{r} vs {(grado + 7) % 12}')
+        pcs = {y % 12 for y in MU.voci(sigla)}
+        check(f'{sigla}: e un dom7 (3a magg {(r+4)%12}, 7a min {(r+10)%12})',
+              (r + 4) % 12 in pcs and (r + 10) % 12 in pcs, str(sorted(pcs)))
+
+    # il ii-V interpolato per tonicizzare Re m: Em7b5 -> A7 -> Dm7,
+    # le fondamentali salgono di quarta (E->A->D)
+    catena = [MU.sigla(s).fondamentale for s in ('Em7b5', 'A7', 'Dm7')]
+    check('ii-V di Re m: le fondamentali salgono di quarta (E=4, A=9, D=2)',
+          catena == [4, 9, 2]
+          and all((catena[i] + 5) % 12 == catena[i + 1] for i in range(2)),
+          str(catena))
+
+    # il ciclo delle quinte E7 A7 D7 G7 C: ognuna e la dominante della successiva
+    ciclo = [MU.sigla(s).fondamentale for s in ('E7', 'A7', 'D7', 'G7', 'C')]
+    check('ciclo delle quinte: ogni fondamentale sale di quarta sulla successiva',
+          all((ciclo[i] + 5) % 12 == ciclo[i + 1] for i in range(4)), str(ciclo))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 

@@ -12,8 +12,9 @@ e delle [medianti cromatiche](medianti-cromatiche.md) — che sono colori che
 sospendono il tonale. Qui il cromatismo serve la tonalità: l'accordo infilato
 approccia un bersaglio diatonico, e la casa resta.
 
-**Cosa ti serve prima di cominciare:** un giro diatonico (la casa) e il punto
-dove vuoi la colla.
+**Cosa ti serve prima di cominciare:** un giro diatonico (la casa — come si
+costruisce: [`armonia-funzionale.md`](armonia-funzionale.md)) e il punto dove
+vuoi la colla.
 
 ---
 

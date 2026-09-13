@@ -18,7 +18,8 @@ casa tonale, quello che ti serve è l'armonia modale, non questa.
 
 **Cosa ti serve prima di cominciare:**
 
-- la **tonalità di casa** (es. Do maggiore) e un **giro diatonico** che regge;
+- la **tonalità di casa** (es. Do maggiore) e un **giro diatonico** che regge
+  (come si costruisce: [`armonia-funzionale.md`](armonia-funzionale.md));
 - il **punto** dove vuoi il colore;
 - se hai una melodia, le sue note (il prestito va d'accordo con la voce in cima).
 

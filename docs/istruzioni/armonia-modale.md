@@ -42,7 +42,8 @@ all'inizio è *«fuorviante e del tutto ridondante»*.
 
 ⚠️ **Questa è la differenza con l'armonia tonale, e con la casella 5-11 del
 jazz che ho scritto finora.** Lì l'armonia è un motore che tira: ii-V-I, la
-dominante che risolve. Qui l'armonia è **ferma**, e il suo lavoro è tenere in
+dominante che risolve (ora scritta: [`armonia-funzionale.md`](armonia-funzionale.md)).
+Qui l'armonia è **ferma**, e il suo lavoro è tenere in
 piedi un colore. Le due cose vogliono mosse opposte.
 
 ---
