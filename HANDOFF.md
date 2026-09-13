@@ -2924,7 +2924,7 @@ salvo `MU.armonia()` che già conduce le parti.
 ## 6-tervicies. L'armonia si allarga — prestito, scale simmetriche, cromatismo — 12-13 settembre 2026
 
 **In due giorni l'armonia è passata dalla prima prova del prestito a una
-copertura ampia dello spettro espressivo.** Cinque istruzioni nuove, otto pezzi
+copertura ampia dello spettro espressivo.** Sei istruzioni nuove, nove pezzi
 costruiti da zero e caricati sul Deluge, **tutti approvati al primo colpo**. Il
 metodo è quello di §6-unetvicies (istruzioni, non generatore); il flusso quello
 di PERCHE — scrivi una parte → carica via SysEx → l'utente ascolta → il verdetto
@@ -2939,9 +2939,10 @@ chiude l'istruzione con l'esempio lavorato.
 | `docs/istruzioni/scala-esatonale.md` | la **whole-tone**: simmetrica per tono, sospesa (aumentate, dom7♯5), il ciclo per tono |
 | `docs/istruzioni/armonia-parallela.md` | il **planing cromatico**: una forma che scivola parallela, `condotta=False` |
 | `docs/istruzioni/medianti-cromatiche.md` | le **medianti cromatiche**: scarto di terza con una nota in comune, `condotta=True` |
+| `docs/istruzioni/accordi-di-passaggio.md` | gli **accordi di passaggio/approccio**: diminuita di passaggio (basso cromatico) e tritone sub (♭II7), `condotta=True` |
 | `song.MODI` | tre scale nominate nuove: **ottatonica**, **esatonale**, **cromatica** |
-| `tools/*_scritto.py` | i pezzi composti (materiale, con la ragione accanto): `prestito_scritto` (3 pezzi), `ottatonica_/esatonale_/planing_/medianti_scritto` |
-| `tests/test_all.py` | un guardiano `[CALC]` per ogni istruzione + un test per ogni pezzo. Suite **1136 → 1226** |
+| `tools/*_scritto.py` | i pezzi composti (materiale, con la ragione accanto): `prestito_scritto` (3 pezzi), `ottatonica_/esatonale_/planing_/medianti_/passaggio_scritto` |
+| `tests/test_all.py` | un guardiano `[CALC]` per ogni istruzione + un test per ogni pezzo. Suite **1136 → 1233** |
 
 ### Il metodo ha retto, e lo dice un numero
 
@@ -2974,6 +2975,7 @@ scope (quale colore), mai «suona male».
 | Piccardia | Piston, cap. 5 «The Picardy Third», p. 64 |
 | napoletana (♭II) | Piston, cap. 26 «The Neapolitan Sixth», p. 407 |
 | minore jazz (↑6/↑7) | Smith, p. 74 |
+| passaggio / tritone sub | Smith, cap. VIII p. 59 (+ cap. IX p. 75) |
 
 ⚠️ **Smith NON copre la whole-tone** (verificato: zero occorrenze): per quella si
 cambia libro (Piston). ⚠️ **Le medianti cromatiche non hanno una fonte che le
@@ -3013,12 +3015,14 @@ Files/Git/SONGS/...` e l'`open` fallisce. Vedi la memoria `dsysex-da-powershell`
 
 ### Il prossimo passo
 
-1. **chiudere il cromatismo** con l'ultima faccia: gli **accordi di
-   passaggio/approccio** cromatici (la dominante di tritono, la diminuita di
-   passaggio) — la colla funzionale fra accordi diatonici;
-2. poi uscire dall'armonia verso la **priorità 2, la forma**: voicing,
-   contrappunto, comping, struttura (`MU.armonia()` già conduce le parti; il
-   resto è da scrivere).
+⚠️ **Il cromatismo è chiuso**, tre facce su tre: planing (`armonia-parallela.md`),
+medianti (`medianti-cromatiche.md`), passaggio/approccio (`accordi-di-passaggio.md`).
+Quindi:
+
+1. **uscire dall'armonia verso la priorità 2, la forma**: voicing, contrappunto,
+   comping, struttura (`MU.armonia()` già conduce le parti; il resto è da
+   scrivere). È il passo naturale;
+2. oppure restare sull'armonia e raccogliere le code rimaste (sotto).
 
 ⚠️ Restano comunque fuori, sull'armonia: le **doppie medianti** (terza senza
 nota in comune), il **diatonic planing** (scivolare dentro una scala), i **feel
