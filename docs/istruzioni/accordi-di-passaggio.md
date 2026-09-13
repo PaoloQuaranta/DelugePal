@@ -88,10 +88,31 @@ note = MU.armonia('Cmaj7 | C#dim7 | Dm7 | Db7 | Cmaj7', registro='do3',
 
 ## Esempio lavorato: il turnaround cromatico
 
-⚠️ **In costruzione.** Il pezzo di prova è un turnaround in Do — `Cmaj7 |
-C#dim7 | Dm7 | Db7 | …` — con la diminuita di passaggio (basso do→do#→re) e il
-tritone sub (Db7 che approccia Do dall'alto): `tools/passaggio_scritto.py`.
-L'esempio e il verdetto dell'utente vanno qui appena ascoltato sul Deluge.
+`[OSS]` La terza faccia del cromatismo provata — 13 settembre 2026. In
+[`tools/passaggio_scritto.py`](../../tools/passaggio_scritto.py).
+
+**L'idea:** la colla cromatica pura, da zero. Otto battute, tre voci, niente
+batteria.
+
+**La progressione** — un turnaround in Do coi due dispositivi:
+
+```
+Cmaj7 | C#dim7 | Dm7 | Db7 | Cmaj7 | C#dim7 | Dm7 | Db7
+```
+
+La **diminuita di passaggio** (C#dim7) sale cromatica fra Do e Re m (basso
+do→do#→re); il **tritone sub** (Db7) approccia Do dall'alto al posto del Sol7.
+`condotta=True`: la colla è morbida. Il Db7 finale rigira sul Cmaj7 in cima — il
+turnaround.
+
+**Dove si gioca:** il basso cromatico del passaggio e l'approccio dall'alto del
+tritone sub. A differenza di planing e medianti, qui il cromatismo **risolve**:
+è la colla funzionale dello standard.
+
+**Verdetto: approvato.** Con questo il **cromatismo è chiuso**, tre facce su tre:
+il **planing** (stream parallelo), le **medianti** (scarto di terza), il
+**passaggio/approccio** (colla funzionale). L'armonia ha retto anche qui al primo
+colpo.
 
 ---
 
