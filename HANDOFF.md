@@ -128,8 +128,13 @@ espressivo, non si replica un genere. Il flusso è armonizzare/arrangiare
 un'idea → creare da zero → l'utente rifinisce sul Deluge. **L'armonia non
 dipende dai corpus di performance: dipende dalla teoria.** ⚠️ **Il 12-13
 settembre l'armonia si è allargata molto** — prestito modale (due case), le due
-scale simmetriche, il cromatismo (planing e medianti): lo stato e il prossimo
-passo stanno in fondo a **§6-tervicies**, non più a §6-duetvicies.
+scale simmetriche, il cromatismo (planing e medianti); **il 13 la spina
+funzionale** (ii-V-I, cadenze, turnaround, dominanti secondarie) e poi **la
+dominante alterata e le code** (doppie medianti, diatonic planing, seste
+aumentate) hanno **coperto l'armonia della priorità 1**. Lo stato e il prossimo
+passo — ora **la priorità 2, la forma** — stanno in fondo a **§6-quinvicies**.
+⚠️ **Da lì l'armonia si chiude col `[CALC]`, senza esempio all'ascolto**
+(decisione dell'utente, vale solo per l'armonia).
 
 Il testo qui sotto è la formulazione ORIGINALE del lavoro, tenuta perché resta
 vera nel merito — «serie competenze compositive» — ma ora ha una direzione
@@ -3027,6 +3032,139 @@ Quindi:
 ⚠️ Restano comunque fuori, sull'armonia: le **doppie medianti** (terza senza
 nota in comune), il **diatonic planing** (scivolare dentro una scala), i **feel
 non-swing del jazz** (in due, latin, funk).
+
+---
+
+## 6-quatervicies. La spina funzionale — la casa che regge — 13 settembre 2026
+
+**Scritta la fondazione che tutte le istruzioni d'armonia davano per scontata e
+nessuna insegnava.** Due istruzioni nuove — `armonia-funzionale` (ii-V-I,
+cadenze, turnaround) e `dominanti-secondarie` (la tonicizzazione) — chiudono il
+buco più grosso dell'armonia: la **casa tonale che regge e risolve**, il centro
+di «jazz approfondito». ⚠️ **Zero codice:** il vocabolario di sigle di
+`musica.py` era già completo (`7, m7, maj7, m7b5, dim7`, e gli alterati fino a
+`7alt`); il lavoro è documentazione + due guardiani `[CALC]`.
+
+Il passo nasce da una domanda dell'utente — *«prima di passare alla priorità 2,
+assicuriamoci che la copertura d'armonia sia completa»* — e da una ricognizione:
+le nove istruzioni coprivano il **colore** (modale, prestito, scale simmetriche,
+cromatismo) ma non la **funzione** che colorano. Ogni istruzione funzionale
+cominciava con «parti da un giro diatonico che regge»; nessuna lo insegnava.
+
+### La variazione di metodo: l'armonia si chiude col `[CALC]`, senza ascolto
+
+⚠️ **Deciso dall'utente, ed è la cosa che un agente deve sapere.** Motivo: *«lo
+sviluppo dell'armonia ha sempre avuto un successo del 100%, perché sono regole
+precise ed è impossibile sbagliare»*. Da qui in avanti, **per l'armonia** il
+guardiano `[CALC]` **sostituisce** l'esempio lavorato caricato sul Deluge: niente
+`[OSS]`, niente pezzo di prova, niente `_scritto`. ⚠️ **Vale solo per l'armonia**
+(regola precisa), **non per il ritmo**, dove l'ascolto ha respinto dieci versioni
+della batteria. Le due istruzioni della spina sono le prime armoniche senza
+esempio all'ascolto. Sta in memoria (`armonia-si-chiude-col-calc`) e nel design.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `docs/istruzioni/armonia-funzionale.md` | le tre funzioni (T/S/D), il **ii-V-I** maggiore e minore (col iiø7 e la sensibile), le quattro **cadenze** (autentica, plagale, inganno, sospesa), il **turnaround** I-vi-ii-V |
+| `docs/istruzioni/dominanti-secondarie.md` | le cinque **dominanti secondarie** (V7/ii…V7/vi, non il vii°), il **ii-V interpolato**, il **ciclo delle quinte**; il tritone sub rimandato ad `accordi-di-passaggio` |
+| `tests/test_all.py` | `test_armonia_funzionale` + `test_dominanti_secondarie`, guardiani `[CALC]`. Suite **1233 → 1258** |
+| rimandi | `armonia-funzionale` è il **file-fondazione**: prestito, accordi-di-passaggio e modale ora lo linkano per «la casa» |
+
+### Le fonti, verificate sui PDF
+
+| cosa | fonte |
+|---|---|
+| funzione vs. colore, circolo delle quinte, ii-V-I | Smith, *Jazz Theory* (4ª ed.), cap. VIII, p. 51 e 53 |
+| funzioni tonali dei gradi | Piston, *Harmony* (5ª ed.), cap. 5, p. 52 |
+| risoluzione del V7 (il tritono) | Piston, cap. 15, p. 243 |
+| le quattro cadenze | Piston, cap. 11 «Cadences», p. 172 (sospesa 175, plagale 178, inganno 181) |
+| dominanti secondarie / tonicizzazione | Piston, cap. 16 «Secondary Dominants», p. 257-258; Smith cap. VIII p. 57 e 65 |
+
+⚠️ **L'offset dei PDF, che serve a chi ci torna:** in `to-read/`, col testo
+estraibile. *Jazz Theory*: pagina-libro = pagina-PDF **+ 1**. Piston: pagina-libro
+= pagina-PDF **− 19**. Le citazioni sono state lette sulla pagina, non dalla
+memoria — e Piston da 600 pagine si scansiona in background, non in linea.
+
+### Cosa NON rifare
+
+- **non reintrodurre l'esempio all'ascolto per l'armonia:** la variazione di
+  metodo dice che il `[CALC]` basta — ma vale **solo** per l'armonia, non per il
+  ritmo;
+- **non duplicare il tritone sub:** vive in `accordi-di-passaggio`, nelle
+  dominanti secondarie è un rimando;
+- **non inventare le pagine:** si aprono i PDF (offset sopra) e si verifica;
+- **non tonicizzare il vii°** diminuito: non è una tonica su cui posarsi.
+
+### Il prossimo passo
+
+⚠️ **Con la spina, l'armonia funzionale c'è.** Resta, sull'armonia, in ordine:
+
+1. ~~**la dominante alterata**~~ — **fatta il 13 settembre, §6-quinvicies**;
+2. ~~le **code piccole**: doppie medianti, diatonic planing, seste aumentate~~ —
+   **fatte il 13 settembre, §6-quinvicies**;
+3. poi **la priorità 2, la forma** (voicing, contrappunto, comping, struttura).
+
+---
+
+## 6-quinvicies. La dominante alterata e le code — l'armonia è coperta — 13 settembre 2026
+
+**Chiusa l'armonia della priorità 1.** Dopo la spina funzionale, due blocchi
+insieme (**stesso metodo**: `[LIB]` + `[CALC]`, niente ascolto): la **dominante
+alterata** (la tensione dopo la funzione) e le **code** che restavano — doppie
+medianti, diatonic planing, seste aumentate. Con questo l'armonia copre
+funzionale + tensione + cromatismo (tre facce + due estensioni) + modale +
+prestito + scale simmetriche. Il prossimo passo **esce dalla priorità 1**.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `docs/istruzioni/dominante-alterata.md` | le **quattro scale della dominante**: alterata (super-locria) e lidia dominante (modi della melodica), ottatonica HW, esatonale — con le tensioni che ciascuna dà |
+| `docs/istruzioni/seste-aumentate.md` | le **seste aumentate** it./ted./fr.; ⚠️ la **tedesca è enarmonicamente un dom7** (il cugino classico del tritone sub) |
+| `medianti-cromatiche.md` + sezione | le **doppie medianti** — a terza senza **nessuna** nota comune (Do→Fa#, il tritono) |
+| `armonia-parallela.md` + sezione | il **diatonic planing** — la forma scivola *dentro* una scala, per grado, e flette (`condotta=False`) |
+| `song.MODI` | due scale nuove: **`alterata`** (0,1,3,4,6,8,10) e **`lidia dominante`** (0,2,4,6,7,9,10), modi della minore melodica |
+| `tests/test_all.py` | `test_dominante_alterata`, `test_seste_aumentate`, `test_medianti_doppie`, `test_diatonic_planing`. Suite **1258 → 1282** |
+
+### La cosa da sapere: dove i libri non nominano la scala
+
+⚠️ **La scala alterata e la lidia dominante NON sono nominate nei libri in casa.**
+Smith rifiuta anzi il multi-scala (p. 77-78: «una sola forma di minore») e rimanda
+a Russell (*Lydian Chromatic Concept*), che non c'è. Come per le **medianti
+cromatiche**, la regola ha retto: **non si è forzata una citazione**; il rigore è
+nel `[CALC]` (sono rotazioni della minore melodica, testato), dichiarato. È la
+seconda volta che questa regola decide, ed è la stessa di §6-tervicies.
+
+### Le fonti verificate (offset dei PDF in §6-quatervicies)
+
+| cosa | fonte |
+|---|---|
+| le tensioni non cambiano la funzione | Smith, cap. VIII, p. 57 e 78 |
+| l'ottatonica sopra la dominante alterata | Smith, cap. IX, p. 77 |
+| l'esatonale / whole-tone | Piston, cap. 31, p. 490 |
+| le seste aumentate | Piston, cap. 27 «Augmented Sixth Chords», p. 419-420 |
+
+⚠️ **Le seste aumentate confermano il legame col tritone sub dal lato classico:**
+Piston p. 419 dice che nascono da «V di V con la quinta abbassata», e la tedesca
+è lo stesso accordo (Lab7 in Do) che il jazz chiama ♭II7. Due grafie, un suono.
+
+### Cosa NON rifare
+
+- **non forzare una citazione** per alterata/lidia dominante: `[CALC]` + contesto,
+  come le medianti;
+- **non chiamarle «modi del maggiore»**: sono della minore melodica, in `MODI`
+  come intervalli;
+- **non togliere la risoluzione alla dominante alterata**: senza il ritorno a
+  casa torna a essere una scala simmetrica che galleggia (vedi ottatonica/esatonale).
+
+### Il prossimo passo
+
+⚠️ **L'armonia della priorità 1 è coperta.** Il passo naturale è ora la
+**priorità 2, la forma**: voicing (upper structure, quartale, drop), contrappunto,
+comping, struttura. `MU.armonia()` già conduce le parti; il resto è da scrivere.
+Restano fuori dall'armonia solo cose di seconda fila (gli altri modi della melodica,
+il ritmo armonico) — non bloccano l'uscita verso la forma.
 
 ---
 

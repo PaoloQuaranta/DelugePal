@@ -192,6 +192,13 @@ MODI = {
     # ma "nessuna tonalita'": serve a set_scale per il planing (movimento per
     # semitoni). Il cromatismo e' una condotta, non una scala.
     'cromatica':     (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11),
+    # le due scale della DOMINANTE ALTERATA, modi della minore melodica (non del
+    # maggiore). L'alterata (super-locria, 7o modo) da tutte le alterazioni
+    # b9/#9/#11/b13; la lidia dominante (4o modo) da il #11 con 9 e 13 naturali.
+    # I libri in casa non le NOMINANO: il rigore e' nel [CALC]. Vedi
+    # docs/istruzioni/dominante-alterata.md
+    'alterata':        (0, 1, 3, 4, 6, 8, 10),
+    'lidia dominante': (0, 2, 4, 6, 7, 9, 10),
 }
 
 NOTE_NOMI = ('C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B')

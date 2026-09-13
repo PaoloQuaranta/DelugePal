@@ -152,7 +152,8 @@ qui al primo colpo.
   di Debussy): un'altra istruzione;
 - **il cromatismo** — che non è una scala con un centro ma una condotta (il
   movimento per semitoni): va trattato a parte;
-- **l'uso funzionale** dell'ottatonica: la HW sopra una dominante che **risolve**
-  (la tensione del jazz), che è l'opposto del colore statico di qui;
+- ~~**l'uso funzionale** dell'ottatonica: la HW sopra una dominante che
+  **risolve**~~ — c'è, in [`dominante-alterata.md`](dominante-alterata.md): la
+  stessa scala, ma sopra una V che risolve invece che galleggiante;
 - **vedi anche** Piston, *Harmony* (5ª ed.), cap. 31 «After Common Practice»,
   sulle scale artificiali e simmetriche.

@@ -61,9 +61,10 @@ Il planing **cromatico** muove la forma per **semitoni** (ogni passo uguale, la
 | **triadi** (maggiori o minori) | il planing di Debussy, più limpido |
 | **quartali** | aperto, sospeso |
 
-⚠️ Resta fuori da questo giro il *diatonic planing* — far scivolare la forma
-**dentro una scala** (per grado, non per semitono), dove la forma cambia un po'
-a ogni passo. Qui è tutto cromatico: la forma non cambia mai.
+⚠️ Il *diatonic planing* — far scivolare la forma **dentro una scala** (per
+grado, non per semitono), dove la forma cambia un po' a ogni passo — è un colore
+a parte: sta più sotto, nella sua sezione. Qui è tutto cromatico: la forma non
+cambia mai.
 
 ---
 
@@ -120,11 +121,35 @@ questo il progetto ha il suo primo **cromatismo** — una condotta, non una scal
 
 ---
 
+## Il diatonic planing: scivolare dentro una scala
+
+⚠️ **Il fratello diatonico del planing cromatico.** Qui la forma **non** resta
+rigida: scivola **dentro una scala**, per grado, e a ogni passo **cambia un po'**
+perché si piega alle note disponibili. `[CALC]` I sette accordi di terza del Do
+maggiore — Do, Re m, Mi m, Fa, Sol, La m, Si dim — sono tutti **dentro la scala**,
+ma la forma flette: maggiore, minore, diminuita. È l'opposto del cromatico, dove
+la forma non cambia mai. Verificato da `test_diatonic_planing`.
+
+Il suono è più morbido e «dentro»: nessuna nota fuori tonalità, lo scivolamento
+resta consonante col campo. `[DEC]` La condotta resta **spenta**
+(`condotta=False`) come nel cromatico — è ancora uno stream parallelo, solo che il
+parallelo è per **grado di scala** invece che per semitono. La `set_scale` è la
+scala scelta (maggiore, un modo…), non la cromatica.
+
+```python
+S.set_scale(doc, 'C', 'maggiore')     # la scala dentro cui scivolare
+note = MU.armonia('C | Dm | Em | F | G | Am', registro='do3', durata='1/1',
+                  condotta=False)      # scivola per grado, la forma flette
+```
+
+---
+
 ## Cosa manca a questa istruzione
 
-- **il diatonic planing** — far scivolare una forma *dentro una scala* (per
-  grado): la forma cambia a ogni passo, ed è un altro colore;
+- ~~**il diatonic planing**~~ — **fatto** (sopra): la forma scivola dentro una
+  scala, per grado, e flette a ogni passo;
 - **le medianti cromatiche** — accordi a terza con una nota in comune (C→A♭→E),
-  il colore «cinematografico»: un'altra faccia del cromatismo;
-- **gli accordi di passaggio/approccio** cromatici — la colla funzionale (la
-  dominante di tritono, la diminuita di passaggio) fra accordi diatonici.
+  il colore «cinematografico»: c'è, in [`medianti-cromatiche.md`](medianti-cromatiche.md)
+  (con le doppie medianti, a terza senza nota comune);
+- **gli accordi di passaggio/approccio** cromatici — la colla funzionale: c'è, in
+  [`accordi-di-passaggio.md`](accordi-di-passaggio.md).

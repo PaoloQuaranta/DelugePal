@@ -133,7 +133,8 @@ tesa e l'esatonale sospesa — ognuna provata all'ascolto.
 
 - **il cromatismo** — non una scala con un centro ma una condotta (il movimento
   per semitoni): un capitolo a sé;
-- **l'uso funzionale** — il dom7♯5 che **risolve** (la tensione alterata del
-  jazz), opposto del colore statico di qui;
+- ~~**l'uso funzionale** — il dom7♯5 che **risolve**~~ — c'è, in
+  [`dominante-alterata.md`](dominante-alterata.md): la stessa scala, sopra una V
+  che risolve invece che galleggiante;
 - **le altre scale artificiali** non simmetriche (Piston, cap. 31, le tratta
   accanto a questa).

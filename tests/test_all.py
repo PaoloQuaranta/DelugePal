@@ -7650,6 +7650,108 @@ def test_dominanti_secondarie():
           all((ciclo[i] + 5) % 12 == ciclo[i + 1] for i in range(4)), str(ciclo))
 
 
+def test_dominante_alterata():
+    """Le affermazioni [CALC] di docs/istruzioni/dominante-alterata.md.
+
+    Alterata e lidia dominante sono modi della minore melodica; le quattro scale
+    della dominante tengono le note guida del V7 e danno le loro tensioni.
+    """
+    from delugexml import song as S                            # noqa: PLC0415
+    mm = S.MODI['minore melodica']
+
+    def modo(scala, grado):
+        n = len(scala)
+        base = scala[grado - 1]
+        return tuple(sorted((scala[(grado - 1 + i) % n] - base) % 12
+                            for i in range(n)))
+    check('alterata = 7o modo della minore melodica',
+          modo(mm, 7) == tuple(sorted(S.MODI['alterata'])), str(modo(mm, 7)))
+    check('lidia dominante = 4o modo della minore melodica',
+          modo(mm, 4) == tuple(sorted(S.MODI['lidia dominante'])), str(modo(mm, 4)))
+
+    # sopra un G7 (tonica Sol = 7): note guida 3a (si=11) e 7a (fa=5)
+    G = 7
+    guida = {(G + 4) % 12, (G + 10) % 12}
+    scala_su = lambda nome: {(G + iv) % 12 for iv in S.MODI[nome]}  # noqa: E731
+    for nome in ('alterata', 'lidia dominante', 'ottatonica', 'esatonale'):
+        check(f'{nome} su Sol tiene le note guida del V7 (si, fa)',
+              guida <= scala_su(nome), str(sorted(guida - scala_su(nome))))
+
+    alt = scala_su('alterata')
+    tensioni = {(G + i) % 12 for i in (1, 3, 6, 8)}       # b9, #9, #11, b13
+    check('alterata: da tutte le alterazioni b9/#9/#11/b13',
+          tensioni <= alt, str(sorted(tensioni - alt)))
+
+    lyd = scala_su('lidia dominante')
+    check('lidia dominante: da il #11 e tiene la 13 naturale, niente b13',
+          (G + 6) % 12 in lyd and (G + 9) % 12 in lyd and (G + 8) % 12 not in lyd,
+          str(sorted(lyd)))
+
+    wt = scala_su('esatonale')
+    check('esatonale: da il #5/b13 e non ha la 5a giusta',
+          (G + 8) % 12 in wt and (G + 7) % 12 not in wt, str(sorted(wt)))
+
+
+def test_seste_aumentate():
+    """Le affermazioni [CALC] di docs/istruzioni/seste-aumentate.md.
+
+    In Do la sesta aumentata e' fra b6 (lab=8) e #4 (fa#=6): si allargano sulla
+    dominante (sol=7). La tedesca e' enarmonicamente un dom7 (il tritone sub).
+    """
+    from delugexml import musica as MU                         # noqa: PLC0415
+    V, b6, dis4 = 7, 8, 6
+    check('la sesta aumentata (lab=8, fa#=6) si allarga sulla dominante (sol=7)',
+          (b6 - 1) % 12 == V and (dis4 + 1) % 12 == V, f'{b6},{dis4}->{V}')
+
+    italiana, tedesca, francese = {8, 0, 6}, {8, 0, 3, 6}, {8, 0, 2, 6}
+    for nome, acc in (('italiana', italiana), ('tedesca', tedesca),
+                      ('francese', francese)):
+        check(f'la {nome} contiene la sesta aumentata (fa#=6, lab=8)',
+              {6, 8} <= acc, str(sorted(acc)))
+
+    ab7 = {y % 12 for y in MU.voci('Ab7')}
+    check('la sesta tedesca e enarmonicamente un dom7 (Lab7 = il tritone sub)',
+          tedesca == ab7, f'ted {sorted(tedesca)} vs Ab7 {sorted(ab7)}')
+
+
+def test_medianti_doppie():
+    """La sezione 'doppie medianti' di docs/istruzioni/medianti-cromatiche.md.
+
+    Una doppia mediante (Do -> Fa#, a tritono) non condivide NESSUNA nota: contro
+    una della mediante cromatica e due della diatonica.
+    """
+    from delugexml import musica as MU                         # noqa: PLC0415
+    do = {y % 12 for y in MU.voci('C')}
+    fad = {y % 12 for y in MU.voci('F#')}
+    check('Do e Fa# (doppia mediante): nessuna nota in comune',
+          len(do & fad) == 0, str(sorted(do & fad)))
+    ab = {y % 12 for y in MU.voci('Ab')}
+    em = {y % 12 for y in MU.voci('Em')}
+    check('contrasto: Do-Lab (cromatica) una, Do-Em (diatonica) due',
+          len(do & ab) == 1 and len(do & em) == 2,
+          f'Lab {sorted(do & ab)}, Em {sorted(do & em)}')
+
+
+def test_diatonic_planing():
+    """La sezione 'diatonic planing' di docs/istruzioni/armonia-parallela.md.
+
+    I sette accordi di terza del Do maggiore stanno tutti dentro la scala, ma la
+    forma flette (maggiore/minore/diminuita) -- l'opposto del planing cromatico,
+    dove la forma e' rigida.
+    """
+    from delugexml import song as S                            # noqa: PLC0415
+    scala = S.MODI['maggiore']
+    campo, n, forme = set(scala), len(scala), set()
+    for i in range(n):
+        r, tz, q = scala[i], scala[(i + 2) % n], scala[(i + 4) % n]
+        triade = {r % 12, tz % 12, q % 12}
+        check(f'grado {i+1}: la triade di terze e dentro la scala',
+              triade <= campo, str(sorted(triade - campo)))
+        forme.add(((tz - r) % 12, (q - r) % 12))
+    check('la forma FLETTE dentro la scala (piu di una qualita di triade)',
+          len(forme) > 1, str(sorted(forme)))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 

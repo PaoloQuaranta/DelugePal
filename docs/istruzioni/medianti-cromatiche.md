@@ -119,10 +119,35 @@ qui l'armonia ha retto al primo colpo.
 
 ---
 
+## Le doppie medianti: la terza senza nessuna nota in comune
+
+⚠️ **Un passo più in là.** La mediante cromatica sopra teneva **una** nota comune
+— era la sua morbidezza. La **doppia mediante** è ancora a distanza di terza ma
+**senza nessuna** nota in comune: più lontana, più straniata. `[CALC]` Il caso
+limite è **Do → Fa#**: le due triadi (Do = do-mi-sol, Fa# = fa#-la#-do#) non
+condividono **niente**. Sono a tritono — l'accostamento più remoto che ci sia.
+
+Senza la nota tenuta la condotta non può ammorbidire lo scarto: **tutte e tre**
+le voci si muovono. È il colore «alieno», il salto di meraviglia-perturbante
+delle colonne sonore. `[DEC]` La chiamo «doppia» perché salta due medianti in un
+colpo — è l'asse del tritono, non della terza singola: distanza doppia, parentela
+nulla. `[CALC]` Verificato da `test_medianti_doppie`: Do e Fa# non hanno note in
+comune (contro **una** della mediante cromatica e **due** della diatonica).
+
+```python
+S.set_scale(doc, 'C', 'maggiore')     # la casa; la doppia mediante e colore sopra
+note = MU.armonia('C | F#m | C', registro='do3', durata='1/1')
+# nessuna nota tenuta: tutte le voci si spostano
+```
+
+---
+
 ## Cosa manca a questa istruzione
 
-- **le doppie medianti cromatiche** — a terza ma senza **nessuna** nota in comune
-  (Do → Fa#): più distanti, più straniate;
-- **il diatonic planing** — far scivolare una forma dentro una scala;
-- **gli accordi di passaggio/approccio** cromatici — l'ultima faccia del
-  cromatismo, quella funzionale.
+- ~~**le doppie medianti cromatiche**~~ — **fatte** (sopra): a terza senza nessuna
+  nota in comune (Do → Fa#), lo straniamento del tritono;
+- **il diatonic planing** — far scivolare una forma dentro una scala: c'è, in
+  [`armonia-parallela.md`](armonia-parallela.md);
+- ~~**gli accordi di passaggio/approccio**~~ — c'è, in
+  [`accordi-di-passaggio.md`](accordi-di-passaggio.md): il cromatismo è chiuso su
+  tutte le facce.
