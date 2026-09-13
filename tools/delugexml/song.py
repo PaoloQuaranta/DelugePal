@@ -199,6 +199,15 @@ MODI = {
     # docs/istruzioni/dominante-alterata.md
     'alterata':        (0, 1, 3, 4, 6, 8, 10),
     'lidia dominante': (0, 2, 4, 6, 7, 9, 10),
+    # gli altri modi della minore melodica (l'alterata e la lidia dominante sopra
+    # sono il 7o e il 4o). Ognuno e' la casa di un accordo: lidio aumentato ->
+    # maj7#5, locrio nat2 -> m7b5, misolidio b6 -> 7b13, dorico b2 -> m7(b9)/susb9.
+    # I libri non li NOMINANO come chord-scale: il rigore e' nel [CALC]. Vedi
+    # docs/istruzioni/modi-minore-melodica.md
+    'dorico b2':       (0, 1, 3, 5, 7, 9, 10),
+    'lidio aumentato': (0, 2, 4, 6, 8, 9, 11),
+    'misolidio b6':    (0, 2, 4, 5, 7, 8, 10),
+    'locrio nat2':     (0, 2, 3, 5, 6, 8, 10),
 }
 
 NOTE_NOMI = ('C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B')

@@ -179,8 +179,8 @@ Per una casa minore, `set_scale(doc, 'C', 'minore')` e il ii-V-i col mezzo-dimin
 - **le dominanti secondarie** — dare spinta a un grado diverso dalla tonica
   tonicizzandolo: c'è, in [`dominanti-secondarie.md`](dominanti-secondarie.md),
   la seconda faccia della spina;
-- **il ritmo armonico** — ogni quanto cambia l'accordo, e come la cadenza cade sul
-  metro;
+- ~~**il ritmo armonico**~~ — c'è, in [`ritmo-armonico.md`](ritmo-armonico.md):
+  ogni quanto cambia l'accordo, e come la cadenza cade sul metro;
 - **la dominante alterata** — la tensione della dominante (♭9, ♯9, ♯5, alt; la
   scala alterata e la lidia dominante dal minore melodico; l'uso funzionale di
   ottatonica ed esatonale): è il passo naturale **dopo** questa — la tensione,

@@ -210,7 +210,8 @@ del vocabolario, non un traguardo.
 ## Cosa manca a questa istruzione
 
 - **il ritmo armonico** — ogni quanto cambia l'accordo. Nel modale spesso è
-  lentissimo (un accordo per intere battute), ma qui non è detto;
+  lentissimo (un accordo per intere battute); il come si decide è ora in
+  [`ritmo-armonico.md`](ritmo-armonico.md);
 - **il modal interchange** — prendere in prestito un accordo da un modo
   parallelo, che è il ponte verso l'eclettismo che l'utente cerca: ora c'è, in
   [`armonia-prestito.md`](armonia-prestito.md);

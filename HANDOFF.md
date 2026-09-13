@@ -131,8 +131,9 @@ settembre l'armonia si è allargata molto** — prestito modale (due case), le d
 scale simmetriche, il cromatismo (planing e medianti); **il 13 la spina
 funzionale** (ii-V-I, cadenze, turnaround, dominanti secondarie) e poi **la
 dominante alterata e le code** (doppie medianti, diatonic planing, seste
-aumentate) hanno **coperto l'armonia della priorità 1**. Lo stato e il prossimo
-passo — ora **la priorità 2, la forma** — stanno in fondo a **§6-quinvicies**.
+aumentate), infine **ritmo armonico e i modi della minore melodica** hanno
+**chiuso l'armonia della priorità 1, code comprese**. Lo stato e il prossimo
+passo — ora **la priorità 2, la forma** — stanno in fondo a **§6-sexvicies**.
 ⚠️ **Da lì l'armonia si chiude col `[CALC]`, senza esempio all'ascolto**
 (decisione dell'utente, vale solo per l'armonia).
 
@@ -3163,8 +3164,63 @@ Piston p. 419 dice che nascono da «V di V con la quinta abbassata», e la tedes
 ⚠️ **L'armonia della priorità 1 è coperta.** Il passo naturale è ora la
 **priorità 2, la forma**: voicing (upper structure, quartale, drop), contrappunto,
 comping, struttura. `MU.armonia()` già conduce le parti; il resto è da scrivere.
-Restano fuori dall'armonia solo cose di seconda fila (gli altri modi della melodica,
-il ritmo armonico) — non bloccano l'uscita verso la forma.
+~~Restano fuori dall'armonia solo cose di seconda fila (gli altri modi della
+melodica, il ritmo armonico)~~ — **fatte anche quelle il 13 settembre,
+§6-sexvicies**: l'armonia è chiusa, code comprese.
+
+---
+
+## 6-sexvicies. Il ritmo armonico e i modi della melodica — l'armonia è chiusa — 13 settembre 2026
+
+**Le due ultime code dell'armonia, in un passo.** Il **ritmo armonico** (ogni
+quanto cambia l'accordo, e dove cade sul metro) e **gli altri cinque modi della
+minore melodica** (i due dominanti — alterata, lidia dominante — erano già in
+`dominante-alterata`). Con questo la priorità 1 **non ha più code**: il prossimo
+passo esce davvero verso la forma.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `docs/istruzioni/ritmo-armonico.md` | ogni quanto cambia l'accordo, il peso del metro (la «tirannia della stanghetta», lo stress agogico), l'accelerare verso la cadenza; il meccanismo `durata` sul Deluge |
+| `docs/istruzioni/modi-minore-melodica.md` | il quadro dei **sette modi** della melodica → sette accordi; i due dominanti rimandati a `dominante-alterata` |
+| `song.MODI` | quattro modi nuovi: `dorico b2`, `lidio aumentato`, `misolidio b6`, `locrio nat2` |
+| `tests/test_all.py` | `test_ritmo_armonico`, `test_modi_minore_melodica`. Suite **1282 → 1292** |
+| rimandi | funzionale, dominante-alterata, modale e prestito ora puntano a `ritmo-armonico` dove dicevano «scelta del caso» |
+
+### Le fonti verificate
+
+| cosa | fonte |
+|---|---|
+| il ritmo armonico | Piston, cap. 12 «Harmonic Rhythm», p. 189 (la frequenza del cambio, la stanghetta, lo stress agogico); Smith p. 53 (l'alternanza forte-debole del ii-V-I) e p. 65 (a minima) |
+| la scala minore melodica | Piston, cap. 4 «The Minor Mode», p. 43 |
+
+### Le due cose da sapere
+
+⚠️ **Il `[CALC]` del ritmo armonico è sul MECCANISMO, non sull'altezza:** il ritmo
+armonico è tempo, non note, e il guardiano verifica che `durata` in `MU.armonia`
+fissi la distanza fra gli attacchi (1/1 → 384 tick, 1/2 → 192). È il primo
+guardiano armonico di questo tipo, e va bene: la regola «l'armonia si chiude col
+`[CALC]`» non impone che il `[CALC]` sia sulle note.
+
+⚠️ **Il sistema dei modi come chord-scale NON è nominato nei libri** (Smith lo
+rifiuta, p. 77-78, rimanda a Russell): come l'alterata e le medianti, `[CALC]` +
+contesto, senza forzare la citazione. **Terza volta** che questa regola decide.
+
+### Cosa NON rifare
+
+- **non forzare una citazione** per il sistema dei modi;
+- **non duplicare i due modi dominanti** (alterata, lidia dominante): vivono in
+  `dominante-alterata`, qui sono un rimando;
+- il **ritmo armonico disuguale** si compone a segmenti (`durata` è uniforme per
+  chiamata di `MU.armonia`): è una comodità di libreria mancante, non una lacuna
+  di teoria.
+
+### Il prossimo passo
+
+⚠️ **L'armonia della priorità 1 è chiusa, code comprese.** Il passo è la
+**priorità 2, la forma**: voicing (upper structure, quartale, drop), contrappunto,
+comping, struttura. Niente resta aperto sull'armonia che blocchi l'uscita.
 
 ---
 

@@ -319,8 +319,8 @@ del perimetro.
 - **le scale non diatoniche** che l'utente usa (ottatoniche, cromatiche): questo
   documento copre il prestito fra i modi diatonici paralleli, non quelle;
 - **il ritmo armonico** — ogni quanto cambia l'accordo, e quanto dura il
-  prestito prima di risolvere: qui è una scelta del caso, non una regola, come
-  già in `armonia-modale.md`;
+  prestito prima di risolvere: il come si decide è ora in
+  [`ritmo-armonico.md`](ritmo-armonico.md);
 - ~~**la verifica su un pezzo DA ZERO**~~ — **superata il 12 settembre 2026**
   (vedi l'esempio lavorato): è la prima istruzione armonica a passare il «creare
   dal nulla», non solo l'armonizzare un'idea esistente.

@@ -7752,6 +7752,61 @@ def test_diatonic_planing():
           len(forme) > 1, str(sorted(forme)))
 
 
+def test_modi_minore_melodica():
+    """Le affermazioni [CALC] di docs/istruzioni/modi-minore-melodica.md.
+
+    I quattro modi nuovi sono rotazioni della minore melodica, e ognuno contiene
+    l'accordo di casa che gli si attribuisce.
+    """
+    from delugexml import song as S                            # noqa: PLC0415
+    mm = S.MODI['minore melodica']
+
+    def modo(scala, grado):
+        n = len(scala)
+        base = scala[grado - 1]
+        return tuple(sorted((scala[(grado - 1 + i) % n] - base) % 12
+                            for i in range(n)))
+    rotazioni = {'dorico b2': 2, 'lidio aumentato': 3,
+                 'misolidio b6': 5, 'locrio nat2': 6}
+    for nome, grado in rotazioni.items():
+        check(f'{nome} = {grado}o modo della minore melodica',
+              modo(mm, grado) == tuple(sorted(S.MODI[nome])),
+              str(modo(mm, grado)))
+
+    scala = lambda nome: {iv % 12 for iv in S.MODI[nome]}      # noqa: E731
+    casa = {
+        'lidio aumentato': ({0, 4, 8, 11}, 'Cmaj7#5'),
+        'locrio nat2':     ({0, 3, 6, 10}, 'Cm7b5'),
+        'misolidio b6':    ({0, 4, 7, 10, 8}, 'C7 + b13'),
+        'dorico b2':       ({0, 3, 7, 10, 1}, 'Cm7 + b9'),
+    }
+    for nome, (note, etich) in casa.items():
+        check(f'{nome} contiene {etich}',
+              note <= scala(nome), str(sorted(note - scala(nome))))
+
+
+def test_ritmo_armonico():
+    """L'affermazione [CALC] di docs/istruzioni/ritmo-armonico.md.
+
+    Il ritmo armonico si fissa con durata: gli attacchi degli accordi distano
+    durata_in_tick(durata), e dimezzare durata raddoppia il ritmo armonico.
+    """
+    from delugexml import musica as MU                         # noqa: PLC0415
+
+    def attacchi(durata):
+        out = MU.armonia('C | F', durata=durata, registro='do3')
+        return sorted({n.pos for note in out.values() for n in note})
+
+    lento, veloce = attacchi('1/1'), attacchi('1/2')
+    check('un accordo per battuta: gli attacchi distano durata_in_tick(1/1)',
+          len(lento) == 2 and lento[1] - lento[0] == MU.durata_in_tick('1/1'),
+          str(lento))
+    check('due per battuta: il passo si dimezza (ritmo armonico doppio)',
+          len(veloce) == 2 and veloce[1] - veloce[0] == MU.durata_in_tick('1/2')
+          and 2 * (veloce[1] - veloce[0]) == (lento[1] - lento[0]),
+          str(veloce))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 

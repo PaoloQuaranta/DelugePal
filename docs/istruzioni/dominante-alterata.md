@@ -142,8 +142,9 @@ S.set_scale(doc, 'G', 'alterata')          # = La♭ minore melodica, letta da S
 
 ## Cosa manca a questa istruzione
 
-- il **ritmo armonico** — quanto dura la tensione prima di risolvere;
-- gli **altri modi della minore melodica** (dorico ♭2, lidio aumentato…): qui
-  servono le due che colorano la **dominante**, non tutti e sette;
+- ~~il **ritmo armonico**~~ — c'è, in [`ritmo-armonico.md`](ritmo-armonico.md);
+- ~~gli **altri modi della minore melodica**~~ — c'è, in
+  [`modi-minore-melodica.md`](modi-minore-melodica.md): il quadro dei sette modi
+  (queste due colorano la dominante, le altre cinque altri accordi);
 - il **voicing** delle tensioni (upper structure, quartale sulla dominante): è
   priorità 2 (forma).
