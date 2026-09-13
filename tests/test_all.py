@@ -7834,6 +7834,63 @@ def test_voicing_scritto():
           {2, 7, 0} <= classi_basso, str(sorted(classi_basso)))
 
 
+def test_comping():
+    """Le affermazioni [CALC] di docs/istruzioni/comping.md.
+
+    MU.comping piazza gli accordi sui colpi della stringa di ritmo; una x
+    sull'ultima croma anticipa il battere dopo; il colpo porta le note voicizzate.
+    """
+    from delugexml import musica as MU                         # noqa: PLC0415
+    passo = MU.durata_in_tick('1/8')
+
+    note = MU.comping('C', 'x..x....')
+    onsets = sorted({n.pos for ns in note.values() for n in ns})
+    check('i colpi cadono sulle celle x (0 e 3)',
+          onsets == [0, 3 * passo], str(onsets))
+
+    ant = MU.comping('C | F', ['.......x', 'x.......'])
+    onsets2 = sorted({n.pos for ns in ant.values() for n in ns})
+    check("l'anticipazione (x sull'ultima croma) cade a 336, prima del battere (384)",
+          onsets2 == [7 * passo, MU.TICK_PER_BATTUTA], str(onsets2))
+
+    do = {y % 12 for y in MU.comping('C', 'x.......', voicing='chiuso')}
+    check('il colpo porta le note dell accordo (do mi sol)',
+          {0, 4, 7} <= do, str(sorted(do)))
+
+    try:
+        MU.comping('C | F', ['x.......'])
+        check('rifiuta ritmi != battute', False, 'non ha sollevato')
+    except ValueError:
+        check('rifiuta ritmi != battute', True)
+
+    try:
+        MU.comping('C', 'xxx')
+        check('rifiuta un ritmo di lunghezza sbagliata', False, 'non ha sollevato')
+    except ValueError:
+        check('rifiuta un ritmo di lunghezza sbagliata', True)
+
+
+def test_comping_scritto():
+    """Il pezzo di confronto del comping e' quello che dichiara (comping.md).
+
+    Il rado ha meno colpi del fitto e anticipa (una x sull'ultima croma); il
+    basso porta le fondamentali.
+    """
+    import comping_scritto as C                                # noqa: PLC0415
+
+    colpi_rado = sum(r.count('x') for r in C.RITMO_RADO)
+    colpi_fitto = sum(r.count('x') for r in C.RITMO_FITTO)
+    check('il rado ha meno colpi del fitto',
+          colpi_rado < colpi_fitto, f'rado {colpi_rado}, fitto {colpi_fitto}')
+    check("il rado anticipa (una x sull'ultima croma di una battuta)",
+          any(r[-1] == 'x' for r in C.RITMO_RADO), str(C.RITMO_RADO))
+    check('il comping produce colpi', len(C.comping()) > 0)
+
+    classi_basso = {y % 12 for y in C.basso()}
+    check('il basso porta le fondamentali D, G, C (2, 7, 0)',
+          {2, 7, 0} <= classi_basso, str(sorted(classi_basso)))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 

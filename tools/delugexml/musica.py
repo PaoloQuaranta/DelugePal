@@ -947,6 +947,53 @@ def armonia(spec: str, *, voicing: str = 'chiuso', registro: str = 'do3',
     return out
 
 
+def comping(progressione: str, ritmi, *, voicing: str = 'chiuso',
+            registro: str = 'do3', velocity: int = 72,
+            articolazione: str = 'staccato', condotta: bool = True,
+            figura: str | int = '1/8', da: int = 0) -> dict[int, list[Note]]:
+    """Il comping: da una progressione (un accordo per battuta) e un RITMO per
+    battuta, gli accordi piazzati sui colpi, voicizzati e condotti.
+
+    `ritmi` e' una lista di stringhe (o una sola), una per battuta, di `'x'`
+    (colpo) e `'.'` (pausa) -- es. `'x..x....'`, otto crome. Tutte della stessa
+    lunghezza, e quella lunghezza per `figura` deve fare una battuta (8 crome,
+    16 semicrome...). ⚠️ Una `'x'` sull'ULTIMA cella anticipa il battere della
+    battuta dopo: e' cosi' che il comping jazz "spinge".
+
+    E' un COSTRUTTORE DI SPEC sopra `armonia()` -- la collocazione, il voicing e
+    la condotta vengono da li', nessuna logica di piazzamento nuova. Nasce da
+    `genera_jazz._spec_comping`, promosso a primitiva. Vedi
+    docs/istruzioni/comping.md.
+    """
+    if isinstance(ritmi, str):
+        ritmi = [ritmi]
+    accordi = [g.strip() for g in progressione.split(SEPARATORE_ACCORDI)]
+    if len(accordi) != len(ritmi):
+        raise ValueError(
+            f'comping(): {len(accordi)} battute di accordi e {len(ritmi)} di '
+            f'ritmo -- devono essere uguali (un ritmo per battuta)')
+    passo = durata_in_tick(figura)
+    if TICK_PER_BATTUTA % passo:
+        raise ValueError(f'comping(): la figura {figura!r} non divide la battuta')
+    per_battuta = TICK_PER_BATTUTA // passo
+    gruppi = []
+    for b, (accordo, ritmo) in enumerate(zip(accordi, ritmi)):
+        if len(ritmo) != per_battuta:
+            raise ValueError(
+                f'comping(): la battuta {b + 1} ha un ritmo di {len(ritmo)} '
+                f'celle, ma con figura {figura!r} una battuta ne vuole '
+                f'{per_battuta}')
+        for c in ritmo:
+            if c not in ('x', PAUSA):
+                raise ValueError(
+                    f"comping(): cella {c!r} sconosciuta, usare 'x' o '{PAUSA}'")
+            gruppi.append(accordo if c == 'x' else PAUSA)
+    spec = f' {SEPARATORE_ACCORDI} '.join(gruppi)
+    return armonia(spec, voicing=voicing, registro=registro, durata=figura,
+                   velocity=velocity, articolazione=articolazione,
+                   condotta=condotta, da=da)
+
+
 def racconta_armonia(spec: str, *, voicing: str = 'chiuso',
                      registro: str = 'do3', condotta: bool = True) -> str:
     """Cosa e' diventata ogni sigla, e quali ambiguita' sono state sciolte.

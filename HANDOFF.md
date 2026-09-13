@@ -133,8 +133,9 @@ funzionale** (ii-V-I, cadenze, turnaround, dominanti secondarie) e poi **la
 dominante alterata e le code** (doppie medianti, diatonic planing, seste
 aumentate), infine **ritmo armonico e i modi della minore melodica** hanno
 **chiuso l'armonia della priorità 1, code comprese**. ⚠️ **Poi è cominciata la
-priorità 2, la forma**, dal **voicing** (§6-septvicies): lo stato e il prossimo
-passo — il **comping** — stanno lì. ⚠️ **Il metodo cambia per area:** l'armonia si
+priorità 2, la forma**, dal **voicing** (§6-septvicies) e poi il **comping**
+(§6-noniesvicies, con `MU.comping`): lo stato e il prossimo passo — il
+**contrappunto** — stanno lì. ⚠️ **Il metodo cambia per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
 letteratura nuova (Levine ×2, Piston *Counterpoint*, Crook) e tutta l'armonia è
@@ -3345,6 +3346,53 @@ domanda, non a tappeto.)
 Invariato: il **comping** — Levine ha il capitolo apposta (da p. ~232), oltre a
 `ritmo-armonico` + `voicing`. E *Counterpoint* (Piston) abilita il contrappunto
 quando toccherà.
+
+---
+
+## 6-noniesvicies. La forma continua: il comping — 13 settembre 2026
+
+**Seconda faccia della forma.** Dopo il voicing, il **comping** — il ritmo con cui
+la mano che accompagna suona gli accordi. `docs/istruzioni/comping.md`, stesso
+metodo del voicing (`[CALC]` + un ascolto).
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `docs/istruzioni/comping.md` | il vocabolario: le tre collocazioni del colpo (battere / **anticipato** / dietro), lo **spazio** (rado dove il solista è fitto), il registro; da Levine cap. 21 |
+| `MU.comping` (`musica.py`) | ⚠️ **codice nuovo**: una stringa di ritmo per battuta → accordi piazzati sui colpi, voicizzati e condotti; promuove `genera_jazz._spec_comping` a primitiva (thin wrapper su `armonia`) |
+| `tools/comping_scritto.py` | il pezzo di confronto: rado/anticipato vs fitto |
+| `tests/test_all.py` | `test_comping` + `test_comping_scritto`. Suite **1299 → 1308** |
+| `out/COMPING01.XML` | caricato e verificato sul Deluge (non versionato) |
+
+### Il verdetto, e la fonte
+
+`COMPING01` (rado/anticipato vs fitto): **«suona bene, il rado ha spazio e spinta —
+approvato»**. Conferma le due mosse — lo **spazio** e la **spinta**
+(l'anticipazione) — al primo colpo. `[LIB]` Levine, *The Jazz Piano Book*, cap. 21
+«Comping» (p. ~223-234): complementare il solista, «punto medio fra audacia e
+ritegno», non pestare nel registro del solista.
+
+### La cosa da sapere: `MU.comping` è un costruttore di spec
+
+⚠️ `MU.comping` **non piazza note per conto suo**: costruisce lo spec e chiama
+`armonia()` — la collocazione, il voicing e la condotta vengono da lì.
+L'anticipazione è una `x` sull'**ultima** croma (nessun codice speciale). ⚠️
+`genera_jazz` **non** è stato forzato ad adottarla (è una coppia controllata):
+l'adozione è un cleanup successivo, con la sua verifica.
+
+### Cosa NON rifare
+
+- **non chiudere senza l'ascolto** (metodo `[CALC]` + un ascolto);
+- **non forzare `genera_jazz`** ad adottare `MU.comping` ora;
+- **non confondere comping e ritmo armonico:** il comping è ogni quanto si
+  **colpisce** l'accordo, il ritmo armonico ogni quanto **cambia**.
+
+### Il prossimo passo
+
+Le facce restanti della forma: il **contrappunto** (Piston *Counterpoint*, ora
+leggibile via djvu) e la **struttura** lunga (l'`arranger` c'è già). Il
+contrappunto è il naturale prossimo.
 
 ---
 
