@@ -75,13 +75,20 @@ melodica** (già in `song.MODI`), non del maggiore:
   di Re letta da Sol. È un misolidio con la **4ª alzata**: dà il `♯11` ma tiene 9
   e 13 naturali.
 
-⚠️ **Qui manca il `[LIB]`, ed è una scelta dichiarata** — come per le
-[medianti cromatiche](medianti-cromatiche.md). I termini «scala alterata» e
-«lidia dominante» **non sono nominati** nei libri in casa: Smith rifiuta anzi
-l'approccio multi-scala (p. 77-78: «una sola forma di minore»), e rimanda semmai
-al *Lydian Chromatic Concept* di George Russell (Smith p. 77), che non è in casa.
-Il rigore viene dal `[CALC]`: che siano rotazioni della minore melodica, e che
-diano esattamente quelle tensioni, è calcolabile e testato.
+`[LIB]` **La fonte è Levine, *The Jazz Piano Book*, cap. 9 «Scale Theory».**
+Levine è l'opposto di Smith sull'approccio chord-scale: lo **abbraccia**, e nomina
+proprio queste scale. Sull'**alterata**: *«i nomi per la scala alterata: il modo
+**super-locrio**... il **settimo modo** [della minore melodica]... la scala
+**diminished whole-tone**... per improvvisare sugli accordi di settima di
+dominante alterati»* (fig. 9-24). La **lidia dominante** è il **4º modo** della
+melodica (Levine, cap. 9).
+
+⚠️ **Una storia di metodo da tenere.** Finché in casa c'era solo Smith — che
+**rifiuta** il multi-scala (p. 77-78: «una sola forma di minore») — queste scale
+erano `[CALC]` **senza** `[LIB]`, come le [medianti cromatiche](medianti-cromatiche.md):
+non si era forzata una citazione. Levine è arrivato dopo (13 settembre 2026) e la
+fonte c'era eccome. Il `[CALC]` (rotazioni della melodica, testato) regge lo
+stesso — e ora ha la fonte accanto.
 
 ### Le due simmetriche, ora funzionali
 
@@ -135,8 +142,8 @@ S.set_scale(doc, 'G', 'alterata')          # = La♭ minore melodica, letta da S
   `scala-ottatonica.md` / `scala-esatonale.md`);
 - **non chiamare «modo del maggiore» l'alterata o la lidia dominante:** sono modi
   della **minore melodica**, in `MODI` come intervalli;
-- **non forzare una citazione** per le due scale del minore melodico: i libri non
-  le nominano, e lo si dice — il `[CALC]` regge il fatto.
+- **non ricadere nel «i libri non le nominano»:** era vero con solo Smith, non con
+  Levine (cap. 9), che le nomina — l'alterata e la lidia dominante hanno `[LIB]`.
 
 ---
 

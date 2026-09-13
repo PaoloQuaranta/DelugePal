@@ -35,7 +35,8 @@ scala. Il prestito invece presuppone una casa tonale, che qui non c'è.
 ## Il principio: colore simmetrico, non funzione
 
 `[LIB]` Smith, *Jazz Theory* (4ª ed.), cap. IX, p. 75-76, «The "Diminished"
-Scale»:
+Scale» (e `[LIB]` **Levine**, *The Jazz Piano Book*, cap. 9 «Scale Theory»,
+«Diminished scale harmony», fig. 9-27):
 
 > «La scala "diminuita" (o "ottatonica") è spesso un'alternativa ricca di colore
 > alle scale maggiori e minori. [...] Come l'accordo diminuito, la scala

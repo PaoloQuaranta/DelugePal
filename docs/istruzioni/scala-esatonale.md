@@ -25,9 +25,12 @@ sono sei equivalenti) e il registro.
 | `[DEC]` | decisione presa qui, con la ragione |
 | `[OSS]` | osservato all'ascolto |
 
-⚠️ **La fonte qui è Piston, non Smith.** Il *Jazz Theory* di Smith tratta
-l'ottatonica ma **non** la whole-tone (verificato): per questa scala si cambia
-libro.
+⚠️ **La fonte qui è Piston (e ora Levine), non Smith.** Il *Jazz Theory* di Smith
+tratta l'ottatonica ma **non** la whole-tone (verificato): per questa scala si
+cambia libro. Piston la tratta fra le scale artificiali; e `[LIB]` **Levine**,
+*The Jazz Piano Book*, cap. 9 «Scale Theory» («Whole-tone scale harmony»,
+fig. 9-40), la usa come scala della dominante `♯5` — l'uso funzionale è in
+[`dominante-alterata.md`](dominante-alterata.md).
 
 ---
 

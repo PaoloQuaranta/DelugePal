@@ -7807,6 +7807,33 @@ def test_ritmo_armonico():
           str(veloce))
 
 
+def test_voicing_scritto():
+    """Il pezzo di confronto dei voicing e' quello che dichiara (voicing.md).
+
+    Le tre passate sono lo STESSO ii-V-I con tre voicing: il rootless omette la
+    fondamentale (che il basso fa), il drop2 ha le stesse classi del chiuso ma
+    spostate d'ottava. Cosi' all'ascolto cambia solo il voicing.
+    """
+    import voicing_scritto as V                                # noqa: PLC0415
+    from delugexml import musica as MU                         # noqa: PLC0415
+
+    for sigla, root in (('Dm7', 2), ('G7', 7), ('Cmaj7', 0)):
+        chiuso = MU.voci(sigla, voicing='chiuso', registro=V.REGISTRO)
+        rootless = {y % 12 for y in
+                    MU.voci(sigla, voicing='senza-fondamentale', registro=V.REGISTRO)}
+        drop2 = MU.voci(sigla, voicing='drop2', registro=V.REGISTRO)
+        check(f'{sigla}: il chiuso ha la fondamentale, il rootless no',
+              root in {y % 12 for y in chiuso} and root not in rootless,
+              f'chiuso {sorted({y % 12 for y in chiuso})}, rootless {sorted(rootless)}')
+        check(f'{sigla}: il drop2 ha le stesse classi del chiuso, note diverse',
+              {y % 12 for y in drop2} == {y % 12 for y in chiuso} and drop2 != chiuso,
+              f'{drop2} vs {chiuso}')
+
+    classi_basso = {y % 12 for y in V.basso()}
+    check('il basso porta le fondamentali D, G, C (2, 7, 0)',
+          {2, 7, 0} <= classi_basso, str(sorted(classi_basso)))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 

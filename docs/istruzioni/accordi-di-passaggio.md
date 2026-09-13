@@ -44,7 +44,8 @@ semitono fra** i due accordi — è quella a portare il basso cromatico.
 ### La sostituzione di tritono (♭II7)
 
 Il `♭II7` al posto del `V7`: `Db7 → Cmaj7` invece di `G7 → Cmaj7`. Approccio
-cromatico **dall'alto**. `[LIB]` Smith, cap. VIII p. 59, «Tritone Substitution:
+cromatico **dall'alto**. `[LIB]` Smith, cap. VIII p. 59 (e Levine, *The Jazz
+Piano Book*, cap. 6 «Tritone Substitution»), «Tritone Substitution:
 ♭II7 Substituted for V7». `[CALC]` Funziona perché il ♭II7 e il V7 **condividono
 il tritono**: G7 ha fa-si (la 3ª e la 7ª), e Db7 ha le stesse due note scambiate
 — è il tritono a risolvere, e lo fa uguale con tutt'e due le fondamentali.

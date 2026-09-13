@@ -28,7 +28,8 @@ frigio, misolidio, locrio.
 
 ## Il principio: colore statico, non funzione
 
-`[LIB]` Smith, *Jazz Theory* (4ª ed.), cap. X «Other Systems», sez. «Modal Jazz», p. 81:
+`[LIB]` Smith, *Jazz Theory* (4ª ed.), cap. X «Other Systems», sez. «Modal Jazz», p. 81
+(e Levine, *The Jazz Piano Book*, cap. 12 «So What Chords», sul quartale modale):
 
 > «Il jazz "modale" fornisce un impianto per l'improvvisazione basato sulle
 > **scale invece che sulle progressioni di accordi**. [...] Poiché tutte le
@@ -155,7 +156,7 @@ note = MU.armonia('Dm | Em | Gmaj | Dm', voicing='quartale',
 ```
 
 ⚠️ **Il voicing quartale** (accordi per quarte invece che per terze) è il
-suono modale per eccellenza — il «So What chord» — proprio perché la quarta
+suono modale per eccellenza — il «So What chord» (vedi [`voicing.md`](voicing.md)) — proprio perché la quarta
 non contiene la terza che deciderebbe maggiore/minore. `MU.voci()` lo fa già:
 è nato per il modale del pezzo `MODALE06`.
 

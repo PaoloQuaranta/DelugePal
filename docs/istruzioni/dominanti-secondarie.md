@@ -94,7 +94,9 @@ successivo»*. Ogni fondamentale sta una quinta sopra quella dopo.
 ### Il rimando: il tritone sub
 
 La dominante secondaria si può sostituire col suo **♭II7** (il tritone sub): al
-posto di `A7 → Dm7`, `Eb7 → Dm7`. Non si ripete qui — vive in
+posto di `A7 → Dm7`, `Eb7 → Dm7`. `[LIB]` Levine, *The Jazz Piano Book*, cap. 6
+«Tritone Substitution»: sono proprio i bebopper ad aver **esteso il tritone sub
+alle dominanti secondarie**, incatenandone. Non si ripete qui — vive in
 [`accordi-di-passaggio.md`](accordi-di-passaggio.md), che è la faccia cromatica e
 funzionale della stessa mossa.
 

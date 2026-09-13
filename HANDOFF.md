@@ -132,10 +132,15 @@ scale simmetriche, il cromatismo (planing e medianti); **il 13 la spina
 funzionale** (ii-V-I, cadenze, turnaround, dominanti secondarie) e poi **la
 dominante alterata e le code** (doppie medianti, diatonic planing, seste
 aumentate), infine **ritmo armonico e i modi della minore melodica** hanno
-**chiuso l'armonia della priorità 1, code comprese**. Lo stato e il prossimo
-passo — ora **la priorità 2, la forma** — stanno in fondo a **§6-sexvicies**.
-⚠️ **Da lì l'armonia si chiude col `[CALC]`, senza esempio all'ascolto**
-(decisione dell'utente, vale solo per l'armonia).
+**chiuso l'armonia della priorità 1, code comprese**. ⚠️ **Poi è cominciata la
+priorità 2, la forma**, dal **voicing** (§6-septvicies): lo stato e il prossimo
+passo — il **comping** — stanno lì. ⚠️ **Il metodo cambia per area:** l'armonia si
+chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
+ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
+letteratura nuova (Levine ×2, Piston *Counterpoint*, Crook) e tutta l'armonia è
+stata rivista con Levine: §6-octovicies** — Levine nomina le chord-scale che Smith
+rifiutava, e ora hanno `[LIB]`. I tool djvu sono installati (memoria
+`letteratura-composizione`).
 
 Il testo qui sotto è la formulazione ORIGINALE del lavoro, tenuta perché resta
 vera nel merito — «serie competenze compositive» — ma ora ha una direzione
@@ -3219,8 +3224,127 @@ contesto, senza forzare la citazione. **Terza volta** che questa regola decide.
 ### Il prossimo passo
 
 ⚠️ **L'armonia della priorità 1 è chiusa, code comprese.** Il passo è la
-**priorità 2, la forma**: voicing (upper structure, quartale, drop), contrappunto,
-comping, struttura. Niente resta aperto sull'armonia che blocchi l'uscita.
+**priorità 2, la forma** — cominciata subito col voicing, §6-septvicies.
+
+---
+
+## 6-septvicies. La priorità 2 comincia: il voicing — 13 settembre 2026
+
+**Primo passo della forma, e primo con un metodo nuovo.** Chiusa l'armonia, si
+entra nella forma dalla faccia più vicina: il **voicing** — come disporre le note
+di un accordo. `docs/istruzioni/voicing.md`.
+
+### Il metodo cambia di nuovo: `[CALC]` + un ascolto
+
+⚠️ **Deciso dall'utente, ed è il punto che un agente deve sapere.** Il voicing
+**non** è «impossibile sbagliare» come l'armonia pura: le meccaniche sono precise
+(e già testate), ma **quale** voicing suona giusto è un giudizio d'orecchio —
+PERCHE l'aveva già mostrato (il quartale scartato perché toglieva corpo). Quindi
+né il solo `[CALC]` dell'armonia né l'ascolto pieno del ritmo, ma un **ibrido**:
+`[LIB]` + `[CALC]` per le meccaniche, e un esempio lavorato **ascoltato** per la
+scelta. ⚠️ **Conseguenza:** l'agente non chiude l'istruzione da solo — l'ultimo
+passo (l'ascolto) è dell'utente. La regola generale, in memoria
+(`voicing-calc-piu-ascolto`): il metodo scala con **quanto orecchio** serve —
+regola precisa → `[CALC]`; con una parte di gusto → `[CALC]` + un ascolto; corpo
+di performance → ascolto pieno.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `docs/istruzioni/voicing.md` | quando usare quale voicing (chiuso, shell, rootless/Bill Evans, drop2, quartale); il principio, come si sceglie, l'ortogonalità condotta/voicing |
+| `tools/voicing_scritto.py` | il pezzo di **confronto**: lo stesso ii-V-I in tre voicing, per l'ascolto |
+| `tests/test_all.py` | `test_voicing_scritto`. ⚠️ Le **meccaniche** dei voicing avevano **già** i guardiani (`test_voicing_*`, `test_condotta_delle_parti`): l'istruzione li richiama, non li riscrive. Suite **1292 → 1299** |
+| `out/VOICING01.XML` | caricato e **verificato per rilettura** sul Deluge (non versionato: incorpora i preset) |
+
+### Il codice del voicing c'era già, l'istruzione no
+
+⚠️ **È il pattern della priorità 2.** `MU.voci` faceva già cinque voicing e
+`voci_condotte` conduceva le parti — scritti nell'era del generatore. Mancava
+l'istruzione che insegnasse **quando** usarli. Spesso, nella forma, parte
+dell'infrastruttura esiste già: il lavoro è lo strato di **scelta**, non il
+codice.
+
+### Il verdetto, e cosa conferma
+
+Le tre versioni (`VOICING01`, Rhodes + basso, lo stesso `Dm7 | G7 | Cmaj7` in
+chiuso / rootless / drop2): **«sono tutti e tre belli e funzionano; quale
+preferisco dipende dal contesto»**. Conferma all'orecchio il principio di Smith
+(`[LIB]` cap. VI «Chord Voicings», p. 35: non c'è un voicing giusto in assoluto),
+e **passa al primo colpo**, come l'armonia. Fonti: shell p. 37, rootless p. 38,
+drop2 p. 46, quartale p. 81.
+
+### Cosa NON rifare
+
+- **non riscrivere i guardiani `[CALC]`** dei voicing: esistono, si richiamano;
+- **non chiudere un'istruzione con parte d'orecchio senza l'ascolto:** il metodo
+  qui è `[CALC]` + un ascolto, non il solo `[CALC]`;
+- **non confondere voicing e condotta:** sono ortogonali.
+
+### Il prossimo passo
+
+⚠️ Le altre facce della priorità 2, in ordine di vicinanza: il **comping** (i
+pattern **ritmici** dell'accompagnamento — poggia su voicing +
+`ritmo-armonico`), poi il **contrappunto** (linee indipendenti), poi la
+**struttura** (l'arco lungo, l'`arranger` c'è già). Il comping è il naturale
+prossimo.
+
+---
+
+## 6-octovicies. Nuova letteratura, e la revisione dell'armonia con Levine — 13 settembre 2026
+
+**L'utente ha aggiunto la letteratura che mancava**, e tutta l'armonia è stata
+rivista contro di essa. Il grosso: **Levine, *The Jazz Piano Book*** — la fonte
+canonica di voicing, comping e chord-scale del jazz, un intero libro dove Smith
+aveva un capitolo.
+
+### La letteratura nuova, e come si legge
+
+| libro | formato | uso |
+|---|---|---|
+| Levine, *The Jazz Piano Book* | PDF (testo) | voicing, comping, chord-scale |
+| Levine, *The Jazz Theory Book* | djvu | teoria jazz profonda (da minare su domanda) |
+| Piston, *Counterpoint* (1970) | djvu | il **contrappunto** (faccia da fare) |
+| Crook, *How to Improvise* | PDF scansione | melodia/assolo — servirà OCR |
+
+⚠️ **Tool djvu installati:** DjVuLibre (winget `DjVuLibre.DjView`, dalla fonte
+ufficiale) in `C:\Program Files (x86)\DjVuLibre\`; `djvutxt.exe --page=N` estrae
+il testo (c'è un layer OCR, con rumore). ⚠️ Non su PATH in una shell nuova: usare
+il percorso pieno. Tutto in memoria `letteratura-composizione`.
+
+### La scoperta che dà ragione all'utente
+
+⚠️ **Levine NOMINA le chord-scale che Smith RIFIUTA.** Smith (p. 77-78) nega
+l'approccio multi-scala; Levine (cap. 9 «Scale Theory») lo **abbraccia** e nomina
+proprio: la **scala alterata** (super-locrio = 7º modo della melodica =
+«diminished whole-tone», fig. 9-24), la **lidia dominante** (4º modo), la
+**diminished scale** (fig. 9-27), la **whole-tone** (fig. 9-40), e i modi della
+melodica come sistema. Quattro istruzioni che erano `[CALC]` **senza** `[LIB]` (o
+con la nota «i libri non le nominano») ora hanno la fonte. ⚠️ **La regola «non
+forzare una citazione» ha retto:** quando non c'era la fonte non se n'è inventata
+una; è arrivata dopo, e il `[CALC]` reggeva già. È la terza conferma di quella
+regola, e la più bella: aveva ragione ad aspettare.
+
+### Cosa è cambiato, per istruzione
+
+| istruzione | cosa aggiunge Levine |
+|---|---|
+| `dominante-alterata`, `modi-minore-melodica` | `[LIB]` per l'alterata, la lidia dominante, il sistema dei modi (cap. 9) — tolta la nota «i libri non le nominano» |
+| `scala-ottatonica`, `scala-esatonale` | `[LIB]` cap. 9 (diminished / whole-tone scale harmony) accanto a Smith/Piston |
+| `voicing` | la fonte **profonda**: shell cap. 3, rootless cap. 7-8, quartale cap. 13, So What cap. 12, upper structures cap. 14 |
+| `armonia-funzionale`, `accordi-di-passaggio`, `dominanti-secondarie`, `armonia-modale` | rimandi di conferma (ii-V-I cap. 2, tritone sub cap. 6, So What cap. 12) |
+
+⚠️ **Non tutto cambia:** prestito, planing, medianti, seste aumentate, ritmo
+armonico sono territorio classico (Piston) o di Debussy — Levine non li tratta, e
+le loro fonti restano giuste. La revisione le **conferma**, non le tocca. (Il
+*Jazz Theory Book* di Levine, più ampio, potrebbe toccarne alcuni: da minare su
+domanda, non a tappeto.)
+
+### Il prossimo passo
+
+Invariato: il **comping** — Levine ha il capitolo apposta (da p. ~232), oltre a
+`ritmo-armonico` + `voicing`. E *Counterpoint* (Piston) abilita il contrappunto
+quando toccherà.
 
 ---
 

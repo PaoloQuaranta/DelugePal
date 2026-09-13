@@ -74,7 +74,8 @@ ascendente).
 
 ### Il ii-V-I, l'atomo
 
-`[LIB]` Smith, cap. VIII, p. 53: *«Il paradigma [dell'alternanza forte-debole del
+`[LIB]` Smith, cap. VIII, p. 53 (e Levine, *The Jazz Piano Book*, cap. 2 «The
+Major Modes and II-V-I»): *«Il paradigma [dell'alternanza forte-debole del
 jazz] è la progressione **II V I**, che è ubiqua nel jazz. Come si usa di solito,
 I e II sono accordi forti, V è un accordo debole.»* È la cellula minima del
 tonale funzionale.

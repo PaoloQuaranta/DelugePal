@@ -29,15 +29,17 @@ scala.
 ⚠️ **Niente `[OSS]`**: l'armonia si chiude col `[CALC]` (decisione del 13
 settembre 2026).
 
-⚠️ **Qui manca in gran parte il `[LIB]`, ed è una scelta dichiarata** — come per
-l'alterata e le [medianti cromatiche](medianti-cromatiche.md). La **scala** minore
-melodica è nei libri (`[LIB]` Piston, *Harmony* 5ª ed., cap. 4 «The Minor Mode»,
-p. 43: nel minore *«si usano diversi tipi di triadi e scale»*, e la forma con 6ª
-e 7ª alzate è una di queste); ma il **sistema dei sette modi come chord-scale**
-non è nominato nei libri in casa — Smith lo rifiuta (p. 77-78) e rimanda a Russell
-(*Lydian Chromatic Concept*), che non c'è. Il rigore viene dal `[CALC]`: che
-siano rotazioni della melodica, e che ognuno contenga l'accordo che gli si
-attribuisce, è calcolato e testato.
+`[LIB]` **La fonte è Levine, *The Jazz Piano Book*, cap. 9 «Scale Theory».**
+Levine tratta la minore melodica proprio come un **sistema di modi-per-accordo**:
+per ogni modo dice l'accordo di casa (il settimo modo = super-locrio per il
+`7alt`, fig. 9-24; il modo sul VI grado per il mezzo-diminuito, ecc.). La **scala**
+melodica sta anche in `[LIB]` Piston, *Harmony* 5ª ed., cap. 4 «The Minor Mode»,
+p. 43 (*«nel minore si usano diversi tipi di triadi e scale»*).
+
+⚠️ **Da tenere:** finché in casa c'era solo Smith — che **rifiuta** il multi-scala
+(p. 77-78) — il sistema era `[CALC]` senza `[LIB]`. Levine (arrivato il 13
+settembre 2026) è la fonte che lo nomina. Il `[CALC]` (rotazioni della melodica,
+ognuna col suo accordo) resta il guardiano.
 
 ---
 
@@ -99,8 +101,8 @@ dalla minore melodica. Chiamarli «modi» va bene; chiamarli «del maggiore» no
 
 ## Cosa NON fare
 
-- **non forzare una citazione** per il sistema dei modi: i libri non lo nominano,
-  il `[CALC]` regge il fatto (rotazioni della melodica, ognuna col suo accordo);
+- **il sistema dei modi ha `[LIB]`** ora (Levine, cap. 9): non ripetere il vecchio
+  «i libri non lo nominano», vero solo quando c'era solo Smith;
 - **non usarli come colore statico che galleggia:** a differenza delle scale
   simmetriche, questi servono **sopra un accordo preciso** — il locrio ♮2 senza il
   suo `m7♭5` sotto è solo una scala;
