@@ -174,5 +174,5 @@ terreno fermo quanto lei, purché la scelta resti una scelta e non una gara.
   forma;
 - le **upper structure** e i **polichordi** — voicing avanzati (Levine, cap. 14
   «Upper Structures»): su domanda di un pezzo;
-- il [contrappunto](contrappunto.md) (fatto) e la **struttura** lunga: le altre
-  facce della priorità 2.
+- il [contrappunto](contrappunto.md) e la [struttura](struttura.md) lunga (fatti):
+  le altre facce della priorità 2.

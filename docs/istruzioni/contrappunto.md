@@ -230,7 +230,7 @@ la scelta resti una scelta.
 
 ## Cosa manca a questa istruzione
 
-- la **struttura** lunga (l'arco del pezzo, le sezioni): l'ultima faccia della
+- la [struttura](struttura.md) lunga (l'arco del pezzo, le sezioni): l'ultima faccia della
   priorità 2, e l'`arranger` c'è già;
 - il **contrappunto a tre e più parti** (Piston cap. 7-8): il `[CALC]` oggi
   guarda **due** voci per volta — tre parti si controllano a coppie, ma la quarta

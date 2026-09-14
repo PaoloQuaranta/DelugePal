@@ -7992,6 +7992,79 @@ def test_contrappunto_scritto():
           f'dip {dip.paralleli}, ind {ind.paralleli}')
 
 
+def test_forma():
+    """Le affermazioni [CALC] di docs/istruzioni/struttura.md.
+
+    MU.forma stende una mappa di sezioni sull'arranger, ai tick giusti; ripete
+    una sezione riusando la stessa clip; rispetta battute_per; rifiuta una
+    sezione ignota prima di piazzare nulla.
+    """
+    from delugexml import musica as MU                        # noqa: PLC0415
+    from delugexml import arranger as A                       # noqa: PLC0415
+    B = MU.TICK_PER_BATTUTA
+
+    # una sezione ignota nella mappa e' rifiutata prima di toccare l'arranger
+    try:
+        MU.forma(None, 'A Z', {'A': []})
+        check('forma rifiuta una sezione ignota', False, 'non ha sollevato')
+    except ValueError:
+        check('forma rifiuta una sezione ignota', True)
+
+    try:
+        MU.forma(None, '', {'A': []})
+        check('forma rifiuta una mappa vuota', False, 'non ha sollevato')
+    except ValueError:
+        check('forma rifiuta una mappa vuota', True)
+
+    # il piano restituito ha i tick giusti, con battute_per per sezione
+    doc, sez = _forma_nuovo()
+    if doc is None:
+        return                                                # manca il materiale
+    piano = MU.forma(doc, 'intro A A B A',
+                     {'intro': sez['A'], 'A': sez['A'], 'B': sez['B']},
+                     battute=4, battute_per={'intro': 2})
+    pos = [(s.nome, s.pos, s.battute) for s in piano]
+    atteso = [('intro', 0, 2), ('A', 2 * B, 4), ('A', 6 * B, 4),
+              ('B', 10 * B, 4), ('A', 14 * B, 4)]
+    check('il piano cade ai tick giusti, con battute_per', pos == atteso, str(pos))
+
+    # l'esempio lavorato: AABA di 16 battute, ogni strumento con 4 sezioni
+    doc2, piano2 = _forma_costruisci()
+    if doc2 is None:
+        return
+    check('l AABA e lungo 16 battute', A.extent(doc2) == (0, 16 * B),
+          str(A.extent(doc2)))
+    check('la mappa e A A B A', [s.nome for s in piano2] == ['A', 'A', 'B', 'A'],
+          str([s.nome for s in piano2]))
+    strumenti = doc2.root.find('instruments').children
+    attesi = [0, 4 * B, 8 * B, 12 * B]
+    for s in strumenti:
+        posizioni = sorted(i.pos for i in A.instances(s))
+        check(f'{A.nome_di(s)}: 4 sezioni ai tick di A A B A',
+              posizioni == attesi, str(posizioni))
+    check('il file dell esempio e valido', MU.verifica(doc2) == [],
+          str(MU.verifica(doc2)))
+
+
+def _forma_nuovo():
+    """Costruisce un doc di prova per la forma, o (None, None) se manca il
+    materiale non versionato (preset di terzi)."""
+    try:
+        import forma_scritto as F                             # noqa: PLC0415
+        return F.nuovo()
+    except FileNotFoundError:
+        salta('test_forma (nuovo)', 'manca un preset di refs/synths')
+        return None, None
+
+
+def _forma_costruisci():
+    try:
+        import forma_scritto as F                             # noqa: PLC0415
+        return F.costruisci()
+    except FileNotFoundError:
+        return None, None
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 

@@ -1211,6 +1211,91 @@ def racconta_contrappunto(voce_a: dict[int, list[Note]],
     return '\n'.join(righe)
 
 
+# ------------------------------------------------------------------ la forma
+#
+# La forma lunga: la MAPPA delle sezioni nel tempo -- AABA, blues, testa/soli/
+# testa. Le sezioni sono clip gia' scritte; `forma` le stende sulla timeline
+# dell'arranger facendo i conti in tick. Non compone: e' lo scheletro.
+
+class Sezione(NamedTuple):
+    """Una sezione piazzata sulla timeline dell'arranger."""
+
+    nome: str
+    pos: int          # tick d'inizio
+    battute: int      # quante battute dura
+    lung: int         # durata in tick
+
+
+def forma(doc, mappa, sezioni: dict, *, battute: int = 8,
+          battute_per: dict | None = None) -> list[Sezione]:
+    """Stende una FORMA sull'arranger: la mappa delle sezioni nel tempo.
+
+    `mappa` e' la sequenza delle sezioni -- `'A A B A'` (o la lista
+    `['A', 'A', 'B', 'A']`) -- e `sezioni` dice quali CLIP suonano in ognuna:
+    `{'A': [clip_accordi, clip_melodia], 'B': [...]}`. Ogni clip sa gia' a
+    quale strumento appartiene (`song.instrument_of`), e viene piazzata sulla
+    sua traccia al punto giusto, per la durata della sezione.
+
+    ⚠️ NON compone e non crea clip: il materiale di ogni sezione lo scrive
+    l'AI prima, con le altre primitive. `forma` fa solo i CONTI -- dove cade
+    ogni sezione in tick -- e chiama `arranger.place`. E' la divisione di
+    sempre: l'AI decide la forma, il codice la stende.
+
+    `battute` e' la lunghezza di default di una sezione (8, la convenzione
+    dell'AABA e del pop); `battute_per` la cambia per singola sezione --
+    `{'blues': 12, 'intro': 4}`.
+
+    ⚠️ Una sezione che si RIPETE identica usa la STESSA clip a piu' posizioni
+    (e' il modo del dispositivo: cambiando la clip cambiano tutte le
+    ripetizioni). Per una ripetizione VARIATA -- l'ultimo A diverso, il fill
+    dell'ultimo giro -- si usa `arranger.place_unique`, la clip "bianca", dopo:
+    e' la faccia "sviluppo" della struttura, non questa.
+    """
+    from . import arranger as A                              # noqa: PLC0415
+    from . import song as S                                  # noqa: PLC0415
+
+    if isinstance(mappa, str):
+        mappa = mappa.split()
+    if not mappa:
+        raise ValueError('forma(): la mappa e vuota')
+    ignote = sorted({n for n in mappa if n not in sezioni})
+    if ignote:
+        raise ValueError(
+            f'forma(): sezioni ignote {ignote} -- '
+            f'sezioni definite: {sorted(sezioni)}')
+
+    piano: list[Sezione] = []
+    pos = 0
+    for nome in mappa:
+        bb = (battute_per or {}).get(nome, battute)
+        lung = bb * TICK_PER_BATTUTA
+        for clip in sezioni[nome]:
+            strum = S.instrument_of(doc, clip)
+            if strum is None:
+                raise ValueError(
+                    f'forma(): una clip della sezione {nome!r} non appartiene '
+                    f'a nessuno strumento')
+            A.place(doc, strum, clip, pos, lung)
+        piano.append(Sezione(nome, pos, bb, lung))
+        pos += lung
+    A.fit_view(doc)
+    return piano
+
+
+def racconta_forma(piano) -> str:
+    """La forma stesa, a parole (regola 4). ASCII soltanto (console cp1252)."""
+    if not piano:
+        return 'forma vuota'
+    fine = piano[-1].pos + piano[-1].lung
+    righe = [f'forma: {" ".join(s.nome for s in piano)} '
+             f'({fine // TICK_PER_BATTUTA} battute, {fine} tick)']
+    for s in piano:
+        da = s.pos // TICK_PER_BATTUTA + 1
+        a = (s.pos + s.lung) // TICK_PER_BATTUTA
+        righe.append(f'  {s.nome:<6} battute {da:>3}-{a:<3} ({s.battute})')
+    return '\n'.join(righe)
+
+
 def racconta_armonia(spec: str, *, voicing: str = 'chiuso',
                      registro: str = 'do3', condotta: bool = True) -> str:
     """Cosa e' diventata ogni sigla, e quali ambiguita' sono state sciolte.

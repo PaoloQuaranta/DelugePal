@@ -138,5 +138,5 @@ scelta.
   su domanda, quando servirà un pezzo latin;
 - la **risposta misurata** a una melodia data (dove sono i buchi): qui è una
   scelta a mano, non ancora calcolata dalla melodia;
-- il [contrappunto](contrappunto.md) (fatto) e la **struttura** lunga: le altre
-  facce della priorità 2.
+- il [contrappunto](contrappunto.md) e la [struttura](struttura.md) lunga (fatti):
+  le altre facce della priorità 2.

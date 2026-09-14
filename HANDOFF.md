@@ -134,9 +134,11 @@ dominante alterata e le code** (doppie medianti, diatonic planing, seste
 aumentate), infine **ritmo armonico e i modi della minore melodica** hanno
 **chiuso l'armonia della priorità 1, code comprese**. ⚠️ **Poi è cominciata la
 priorità 2, la forma**, dal **voicing** (§6-septvicies), poi il **comping**
-(§6-noniesvicies, con `MU.comping`) e poi il **contrappunto** (§6-tricies, con
-`MU.contrappunto` — un analizzatore, non un costruttore): lo stato e il prossimo
-passo — la **struttura** lunga — stanno lì. ⚠️ **Il metodo cambia per area:** l'armonia si
+(§6-noniesvicies, con `MU.comping`), il **contrappunto** (§6-tricies, con
+`MU.contrappunto`) e infine la **struttura** — la **mappa di forma** (§6-untrigies,
+con `MU.forma`, la prima delle sue tre facce): lo stato e il prossimo passo — le
+altre due facce della struttura, l'**arco dinamico** e le **transizioni** — stanno
+lì. ⚠️ **Il metodo cambia per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
 letteratura nuova (Levine ×2, Piston *Counterpoint*, Crook) e tutta l'armonia è
@@ -3458,6 +3460,71 @@ sezioni, le transizioni (l'`arranger` c'è già; la skill `music-composition` co
 «tutto ciò che dura più di una battuta»). Poi resta, dentro il contrappunto stesso
 e **su domanda**: il **tre-e-più parti** (Piston cap. 7-8 — oggi il `[CALC]` guarda
 due voci per volta), l'**invertibile** e il **canone** (cap. 9-11).
+
+---
+
+## 6-untrigies. La forma continua: la struttura (mappa di forma) — 14 settembre 2026
+
+**Ultima faccia della forma, prima delle sue tre.** Dopo voicing, comping e
+contrappunto — che lavorano **dentro** una o due battute — la **struttura**: come
+il materiale si dispone nel tempo. La struttura ha tre facce, e l'utente ha scelto
+di partire dalla **mappa di forma** (lo scheletro: dove cadono le sezioni), fra
+mappa / arco dinamico / transizioni. `docs/istruzioni/struttura.md`, metodo
+`[CALC]` + un ascolto.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `docs/istruzioni/struttura.md` | il vocabolario: le sezioni (intro/A/ponte/out), le **mappe canoniche** (AABA, blues 12, rhythm changes, testa-soli-testa), le lunghezze; la regola che pesa di più (**ripetizione contro sviluppo**). `[LIB]` music-composition `references/form/popular-song-forms.md` + `[MIS]` casella 9 di `jazz.md` |
+| `MU.forma` (`musica.py`) | ⚠️ **codice nuovo, thin layer su `arranger.place`.** Stende una mappa (`'A A B A'`) di clip sulla timeline dell'arranger, calcolando dove cade ogni sezione in tick. `battute_per` per le sezioni di lunghezza diversa. `MU.racconta_forma` a parole (regola 4, ASCII). Nuovo tipo `Sezione` |
+| `tools/forma_scritto.py` | l'esempio: un **AABA** vero (Rhodes + tromba, A = casa, B = ponte sul IV), steso con `MU.forma`, aperto in arranger view |
+| `tests/test_all.py` | `test_forma`. Suite **1324 → 1332** |
+
+### La cosa da sapere: il codice stende, non compone (di nuovo)
+
+⚠️ **`MU.forma` non compone e non crea clip.** Il materiale di ogni sezione lo
+scrive l'AI prima; `forma` fa i **conti** — dove cade ogni sezione — e chiama
+`arranger.place`. È la stessa divisione di `comping` e `contrappunto`. E due
+distinzioni del modello del dispositivo, verificate: una sezione che si **ripete
+identica** riusa la **stessa clip** a più posizioni (`place`); una ripetizione
+**variata** vuole la clip **bianca** (`arranger.place_unique`) — ed è la faccia
+*sviluppo*, non questa.
+
+### La scoperta utile: si suona dall'arranger
+
+⚠️ **La forma è una cosa d'arranger, non di session view.** `A.open_in_arranger`
+apre la song in arranger view (verificato sul corpus: `inArrangementView="1"` è lo
+stato di una song salvata così): la **timeline è la forma**. Le clip di sessione
+restano ferme, e `avvertenze()` lo segnala — ma qui è **atteso**, non un difetto:
+non si lanciano a mano, le suona la timeline. È il primo pezzo di questo progetto
+che si ascolta dall'arranger e non dai lanci di sessione.
+
+### Il verdetto, e la fonte
+
+⚠️ **Verdetto: «suona giusto, approvato»** (14 settembre 2026, `STRUTTURA01`,
+AABA di 16 battute). Il `[CALC]` verificava che le sezioni cadono ai tick di
+`A A B A` e che il file è valido; l'orecchio ha **confermato** che la forma si
+sente — l'A torna, il ponte contrasta. Passa al primo colpo, come le altre facce.
+`[LIB]` music-composition `references/form/popular-song-forms.md`; `[MIS]` casella
+9 di `docs/repertori/jazz.md` (AABA 103, blues 81, rhythm changes 19).
+
+### Cosa NON rifare
+
+- **non far comporre la forma al codice:** `MU.forma` stende una mappa decisa
+  dall'AI;
+- **non usare `place` dove serve `place_unique`:** ripetizione identica vs
+  variazione;
+- **non chiudere senza l'ascolto** (metodo `[CALC]` + un ascolto);
+- **non aspettarsi la session view:** è una forma d'arranger.
+
+### Il prossimo passo
+
+Le **altre due facce della struttura**, su domanda: l'**arco dinamico** — densità e
+intensità che salgono al ponte e ricadono sull'ultimo A, **già misurato** (`[MIS]`
+casella 9), da spendere sul generatore; e le **transizioni** — turnaround, fill,
+stacchi, con le **variazioni** via `arranger.place_unique`. Con questo la priorità
+2 (forma) è **coperta nello scheletro**; restano le rifiniture su domanda.
 
 ---
 
