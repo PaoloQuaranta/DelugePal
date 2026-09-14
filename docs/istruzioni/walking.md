@@ -194,9 +194,12 @@ il passo 1 — usa `genera_jazz._vicino(classe, riferimento)`.
 
 Va scritto, perché chi la legge sappia cosa non ci troverà:
 
-- **quando** fare le cose. La linea cambia fra tema, assolo e ultimo giro, e
-  qui non è detto;
+- **quando** fare le cose. La linea cambia fra tema, assolo e ultimo giro:
+  in parte lo copre ora [reazione.md](reazione.md) (il basso segue l'arco della
+  forma), ma il dettaglio del «quando» qui non è detto;
 - **la frase.** Domanda e risposta, gruppi di due e quattro battute;
-- **la risposta agli altri.** Il basso e la batteria cadono insieme fuori
-  griglia 1,60 volte più del caso (`[MIS]`), e qui non è usato;
+- **la risposta agli altri.** In parte fatta: [reazione.md](reazione.md) misura se
+  il basso **complementa** la melodia (`MU.reazione`). Resta il timing —
+  basso e batteria che cadono insieme fuori griglia 1,60 volte più del caso
+  (`[MIS]`), qui non usato;
 - **il fuoco e la spinta**, che il libro stesso dichiara di non dare.

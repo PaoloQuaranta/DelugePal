@@ -140,9 +140,11 @@ priorità 2, la forma**, dal **voicing** (§6-septvicies), poi il **comping**
 `MU.dinamica`, che prova anche il ritmo armonico rimasto senza ascolto) e le
 **transizioni** (§6-trestrigies, con `MU.variazione`, la clip bianca): ⚠️ **con
 questo la priorità 2 (forma) è coperta.** ⚠️ **Poi è cominciata la priorità 3, il
-ritmo, dal fill** (§6-quattuortrigies, con `MU.controlla_fill`): il fill è la
-faccia ritmica del giunto — il `[CALC]` sulla firma è fatto, manca l'ascolto (vuole
-una batteria coi tom) e il resto del ritmo. ⚠️ **Il metodo cambia per area:** l'armonia si
+ritmo**: il **fill** (§6-quattuortrigies, con `MU.controlla_fill`) e poi la
+**reazione** — basso e batteria che reagiscono alla forma invece di applicarsi
+acriticamente (§6-quinquiestrigies, con `MU.reazione`), la **correzione del difetto
+d'origine** del progetto. Manca il resto del ritmo (groove template applicati,
+interazione vera oltre la densità). ⚠️ **Il metodo cambia per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
 letteratura nuova (Levine ×2, Piston *Counterpoint*, Crook) e tutta l'armonia è
@@ -3680,7 +3682,7 @@ il ritmo viene *dopo* la forma e non prima.
 | `docs/istruzioni/fill.md` | la firma **misurata** (`[MIS]` casella 9, 51 fill, **2 batteristi** — con la cautela): dura una battuta, ~1,2× più fitto (non il doppio), e la firma NON è la densità ma che **il ride si ferma (20%→3%) e arrivano i tom (10%→29%)**, a volume uguale o minore |
 | `MU.controlla_fill` (`musica.py`) | ⚠️ **codice nuovo, un CHECKER non un generatore**: prende `beat` e `fill` (`ruolo -> [Note]`) e segnala se il ride non si ferma, i tom non arrivano, è troppo fitto, è un crescendo. È il ruolo del corpus, «prendere gli errori», come `contrappunto`. Nuovi: `Fill`, `_ruolo_batteria` |
 | `tools/fill_scritto.py` | scrive le battute **12 e 24** del blues (i turnaround vuoti di `batteria_scritta.py`) con la firma, e passa `controlla_fill` |
-| `tests/test_all.py` | `test_controlla_fill` + `test_fill_scritto`. Suite **1352 → 1362** |
+| `tests/test_all.py` | `test_controlla_fill` + `test_fill_scritto` + `test_fill_costruito`. Suite **1352 → 1365** |
 
 ### La cosa da sapere: il codice prende gli errori, non compone
 
@@ -3706,12 +3708,62 @@ suono. La build sta in `fill_scritto.costruisci()`. `[MIS]` casella 9 di
 
 ### Il prossimo passo
 
-Chiudere l'ascolto del fill (kit coi tom + dispositivo), e poi il **resto della
-priorità 3**: basso e batteria che **reagiscono** alla forma oltre il fill (l'arco
-di densità della batteria lungo il pezzo, il basso che risponde), i **groove
-template** applicati (`GR.profilo` + `MU.applica_groove`, già scritti), gli altri
-**feel** (spazzole, terzine). È l'area dove l'utente aveva sentito i difetti
-all'inizio, e ora ha la forma sotto.
+Chiudere l'ascolto del fill (kit coi tom + dispositivo). ⚠️ **La reazione — basso e
+batteria che reagiscono alla forma — è §6-quinquiestrigies.**
+
+---
+
+## 6-quinquiestrigies. Il ritmo che reagisce: la correzione del difetto d'origine — 14 settembre 2026
+
+**Il cuore della priorità 3, e la chiusura del cerchio.** ⚠️ **Scelta dell'utente:**
+«passa al basso e batteria che reagiscono alla forma». È il **difetto d'origine**
+del progetto (11 settembre): la batteria «suona **discontinua** rispetto a basso e
+piano... e non le puoi **applicare acriticamente**». `docs/istruzioni/reazione.md`.
+
+### I due guasti, e perché serviva la forma prima
+
+⚠️ Il verdetto conteneva **due** difetti: **uniforme** (il basso a 4,00 note per
+battuta, deviazione **0,00** — applicato acriticamente) e **scollegata** (varia ma
+senza c'entrare — discontinua). Il `walking` aveva già tolto l'uniformità
+(deviazione 0,94); mancava il **c'entrare**. E per c'entrare serve qualcosa a cui
+reagire: la melodia, il comping, l'**arco** — cioè la forma, che ora c'è. È la
+ragione per cui la priorità 3 viene dopo la 2.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `docs/istruzioni/reazione.md` | i **quattro verdetti** (uniforme / scollegata = i guasti; complementa / segue = reagisce) e le **due scale**: la battuta (complementa la melodia, call-and-response) e la sezione (segue l'arco, `[MIS]` casella 9) |
+| `MU.reazione` (`musica.py`) | ⚠️ **codice nuovo, un ANALIZZATORE non un generatore**: guarda la densità per battuta della parte (la **deviazione**: sotto 0,75 è piatta = uniforme) e la **correlazione** col riferimento (negativa = complementa, positiva = segue, ~0 con variazione = scollegata). Il ruolo del corpus, «prendere gli errori», come `contrappunto`. Nuovi: `Reazione`, `_pearson`, `_densita_per_battuta` |
+| `tools/reazione_scritto.py` | l'esempio: la stessa melodia con due bassi — **uniforme** (4 4 4 4, il difetto d'origine rimesso in scena) e **reattivo** (4 1 4 1, complementa) |
+| `tests/test_all.py` | `test_reazione` + `test_reazione_scritto`. Suite **1365 → 1374** |
+
+### La cosa da sapere: reagire NON è riempire
+
+⚠️ Spesso la reazione giusta a una melodia fitta è **tacere**. `MU.reazione`
+misura la densità e la correlazione, non «quante note»: una parte che complementa
+**cala** dove il riferimento è fitto. E `MU.reazione` non compone — l'AI scrive la
+parte, il codice dice se reagisce (regola del 30 agosto: il corpus dà relazioni).
+
+### Il verdetto, e la fonte
+
+⚠️ **Verdetto: «suona giusto, approvato»** (14 settembre 2026, `REAZIONE01`). Il
+`[CALC]` misurava che il basso uniforme è `uniforme` (deviazione 0,00, il difetto
+d'origine) e il reattivo `complementa` (correlazione −1,00); l'orecchio ha
+**confermato**: il basso reattivo respira col tema, l'uniforme suona meccanico. È il
+**difetto d'origine del progetto, corretto e sentito**. Vale per la batteria allo
+stesso modo (`batteria_scritta.py` lo fa già a mano). `[MIS]` casella 9 di
+`docs/repertori/jazz.md`; il difetto d'origine sta in §6-vicies e nel design del 10
+settembre.
+
+### Il prossimo passo
+
+Il **resto della priorità 3**, su domanda: la reazione a **più riferimenti**
+insieme (il basso rispetto a melodia *e* batteria), l'**interazione** vera oltre la
+densità (raccogliere un accento, seguire un fraseggio), i **groove template**
+applicati (`GR.profilo` + `MU.applica_groove`, già scritti — il tocco sopra la
+reazione), e i **feel** diversi dallo swing (spazzole, terzine). E l'ascolto del
+fill nel suo suono (un kit acustico coi tom).
 
 ---
 

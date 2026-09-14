@@ -8315,6 +8315,69 @@ def test_fill_costruito():
           str([A.is_white(f) for f in fills]))
 
 
+def test_reazione():
+    """Le affermazioni [CALC] di docs/istruzioni/reazione.md.
+
+    MU.reazione coglie i due difetti d'origine: la parte UNIFORME (applicata
+    acriticamente) e quella che varia ma e' SCOLLEGATA dal riferimento; e
+    riconosce chi reagisce -- complementa (cala dove il rif e fitto) o segue.
+    """
+    from delugexml import musica as MU                        # noqa: PLC0415
+    from delugexml.notes import Note                          # noqa: PLC0415
+    B = MU.TICK_PER_BATTUTA
+
+    def da_densita(dens):                                     # una parte con `d` note per battuta
+        note = {}
+        for b, d in enumerate(dens):
+            for k in range(d):
+                note.setdefault(60 + k, []).append(
+                    Note(pos=b * B + k * 20, length=48, velocity=80))
+        return note
+
+    rif = da_densita([2, 5, 1, 6, 2, 5, 1, 6])
+
+    check('una parte piatta (4 ogni battuta) e UNIFORME',
+          MU.reazione(da_densita([4] * 8), rif).verdetto == 'uniforme')
+    check('una parte che cala dove il rif e fitto COMPLEMENTA',
+          MU.reazione(da_densita([5, 1, 6, 1, 5, 2, 6, 1]), rif).verdetto
+          == 'complementa')
+    check('una parte con la stessa forma del rif lo SEGUE',
+          MU.reazione(da_densita([2, 5, 1, 6, 2, 5, 1, 6]), rif).verdetto == 'segue')
+    # varia ma ortogonale al riferimento -> scollegata
+    scoll = MU.reazione(da_densita([6, 6, 2, 2, 6, 6, 2, 2]), rif)
+    check('una parte che varia senza correlazione e SCOLLEGATA',
+          scoll.verdetto == 'scollegata', f'{scoll.verdetto} corr {scoll.correlazione}')
+    check('il difetto d origine (deviazione 0,00) e uniforme',
+          MU.reazione(da_densita([4] * 8), rif).deviazione == 0.0)
+
+
+def test_reazione_scritto():
+    """Il pezzo di confronto (reazione_scritto.py) e' quello che dichiara.
+
+    Stesso tema, basso uniforme (il difetto d'origine) vs reattivo (complementa).
+    """
+    from delugexml import musica as MU                        # noqa: PLC0415
+    import reazione_scritto as R                              # noqa: PLC0415
+
+    uni = MU.reazione(R.basso_uniforme(), R.melodia())
+    rea = MU.reazione(R.basso_reattivo(), R.melodia())
+    check('il basso uniforme e "uniforme" (deviazione 0,00, difetto d origine)',
+          uni.verdetto == 'uniforme' and uni.deviazione == 0.0, str(uni.deviazione))
+    check('il basso reattivo COMPLEMENTA (correlazione negativa col tema)',
+          rea.verdetto == 'complementa' and rea.correlazione < 0,
+          f'{rea.verdetto} {rea.correlazione}')
+
+    try:
+        doc, verdetti = R.costruisci()
+    except FileNotFoundError:
+        salta('test_reazione_scritto (build)', 'manca un preset di refs/synths')
+        return
+    check('il pezzo e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('i verdetti nel pezzo sono uniforme e complementa',
+          verdetti == {'uniforme': 'uniforme', 'reattivo': 'complementa'},
+          str(verdetti))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 

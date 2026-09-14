@@ -1470,6 +1470,140 @@ def racconta_fill(beat: dict[str, list[Note]],
     return '\n'.join(righe)
 
 
+# ------------------------------------------------------- reagire alla forma
+#
+# Il difetto d'origine del progetto, in due parole dell'utente: la batteria
+# «suona discontinua rispetto a basso e piano... e non le puoi applicare
+# acriticamente». Due guasti in uno: la parte e' UNIFORME (applicata
+# acriticamente -- il basso a 4,00 note per battuta, deviazione 0,00) oppure
+# VARIA ma SCOLLEGATA da cio' che succede. Una parte che REAGISCE fa il
+# contrario: varia, e la sua variazione ha a che fare col resto -- complementa
+# la melodia dove tace, si addensa verso il culmine. Qui il codice lo MISURA:
+# l'AI scrive le parti, `reazione` dice se reagiscono o no.
+
+def _tutte_le_note(parte) -> list[Note]:
+    """Le Note di una parte, sia essa `y -> [Note]`, `drum -> [Note]` o lista."""
+    if isinstance(parte, dict):
+        return [n for ns in parte.values() for n in ns]
+    return list(parte)
+
+
+def _densita_per_battuta(parte, battute: int | None = None) -> list[int]:
+    """Quante note cadono in ogni battuta."""
+    note = _tutte_le_note(parte)
+    if not note:
+        return [0] * (battute or 0)
+    nb = battute or (max(n.pos for n in note) // TICK_PER_BATTUTA + 1)
+    conta = [0] * nb
+    for n in note:
+        b = n.pos // TICK_PER_BATTUTA
+        if 0 <= b < nb:
+            conta[b] += 1
+    return conta
+
+
+def _deviazione(xs: list[int]) -> float:
+    if len(xs) < 2:
+        return 0.0
+    m = sum(xs) / len(xs)
+    return (sum((x - m) ** 2 for x in xs) / len(xs)) ** 0.5
+
+
+def _pearson(a: list[int], b: list[int]) -> float | None:
+    """La correlazione di Pearson, o None se una delle due e' piatta."""
+    n = len(a)
+    if n < 2:
+        return None
+    ma, mb = sum(a) / n, sum(b) / n
+    va = sum((x - ma) ** 2 for x in a)
+    vb = sum((y - mb) ** 2 for y in b)
+    if va == 0 or vb == 0:
+        return None
+    cov = sum((x - ma) * (y - mb) for x, y in zip(a, b))
+    return cov / (va ** 0.5 * vb ** 0.5)
+
+
+#: Sotto questa deviazione la parte e' "piatta", cioe' applicata acriticamente.
+REAZIONE_PIATTA = 0.75
+#: Oltre questa correlazione (in valore assoluto) la parte "reagisce" davvero.
+REAZIONE_SOGLIA = 0.30
+
+
+class Reazione(NamedTuple):
+    """I conti su quanto una parte reagisce a un riferimento."""
+
+    densita: list[int]            # note per battuta della PARTE
+    densita_rif: list[int]        # note per battuta del RIFERIMENTO
+    deviazione: float             # di quanto varia la densita' della parte
+    correlazione: float | None    # Pearson parte/riferimento (None se una e' piatta)
+    verdetto: str                 # uniforme | scollegata | complementa | segue | varia
+
+
+def reazione(parte, riferimento, *, battute: int | None = None) -> Reazione:
+    """Misura se una parte REAGISCE a un riferimento (la melodia, il comping).
+
+    ⚠️ NON compone: l'AI scrive il basso o la batteria, questo fa i conti per
+    dire se reagisce o e' applicata acriticamente. E' il difetto d'origine del
+    progetto, misurato -- come `contrappunto` per due linee.
+
+    `parte` e `riferimento` sono note (`y -> [Note]`, `drum -> [Note]`, o una
+    lista). Guarda due cose, battuta per battuta:
+
+      - la DEVIAZIONE della densita' della parte: se e' quasi zero, la parte e'
+        UNIFORME -- applicata acriticamente (il basso a 4,00 note per battuta,
+        deviazione 0,00, era questo);
+      - la CORRELAZIONE con il riferimento: una parte che COMPLEMENTA cala dove
+        il riferimento e' fitto (correlazione negativa -- call-and-response); una
+        che lo SEGUE si addensa con lui (positiva, tipico verso il culmine); una
+        che VARIA ma senza correlazione e' SCOLLEGATA -- l'altro difetto,
+        «discontinua rispetto a basso e piano».
+
+    `verdetto`: `uniforme` e `scollegata` sono i due guasti; `complementa`,
+    `segue` (e `varia`, quando il riferimento e' piatto e non c'e' con cosa
+    correlare) sono parti che reagiscono.
+    """
+    dp = _densita_per_battuta(parte, battute)
+    dr = _densita_per_battuta(riferimento, battute)
+    nb = max(len(dp), len(dr))
+    dp = dp + [0] * (nb - len(dp))
+    dr = dr + [0] * (nb - len(dr))
+
+    dev = _deviazione(dp)
+    r = _pearson(dp, dr)
+    if dev < REAZIONE_PIATTA:
+        verdetto = 'uniforme'
+    elif r is None:
+        verdetto = 'varia'
+    elif r <= -REAZIONE_SOGLIA:
+        verdetto = 'complementa'
+    elif r >= REAZIONE_SOGLIA:
+        verdetto = 'segue'
+    else:
+        verdetto = 'scollegata'
+    return Reazione(dp, dr, dev, r, verdetto)
+
+
+def racconta_reazione(parte, riferimento, *, battute: int | None = None,
+                      nomi: tuple[str, str] = ('parte', 'riferimento')) -> str:
+    """Se una parte reagisce, a parole (regola 4). ASCII soltanto (console cp1252)."""
+    re = reazione(parte, riferimento, battute=battute)
+    corr = 'piatto' if re.correlazione is None else f'{re.correlazione:+.2f}'
+    spiega = {
+        'uniforme': 'UNIFORME: applicata acriticamente (non varia)',
+        'scollegata': 'SCOLLEGATA: varia ma non c entra col riferimento',
+        'complementa': 'complementa: cala dove il riferimento e fitto (reagisce)',
+        'segue': 'segue: si addensa col riferimento (reagisce)',
+        'varia': 'varia (il riferimento e piatto: niente con cui correlare)',
+    }
+    return '\n'.join([
+        f'{nomi[0]} vs {nomi[1]}: {spiega[re.verdetto]}',
+        f'  densita {nomi[0]:<10} {re.densita}',
+        f'  densita {nomi[1]:<10} {re.densita_rif}',
+        f'  deviazione {re.deviazione:.2f} (sotto {REAZIONE_PIATTA} = piatta), '
+        f'correlazione {corr}',
+    ])
+
+
 def racconta_armonia(spec: str, *, voicing: str = 'chiuso',
                      registro: str = 'do3', condotta: bool = True) -> str:
     """Cosa e' diventata ogni sigla, e quali ambiguita' sono state sciolte.
