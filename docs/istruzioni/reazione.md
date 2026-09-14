@@ -150,6 +150,7 @@ all'orecchio. Passa al primo colpo.
 - l'**interazione** vera (non solo densità: il basso che raccoglie un accento
   della batteria, la batteria che segue un fraseggio): la densità è una prima
   misura, non tutto;
-- i **groove template** applicati alla parte reattiva (`GR.profilo` +
-  `MU.applica_groove`, già scritti): il tocco sopra la reazione;
+- ~~i **groove template** applicati alla parte reattiva~~: **scritto** in
+  [`groove-template.md`](groove-template.md) — il tocco (velocity e microtiming di
+  un batterista vero) sopra la reazione;
 - la reazione fuori dal jazz (l'automazione dei generi elettronici): su domanda.

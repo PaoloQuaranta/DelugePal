@@ -8378,6 +8378,86 @@ def test_reazione_scritto():
           str(verdetti))
 
 
+def test_rimappa_dinamica():
+    """rimappa_dinamica alza il fondo tenendo ordine e proporzioni (musica.py).
+
+    Serve quando un kit non da' voce alle velocity basse di un groove template:
+    e' una mappa lineare sull'INTERO insieme di voci, min->pavimento, e i
+    rapporti fra i colpi si conservano.
+    """
+    from delugexml import musica as MU                        # noqa: PLC0415
+    from delugexml.notes import Note                          # noqa: PLC0415
+
+    ghost = [Note(pos=0, length=24, velocity=24)]
+    comp = [Note(pos=24, length=24, velocity=48)]
+    forte = [Note(pos=48, length=24, velocity=96)]
+    r = MU.rimappa_dinamica([ghost, comp, forte], 55)
+    check('il fondo sale al pavimento', ghost[0].velocity == 55, str(ghost[0].velocity))
+    check('il forte (max misurato) resta dov era, si alza solo il fondo',
+          forte[0].velocity == 96, str(forte[0].velocity))
+    check('l ordine e conservato (ghost < comp < forte)',
+          ghost[0].velocity < comp[0].velocity < forte[0].velocity,
+          f'{ghost[0].velocity} {comp[0].velocity} {forte[0].velocity}')
+    check('la mappa e lineare (le proporzioni si conservano)',
+          comp[0].velocity == round(55 + (48 - 24) * (96 - 55) / (96 - 24)),
+          str(comp[0].velocity))
+    check('il rapporto dice da->a (regola 4)',
+          r['da'] == (24, 96) and r['a'] == (55, 96), str(r))
+    check('un pavimento sopra il soffitto e un errore',
+          _raises(lambda: MU.rimappa_dinamica([forte], 100, 90), ValueError))
+
+
+def test_groove_template_scritto():
+    """Il tocco sopra la reazione (groove_template_scritto.py): l'esempio di
+    docs/istruzioni/groove-template.md.
+
+    Lo stesso pattern reattivo, piatto (velocity 80, sulla griglia) contro il
+    tocco di drummer1/session1/49, RIMAPPATO sul range udibile del kit. Salta se
+    manca il Groove MIDI Dataset o una fixture non versionata.
+    """
+    from delugexml import musica as MU                        # noqa: PLC0415
+    import groove_template_scritto as GT                      # noqa: PLC0415
+
+    try:
+        prof = GT.profilo()
+    except FileNotFoundError:
+        salta('test_groove_template_scritto', 'manca il Groove MIDI Dataset')
+        return
+
+    check('la passata piatta e uniforme (ogni colpo a velocity 80)',
+          all(n.velocity == 80 for n in GT.note_voce('kick', 0)), 'non tutte 80')
+
+    # il tocco: applica_groove non inventa, poi la dinamica si rimappa sul kit
+    tocchi, rap = GT.voci_col_tocco(prof)
+    check('applica_groove non ha passi senza appoggio (usa solo passi suonati)',
+          all(rap[v]['senza_appoggio'] == [] for v in GT.VOCI),
+          str({v: rap[v]['senza_appoggio'] for v in GT.VOCI}))
+
+    tutte = [n for v in GT.VOCI for n in tocchi[v]]
+    check('dopo la rimappa nessun colpo scende sotto il pavimento udibile',
+          all(n.velocity >= GT.PAVIMENTO for n in tutte),
+          f'min {min(n.velocity for n in tutte)}')
+    # la dinamica di kit resta: il fantasma del rullante e' sotto il piede del charleston
+    vmin_rull = min(n.velocity for n in tocchi['rullante'])
+    vmax_ped = max(n.velocity for n in tocchi['charleston a pedale'])
+    check('la dinamica di kit resta (fantasma del rullante < piede del charleston)',
+          vmin_rull < vmax_ped, f'{vmin_rull} vs {vmax_ped}')
+
+    # il piede del charleston ANTICIPA: scarto negativo -> posizione <= griglia
+    grid = GT.note_voce('charleston a pedale', 0)
+    ped = tocchi['charleston a pedale']
+    check('il piede del charleston anticipa (posizione <= griglia)',
+          all(a.pos <= b.pos for a, b in zip(ped, grid)),
+          str([(a.pos, b.pos) for a, b in zip(ped, grid)]))
+
+    try:
+        doc, _ = GT.costruisci()
+    except FileNotFoundError:
+        salta('test_groove_template_scritto (build)', 'manca una fixture')
+        return
+    check('il pezzo TOCCO01 e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 

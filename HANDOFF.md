@@ -143,8 +143,11 @@ questo la priorità 2 (forma) è coperta.** ⚠️ **Poi è cominciata la priori
 ritmo**: il **fill** (§6-quattuortrigies, con `MU.controlla_fill`) e poi la
 **reazione** — basso e batteria che reagiscono alla forma invece di applicarsi
 acriticamente (§6-quinquiestrigies, con `MU.reazione`), la **correzione del difetto
-d'origine** del progetto. Manca il resto del ritmo (groove template applicati,
-interazione vera oltre la densità). ⚠️ **Il metodo cambia per area:** l'armonia si
+d'origine** del progetto, e infine il **groove template applicato** — il tocco di un
+batterista vero sopra la reazione (§6-sexiestrigies, con `MU.rimappa_dinamica`), dove
+l'ascolto ha trovato che su un kit elettronico il template misurato **si
+autodistrugge** se non si adatta la dinamica al kit. Manca il resto del ritmo
+(l'interazione vera oltre la densità, i feel diversi dallo swing). ⚠️ **Il metodo cambia per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
 letteratura nuova (Levine ×2, Piston *Counterpoint*, Crook) e tutta l'armonia è
@@ -3764,6 +3767,68 @@ densità (raccogliere un accento, seguire un fraseggio), i **groove template**
 applicati (`GR.profilo` + `MU.applica_groove`, già scritti — il tocco sopra la
 reazione), e i **feel** diversi dallo swing (spazzole, terzine). E l'ascolto del
 fill nel suo suono (un kit acustico coi tom).
+
+---
+
+## 6-sexiestrigies. Il groove template applicato: il tocco, e la dinamica adattata al kit — 14 settembre 2026
+
+Chiude «il tocco sopra la reazione», l'ultima voce che `reazione.md` lasciava in
+«cosa manca». L'infrastruttura c'era da §6-terdecies (`GR.profilo` legge,
+`MU.applica_groove` posa): qui diventa **un'istruzione**, con un esempio che è
+stato **ascoltato**. E l'ascolto ha trovato un limite che nessun test poteva
+vedere.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `docs/istruzioni/groove-template.md` | l'istruzione: cos'è il template, cosa **non** porta (una esecuzione nominata / solo il residuo, non lo swing / non inventa), le **tre trappole** (nome GM ≠ ruolo, il tempo conta perché lo scarto è in tick, le collisioni), come si applica, e **l'adattamento al kit** |
+| `MU.rimappa_dinamica` (`musica.py`) | ⚠️ **codice nuovo**: alza il **fondo** della velocity a un pavimento udibile tenendo i **rapporti** (mappa lineare), sull'**intero insieme di voci** insieme. Muta in posto come `applica_groove`. Nato dall'ascolto — vedi sotto |
+| `tools/groove_template_scritto.py` | l'esempio: lo **stesso** pattern reattivo, piatto (velocity 80) vs il tocco di `drummer1/session1/49` rimappato. `TOCCO03.XML` sul device, riletto byte per byte |
+| `tests/test_all.py` | `test_rimappa_dinamica` + `test_groove_template_scritto`. Suite **1374 → 1386** |
+
+### La cosa da sapere: il template si autodistrugge sul kit sbagliato
+
+⚠️ Prima stesura caricata (`TOCCO02`), verdetto dell'utente: *«la versione col
+tocco lascia fuori troppe note, le cancella»*. **Non ne cancellava nessuna** — i
+conteggi erano identici (6/6, 6/6, 8/8, 24/24) e il file torna byte per byte dal
+device. Era la **velocity**: i fantasmi del rullante (24) e la cassa sfiorata
+(42) cadevano **sotto la soglia che il KIT009 — un RX-5 elettronico — dà voce**.
+Il tocco misurato, applicato fedelmente, faceva suonare la parte svuotata. È
+esattamente la differenza fra `[CALC]` verde e `[OSS]`: **nessun test poteva
+vederlo**.
+
+La correzione, scelta dall'utente: **rimappare**. Alzare il fondo a 55 tenendo i
+rapporti del batterista (una mappa lineare, su tutte le voci — la dinamica che
+conta è quella **di kit**). ⚠️ **Non è ritoccare la misura, è adattarla allo
+strumento**, ed è dichiarato. Seconda stesura (`TOCCO03`): *«ok funziona»*.
+
+⚠️ Due note di metodo da tenere:
+- **il conteggio ha smentito la parola, non l'orecchio.** «Le cancella» era falso
+  alla lettera e vero all'ascolto. Si onora l'osservazione **e** si spiega il
+  meccanismo — non l'uno al posto dell'altro (§8: quando dice che non torna, ha
+  ragione, sei volte su sei).
+- **un difetto trovato implementando:** `racconta_tocco` leggeva il passo dalla
+  posizione **già spostata** dallo scarto, e stampava passi e scarti sbagliati.
+  Solo la stampa, non il file — ma è la stessa famiglia di «leggere lo stato dopo
+  averlo mutato».
+
+### Il verdetto, e la fonte
+
+⚠️ **Verdetto `[OSS]`: «ok funziona»** (14 settembre 2026, `TOCCO03`). Il `[CALC]`
+misurava 0 `senza_appoggio`, 0 `collisioni`, e dopo la rimappa niente sotto 55;
+l'orecchio ha confermato che il tocco si sente come una **mano**, non un
+metronomo, e nessuna nota resta fuori. ⚠️ **Il pavimento 55 è tarato a orecchio,
+non misurato**: dipende da come il singolo kit voce le velocity basse, e va
+rifatto per ogni kit. `docs/istruzioni/groove-template.md`; il template è di
+§6-terdecies.
+
+### Il prossimo passo
+
+Il resto della priorità 3, su domanda: l'**aggancio** (già in
+`genera_jazz.py --aggancio`, ma la misura per cui esiste non è ancora riprodotta
+all'ascolto, §6-vicies), i **feel diversi dallo swing** (spazzole, terzine), e il
+template **fuori dal jazz**.
 
 ---
 

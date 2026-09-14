@@ -254,6 +254,56 @@ def applica_groove(note: list[Note], profilo, dove: str) -> dict[str, object]:
             'senza_appoggio': sorted(senza), 'collisioni': collisioni}
 
 
+def rimappa_dinamica(voci: list[list[Note]], pavimento: int,
+                     soffitto: int | None = None) -> dict[str, object]:
+    """Rimappa la velocity di note gia' scritte in `[pavimento, soffitto]`,
+    PRESERVANDO ordine e proporzioni -- una mappa lineare.
+
+    ⚠️ MUTA le `Note` in posto, come `applica_groove()`.
+
+    A cosa serve: un groove template porta la dinamica di un batterista vero,
+    coi fantasmi intorno a velocity 24. Su un kit che non da' voce alle velocity
+    basse -- un kit elettronico campionato -- quei colpi SPARISCONO all'udito,
+    e la parte suona come se avesse note in meno. Rimappare alza il FONDO fino a
+    dove il kit lo voce, senza appiattire.
+
+    ⚠️ NON e' ritoccare la misura: e' adattarla allo STRUMENTO. La forma resta
+    quella del batterista (fantasma < comp < accento), cambia solo il range in
+    cui cade -- una mappa lineare conserva l'ordine e le proporzioni delle
+    differenze. Resta una DECISIONE, non una misura, e per questo va dichiarata:
+    il rapporto di ritorno (regola 4) dice da quale range a quale.
+
+    ⚠️ Si rimappa l'INTERO insieme di voci in una volta -- `voci` e' l'elenco
+    delle liste di note del kit -- perche' la dinamica che conta e' quella DI
+    KIT: il fantasma del rullante e' piano RISPETTO al ride e al piede. Prendere
+    min e max su una voce sola gonfierebbe i fantasmi del rullante fino al
+    fortissimo dentro la loro riga, distruggendo proprio il rapporto che si
+    voleva tenere.
+
+    `soffitto` di default e' il massimo misurato: si alza il pavimento e si
+    lascia il forte dov'e'.
+    """
+    tutte = [n for lst in voci for n in lst]
+    if not tutte:
+        return {'toccate': 0, 'da': None, 'a': None}
+    vmin = min(n.velocity for n in tutte)
+    vmax = max(n.velocity for n in tutte)
+    if soffitto is None:
+        soffitto = vmax
+    if not (1 <= pavimento <= 127) or not (1 <= soffitto <= 127) \
+            or pavimento > soffitto:
+        raise ValueError(
+            f'range [{pavimento}, {soffitto}] non valido: '
+            f'1..127 e pavimento <= soffitto')
+    for n in tutte:
+        if vmax == vmin:
+            n.velocity = pavimento
+        else:
+            n.velocity = round(pavimento + (n.velocity - vmin)
+                               * (soffitto - pavimento) / (vmax - vmin))
+    return {'toccate': len(tutte), 'da': (vmin, vmax), 'a': (pavimento, soffitto)}
+
+
 def durata_in_tick(spec: str | int) -> int:
     """`'1/8'` -> 48 tick. Un intero passa invariato, gia' in tick."""
     if isinstance(spec, int):
