@@ -1351,6 +1351,125 @@ def variazione(doc, sorgente, pos: int, *, length: int | None = None):
     return copia
 
 
+# -------------------------------------------------------------------- il fill
+#
+# Il fill e' la transizione nella BATTERIA: una battuta, al giunto fra due
+# sezioni. Dove va lo dice la forma (i giunti); cosa cambia lo dice la casella 9
+# di docs/repertori/jazz.md, MISURATA su 51 fill jazz (2 batteristi). La firma
+# NON e' la densita' -- e' che il ride si ferma e arrivano i tom.
+
+#: Le quote di colpi per strumento, MISURATE (casella 9). ride nel beat 20,4% e
+#: nel fill 3,3%; i tom 9,9% -> 29,0%. Sono la firma del fill.
+FILL_QUOTA_RIDE_MAX = 0.10      # sopra il 10% il ride "non si e' fermato" (mis. 3,3%)
+FILL_QUOTA_TOM_MIN = 0.15       # sotto il 15% "i tom non sono arrivati" (mis. 29,0%)
+FILL_DENSITA_MAX = 1.5          # un fill e' ~1,2x il beat (15,7 vs 12,9), non il doppio
+
+
+def _ruolo_batteria(nome: str) -> str:
+    """Riconduce un nome di drum al suo RUOLO, per leggere la firma del fill
+    senza dipendere da come e' chiamato il drum in un kit."""
+    n = nome.lower()
+    if 'tom' in n:
+        return 'tom'
+    if 'ride' in n:
+        return 'ride'
+    if 'rull' in n or 'snare' in n:
+        return 'rullante'
+    if 'cassa' in n or 'kick' in n:
+        return 'cassa'
+    if 'charl' in n or 'hat' in n or ' hi' in n:
+        return 'charleston'
+    return n
+
+
+class Fill(NamedTuple):
+    """I conti su un fill, contro la firma misurata -- i fatti, non il giudizio."""
+
+    colpi: tuple[int, int]                 # (beat, fill): colpi totali
+    densita: float                         # fill / beat
+    quote: dict[str, tuple[float, float]]  # ruolo -> (quota nel beat, nel fill)
+    velocita: tuple[float, float]          # (beat, fill): velocity media
+    problemi: list[str]                    # cosa lo mette FUORI dal corpus
+
+
+def _quote_per_ruolo(parte: dict[str, list[Note]]) -> tuple[dict[str, int], int]:
+    conta: dict[str, int] = {}
+    for nome, ns in parte.items():
+        conta[_ruolo_batteria(nome)] = conta.get(_ruolo_batteria(nome), 0) + len(ns)
+    return conta, sum(conta.values())
+
+
+def _velocita_media(parte: dict[str, list[Note]]) -> float:
+    tutte = [n.velocity for ns in parte.values() for n in ns]
+    return sum(tutte) / len(tutte) if tutte else 0.0
+
+
+def controlla_fill(beat: dict[str, list[Note]],
+                   fill: dict[str, list[Note]]) -> Fill:
+    """Controlla un FILL di batteria contro la firma MISURATA (casella 9).
+
+    ⚠️ NON genera il fill: lo scrive l'AI (quali colpi, quali tom), e questo fa
+    i conti per dire se sta nel territorio del corpus -- e' il ruolo che il
+    corpus ha nel progetto, «prendere gli errori». Come `contrappunto` per le
+    due linee.
+
+    `beat` e `fill` sono `ruolo -> [Note]` (dai `passi()` di ogni drum): la
+    battuta di groove e la battuta di fill che la sostituisce al giunto. La
+    firma del fill (`[MIS]` 51 fill jazz, 2 batteristi -- vedi la cautela nella
+    casella 9):
+
+      - il RIDE si ferma: dal 20,4% dei colpi al 3,3%;
+      - i TOM arrivano: dal 9,9% al 29,0% -- e' QUESTA la firma, non la densita';
+      - la densita' sale di poco: 15,7 colpi contro 12,9, cioe' ~1,2x, non il
+        doppio;
+      - NON alza la voce: la velocity resta uguale o scende -- un fill non e' un
+        crescendo, e' un cambio di strumento.
+
+    `problemi` elenca cosa lo porta fuori dal corpus. Vuoto = il fill ha la firma.
+    """
+    conta_b, tot_b = _quote_per_ruolo(beat)
+    conta_f, tot_f = _quote_per_ruolo(fill)
+    q_ride = conta_f.get('ride', 0) / tot_f if tot_f else 0.0
+    q_tom = conta_f.get('tom', 0) / tot_f if tot_f else 0.0
+    densita = tot_f / tot_b if tot_b else 0.0
+    vel_b, vel_f = _velocita_media(beat), _velocita_media(fill)
+
+    ruoli = sorted(set(conta_b) | set(conta_f))
+    quote = {r: (conta_b.get(r, 0) / tot_b if tot_b else 0.0,
+                 conta_f.get(r, 0) / tot_f if tot_f else 0.0) for r in ruoli}
+
+    problemi = []
+    if q_ride > FILL_QUOTA_RIDE_MAX:
+        problemi.append(f'il ride non si ferma: {q_ride:.0%} dei colpi, il '
+                        f'corpus dice 3% (nel beat era 20%)')
+    if q_tom < FILL_QUOTA_TOM_MIN:
+        problemi.append(f'i tom non arrivano: {q_tom:.0%} dei colpi, il corpus '
+                        f'dice 29% -- e i tom SONO la firma del fill')
+    if densita > FILL_DENSITA_MAX:
+        problemi.append(f'troppo fitto: {densita:.1f}x il beat, un fill jazz e '
+                        f'~1,2x -- raddoppiare i colpi e fuori dal corpus')
+    if vel_f > vel_b * 1.05:
+        problemi.append(f'e un crescendo: velocity media {vel_f:.0f} contro '
+                        f'{vel_b:.0f} del beat -- un fill non alza la voce')
+    return Fill((tot_b, tot_f), densita, quote, (vel_b, vel_f), problemi)
+
+
+def racconta_fill(beat: dict[str, list[Note]],
+                  fill: dict[str, list[Note]]) -> str:
+    """Il controllo del fill, a parole (regola 4). ASCII soltanto (console cp1252)."""
+    f = controlla_fill(beat, fill)
+    righe = [f'fill: {f.colpi[1]} colpi contro {f.colpi[0]} del beat '
+             f'({f.densita:.1f}x), velocity {f.velocita[1]:.0f} vs {f.velocita[0]:.0f}']
+    for ruolo, (qb, qf) in sorted(f.quote.items()):
+        righe.append(f'  {ruolo:<12} beat {qb:>4.0%}  fill {qf:>4.0%}')
+    if f.problemi:
+        righe.append('FUORI dal corpus:')
+        righe.extend(f'  - {p}' for p in f.problemi)
+    else:
+        righe.append('ha la firma del fill (ride giu, tom su, poco piu fitto, non piu forte)')
+    return '\n'.join(righe)
+
+
 def racconta_armonia(spec: str, *, voicing: str = 'chiuso',
                      registro: str = 'do3', condotta: bool = True) -> str:
     """Cosa e' diventata ogni sigla, e quali ambiguita' sono state sciolte.

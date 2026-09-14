@@ -133,9 +133,9 @@ giunti cuciono. Passa al primo colpo, come le altre facce della forma.
 
 ## Cosa manca a questa istruzione
 
-- il **fill di batteria** — il segnale ritmico che annuncia la sezione nuova: è
-  già **misurato** (`[MIS]` casella 9 di [jazz.md](../repertori/jazz.md), 51 fill
-  jazz) ma vuole una traccia di batteria nel pezzo;
+- ~~il **fill di batteria**~~ **[fatto](fill.md)** (la faccia ritmica del giunto):
+  ride giù, tom su, ~1,2×, non più forte (`[MIS]` casella 9), posato al giunto con
+  la stessa clip bianca. Resta l'ascolto pieno (vuole una batteria coi tom nel pezzo);
 - i **tre modi a confronto** sullo stesso giunto (brusco / rampa / morbido), come
   il voicing e il comping mettevano a confronto le loro scelte;
 - la transizione **morbida** vera (sovrapposizione, cross-fade): qui c'è il perno

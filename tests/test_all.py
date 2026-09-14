@@ -8217,6 +8217,104 @@ def test_transizioni_scritto():
           str(A.extent(doc)))
 
 
+def test_controlla_fill():
+    """Le affermazioni [CALC] di docs/istruzioni/fill.md.
+
+    MU.controlla_fill legge la firma MISURATA del fill (casella 9): il ride si
+    ferma, i tom arrivano, la densita' sale di poco, la voce non si alza. Un
+    fill che sta nella firma non ha problemi; ognuno che ne esce e' segnalato.
+    """
+    from delugexml import musica as MU                        # noqa: PLC0415
+
+    beat = {
+        'ride': MU.passi('x...x.x.x...x.x.'),
+        'charleston': MU.passi('....x.......x...'),
+        'rullante': MU.passi('.......x....x...'),
+        'cassa': MU.passi('x.......x.......'),
+    }
+    buono = {
+        'ride': MU.passi('x...............'),
+        'rullante': MU.passi('x.x...x.x.......'),
+        'tom-medio': MU.passi('....x.x.....x...'),
+        'tom-basso': MU.passi('........x.x.x.x.'),
+        'cassa': MU.passi('x.......x.......'),
+    }
+    f = MU.controlla_fill(beat, buono)
+    check('un fill con la firma non ha problemi', f.problemi == [], str(f.problemi))
+    check('il ride cala e i tom salgono',
+          f.quote['ride'][1] < f.quote['ride'][0]
+          and f.quote['tom'][1] > f.quote.get('tom', (0, 0))[0], str(f.quote))
+    check('la densita e ~1,2x, non il doppio', 1.0 <= f.densita <= 1.5,
+          str(round(f.densita, 2)))
+
+    # ride ancora acceso -> segnalato
+    ride_acceso = {'ride': MU.passi('x.x.x.x.x.x.x.x.'),
+                   'rullante': MU.passi('x.......x.......')}
+    p = MU.controlla_fill(beat, ride_acceso).problemi
+    check('un fill col ride acceso e segnalato',
+          any('ride non si ferma' in x for x in p), str(p))
+
+    # niente tom -> segnalato
+    senza_tom = {'rullante': MU.passi('x.x.x.x.x.x.x.x.'),
+                 'cassa': MU.passi('x...x...x...x...')}
+    p = MU.controlla_fill(beat, senza_tom).problemi
+    check('un fill senza tom e segnalato',
+          any('tom non arrivano' in x for x in p), str(p))
+
+    # troppo fitto e piu' forte -> segnalati tutti e due
+    fuoco = {'rullante': MU.passi('xxxxxxxxxxxxxxxx', velocity=120),
+             'cassa': MU.passi('xxxxxxxxxxxxxxxx', velocity=120),
+             'tom-basso': MU.passi('xxxxxxxxxxxxxxxx', velocity=120)}
+    p = MU.controlla_fill(beat, fuoco).problemi
+    check('un fill troppo fitto e segnalato', any('troppo fitto' in x for x in p),
+          str(p))
+    check('un fill piu forte (crescendo) e segnalato',
+          any('crescendo' in x for x in p), str(p))
+
+
+def test_fill_scritto():
+    """Il fill del turnaround (fill_scritto.py) ha la firma del corpus.
+
+    docs/istruzioni/fill.md: completa le battute 12 e 24 di batteria_scritta.py,
+    marcate «(fill)» e lasciate vuote. Deve passare controlla_fill senza problemi
+    e portare la firma -- ride giu, tom su, poco piu' fitto, non piu' forte.
+    """
+    import fill_scritto as F                                  # noqa: PLC0415
+
+    f = F.controllo()
+    check('il fill scritto non ha problemi (sta nel corpus)',
+          f.problemi == [], str(f.problemi))
+    check('il ride si ferma (quota giu) e i tom arrivano (quota su)',
+          f.quote['ride'][1] < f.quote['ride'][0] and f.quote['tom'][1] >= 0.15,
+          str(f.quote))
+    check('e ~1,2x il beat, non il doppio, e non piu forte',
+          f.densita <= 1.5 and f.velocita[1] <= f.velocita[0] * 1.05,
+          f'densita {f.densita:.2f}, vel {f.velocita}')
+
+
+def test_fill_costruito():
+    """Il pezzo dell'ascolto (FILL01) sta in piedi: 8 battute, due fill al giunto
+    posati con la clip bianca. Salta se manca il materiale non pubblicato."""
+    try:
+        import fill_scritto as F                              # noqa: PLC0415
+    except FileNotFoundError:
+        salta('test_fill_costruito', 'manca refs/songs/DRUMS1_4.XML o un preset')
+        return
+    from delugexml import musica as MU                        # noqa: PLC0415
+    from delugexml import arranger as A                       # noqa: PLC0415
+    try:
+        doc, fills = F.costruisci()
+    except FileNotFoundError:
+        salta('test_fill_costruito', 'manca refs/songs/DRUMS1_4.XML o un preset')
+        return
+    check('FILL01 e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('e lungo 8 battute', A.extent(doc) == (0, 8 * MU.TICK_PER_BATTUTA),
+          str(A.extent(doc)))
+    check('i due fill sono clip bianche ai giunti',
+          len(fills) == 2 and all(A.is_white(f) for f in fills),
+          str([A.is_white(f) for f in fills]))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 

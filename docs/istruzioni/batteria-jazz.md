@@ -254,8 +254,9 @@ chi studia. Presi alla lettera hanno prodotto due versioni respinte.
 
 - **il vocabolario delle figure di Riley** (pp. 18-29): sono in notazione, e
   la notazione non è ancora stata trascritta;
-- **il fill**: dove va, quanto dura. Oggi è una decisione arbitraria messa sul
-  turnaround;
+- ~~**il fill**: dove va, quanto dura~~ **[fatto](fill.md)**: dove lo dice la
+  forma (i giunti), cosa lo dice il corpus (ride giù, tom su, ~1,2×, non più
+  forte). `MU.controlla_fill` ne prende gli errori; resta l'ascolto pieno;
 - **le spazzole** e i feel diversi dallo swing (pp. 55-61);
 - **le terzine**: la griglia a sedicesimi non le rappresenta, e per questo
   alcuni batteristi del corpus non si possono leggere.

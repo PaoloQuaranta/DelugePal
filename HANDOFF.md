@@ -139,8 +139,10 @@ priorità 2, la forma**, dal **voicing** (§6-septvicies), poi il **comping**
 (§6-untrigies, con `MU.forma`), l'**arco dinamico** (§6-duotrigies, con
 `MU.dinamica`, che prova anche il ritmo armonico rimasto senza ascolto) e le
 **transizioni** (§6-trestrigies, con `MU.variazione`, la clip bianca): ⚠️ **con
-questo la priorità 2 (forma) è coperta** — resta il fill di batteria e le
-rifiniture, su domanda. ⚠️ **Il metodo cambia per area:** l'armonia si
+questo la priorità 2 (forma) è coperta.** ⚠️ **Poi è cominciata la priorità 3, il
+ritmo, dal fill** (§6-quattuortrigies, con `MU.controlla_fill`): il fill è la
+faccia ritmica del giunto — il `[CALC]` sulla firma è fatto, manca l'ascolto (vuole
+una batteria coi tom) e il resto del ritmo. ⚠️ **Il metodo cambia per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
 letteratura nuova (Levine ×2, Piston *Counterpoint*, Crook) e tutta l'armonia è
@@ -3647,11 +3649,69 @@ ponte arriva preparato, il ritorno chiude. Passa al primo colpo. `[LIB]`
 ### Il prossimo passo
 
 ⚠️ **Con questo la priorità 2 (forma) è coperta:** voicing, comping, contrappunto,
-struttura (mappa, arco, transizioni). Restano, su domanda: il **fill di batteria**
-(`[MIS]` casella 9, 51 fill jazz — vuole una traccia di batteria nel pezzo), i
-**tre modi a confronto**, la transizione **morbida** vera (sovrapposizione), e una
-primitiva che **alza l'ultimo giro** in automatico (final-chorus elevation). Poi
-c'è la **priorità 3** (ritmo, dal jazz in poi, coi groove template).
+struttura (mappa, arco, transizioni). ⚠️ **Poi è cominciata la priorità 3, il
+ritmo, dal fill** — vedi §6-quattuortrigies. Restano, su domanda dentro la forma:
+i **tre modi a confronto**, la transizione **morbida** vera (sovrapposizione), una
+primitiva che **alza l'ultimo giro** in automatico (final-chorus elevation).
+
+---
+
+## 6-quattuortrigies. Comincia la priorità 3: il fill — 14 settembre 2026
+
+**Il ritmo, dal fill.** ⚠️ **Scelta dell'utente:** «passa al ritmo, tratteremo i
+fill all'interno di quello». Il fill è la **faccia ritmica delle transizioni** — la
+battuta in cui la batteria annuncia la sezione nuova — e chiude due lacune
+dichiarate: quella di `batteria-jazz.md` («il fill: dove va, quanto dura. Oggi è
+una decisione arbitraria») e la battuta «(fill)» vuota di `batteria_scritta.py`.
+`docs/istruzioni/fill.md`.
+
+### La convergenza: dove lo dice la forma, cosa lo dice il corpus
+
+⚠️ La casella 9 diceva netto: **«dove va un fill non lo dice il corpus»** — il
+dataset consegna i fill staccati da ogni pezzo. **Ora la forma c'è** (priorità 2):
+il fill va al **giunto**, e si posa con `MU.variazione` (la clip bianca delle
+transizioni). Il **dove** dalla forma, il **cosa** dal corpus. È la ragione per cui
+il ritmo viene *dopo* la forma e non prima.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `docs/istruzioni/fill.md` | la firma **misurata** (`[MIS]` casella 9, 51 fill, **2 batteristi** — con la cautela): dura una battuta, ~1,2× più fitto (non il doppio), e la firma NON è la densità ma che **il ride si ferma (20%→3%) e arrivano i tom (10%→29%)**, a volume uguale o minore |
+| `MU.controlla_fill` (`musica.py`) | ⚠️ **codice nuovo, un CHECKER non un generatore**: prende `beat` e `fill` (`ruolo -> [Note]`) e segnala se il ride non si ferma, i tom non arrivano, è troppo fitto, è un crescendo. È il ruolo del corpus, «prendere gli errori», come `contrappunto`. Nuovi: `Fill`, `_ruolo_batteria` |
+| `tools/fill_scritto.py` | scrive le battute **12 e 24** del blues (i turnaround vuoti di `batteria_scritta.py`) con la firma, e passa `controlla_fill` |
+| `tests/test_all.py` | `test_controlla_fill` + `test_fill_scritto`. Suite **1352 → 1362** |
+
+### La cosa da sapere: il codice prende gli errori, non compone
+
+⚠️ `MU.controlla_fill` **non genera il fill**: lo scrive l'AI (quali tom, quali
+colpi), e il codice fa i conti sulla firma per dire se sta nel corpus. È la
+divisione di sempre, e la regola del 30 agosto (il corpus dà relazioni, non
+superfici): un fill generato raddoppiando i colpi sarebbe «rumore con la forma
+giusta».
+
+### Il verdetto, e cosa manca all'ascolto
+
+⚠️ **Verdetto: «suona giusto, approvato»** (14 settembre 2026, `FILL01`). Il fill
+**annuncia** la sezione nuova — il segnatempo tace, i tom scendono al giunto. ⚠️
+**Su un kit di RIPIEGO:** i kit in `refs/kits/` sono elettronici (808, CR78) senza
+tom; l'unico coi tom è il **TR-808 di `refs/songs/DRUMS1_4.XML`**
+(KICK/SNARE/HATC/HATO/TOML/TOMM/TOMH), che **non ha il ride** — il segnatempo è il
+charleston. Si è sentita la **struttura** del fill (segnatempo che si ferma, tom
+che arrivano), non il timbro jazz. ⚠️ **Un kit acustico coi tom non è in casa**
+(l'utente non era sicura di averne, e `/KITS` sulla SD non si elenca via SysEx —
+la root sì, quella cartella va in timeout): resta il modo di sentirlo nel suo
+suono. La build sta in `fill_scritto.costruisci()`. `[MIS]` casella 9 di
+`docs/repertori/jazz.md`.
+
+### Il prossimo passo
+
+Chiudere l'ascolto del fill (kit coi tom + dispositivo), e poi il **resto della
+priorità 3**: basso e batteria che **reagiscono** alla forma oltre il fill (l'arco
+di densità della batteria lungo il pezzo, il basso che risponde), i **groove
+template** applicati (`GR.profilo` + `MU.applica_groove`, già scritti), gli altri
+**feel** (spazzole, terzine). È l'area dove l'utente aveva sentito i difetti
+all'inizio, e ora ha la forma sotto.
 
 ---
 
