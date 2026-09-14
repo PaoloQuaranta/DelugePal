@@ -136,9 +136,11 @@ aumentate), infine **ritmo armonico e i modi della minore melodica** hanno
 priorità 2, la forma**, dal **voicing** (§6-septvicies), poi il **comping**
 (§6-noniesvicies, con `MU.comping`), il **contrappunto** (§6-tricies, con
 `MU.contrappunto`) e infine la **struttura**, in tre facce: la **mappa di forma**
-(§6-untrigies, con `MU.forma`) e l'**arco dinamico** (§6-duotrigies, con
-`MU.dinamica`, che prova anche il ritmo armonico rimasto senza ascolto): lo stato e
-il prossimo passo — l'ultima faccia, le **transizioni** — stanno lì. ⚠️ **Il metodo cambia per area:** l'armonia si
+(§6-untrigies, con `MU.forma`), l'**arco dinamico** (§6-duotrigies, con
+`MU.dinamica`, che prova anche il ritmo armonico rimasto senza ascolto) e le
+**transizioni** (§6-trestrigies, con `MU.variazione`, la clip bianca): ⚠️ **con
+questo la priorità 2 (forma) è coperta** — resta il fill di batteria e le
+rifiniture, su domanda. ⚠️ **Il metodo cambia per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
 letteratura nuova (Levine ×2, Piston *Counterpoint*, Crook) e tutta l'armonia è
@@ -3585,10 +3587,71 @@ ritorno si posa — e con esso il **ritmo armonico**, ascoltato per la prima vol
 
 ### Il prossimo passo
 
-L'ultima faccia della struttura: le **transizioni** — turnaround, fill di batteria,
-stacchi, pickup che cuciono le sezioni, e la **variazione** dell'ultimo giro con
-`arranger.place_unique` (la clip bianca). Poi la priorità 2 (forma) è **coperta**
-oltre lo scheletro; il resto è su domanda (l'arco su più giri, i generi non-jazz).
+L'ultima faccia della struttura: le **transizioni** — vedi §6-trestrigies, dove
+sono state fatte.
+
+---
+
+## 6-trestrigies. La struttura si chiude: le transizioni — 14 settembre 2026
+
+**Terza e ultima faccia della struttura.** Dopo la mappa (dove cadono le sezioni) e
+l'arco (con quanta intensità), le **transizioni**: i **giunti** fra le sezioni, e
+come si cuciono. ⚠️ **Scelta dell'utente** fra tre primi pezzi (giunti
+armonico-melodici + clip bianca / fill di batteria / i tre modi a confronto): il
+primo, perché dà a `arranger.place_unique` — la clip bianca, «finora solo
+nominata» — il suo primo uso vero, senza aggiungere una batteria.
+`docs/istruzioni/transizioni.md`, metodo `[CALC]` + un ascolto.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `docs/istruzioni/transizioni.md` | i **tre modi** della transizione (brusco / rampa / morbido) e la cadenza come punteggiatura del giunto (mezza/ingannevole all'interno, piena per la fine); il vocabolario del giunto — turnaround, pickup, break, perno. `[LIB]` `narrative-and-transitions.md` |
+| `MU.variazione` (`musica.py`) | ⚠️ **codice nuovo, thin su `arranger.place_unique`**: fa una copia **bianca** (arranger-only) di una clip di sezione, la piazza a un giunto, la ritorna — lo strumento lo trova da sé. Modificarla non tocca l'originale né le altre ripetizioni. È il meccanismo che rende la clip bianca finalmente usabile |
+| `tools/transizioni_scritto.py` | l'esempio: l'AABA con due giunti — un **pickup** che sale e consegna il ponte (rampa), un **turnaround** sull'ultimo A che stringe il ritmo armonico e risolve (morbido) |
+| `tests/test_all.py` | `test_variazione` + `test_transizioni_scritto`. Suite **1341 → 1352** |
+
+### La cosa da sapere: la clip bianca varia UNA istanza
+
+⚠️ **La copia è arranger-only (niente `section`): vive solo sulla timeline, non
+sporca le scene di session view.** È il modo del dispositivo per variare **un**
+giunto — l'ultima battuta di una ripetizione — senza toccare le altre. E si varia
+**solo la voce che cambia:** nell'esempio la melodia di A2 (per il pickup) e
+l'ultimo A (per il turnaround) sono bianche; A1, B e gli accordi di A2 restano le
+sezioni piane. Verificato che modificarla non tocca la sorgente.
+
+### La convergenza (di nuovo): il turnaround è ritmo armonico
+
+⚠️ Il turnaround che chiude l'ultimo A **stringe il ritmo armonico** (Dm7 G7 in una
+battuta, poi risolve su Cmaj7): è la stessa mossa di `ritmo-armonico.md`
+(«accelerare verso la cadenza»), vista dal giunto. La struttura, l'armonia e il
+ritmo si toccano qui.
+
+### Il verdetto, e la fonte
+
+⚠️ **Verdetto: «suona giusto, approvato»** (14 settembre 2026, `STRUTTURA03`). Il
+`[CALC]` verificava che il pickup sale e arriva in alto (do5), il turnaround
+stringe il ritmo armonico (2 accordi nella battuta 3) e risolve su Cmaj7, le
+variazioni sono bianche; l'orecchio ha **confermato** che i giunti cuciono — il
+ponte arriva preparato, il ritorno chiude. Passa al primo colpo. `[LIB]`
+`references/form/narrative-and-transitions.md`.
+
+### Cosa NON rifare
+
+- **non toccare la clip di sezione per variare un giunto:** la copia è bianca
+  apposta — modificando l'originale cambiano tutte le ripetizioni;
+- **non copiare tutta la sezione per una voce sola** (la clip bianca è solo per la
+  voce che cambia);
+- **non chiudere senza l'ascolto** (metodo `[CALC]` + un ascolto).
+
+### Il prossimo passo
+
+⚠️ **Con questo la priorità 2 (forma) è coperta:** voicing, comping, contrappunto,
+struttura (mappa, arco, transizioni). Restano, su domanda: il **fill di batteria**
+(`[MIS]` casella 9, 51 fill jazz — vuole una traccia di batteria nel pezzo), i
+**tre modi a confronto**, la transizione **morbida** vera (sovrapposizione), e una
+primitiva che **alza l'ultimo giro** in automatico (final-chorus elevation). Poi
+c'è la **priorità 3** (ritmo, dal jazz in poi, coi groove template).
 
 ---
 

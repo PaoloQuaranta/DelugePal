@@ -1321,6 +1321,36 @@ def racconta_forma(piano) -> str:
     return '\n'.join(righe)
 
 
+def variazione(doc, sorgente, pos: int, *, length: int | None = None):
+    """Una copia BIANCA di una clip, piazzata a un giunto per essere variata.
+
+    E' la clip "bianca" dell'arranger (`arranger.place_unique`) con lo strumento
+    trovato da se': prende una clip di sezione, ne mette una copia INDIPENDENTE
+    a `pos` sulla timeline, e la ritorna perche' la si modifichi -- un turnaround
+    in coda, un pickup che porta alla sezione dopo, un tag finale -- SENZA toccare
+    l'originale ne' le altre ripetizioni. E' il meccanismo delle transizioni
+    (docs/istruzioni/transizioni.md), la faccia della struttura che chiude i
+    giunti.
+
+    ⚠️ La copia e' arranger-only (niente `section`): vive solo sulla timeline,
+    non compare in session view. Cosi' la variazione di un giunto non sporca le
+    scene. La si riempie come una clip qualunque -- `MU.togli`/`MU.scrivi` --
+    dopo averla avuta indietro.
+
+    Ritorna il nodo della clip bianca. `length` di default e' quella della
+    sorgente (una ripetizione); vedi `arranger.place_unique`.
+    """
+    from . import arranger as A                              # noqa: PLC0415
+    from . import song as S                                  # noqa: PLC0415
+
+    strum = S.instrument_of(doc, sorgente)
+    if strum is None:
+        raise ValueError('variazione(): la clip sorgente non appartiene a '
+                         'nessuno strumento')
+    copia, _ist = A.place_unique(doc, strum, sorgente, pos, length)
+    return copia
+
+
 def racconta_armonia(spec: str, *, voicing: str = 'chiuso',
                      registro: str = 'do3', condotta: bool = True) -> str:
     """Cosa e' diventata ogni sigla, e quali ambiguita' sono state sciolte.

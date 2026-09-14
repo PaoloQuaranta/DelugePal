@@ -172,10 +172,9 @@ regge. È passata al primo colpo, come le altre facce della forma.
 - ~~l'**arco dinamico**~~ **[fatto](arco-dinamico.md)**: come densità e intensità
   salgono al ponte e ricadono sull'ultimo A (`[MIS]` casella 9). La seconda faccia
   della struttura;
-- le **transizioni** — turnaround, fill di batteria, stacchi, pickup che cuciono le
-  sezioni;
-- le **variazioni** con `arranger.place_unique` (la clip bianca): l'ultimo giro
-  diverso, il fill;
+- ~~le **transizioni**~~ **[fatte](transizioni.md)** (i giunti armonico-melodici):
+  turnaround, pickup, break, con la clip bianca `MU.variazione`. Resta fuori il
+  **fill di batteria**. La terza faccia della struttura;
 - la forma **non uniforme e annidata** (una coda che tronca l'ultimo A, un intro
   di lunghezza dispari): `battute_per` copre le sezioni di lunghezza diversa, non
   ancora le sovrapposizioni.

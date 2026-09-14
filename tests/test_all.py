@@ -8126,6 +8126,97 @@ def test_arco_scritto():
           and p['A3']['vel'] < p['B']['vel'], str(p))
 
 
+def test_variazione():
+    """Le affermazioni [CALC] di docs/istruzioni/transizioni.md.
+
+    MU.variazione fa una clip BIANCA (arranger-only) a un giunto, indipendente:
+    modificarla non tocca la sorgente; lo strumento lo trova da se'; una clip
+    senza strumento e' rifiutata.
+    """
+    from delugexml import musica as MU                        # noqa: PLC0415
+    from delugexml import song as S                           # noqa: PLC0415
+    from delugexml import arranger as A                       # noqa: PLC0415
+    B = MU.TICK_PER_BATTUTA
+
+    def n_righe(clip):
+        nr = clip.find('noteRows')
+        return len(nr.children) if nr is not None else 0
+
+    doc, sez = _forma_nuovo()
+    if doc is None:
+        return                                                # manca il materiale
+    cA = sez['A'][0]                                          # una clip di sezione
+    strum = S.instrument_of(doc, cA)
+    righe_prima = n_righe(cA)
+
+    var = MU.variazione(doc, cA, 8 * B)
+    check('la variazione e una clip BIANCA (arranger-only)',
+          A.is_white(var), 'ha section')
+    check('e piazzata al giunto (tick 8*battuta)',
+          any(i.pos == 8 * B for i in A.instances(strum)), 'non piazzata')
+
+    # svuotare la variazione non tocca la sorgente (e' una copia indipendente)
+    nr = var.find('noteRows')
+    if nr is not None:
+        var.children.remove(nr)
+    check('svuotare la variazione non tocca la clip sorgente',
+          n_righe(cA) == righe_prima and righe_prima > 0,
+          f'{righe_prima} -> {n_righe(cA)}')
+
+    # una clip senza strumento e' rifiutata
+    from delugexml.parser import Node                         # noqa: PLC0415
+    try:
+        MU.variazione(doc, Node(tag='instrumentClip', attrs=[]), 0)
+        check('rifiuta una clip senza strumento', False, 'non ha sollevato')
+    except ValueError:
+        check('rifiuta una clip senza strumento', True)
+
+
+def test_transizioni_scritto():
+    """Il pezzo dei giunti e' quello che dichiara (transizioni.md).
+
+    Due giunti via clip bianca: il pickup che SALE verso il ponte, e il
+    turnaround che STRINGE il ritmo armonico e RISOLVE. La sorgente A resta piana.
+    """
+    try:
+        import transizioni_scritto as TR                      # noqa: PLC0415
+    except FileNotFoundError:
+        salta('test_transizioni_scritto', 'manca un preset di refs/synths')
+        return
+    from delugexml import musica as MU                        # noqa: PLC0415
+    from delugexml import arranger as A                       # noqa: PLC0415
+    B = MU.TICK_PER_BATTUTA
+
+    # il pickup: l'ultima battuta sale e finisce in alto (do5 = 72)
+    pk = TR.a2_melodia_pickup()
+    ultima = [(n.pos, y) for y, ns in pk.items() for n in ns if n.pos >= 3 * B]
+    ultima.sort()
+    alt = [y for _pos, y in ultima]
+    check('il pickup sale nell ultima battuta', alt == sorted(alt) and len(alt) >= 3,
+          str(alt))
+    check('il pickup arriva in alto (do5=72) a consegnare il ponte',
+          max(alt) == 72, str(max(alt)))
+
+    # il turnaround: la battuta 3 STRINGE (2 accordi) e la 4 RISOLVE (Cmaj7)
+    ch = TR.a3_accordi_turnaround()
+    attacchi = sorted({n.pos for ns in ch.values() for n in ns})
+    in_bar3 = [t for t in attacchi if 2 * B <= t < 3 * B]
+    check('il turnaround stringe il ritmo armonico nella battuta 3 (2 accordi)',
+          len(in_bar3) == 2, str([round(t / B, 2) for t in attacchi]))
+    classi_bar4 = {y % 12 for y, ns in ch.items() for n in ns if n.pos >= 3 * B}
+    check('la battuta 4 risolve su Cmaj7 (do mi sol si)',
+          {0, 4, 7} <= classi_bar4, str(sorted(classi_bar4)))
+
+    # il pezzo sta in piedi, e i giunti sono clip bianche
+    doc, bianche = TR.costruisci()
+    check('le tre variazioni sono clip bianche',
+          all(A.is_white(v) for v in bianche.values()),
+          str({k: A.is_white(v) for k, v in bianche.items()}))
+    check('il pezzo e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('l arrangiamento e lungo 16 battute', A.extent(doc) == (0, 16 * B),
+          str(A.extent(doc)))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 

@@ -157,8 +157,9 @@ come le altre facce della forma.
 
 - l'arco su **più giri** (testa-soli-testa): l'intensità che cresce di chorus in
   chorus, non solo dentro un AABA;
-- il **fill di batteria** e i **turnaround** come segnali di transizione fra le
-  sezioni: è la terza faccia della struttura, le **transizioni**;
+- i **turnaround** e i pickup come segnali di transizione fra le sezioni:
+  **[fatti](transizioni.md)** (la terza faccia della struttura). Resta il **fill di
+  batteria**, che vuole una traccia di batteria nel pezzo;
 - la **variazione automatica** dell'ultimo giro con `place_unique`: qui l'ultimo A
   è già una clip a sé, ma non c'è (ancora) una primitiva che «alza l'ultimo giro»;
 - l'arco su generi **non-jazz** (l'EDM sale al drop, il pop al ritornello finale):
