@@ -8065,6 +8065,67 @@ def _forma_costruisci():
         return None, None
 
 
+def test_dinamica():
+    """Le affermazioni [CALC] di docs/istruzioni/arco-dinamico.md.
+
+    MU.dinamica scala le velocity, stretto fra minimo e 127, senza mutare
+    l'originale; un fattore negativo e' rifiutato.
+    """
+    from delugexml import musica as MU                        # noqa: PLC0415
+
+    base = MU.melodia('do4 re4 mi4', durata='1/4', velocity=80)
+    piano = MU.dinamica(base, 0.5)
+    vel_p = {n.velocity for ns in piano.values() for n in ns}
+    check('dimezza le velocity (80 -> 40)', vel_p == {40}, str(vel_p))
+
+    vel_o = {n.velocity for ns in base.values() for n in ns}
+    check('non muta l originale (resta 80)', vel_o == {80}, str(vel_o))
+
+    forte = MU.dinamica(base, 3.0)
+    vel_f = {n.velocity for ns in forte.values() for n in ns}
+    check('stringe a 127 in alto (80*3 -> 127)', vel_f == {127}, str(vel_f))
+
+    quasi = MU.dinamica(base, 0.01, minimo=10)
+    vel_q = {n.velocity for ns in quasi.values() for n in ns}
+    check('rispetta il minimo in basso', vel_q == {10}, str(vel_q))
+
+    try:
+        MU.dinamica(base, -1)
+        check('rifiuta un fattore negativo', False, 'non ha sollevato')
+    except ValueError:
+        check('rifiuta un fattore negativo', True)
+
+
+def test_arco_scritto():
+    """L'arco del pezzo e' quello che dichiara (arco-dinamico.md).
+
+    Casella 9 di docs/repertori/jazz.md: si parte radi, si cresce, si CULMINA
+    sul ponte, si RICADE sull'ultimo A -- su tre leve (densita', ritmo armonico,
+    dinamica). E il ponte raddoppia il ritmo armonico (prova il ritmo armonico).
+    """
+    try:
+        import arco_scritto as AR                             # noqa: PLC0415
+    except FileNotFoundError:
+        salta('test_arco_scritto', 'manca un preset di refs/synths')
+        return
+    p = AR.profilo()
+
+    check('la densita sale al ponte e ricade (4 < 8 < 16 > 4)',
+          p['A1']['note'] < p['A2']['note'] < p['B']['note'] > p['A3']['note'],
+          str({k: v['note'] for k, v in p.items()}))
+    check('il ponte RADDOPPIA il ritmo armonico (accordi: A=4, B=8)',
+          p['B']['accordi'] == 2 * p['A1']['accordi'],
+          str({k: v['accordi'] for k, v in p.items()}))
+    check('la dinamica culmina sul ponte e ricade',
+          p['A1']['vel'] < p['A2']['vel'] < p['B']['vel']
+          and p['A3']['vel'] < p['B']['vel'],
+          str({k: v['vel'] for k, v in p.items()}))
+    check("l'ultimo A ricade sotto il ponte su tutte e tre le leve",
+          p['A3']['note'] < p['B']['note']
+          and p['A3']['accordi'] < p['B']['accordi']
+          and p['A3']['vel'] < p['B']['vel'], str(p))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 

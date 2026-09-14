@@ -135,10 +135,10 @@ aumentate), infine **ritmo armonico e i modi della minore melodica** hanno
 **chiuso l'armonia della priorità 1, code comprese**. ⚠️ **Poi è cominciata la
 priorità 2, la forma**, dal **voicing** (§6-septvicies), poi il **comping**
 (§6-noniesvicies, con `MU.comping`), il **contrappunto** (§6-tricies, con
-`MU.contrappunto`) e infine la **struttura** — la **mappa di forma** (§6-untrigies,
-con `MU.forma`, la prima delle sue tre facce): lo stato e il prossimo passo — le
-altre due facce della struttura, l'**arco dinamico** e le **transizioni** — stanno
-lì. ⚠️ **Il metodo cambia per area:** l'armonia si
+`MU.contrappunto`) e infine la **struttura**, in tre facce: la **mappa di forma**
+(§6-untrigies, con `MU.forma`) e l'**arco dinamico** (§6-duotrigies, con
+`MU.dinamica`, che prova anche il ritmo armonico rimasto senza ascolto): lo stato e
+il prossimo passo — l'ultima faccia, le **transizioni** — stanno lì. ⚠️ **Il metodo cambia per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
 letteratura nuova (Levine ×2, Piston *Counterpoint*, Crook) e tutta l'armonia è
@@ -3525,6 +3525,70 @@ intensità che salgono al ponte e ricadono sull'ultimo A, **già misurato** (`[M
 casella 9), da spendere sul generatore; e le **transizioni** — turnaround, fill,
 stacchi, con le **variazioni** via `arranger.place_unique`. Con questo la priorità
 2 (forma) è **coperta nello scheletro**; restano le rifiniture su domanda.
+
+---
+
+## 6-duotrigies. La struttura continua: l'arco dinamico (e il ritmo armonico ascoltato) — 14 settembre 2026
+
+**Seconda faccia della struttura.** Dopo la mappa (dove cadono le sezioni), l'arco
+dinamico: **con quanta intensità** ciascuna suona. ⚠️ **Nasce da due richieste in
+una:** fare l'arco, e **usare il brano di test anche per provare il ritmo armonico**
+— che era chiuso col solo `[CALC]` e non era mai stato ascoltato. Le due cose sono
+la stessa: il ritmo armonico è una **leva** dell'arco, e `ritmo-armonico.md` (riga
+124) già indicava «il rapporto con la forma lunga» come lavoro di priorità 2.
+`docs/istruzioni/arco-dinamico.md`, metodo `[CALC]` + un ascolto.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `docs/istruzioni/arco-dinamico.md` | l'arco **misurato** (`[MIS]` casella 9 di `jazz.md`: A1 rado → ponte culmine → A3 ricade; il ponte è la sola sezione che non respira), steso su **tre leve** che salgono insieme: densità, ritmo armonico, dinamica |
+| `MU.dinamica` (`musica.py`) | ⚠️ **codice nuovo**, la leva delle dinamiche: scala le velocity per un fattore, stretto fra `minimo` e 127, **senza mutare** l'originale (così la stessa frase si posa a più livelli). Le altre due leve usano primitive che c'erano già — densità (quante note) e `durata` (ritmo armonico) |
+| `tools/arco_scritto.py` | l'esempio: l'AABA della mappa con l'arco steso — A1 rada/piano/lenta, A2 cresce, **B fitta/forte/veloce (2 accordi a battuta)**, A3 ricade |
+| `tests/test_all.py` | `test_dinamica` + `test_arco_scritto`. Suite **1332 → 1341** |
+
+### La convergenza: arco e ritmo armonico sono la stessa cosa
+
+⚠️ **Il ponte fa due cose in una: è il culmine dell'arco E raddoppia il ritmo
+armonico** (2 accordi a battuta invece di 1). Così `STRUTTURA02` prova, nello stesso
+ascolto, l'arco dinamico e il ritmo armonico. È dove vive, nella forma lunga, la
+mossa che `ritmo-armonico.md` chiamava «accelerare verso la cadenza». Il ritmo
+armonico resta chiuso col `[CALC]` (decisione del 13 settembre); questo è un
+**ascolto in più**, dentro la forma, non un cambio di metodo.
+
+### La cosa da sapere: l'arco misurato NON è un motore
+
+⚠️ I numeri della casella 9 dicono **dov'è** il culmine (il ponte) e la **forma**
+della salita (radi → fitto → radi), non generano le note. `MU.dinamica` fa
+l'aritmetica delle velocity; densità e ritmo armonico sono scelte dell'AI informate
+dalla misura. È la regola del 30 agosto: il corpus dà relazioni, non superfici — e
+qui la relazione è l'arco, non una distribuzione da campionare.
+
+### Il verdetto, e la fonte
+
+⚠️ **Verdetto: «suona giusto, approvato»** (14 settembre 2026, `STRUTTURA02`). Il
+`[CALC]` verificava che sulle tre leve la densità sale al ponte e ricade
+(4<8<16>4), il ponte raddoppia il ritmo armonico (A=4, B=8 attacchi), la dinamica
+culmina sul ponte; l'orecchio ha **confermato** l'arco — il culmine arriva, il
+ritorno si posa — e con esso il **ritmo armonico**, ascoltato per la prima volta
+(un `[OSS]` di conferma dentro la forma, non un cambio del metodo `[CALC]`).
+`[LIB]` `ritmo-armonico.md` (Piston, *Harmony*, cap. 12); `[MIS]` casella 9 di
+`docs/repertori/jazz.md`.
+
+### Cosa NON rifare
+
+- **non trasformare l'arco misurato in un motore** (il corpus dà relazioni);
+- **non far salire una leva sola:** il culmine vuole densità + ritmo armonico +
+  dinamica insieme;
+- **non chiudere senza l'ascolto** (metodo `[CALC]` + un ascolto);
+- **non far respirare il ponte alla fine:** è il culmine, tira dritto (`[MIS]`).
+
+### Il prossimo passo
+
+L'ultima faccia della struttura: le **transizioni** — turnaround, fill di batteria,
+stacchi, pickup che cuciono le sezioni, e la **variazione** dell'ultimo giro con
+`arranger.place_unique` (la clip bianca). Poi la priorità 2 (forma) è **coperta**
+oltre lo scheletro; il resto è su domanda (l'arco su più giri, i generi non-jazz).
 
 ---
 

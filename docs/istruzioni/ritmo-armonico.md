@@ -27,6 +27,12 @@ settembre 2026). Qui il `[CALC]` è sul **meccanismo** — come `durata` fissa i
 ritmo armonico — perché il ritmo armonico è una scelta di tempo, non un fatto di
 altezze; il resto è `[LIB]` e `[DEC]`.
 
+⚠️ **Ascoltato comunque il 14 settembre 2026**, non per chiudere l'armonia (che
+resta col `[CALC]`) ma perché il ritmo armonico è una **leva della forma**: dentro
+`STRUTTURA02` (esempio dell'[arco dinamico](arco-dinamico.md)) il ponte raddoppia
+il cambio d'accordo, e la spinta si è sentita — *«suona giusto, approvato»*. Un
+`[OSS]` di conferma, non un cambio di metodo.
+
 ---
 
 ## Il principio: la frequenza del cambio, e il suo peso
@@ -121,5 +127,7 @@ dare durate diverse alle sigle di una stessa stringa.
 - l'**anticipazione** dell'accordo (il cambio che arriva sul levare *prima* del
   battere, tipico del jazz e del pop): un colore ritmico-armonico che qui è solo
   nominato;
-- il rapporto con la **forma** lunga (dove accelerare nell'arco di un intero
-  pezzo): è priorità 2 (forma e densità).
+- ~~il rapporto con la **forma** lunga (dove accelerare nell'arco di un intero
+  pezzo)~~ **[fatto](arco-dinamico.md)**: il ritmo armonico è una delle tre leve
+  dell'arco dinamico — il ponte raddoppia il cambio d'accordo, ed è lì che
+  «accelerare verso la cadenza» vive nella forma lunga.

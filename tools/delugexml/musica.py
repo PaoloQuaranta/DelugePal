@@ -427,6 +427,31 @@ def accordi(spec: str, *, durata: str | int = '1/4', da: int = 0,
     return out
 
 
+def dinamica(note: dict[int, list[Note]], fattore: float, *,
+             minimo: int = 1) -> dict[int, list[Note]]:
+    """Scala le velocity di una parte -- il livello dinamico.
+
+    E' la leva delle DINAMICHE dell'arco (docs/istruzioni/arco-dinamico.md): la
+    stessa frase si posa piu' piano (`fattore` < 1) o piu' forte (> 1) a seconda
+    di dove sta nell'arco del pezzo -- rada e piano sull'A d'apertura, piena e
+    forte sul ponte, che ricade sull'ultimo A.
+
+    Ritorna una struttura NUOVA (non muta l'originale), cosi' la stessa frase si
+    puo' posare a piu' livelli -- l'A che torna piu' piano di com'era. `fattore`
+    moltiplica la velocity di ogni nota, e il risultato e' stretto fra `minimo`
+    e 127: una velocity non esce mai dai binari MIDI.
+    """
+    from dataclasses import replace                          # noqa: PLC0415
+    if fattore < 0:
+        raise ValueError(f'dinamica(): fattore negativo ({fattore})')
+    fuori: dict[int, list[Note]] = {}
+    for y, ns in note.items():
+        fuori[y] = [replace(n, velocity=max(minimo,
+                                            min(127, round(n.velocity * fattore))))
+                    for n in ns]
+    return fuori
+
+
 # ------------------------------------------------------------- lo swing
 #
 # Dove cade il LEVARE dentro il movimento, in frazione: 0,5 e' dritto,

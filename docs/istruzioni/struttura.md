@@ -169,9 +169,9 @@ regge. È passata al primo colpo, come le altre facce della forma.
 
 ## Cosa manca a questa istruzione
 
-- l'**arco dinamico** — come densità e intensità salgono al ponte e ricadono
-  sull'ultimo A: è già **misurato** (`[MIS]` casella 9 di jazz.md: A1 rado, si sale
-  al ponte, si ricade), va speso sul generatore. È la faccia *sviluppo*;
+- ~~l'**arco dinamico**~~ **[fatto](arco-dinamico.md)**: come densità e intensità
+  salgono al ponte e ricadono sull'ultimo A (`[MIS]` casella 9). La seconda faccia
+  della struttura;
 - le **transizioni** — turnaround, fill di batteria, stacchi, pickup che cuciono le
   sezioni;
 - le **variazioni** con `arranger.place_unique` (la clip bianca): l'ultimo giro
