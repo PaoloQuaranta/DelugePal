@@ -994,6 +994,223 @@ def comping(progressione: str, ritmi, *, voicing: str = 'chiuso',
                    condotta=condotta, da=da)
 
 
+# ------------------------------------------------------------ il contrappunto
+#
+# Il contrappunto e' l'arte di combinare linee melodiche INDIPENDENTI (Piston,
+# Counterpoint, 1970). Qui il codice non compone: fa i conti sul rapporto fra
+# due linee gia' scritte -- quali intervalli cadono insieme, che moto le lega,
+# e dove l'indipendenza si perde. L'AI scrive le due voci; questa e' la lente.
+
+#: Il nome generico dell'intervallo per semitono ridotto (0-11).
+_NOME_INTERVALLO = ('unisono', '2a', '2a', '3a', '3a', '4a', 'tritono',
+                    '5a', '6a', '6a', '7a', '7a')
+
+#: La specie dell'intervallo, per semitono ridotto. In DUE parti la 4a e'
+#: DISSONANTE (Piston, p.125: smette di esserlo nel tre-parti quando ha una
+#: nota sotto che la sostiene). Unisono/8a/5a perfette; 3a/6a imperfette;
+#: 2a/4a/tritono/7a dissonanti.
+_SPECIE_INTERVALLO = ('perfetta', 'dissonante', 'dissonante', 'imperfetta',
+                      'imperfetta', 'dissonante', 'dissonante', 'perfetta',
+                      'imperfetta', 'imperfetta', 'dissonante', 'dissonante')
+
+#: Un movimento (beat): 4 passi da 24 tick. Il battere su cui la dissonanza
+#: pesa di piu' e la parallela si sente meglio.
+TICK_PER_MOVIMENTO = TICK_PER_PASSO * PASSI_PER_MOVIMENTO
+
+
+class Verticale(NamedTuple):
+    """Un punto in cui le due voci suonano insieme, e cosa ci si sente."""
+
+    pos: int                       # tick
+    a: int | None                  # altezza di A che suona qui (None = pausa)
+    b: int | None                  # altezza di B
+    intervallo: int | None         # semitoni fra le due, >= 0 (None se pausa)
+    nome: str                      # 'unisono', '3a', '5a'... o 'pausa'
+    specie: str                    # 'perfetta' | 'imperfetta' | 'dissonante' | '-'
+    moto: str | None               # rispetto al verticale pieno precedente
+    battere: bool                  # cade su un movimento?
+
+
+class Contrappunto(NamedTuple):
+    """I conti sul rapporto fra due linee -- i fatti, non il giudizio."""
+
+    verticali: list[Verticale]
+    moti: dict[str, int]                    # tipo di moto -> quante volte
+    paralleli: list[int]                    # posizioni di 5e/8e parallele
+    dirette: list[int]                      # 5e/8e raggiunte per moto diretto
+    attacchi: tuple[int, int, int]          # (in comune, in A, in B)
+    simultaneita: float                     # attacchi in comune / max(A, B)
+    picchi: tuple[int | None, int | None]   # posizione del picco di A e di B
+    picchi_insieme: bool                    # i due picchi cadono vicini?
+    dissonanze_battere: list[int]           # dissonanze cadute sul battere
+
+
+def _eventi_linea(voce: dict[int, list[Note]]) -> list[tuple[int, int, int]]:
+    """Da `y -> [Note]` a `(pos, fine, altezza)` ordinati per posizione."""
+    ev = [(n.pos, n.pos + n.length, y)
+          for y, note in voce.items() for n in note]
+    ev.sort()
+    return ev
+
+
+def _suona_a(eventi: list[tuple[int, int, int]], t: int) -> int | None:
+    """L'altezza che suona a `t`: una che ATTACCA li', o quella tenuta.
+
+    Una linea e' monofonica; se in un punto ne trova piu' d'una (una voce che
+    porta accordi) prende la piu' acuta, cosi' l'analisi ha comunque un numero.
+    """
+    attacca = [y for pos, _, y in eventi if pos == t]
+    if attacca:
+        return max(attacca)
+    tiene = [y for pos, fine, y in eventi if pos < t < fine]
+    return max(tiene) if tiene else None
+
+
+def contrappunto(voce_a: dict[int, list[Note]], voce_b: dict[int, list[Note]],
+                 *, movimento: int = TICK_PER_MOVIMENTO) -> Contrappunto:
+    """L'analisi del rapporto fra DUE linee: intervalli, moti, indipendenza.
+
+    ⚠️ NON COMPONE. Prende due voci gia' scritte (la forma di `melodia()`,
+    `linea()`, `armonia()`: `y -> [Note]`) e ne misura il contrappunto. E' la
+    divisione del progetto -- l'AI decide le note delle due linee, il codice fa
+    i conti sul loro rapporto -- come `voci_condotte()` per il voicing.
+
+    Cosa misura, e da dove viene (Piston, Counterpoint, 1970):
+      - a ogni ATTACCO (di A o di B) l'intervallo verticale, e la sua specie
+        (perfetta / imperfetta / dissonante). L'accordo delle voci e'
+        DIPENDENZA, la dissonanza e' INDIPENDENZA (Introduzione, p.9);
+      - il MOTO fra un verticale e il precedente: `contrario` (voci in
+        direzioni opposte), `obliquo` (una tiene, l'altra muove), `parallelo`
+        (stessa direzione, stesso intervallo), `diretto`/simile (stessa
+        direzione, intervallo diverso). Contrario e obliquo fanno il
+        contrappunto; il parallelo lo disfa (cap. 5, p.83);
+      - le 5e/8e PARALLELE: due voci in 5a o 8a che restano tali muovendo
+        insieme collassano in una voce sola (p.83). Sono l'unico vero divieto,
+        e ce n'e' la lista;
+      - le 5e/8e DIRETTE (nascoste): una 5a o 8a raggiunta per moto simile.
+        ⚠️ Piston (p.86) NON le vieta -- "nessuna regola sulle 5e/8e dirette e'
+        confermata dalla pratica dei compositori" -- e chiede discernimento,
+        non un elenco di divieti. Qui si CONTANO, non si condannano;
+      - la SIMULTANEITA' degli attacchi: meno attacchi in comune, piu' le
+        voci sono ritmicamente indipendenti (p.72);
+      - i PICCHI: se le due linee culminano nello stesso momento hanno poca
+        indipendenza di curva (p.76).
+
+    `movimento` e' il tick del battere per marcare le dissonanze forti; il
+    default e' un movimento da 96 tick (4/4).
+    """
+    ea, eb = _eventi_linea(voce_a), _eventi_linea(voce_b)
+    onset_a = {pos for pos, _, _ in ea}
+    onset_b = {pos for pos, _, _ in eb}
+    punti = sorted(onset_a | onset_b)
+
+    verticali: list[Verticale] = []
+    moti = {'contrario': 0, 'obliquo': 0, 'diretto': 0, 'parallelo': 0}
+    paralleli: list[int] = []
+    dirette: list[int] = []
+    dissonanze_battere: list[int] = []
+    prec: Verticale | None = None       # ultimo verticale PIENO (a e b presenti)
+
+    for t in punti:
+        a = _suona_a(ea, t)
+        b = _suona_a(eb, t)
+        battere = (t % movimento == 0)
+        if a is None or b is None:
+            verticali.append(
+                Verticale(t, a, b, None, 'pausa', '-', None, battere))
+            continue
+        iv = abs(a - b)
+        r = iv % 12
+        nome = ('unisono' if iv == 0 else
+                '8a' if r == 0 else _NOME_INTERVALLO[r])
+        specie = _SPECIE_INTERVALLO[r]
+        moto = None
+        if prec is not None and prec.a is not None and prec.b is not None:
+            da = (a > prec.a) - (a < prec.a)
+            db = (b > prec.b) - (b < prec.b)
+            if da == 0 or db == 0:
+                moto = 'obliquo' if (da or db) else None
+            elif da == db:
+                moto = 'parallelo' if r == prec.intervallo % 12 else 'diretto'
+            else:
+                moto = 'contrario'
+            if moto:
+                moti[moto] += 1
+                if moto == 'parallelo' and r in (0, 7):
+                    paralleli.append(t)
+                elif moto == 'diretto' and r in (0, 7):
+                    dirette.append(t)
+        if battere and specie == 'dissonante':
+            dissonanze_battere.append(t)
+        v = Verticale(t, a, b, iv, nome, specie, moto, battere)
+        verticali.append(v)
+        prec = v
+
+    comuni = len(onset_a & onset_b)
+    ta, tb = len(onset_a), len(onset_b)
+    simult = comuni / max(ta, tb) if max(ta, tb) else 0.0
+
+    def _picco(ev):
+        if not ev:
+            return None
+        alto = max(y for _, _, y in ev)
+        return min(pos for pos, _, y in ev if y == alto)
+
+    pa, pb = _picco(ea), _picco(eb)
+    insieme = (pa is not None and pb is not None and abs(pa - pb) < movimento)
+
+    return Contrappunto(verticali, moti, paralleli, dirette,
+                        (comuni, ta, tb), simult, (pa, pb), insieme,
+                        dissonanze_battere)
+
+
+def racconta_contrappunto(voce_a: dict[int, list[Note]],
+                          voce_b: dict[int, list[Note]], *,
+                          movimento: int = TICK_PER_MOVIMENTO,
+                          nomi: tuple[str, str] = ('A', 'B')) -> str:
+    """Il contrappunto fra due voci, a parole (regola 4).
+
+    ASCII soltanto, come tutto quello che finisce in un `print`: la console di
+    Windows e' cp1252 e non regge gli emoji (HANDOFF, 6 settembre 2026).
+    """
+    an = contrappunto(voce_a, voce_b, movimento=movimento)
+    na_, nb_ = nomi
+    righe = [f'{na_} contro {nb_} -- {len(an.verticali)} verticali '
+             f'(* = sul battere)']
+    for v in an.verticali:
+        segno = '*' if v.battere else ' '
+        if v.a is None or v.b is None:
+            righe.append(f'  t{v.pos:<5}{segno} pausa')
+            continue
+        alto, basso = (v.a, v.b) if v.a >= v.b else (v.b, v.a)
+        coppia = f'{nome_altezza(alto)}/{nome_altezza(basso)}'
+        moto = f'  {v.moto}' if v.moto else ''
+        righe.append(f'  t{v.pos:<5}{segno} {coppia:<12} {v.nome:<8}'
+                     f'{v.specie}{moto}')
+    m = an.moti
+    righe.append(f'moti: contrario {m["contrario"]}, obliquo {m["obliquo"]}, '
+                 f'diretto {m["diretto"]}, parallelo {m["parallelo"]}')
+    comuni, ta, tb = an.attacchi
+    righe.append(f'attacchi in comune: {comuni} su {ta}/{tb} '
+                 f'(simultaneita {an.simultaneita:.0%} -- piu bassa, piu '
+                 f'indipendenti)')
+    if an.paralleli:
+        righe.append('!! 5e/8e PARALLELE (le voci collassano in una) a: '
+                     + ', '.join(f't{t}' for t in an.paralleli))
+    if an.dirette:
+        righe.append('5e/8e per moto diretto (Piston p.86: da valutare, non '
+                     'vietate) a: ' + ', '.join(f't{t}' for t in an.dirette))
+    if an.dissonanze_battere:
+        righe.append('dissonanze sul battere (la spezia, purche risolvano) a: '
+                     + ', '.join(f't{t}' for t in an.dissonanze_battere))
+    pa, pb = an.picchi
+    if pa is not None and pb is not None:
+        stato = ('INSIEME -- poca indipendenza di curva' if an.picchi_insieme
+                 else 'sfasati')
+        righe.append(f'picchi: {na_} a t{pa}, {nb_} a t{pb} -- {stato}')
+    return '\n'.join(righe)
+
+
 def racconta_armonia(spec: str, *, voicing: str = 'chiuso',
                      registro: str = 'do3', condotta: bool = True) -> str:
     """Cosa e' diventata ogni sigla, e quali ambiguita' sono state sciolte.

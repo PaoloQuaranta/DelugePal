@@ -7891,6 +7891,107 @@ def test_comping_scritto():
           {2, 7, 0} <= classi_basso, str(sorted(classi_basso)))
 
 
+def test_contrappunto():
+    """Le affermazioni [CALC] di docs/istruzioni/contrappunto.md.
+
+    MU.contrappunto misura il rapporto fra due linee: intervallo e specie,
+    tipo di moto, 5e/8e parallele, simultaneita' degli attacchi, picchi.
+    """
+    from delugexml import musica as MU                            # noqa: PLC0415
+
+    # 1) QUINTE PARALLELE: due voci che salgono per grado tenendo la 5a giusta.
+    #    Devono essere segnalate (collassano in una voce sola, Piston p.83).
+    par = MU.contrappunto(MU.melodia('sol3 la3 si3 do4', durata='1/4'),
+                          MU.melodia('do3 re3 mi3 fa3', durata='1/4'))
+    passo = MU.durata_in_tick('1/4')
+    check('le 5e parallele sono segnalate su ogni passo',
+          par.paralleli == [passo, 2 * passo, 3 * passo], str(par.paralleli))
+    check('il moto e tutto parallelo', par.moti['parallelo'] == 3,
+          str(par.moti))
+
+    # 2) MOTO CONTRARIO: A sale, B scende -- nessuna parallela, tutto contrario.
+    con = MU.contrappunto(MU.melodia('do4 re4 mi4 fa4', durata='1/4'),
+                          MU.melodia('mi3 re3 do3 si2', durata='1/4'))
+    check('il moto contrario non produce parallele', con.paralleli == [],
+          str(con.paralleli))
+    check('il moto e tutto contrario', con.moti['contrario'] == 3,
+          str(con.moti))
+
+    # 3) MOTO OBLIQUO e indipendenza ritmica: A tiene una nota lunga, B muove.
+    obl = MU.contrappunto(MU.melodia('do4', durata='1/1'),
+                          MU.melodia('do3 re3 mi3 fa3', durata='1/4'))
+    check('una voce che tiene contro una che muove da moto obliquo',
+          obl.moti['obliquo'] == 3, str(obl.moti))
+    check('un solo attacco in comune su 1/4 (indipendenza ritmica)',
+          obl.attacchi == (1, 1, 4), str(obl.attacchi))
+
+    # 4) SPECIE dell'intervallo: 8a/5a perfette, 3a/6a imperfette,
+    #    4a/7a dissonanti (in due parti la 4a e' dissonante, Piston p.125).
+    specie = {}
+    for iv, alto in (('8a', 'do4'), ('5a', 'sol3'), ('3a', 'mi3'),
+                     ('6a', 'la3'), ('4a', 'fa3'), ('7a', 'si3')):
+        an = MU.contrappunto(MU.melodia(alto, durata='1/4'),
+                             MU.melodia('do3', durata='1/4'))
+        specie[iv] = (an.verticali[0].nome, an.verticali[0].specie)
+    check('8a e 5a sono perfette',
+          specie['8a'] == ('8a', 'perfetta')
+          and specie['5a'] == ('5a', 'perfetta'), str(specie))
+    check('3a e 6a sono imperfette',
+          specie['3a'][1] == 'imperfetta' and specie['6a'][1] == 'imperfetta',
+          str(specie))
+    check('4a e 7a sono dissonanti (in due parti)',
+          specie['4a'][1] == 'dissonante' and specie['7a'][1] == 'dissonante',
+          str(specie))
+
+    # 5) PICCHI: due linee che culminano nello stesso punto -> poca indipendenza
+    #    di curva; sfasate -> indipendenti.
+    insieme = MU.contrappunto(MU.melodia('do4 sol4 do4', durata='1/4'),
+                              MU.melodia('do3 sol3 do3', durata='1/4'))
+    check('picchi nello stesso punto: picchi_insieme e vero',
+          insieme.picchi_insieme, str(insieme.picchi))
+    sfasati = MU.contrappunto(MU.melodia('sol4 do4 do4', durata='1/4'),
+                              MU.melodia('do3 do3 sol3', durata='1/4'))
+    check('picchi lontani: picchi_insieme e falso',
+          not sfasati.picchi_insieme, str(sfasati.picchi))
+
+    # 6) le PAUSE non producono un intervallo (una voce tace).
+    pausa = MU.contrappunto(MU.melodia('do4 . mi4', durata='1/4'),
+                            MU.melodia('do3 re3 mi3', durata='1/4'))
+    vp = next(v for v in pausa.verticali if v.pos == passo)
+    check('dove una voce tace il verticale e una pausa',
+          vp.nome == 'pausa' and vp.intervallo is None,
+          f'{vp.nome} {vp.intervallo}')
+
+
+def test_contrappunto_scritto():
+    """Il pezzo di confronto del contrappunto e' quello che dichiara.
+
+    docs/istruzioni/contrappunto.md, esempio lavorato: lo stesso tema con due
+    seconde voci -- una DIPENDENTE (terze parallele, "una voce raddoppiata") e
+    una INDIPENDENTE (moto contrario/obliquo, ritmo sfasato). Il [CALC] deve
+    misurare la differenza che l'orecchio poi conferma.
+    """
+    import contrappunto_scritto as CP                            # noqa: PLC0415
+    from delugexml import musica as MU                            # noqa: PLC0415
+
+    tema = CP.tema()
+    dip = MU.contrappunto(tema, CP.dipendente())
+    ind = MU.contrappunto(tema, CP.indipendente())
+
+    check('la versione dipendente e tutta in moto parallelo/diretto',
+          dip.moti['contrario'] == 0 and dip.moti['obliquo'] == 0,
+          str(dip.moti))
+    check('la versione indipendente ha moto contrario e obliquo',
+          ind.moti['contrario'] > 0 and ind.moti['obliquo'] > 0,
+          str(ind.moti))
+    check('la indipendente attacca meno spesso insieme al tema della dipendente',
+          ind.simultaneita < dip.simultaneita,
+          f'ind {ind.simultaneita:.2f}, dip {dip.simultaneita:.2f}')
+    check('nessuna delle due ha 5e/8e parallele',
+          dip.paralleli == [] and ind.paralleli == [],
+          f'dip {dip.paralleli}, ind {ind.paralleli}')
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 

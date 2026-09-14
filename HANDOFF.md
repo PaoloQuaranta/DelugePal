@@ -133,9 +133,10 @@ funzionale** (ii-V-I, cadenze, turnaround, dominanti secondarie) e poi **la
 dominante alterata e le code** (doppie medianti, diatonic planing, seste
 aumentate), infine **ritmo armonico e i modi della minore melodica** hanno
 **chiuso l'armonia della priorità 1, code comprese**. ⚠️ **Poi è cominciata la
-priorità 2, la forma**, dal **voicing** (§6-septvicies) e poi il **comping**
-(§6-noniesvicies, con `MU.comping`): lo stato e il prossimo passo — il
-**contrappunto** — stanno lì. ⚠️ **Il metodo cambia per area:** l'armonia si
+priorità 2, la forma**, dal **voicing** (§6-septvicies), poi il **comping**
+(§6-noniesvicies, con `MU.comping`) e poi il **contrappunto** (§6-tricies, con
+`MU.contrappunto` — un analizzatore, non un costruttore): lo stato e il prossimo
+passo — la **struttura** lunga — stanno lì. ⚠️ **Il metodo cambia per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
 letteratura nuova (Levine ×2, Piston *Counterpoint*, Crook) e tutta l'armonia è
@@ -3393,6 +3394,70 @@ l'adozione è un cleanup successivo, con la sua verifica.
 Le facce restanti della forma: il **contrappunto** (Piston *Counterpoint*, ora
 leggibile via djvu) e la **struttura** lunga (l'`arranger` c'è già). Il
 contrappunto è il naturale prossimo.
+
+---
+
+## 6-tricies. La forma continua: il contrappunto — 14 settembre 2026
+
+**Terza faccia della forma.** Dopo il voicing (quali note) e il comping (il ritmo
+del colpo), il **contrappunto**: due linee **indipendenti** insieme. La domanda
+che decide tutto è una: si sentono come **due** voci, o come **una raddoppiata**?
+`docs/istruzioni/contrappunto.md`, stesso metodo (`[CALC]` + un ascolto).
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `docs/istruzioni/contrappunto.md` | il vocabolario: i **quattro moti** (contrario / obliquo / diretto / parallelo), le **tre facce** dell'indipendenza (armonia, ritmo, curva), il solo divieto (5e/8e parallele), la dissonanza che risolve; da Piston, *Counterpoint* (1970), Intro + cap. 5 |
+| `MU.contrappunto` (`musica.py`) | ⚠️ **codice nuovo, ma è un ANALIZZATORE, non un costruttore.** Prende due voci già scritte e ne misura il rapporto: intervallo e specie, moto, 5e/8e parallele (errore) e dirette (contate), simultaneità degli attacchi, picchi. `MU.racconta_contrappunto` lo dice a parole (regola 4, solo ASCII). Nuovi: `Verticale`, `Contrappunto`, `TICK_PER_MOVIMENTO` |
+| `tools/contrappunto_scritto.py` | il pezzo di confronto: lo stesso tema con due seconde voci — una **dipendente** (terze parallele) e una **indipendente** (contrario/obliquo, ritmo sfasato) |
+| `tests/test_all.py` | `test_contrappunto` + `test_contrappunto_scritto`. Suite **1308 → 1324** |
+
+### La cosa da sapere: il codice non compone, misura
+
+⚠️ **`MU.contrappunto` NON scrive una voce.** È la divisione del progetto — *l'AI
+decide le note delle due linee, il codice fa i conti sul loro rapporto* — la
+stessa di `voci_condotte` per il voicing. Il codice non ha mai composto una nota
+di questo progetto (HANDOFF §6-quindecies) e continua a non farlo: qui fa da
+**lente**, non da penna.
+
+### La scoperta che dà (di nuovo) ragione al progetto
+
+⚠️ **Piston è anti-dogmatico, e lo dice in una riga** (p. 86, sulle quinte/ottave
+dirette): *«non sono state formulate regole confermate dalla pratica dei
+compositori; lo studente sviluppi il discernimento, non regole inventate»*. È
+esattamente il principio del perimetro (11 settembre): **leggi compositive
+generalizzabili non esistono**. Per questo il `[CALC]` **conta** le dirette e non
+le condanna, e segnala come errore **solo** le parallele di quinta e ottava — le
+uniche che collassano davvero due voci in una (p. 83). Quarta dissonante in due
+parti (p. 125), non nel tre-parti: la fonte specifica, e l'istruzione la segue.
+
+### Il verdetto, e la fonte
+
+⚠️ **Verdetto: «suona giusto, approvato»** (14 settembre 2026, caricato come
+`CONTRAPPUNTO01`, Rhodes + basso). Il `[CALC]` misurava che la dipendente è tutta
+moto diretto/parallelo, 100% di attacchi insieme, picchi coincidenti; la
+indipendente 5 contrario + 2 obliquo, 75% insieme, picchi sfasati, **nessuna
+delle due** con 5e/8e parallele — e l'orecchio ha **confermato**: la prima passata
+suona come una voce raddoppiata, la seconda come due voci. Passa al primo colpo,
+come voicing e comping. `[LIB]` Piston, *Counterpoint* (1970), Intro p. 9
+(accordo/disaccordo), cap. 5 p. 72-86 (due-parti: moti, parallele, curve).
+
+### Cosa NON rifare
+
+- **non far comporre una voce al codice:** `MU.contrappunto` analizza, non scrive;
+- **non chiudere senza l'ascolto** (metodo `[CALC]` + un ascolto);
+- **non trasformare Piston in un regolamento:** conta le dirette, non le vieta;
+- **non confondere contrappunto e voicing/comping:** quelli lavorano *sotto* una
+  melodia; il contrappunto mette **due linee** in rapporto.
+
+### Il prossimo passo
+
+L'ultima faccia della forma: la **struttura** lunga — l'arco del pezzo, le
+sezioni, le transizioni (l'`arranger` c'è già; la skill `music-composition` copre
+«tutto ciò che dura più di una battuta»). Poi resta, dentro il contrappunto stesso
+e **su domanda**: il **tre-e-più parti** (Piston cap. 7-8 — oggi il `[CALC]` guarda
+due voci per volta), l'**invertibile** e il **canone** (cap. 9-11).
 
 ---
 
