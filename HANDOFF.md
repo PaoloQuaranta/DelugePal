@@ -146,8 +146,13 @@ acriticamente (§6-quinquiestrigies, con `MU.reazione`), la **correzione del dif
 d'origine** del progetto, e infine il **groove template applicato** — il tocco di un
 batterista vero sopra la reazione (§6-sexiestrigies, con `MU.rimappa_dinamica`), dove
 l'ascolto ha trovato che su un kit elettronico il template misurato **si
-autodistrugge** se non si adatta la dinamica al kit. Manca il resto del ritmo
-(l'interazione vera oltre la densità, i feel diversi dallo swing). ⚠️ **Il metodo cambia per area:** l'armonia si
+autodistrugge** se non si adatta la dinamica al kit. Poi l'**aggancio** — il basso
+che va incontro alla batteria: il difetto d'origine era un basso quantizzato
+esatto, e ora prende il **microtiming** (il float) di un basso JTD nominato
+(§6-septiestrigies, con `MU.applica_microtiming` e `jtd.microtiming`), verdetto
+*«ok funziona, quasi impercettibile ma va bene»* — un effetto piccolo, come il
+residuo di posizione della batteria. Manca il resto del ritmo (la **coincidenza
+vera** basso+batteria dallo stesso trio, i feel diversi dallo swing). ⚠️ **Il metodo cambia per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
 letteratura nuova (Levine ×2, Piston *Counterpoint*, Crook) e tutta l'armonia è
@@ -3829,6 +3834,60 @@ Il resto della priorità 3, su domanda: l'**aggancio** (già in
 `genera_jazz.py --aggancio`, ma la misura per cui esiste non è ancora riprodotta
 all'ascolto, §6-vicies), i **feel diversi dallo swing** (spazzole, terzine), e il
 template **fuori dal jazz**.
+
+---
+
+## 6-septiestrigies. L'aggancio: il basso prende il microtiming — 14 settembre 2026
+
+Riprende il punto che §6-vicies aveva lasciato aperto e che l'aggancio come *flag*
+non chiudeva: **basso e batteria che si incontrano nel tempo.** La scoperta di
+§6-vicies era che il blocco **non è la batteria ma il basso** — quantizzato
+esatto, dispersione zero, non può andare incontro a una batteria che il
+microtiming ce l'ha. Qui il basso lo prende.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `jtd.microtiming` (`jtd.py`) | ⚠️ **codice nuovo**: la **sequenza** delle deviazioni dal beat di uno strumento in un trio JTD nominato, in ordine. `[OSS]` su quell'esecuzione — mediare tira a zero, come per il groove template |
+| `MU.applica_microtiming` (`musica.py`) | ⚠️ **codice nuovo**: posa quella sequenza su una linea scritta, in ordine di tempo, ciclando. Muta in posto |
+| `tools/aggancio_scritto.py` | l'A/B: lo **stesso** walking sotto la **stessa** batteria (groove template), passata 1 **quantizzata**, passata 2 col **float** di Rufus Reid (*Bemsha Swing*, 1984). `AGGANCIO01` sul device |
+| `docs/istruzioni/aggancio.md` | l'istruzione |
+| `tests/test_all.py` | `test_applica_microtiming` + `test_jtd_microtiming` + `test_aggancio_scritto`. Suite **1386 → 1398** |
+
+### La cosa da sapere: la vita sta nella dispersione, non nel lay-back
+
+Misurando sei trii nominati (4/4): il **lay-back mediano** del basso è minuscolo
+(0-2 tick, spesso zero alla risoluzione JTD di 10 ms), ma la **dispersione** è
+~3-4 tick di float nota per nota — più della batteria. **È il float la vita**, e
+un basso quantizzato ha dispersione **zero**. Riprodurre solo la mediana (un
+template a 4 valori per posizione) sarebbe stato inutile: la scelta, presa
+dall'utente, è **la sequenza reale di un'esecuzione nominata**, non una
+distribuzione — un bassista ha un *andamento*, non rumore bianco.
+
+⚠️ **Cosa NON riproduce, e sta scritto nell'istruzione:** la coincidenza 1,60×
+(misura 3) resta un numero di **corpus**. Sul generatore la griglia a sedicesimi
+la rende tutto-o-niente, e la coincidenza vera vorrebbe basso **e** batteria
+dallo **stesso** trio (qui il float è JTD, il template è Groove MIDI: due dischi).
+Questo demo mostra una cosa più semplice: **un basso che respira contro un
+metronomo.**
+
+### Il verdetto, e la fonte
+
+⚠️ **Verdetto `[OSS]`: «ok funziona, è quasi impercettibile ma va bene»**
+(14 settembre 2026, `AGGANCIO01`). L'utente lo ha sentito e approvato, **e ha
+detto che è piccolo** — come previsto, e come la posizione nella batteria
+(§6-terdecies): il microtiming del basso è sottile. ⚠️ Ne segue una cosa per il
+futuro: **il float vale dentro il pieno, non come effetto da mostrare da solo**.
+`docs/repertori/jazz.md` casella 5 (misure 3 e 4); il difetto d'origine è in
+§6-vicies.
+
+### Il prossimo passo
+
+La **coincidenza vera** — basso e batteria dallo **stesso** trio JTD, così che la
+misura 3 diventi spendibile e non solo evocata — e i **feel diversi dallo swing**
+(spazzole, terzine). E l'aggancio come flag (`--aggancio`) va rivisto o buttato:
+il blocco non era lì.
 
 ---
 

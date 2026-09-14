@@ -304,6 +304,40 @@ def rimappa_dinamica(voci: list[list[Note]], pavimento: int,
     return {'toccate': len(tutte), 'da': (vmin, vmax), 'a': (pavimento, soffitto)}
 
 
+def applica_microtiming(note: list[Note], scarti_tick: list[int]) -> dict[str, object]:
+    """Posa una sequenza di scarti su una parte scritta, in ORDINE di tempo.
+
+    ⚠️ MUTA `note` in posto. A cosa serve: dare a una linea -- tipico il basso
+    walking -- il MICROTIMING che non ha. Un basso quantizzato esatto
+    (dispersione zero) non puo' andare incontro a una batteria che il
+    microtiming ce l'ha (il groove template): resta un metronomo sotto una
+    parte che respira, ed e' il difetto che blocca l'aggancio (casella 5 di
+    docs/repertori/jazz.md, docs/istruzioni/aggancio.md).
+
+    `scarti_tick` e' la sequenza di deviazioni, in tick, di UN esecutore vero --
+    da `jtd.microtiming()`, convertita al tempo del pezzo. Si posa in ordine di
+    tempo: la nota piu' presto prende il primo scarto, e cosi' via, CICLANDO se
+    le note sono piu' della sequenza. Positivo = dopo la griglia; `max(0, ...)`
+    perche' una nota non va prima di zero.
+
+    ⚠️ NON e' lo swing (di song) ne' il groove template (della batteria, per
+    passo): e' il float di UNA linea, nota per nota, da un'esecuzione nominata.
+    Ritorna un rapporto (regola 4): `toccate` e lo `scarto` minimo e massimo
+    posati.
+    """
+    if not scarti_tick:
+        raise ValueError('la sequenza di scarti e\' vuota')
+    ordinate = sorted(note, key=lambda n: n.pos)
+    posati = []
+    for i, n in enumerate(ordinate):
+        s = scarti_tick[i % len(scarti_tick)]
+        n.pos = max(0, n.pos + s)
+        posati.append(s)
+    return {'toccate': len(ordinate),
+            'scarto_min': min(posati) if posati else 0,
+            'scarto_max': max(posati) if posati else 0}
+
+
 def durata_in_tick(spec: str | int) -> int:
     """`'1/8'` -> 48 tick. Un intero passa invariato, gia' in tick."""
     if isinstance(spec, int):

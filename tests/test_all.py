@@ -8458,6 +8458,93 @@ def test_groove_template_scritto():
     check('il pezzo TOCCO01 e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
 
 
+def test_applica_microtiming():
+    """applica_microtiming posa una sequenza di scarti in ordine di tempo (musica.py)."""
+    from delugexml import musica as MU                        # noqa: PLC0415
+    from delugexml.notes import Note                          # noqa: PLC0415
+
+    note = [Note(pos=0, length=24, velocity=80),
+            Note(pos=96, length=24, velocity=80),
+            Note(pos=192, length=24, velocity=80)]
+    r = MU.applica_microtiming(note, [2, -3, 5])
+    check('posa gli scarti in ordine di tempo',
+          [n.pos for n in note] == [2, 93, 197], str([n.pos for n in note]))
+    check('il rapporto dice min e max (regola 4)',
+          r['scarto_min'] == -3 and r['scarto_max'] == 5, str(r))
+    n2 = [Note(pos=0, length=24, velocity=80), Note(pos=96, length=24, velocity=80)]
+    MU.applica_microtiming(n2, [10])
+    check('cicla una sequenza piu corta delle note',
+          [n.pos for n in n2] == [10, 106], str([n.pos for n in n2]))
+    n3 = [Note(pos=0, length=24, velocity=80)]
+    MU.applica_microtiming(n3, [-50])
+    check('non manda una nota prima di zero', n3[0].pos == 0, str(n3[0].pos))
+    check('una sequenza vuota e un errore',
+          _raises(lambda: MU.applica_microtiming(
+              [Note(pos=0, length=24, velocity=80)], []), ValueError))
+
+
+def test_jtd_microtiming():
+    """jtd.microtiming da la sequenza di deviazioni di un esecutore nominato.
+
+    Salta se manca il Jazz Trio Database (non versionato).
+    """
+    from delugexml import jtd as JT                           # noqa: PLC0415
+    zpath = ROOT / 'to-read' / 'MIDI' / 'jazz-trio-database-v02.zip'
+    if not zpath.exists():
+        salta('test_jtd_microtiming', 'manca il Jazz Trio Database')
+        return
+    z = JT.apri(zpath)
+    try:
+        nome = JT.nomi(z)[0]
+        seq = JT.microtiming(z, nome, 'bass')
+        check('e una sequenza di deviazioni (float, secondi)',
+              isinstance(seq, list) and all(isinstance(x, float) for x in seq),
+              f'{type(seq)}')
+        check('esclude i beat su cui il basso tace (nessun None)',
+              all(x is not None for x in seq))
+        check('uno strumento sconosciuto e un errore',
+              _raises(lambda: JT.microtiming(z, nome, 'sax'), ValueError))
+    finally:
+        z.close()
+
+
+def test_aggancio_scritto():
+    """L'aggancio (aggancio_scritto.py): il basso quantizzato vs col float,
+    l'esempio di docs/istruzioni/aggancio.md.
+
+    Salta se manca il Groove MIDI, il Jazz Trio Database o una fixture.
+    """
+    from delugexml import musica as MU                        # noqa: PLC0415
+    try:
+        import aggancio_scritto as AG                          # noqa: PLC0415
+    except FileNotFoundError:
+        salta('test_aggancio_scritto', 'manca una fixture')
+        return
+    try:
+        scarti = AG.scarti_float_tick(16)
+    except FileNotFoundError:
+        salta('test_aggancio_scritto', 'manca il Jazz Trio Database')
+        return
+
+    check('il float ha dispersione (non e un lay-back fisso)',
+          len(set(scarti)) > 1, str(scarti))
+    quant = AG.basso_quantizzato(0)
+    flott, _ = AG.basso_con_float(0)
+    off_q = sum(1 for note in quant.values() for n in note if n.pos % AG.MOV)
+    off_f = sum(1 for note in flott.values() for n in note if n.pos % AG.MOV)
+    check('il basso quantizzato e sulla griglia esatta (0 fuori)',
+          off_q == 0, str(off_q))
+    check('il basso col float esce dalla griglia (il microtiming)',
+          off_f > 0, str(off_f))
+
+    try:
+        doc, _ = AG.costruisci()
+    except FileNotFoundError:
+        salta('test_aggancio_scritto (build)', 'manca una fixture')
+        return
+    check('il pezzo AGGANCIO01 e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 

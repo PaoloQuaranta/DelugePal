@@ -258,6 +258,26 @@ def griglia(sorgente, fname: str) -> list[Beat]:
     return fuori
 
 
+def microtiming(sorgente, fname: str, strumento: str = 'bass') -> list[float]:
+    """La SEQUENZA delle deviazioni di uno strumento dal beat, in secondi, in
+    ordine di tempo, per i soli beat su cui ha suonato.
+
+    E' il `float` di UN esecutore nominato: nota per nota di quanto arriva
+    prima (-) o dopo (+) il beat. Serve a dare a un basso scritto il microtiming
+    che non ha -- vedi `musica.applica_microtiming()` e
+    `docs/istruzioni/aggancio.md`. Come tutto qui, RESTITUISCE il dato e non
+    decide niente: la scelta di quale esecuzione, e come applicarla, sta altrove.
+
+    ⚠️ E' [OSS] su quell'esecuzione, non [MIS] su un repertorio: mediare il
+    microtiming di bassisti diversi lo tira verso zero -- la stessa ragione per
+    cui il groove template della batteria viene da un'esecuzione sola.
+    """
+    if strumento not in STRUMENTI:
+        raise ValueError(f'strumento {strumento!r}: uno di {STRUMENTI}')
+    return [bt.scarti[strumento] for bt in griglia(sorgente, fname)
+            if bt.scarti[strumento] is not None]
+
+
 class Battuta(NamedTuple):
     """Una battuta completa, e cosa ci hanno suonato dentro i tre.
 
