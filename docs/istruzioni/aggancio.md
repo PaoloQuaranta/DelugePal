@@ -144,8 +144,30 @@ mostrare da solo.
 
 ## Cosa manca a questa istruzione
 
-- la **coincidenza vera** — basso **e** batteria dallo **stesso** trio JTD, così
-  che la misura 3 diventi spendibile e non solo evocata;
+⚠️ **La «coincidenza vera» (riprodurre la misura 3, 1,60×) è ARCHIVIATA — 15
+settembre 2026, decisione dell'utente.** Resta scritta perché la ragione vale più
+dell'idea. Tre motivi che convergono:
+
+- **l'orecchio ha già votato:** il payload è lo stesso microtiming che il verdetto
+  ha chiamato «quasi impercettibile». La coincidenza è quella roba lì, misurata
+  come statistica, non un suono nuovo;
+- **il dato la blocca:** la coincidenza «dallo stesso trio» vorrebbe basso *e*
+  batteria dalla stessa esecuzione, e ce l'ha solo il JTD — ma il JTD dà gli onset
+  di batteria **aggregati**, senza velocity né *quale* pezzo. Il groove template
+  (che fa suonare la batteria come una batteria) è del Groove MIDI, **batteria
+  sola**. Tenere il template *e* la coincidenza vera dallo stesso disco è
+  impossibile: barattare il suono per la statistica è un cattivo affare;
+- **è la trappola vietata:** riprodurre 1,60× è replicare una **superficie**
+  misurata, non comporre — la regola del 30 agosto (comune di `../MUSICA.md`).
+
+Quello che invece varrebbe, se un giorno si vuole spingere l'interazione, è
+**l'interazione a livello di EVENTO** (il basso che raccoglie un accento della
+batteria, la batteria che segue un fraseggio): udibile e compositiva, al
+contrario di un residuo sotto-tick. È il punto che `reazione.md` già segna in
+«cosa manca».
+
+Restano:
+
 - l'**aggancio come flag** (`--aggancio`, il secondo sorteggio della batteria):
-  va rivisto o buttato alla luce di questo — il blocco non era lì;
+  va rivisto o buttato — il blocco non era lì;
 - il **float fuori dal jazz** (altri strumenti, altri generi): su domanda.

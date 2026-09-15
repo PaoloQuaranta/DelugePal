@@ -151,8 +151,10 @@ che va incontro alla batteria: il difetto d'origine era un basso quantizzato
 esatto, e ora prende il **microtiming** (il float) di un basso JTD nominato
 (§6-septiestrigies, con `MU.applica_microtiming` e `jtd.microtiming`), verdetto
 *«ok funziona, quasi impercettibile ma va bene»* — un effetto piccolo, come il
-residuo di posizione della batteria. Manca il resto del ritmo (la **coincidenza
-vera** basso+batteria dallo stesso trio, i feel diversi dallo swing). ⚠️ **Il metodo cambia per area:** l'armonia si
+residuo di posizione della batteria. ⚠️ **La coincidenza vera (1,60×) è stata
+ARCHIVIATA il 15 settembre** — data bloccata e payload impercettibile, §6-septiestrigies;
+resta del ritmo l'**interazione a livello di evento** (udibile) e i feel diversi dallo
+swing. ⚠️ **Il metodo cambia per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
 letteratura nuova (Levine ×2, Piston *Counterpoint*, Crook) e tutta l'armonia è
@@ -3882,12 +3884,25 @@ futuro: **il float vale dentro il pieno, non come effetto da mostrare da solo**.
 `docs/repertori/jazz.md` casella 5 (misure 3 e 4); il difetto d'origine è in
 §6-vicies.
 
-### Il prossimo passo
+### Il prossimo passo, e una strada ARCHIVIATA
 
-La **coincidenza vera** — basso e batteria dallo **stesso** trio JTD, così che la
-misura 3 diventi spendibile e non solo evocata — e i **feel diversi dallo swing**
-(spazzole, terzine). E l'aggancio come flag (`--aggancio`) va rivisto o buttato:
-il blocco non era lì.
+⚠️ **La «coincidenza vera» (riprodurre la misura 3, 1,60×) è archiviata — 15
+settembre 2026, su domanda dell'utente: *«a cosa serve realmente?»*.** Tre motivi
+che convergono, e stanno per esteso in `docs/istruzioni/aggancio.md`: (1)
+l'orecchio ha già votato «quasi impercettibile» — è lo stesso microtiming, non un
+suono nuovo; (2) il dato la blocca — la coincidenza dallo stesso trio vorrebbe
+basso *e* batteria dalla stessa esecuzione, e solo il JTD ce l'ha, ma con la
+batteria in onset **aggregati** (niente velocity né voce), mentre il groove
+template è del Groove MIDI, batteria sola: tenere suono *e* coincidenza dallo
+stesso disco è impossibile; (3) è replicare una **superficie** misurata, la
+trappola vietata il 30 agosto. È la stessa lezione del lettore di partiture: si
+archivia col motivo perché una sessione futura non ci ricaschi.
+
+Restano: i **feel diversi dallo swing** (spazzole, terzine); e — se si vuole
+spingere l'interazione — **l'interazione a livello di EVENTO** (raccogliere un
+accento, seguire un fraseggio), che è udibile, al contrario di un residuo
+sotto-tick. L'aggancio come flag (`--aggancio`) va rivisto o buttato: il blocco
+non era lì.
 
 ---
 
