@@ -8378,6 +8378,68 @@ def test_reazione_scritto():
           str(verdetti))
 
 
+def test_interazione():
+    """interazione coglie la COLLOCAZIONE dentro la battuta, dove reazione
+    (densita per battuta) e cieca (musica.py).
+    """
+    from delugexml import musica as MU                        # noqa: PLC0415
+    from delugexml.notes import Note                          # noqa: PLC0415
+    B = MU.TICK_PER_BATTUTA
+    MOV = MU.TICK_PER_MOVIMENTO
+
+    # tema: movimenti 1-2 attivi (accento sul 1), buco sul 3-4, 4 battute
+    tema = [Note(pos=b * B + k * MOV, length=48, velocity=(110 if k == 0 else 80))
+            for b in range(4) for k in (0, 1)]
+    risp = [Note(pos=b * B + 2 * MOV, length=48, velocity=80) for b in range(4)]
+    pesta = [Note(pos=b * B + 0 * MOV, length=48, velocity=80) for b in range(4)]
+
+    ir = MU.interazione(risp, tema)
+    ip = MU.interazione(pesta, tema)
+    check('chi sta nei buchi RISPONDE (correlazione negativa)',
+          ir.verdetto == 'risponde' and ir.correlazione < 0,
+          f'{ir.verdetto} {ir.correlazione}')
+    check('chi sta sui colpi del tema e INSIEME (correlazione positiva)',
+          ip.verdetto == 'insieme' and ip.correlazione > 0,
+          f'{ip.verdetto} {ip.correlazione}')
+    check('chi pesta sull accento lo CATTURA (100%)', ip.cattura == 1.0, str(ip.cattura))
+    check('chi risponde nei buchi non cattura gli accenti (0%)',
+          ir.cattura == 0.0, str(ir.cattura))
+    check('la reazione (densita per battuta) NON distingue i due',
+          MU.reazione(risp, tema).verdetto == MU.reazione(pesta, tema).verdetto,
+          f'{MU.reazione(risp, tema).verdetto} vs {MU.reazione(pesta, tema).verdetto}')
+    check('una parte vuota TACE', MU.interazione([], tema).verdetto == 'tace')
+    piatto = [Note(pos=b * B, length=48, velocity=80) for b in range(4)]
+    check('senza accenti nel riferimento la cattura e None',
+          MU.interazione(pesta, piatto).cattura is None,
+          str(MU.interazione(pesta, piatto).cattura))
+
+
+def test_interazione_scritto():
+    """L'esempio (interazione_scritto.py): stesso tema, Rhodes che pesta vs
+    risponde -- stessa densita, collocazione opposta. docs/istruzioni/interazione.md.
+    """
+    from delugexml import musica as MU                        # noqa: PLC0415
+    import interazione_scritto as IN                          # noqa: PLC0415
+
+    ip = MU.interazione(IN.rhodes_pesta(), IN.tema())
+    ir = MU.interazione(IN.rhodes_risponde(), IN.tema())
+    check('il Rhodes che pesta e INSIEME e cattura l accento',
+          ip.verdetto == 'insieme' and ip.cattura == 1.0, f'{ip.verdetto} {ip.cattura}')
+    check('il Rhodes che risponde e nel BUCO', ir.verdetto == 'risponde', ir.verdetto)
+    check('e la reazione (densita) le vede uguali',
+          MU.reazione(IN.rhodes_pesta(), IN.tema()).verdetto
+          == MU.reazione(IN.rhodes_risponde(), IN.tema()).verdetto)
+
+    try:
+        doc, verdetti = IN.costruisci()
+    except FileNotFoundError:
+        salta('test_interazione_scritto (build)', 'manca un preset di refs/synths')
+        return
+    check('il pezzo e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('i verdetti sono insieme e risponde',
+          verdetti == {'pesta': 'insieme', 'risponde': 'risponde'}, str(verdetti))
+
+
 def test_rimappa_dinamica():
     """rimappa_dinamica alza il fondo tenendo ordine e proporzioni (musica.py).
 

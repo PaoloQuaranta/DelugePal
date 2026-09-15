@@ -152,9 +152,12 @@ esatto, e ora prende il **microtiming** (il float) di un basso JTD nominato
 (§6-septiestrigies, con `MU.applica_microtiming` e `jtd.microtiming`), verdetto
 *«ok funziona, quasi impercettibile ma va bene»* — un effetto piccolo, come il
 residuo di posizione della batteria. ⚠️ **La coincidenza vera (1,60×) è stata
-ARCHIVIATA il 15 settembre** — data bloccata e payload impercettibile, §6-septiestrigies;
-resta del ritmo l'**interazione a livello di evento** (udibile) e i feel diversi dallo
-swing. ⚠️ **Il metodo cambia per area:** l'armonia si
+ARCHIVIATA il 15 settembre** — data bloccata e payload impercettibile, §6-septiestrigies.
+Poi l'**interazione a livello di evento** — chiamata e risposta, la parte che mette gli
+eventi *dove* l'altra li chiede (§6-octiestrigies, con `MU.interazione`): la faccia
+**udibile** dell'interazione, verdetto *«ok funziona»*, e coglie ciò che la densità
+di `reazione` non vede. Resta del ritmo l'interazione a **più di due parti** e i feel
+diversi dallo swing. ⚠️ **Il metodo cambia per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
 letteratura nuova (Levine ×2, Piston *Counterpoint*, Crook) e tutta l'armonia è
@@ -3903,6 +3906,55 @@ spingere l'interazione — **l'interazione a livello di EVENTO** (raccogliere un
 accento, seguire un fraseggio), che è udibile, al contrario di un residuo
 sotto-tick. L'aggancio come flag (`--aggancio`) va rivisto o buttato: il blocco
 non era lì.
+
+---
+
+## 6-octiestrigies. L'interazione a livello di evento — 15 settembre 2026
+
+Chiude «l'interazione vera» che `reazione.md` lasciava in «cosa manca», e lo fa
+sul lato **udibile** — al contrario dell'aggancio (microtiming, archiviato perché
+impercettibile). L'idea: una parte non fa solo *spazio* all'altra (densità,
+`reazione`), ma mette i suoi eventi **dove e quando** l'altra li chiede — il basso
+che raccoglie un accento, la batteria che segue un fraseggio.
+
+### Cosa c'è adesso che prima non c'era
+
+| | |
+|---|---|
+| `MU.interazione` (`musica.py`) | ⚠️ **codice nuovo, un ANALIZZATORE**: presenza di un onset per **movimento** (più fine della battuta di `reazione`). Correlazione negativa = `risponde` (nei buchi), positiva = `insieme` (figura se `cattura` alta, muro se bassa); più `cattura`, la quota degli accenti del riferimento presi insieme. Con `Interazione` e `racconta_interazione` |
+| `tools/interazione_scritto.py` | l'A/B: lo **stesso** tema (chiama sui movimenti 1-2, buco sul 3-4), un Rhodes che **pesta** (sul colpo) vs **risponde** (nel buco). `INTERAZIONE01` sul device |
+| `docs/istruzioni/interazione.md` | l'istruzione, con le due facce |
+| `tests/test_all.py` | `test_interazione` + `test_interazione_scritto`. Suite **1398 → 1410** |
+
+### La cosa da sapere: l'evento coglie ciò che la densità non vede
+
+Le due passate dell'esempio hanno la **stessa densità** (uno stab per battuta),
+**collocazione opposta**. `MU.reazione` (densità per battuta) le vede **identiche**
+— `uniforme` entrambe — mentre `MU.interazione` le distingue: `insieme` (+0,55,
+cattura 100%) contro `risponde` (−0,64, cattura 0%). ⚠️ **È la prova, in un test,
+che serviva un secondo analizzatore**: la densità dice *quanto*, l'interazione dice
+*dove*, e sono due cose diverse. `reazione` resta il primo filtro; `interazione` è
+il secondo.
+
+⚠️ **`insieme` non è un difetto di per sé:** a distinguerlo dal muro è la
+`cattura` — alta vuol dire figura presa insieme (musica), bassa vuol dire pestare a
+caso sui colpi dell'altro.
+
+### Il verdetto, e la fonte
+
+⚠️ **Verdetto `[OSS]`: «ok funziona»** (15 settembre 2026, `INTERAZIONE01`). La
+conversazione si sente contro l'accavallarsi, e — nota per il futuro — **è un
+effetto PIENO, non sottile**: la collocazione degli eventi si sente, mentre il
+microtiming (aggancio) no. È la conferma che, fra le due strade dell'interazione,
+questa era quella da spendere e l'altra da archiviare.
+`docs/istruzioni/interazione.md`; il principio `[LIB]` (Riley) è in `batteria-jazz.md`.
+
+### Il prossimo passo
+
+L'interazione a **più di due parti** (il basso rispetto a melodia *e* batteria
+insieme: oggi `interazione` e `reazione` guardano una coppia per volta), e i **feel
+diversi dallo swing** (spazzole, terzine). Poi, fuori dal ritmo, si sale di
+priorità o di repertorio.
 
 ---
 

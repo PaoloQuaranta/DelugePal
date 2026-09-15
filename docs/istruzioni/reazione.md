@@ -147,9 +147,10 @@ all'orecchio. Passa al primo colpo.
 
 - la reazione a **più riferimenti insieme** (il basso rispetto a melodia **e**
   batteria): oggi `MU.reazione` guarda una coppia per volta;
-- l'**interazione** vera (non solo densità: il basso che raccoglie un accento
-  della batteria, la batteria che segue un fraseggio): la densità è una prima
-  misura, non tutto;
+- ~~l'**interazione** vera (non solo densità...)~~: **scritta** in
+  [`interazione.md`](interazione.md) — la collocazione per movimento, non la
+  densità per battuta (il basso che raccoglie un accento, la batteria che segue un
+  fraseggio);
 - ~~i **groove template** applicati alla parte reattiva~~: **scritto** in
   [`groove-template.md`](groove-template.md) — il tocco (velocity e microtiming di
   un batterista vero) sopra la reazione;

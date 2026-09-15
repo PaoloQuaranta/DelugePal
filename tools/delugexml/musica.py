@@ -1688,6 +1688,127 @@ def racconta_reazione(parte, riferimento, *, battute: int | None = None,
     ])
 
 
+#: La cella su cui si guarda la presenza di un onset: il movimento (quarto).
+#: PIU' FINE della battuta di `reazione()`, ed e' li' la differenza: due parti
+#: con la STESSA densita' per battuta ma opposte DENTRO la battuta -- una sul
+#: 1-2, l'altra sul 3-4 -- danno reazione muta (stessa densita') e interazione
+#: "risponde" (presenza opposta cella per cella).
+INTERAZIONE_CELLA = TICK_PER_MOVIMENTO
+#: Oltre questa correlazione (in valore assoluto) sulle presenze c'e' relazione.
+INTERAZIONE_SOGLIA = 0.30
+
+
+def _presenza_per_cella(parte, cella: int, ncelle: int | None = None) -> list[int]:
+    """0/1 per cella: 1 se un onset cade dentro quella cella."""
+    note = _tutte_le_note(parte)
+    if not note:
+        return [0] * (ncelle or 0)
+    nc = ncelle or (max(n.pos for n in note) // cella + 1)
+    out = [0] * nc
+    for n in note:
+        c = n.pos // cella
+        if 0 <= c < nc:
+            out[c] = 1
+    return out
+
+
+def _celle_con_accento(parte, cella: int, ncelle: int) -> list[int]:
+    """Le celle in cui la parte ha un ACCENTO -- velocity nel terzo alto del suo
+    range. `[]` se la parte non ha spread di velocity (nessun accento distinto)."""
+    note = _tutte_le_note(parte)
+    vels = [n.velocity for n in note]
+    if not vels or max(vels) == min(vels):
+        return []
+    soglia = min(vels) + 2 / 3 * (max(vels) - min(vels))
+    out = set()
+    for n in note:
+        if n.velocity >= soglia:
+            c = n.pos // cella
+            if 0 <= c < ncelle:
+                out.add(c)
+    return sorted(out)
+
+
+class Interazione(NamedTuple):
+    """I conti sull'interazione a livello di EVENTO fra una parte e un riferimento."""
+
+    presenza: list[int]           # 0/1 per cella, la PARTE
+    presenza_rif: list[int]       # 0/1 per cella, il RIFERIMENTO
+    correlazione: float | None    # Pearson sulle presenze (neg = risponde nel buco)
+    cattura: float | None         # quota degli accenti del rif presi insieme (None se il rif non accenta)
+    verdetto: str                 # risponde | insieme | slegato | tace
+
+
+def interazione(parte, riferimento, *, cella: int = INTERAZIONE_CELLA,
+                celle: int | None = None) -> Interazione:
+    """Misura se una parte INTERAGISCE col riferimento a livello di EVENTO.
+
+    ⚠️ NON compone: l'AI scrive la parte, questo fa i conti -- come `reazione`
+    e `contrappunto`. E' il passo oltre `reazione`, che guarda la densita' per
+    BATTUTA: qui si guarda la presenza di un onset per MOVIMENTO, e cosi' si
+    coglie la COLLOCAZIONE dentro la battuta, non solo la quantita'.
+
+    Due facce, quelle che l'utente ha nominato:
+
+      - RISPONDE (call-and-response): la parte mette i suoi eventi nei BUCHI del
+        riferimento -- correlazione NEGATIVA sulle presenze cella per cella. E'
+        "la batteria segue un fraseggio", "rispondi dove lasciano un buco"
+        (Riley). ⚠️ Diverso da `reazione.complementa`: due parti con la stessa
+        densita' per battuta ma opposte dentro la battuta danno reazione muta e
+        qui "risponde";
+      - CATTURA (prendere un accento): degli ACCENTI del riferimento, la quota
+        che la parte prende insieme (un onset nella stessa cella). E' "il basso
+        che raccoglie un accento della batteria", la figura presa insieme.
+
+    `verdetto`: `risponde` (riempie i buchi) e `insieme` (suona sui colpi del
+    riferimento: figure se `cattura` e' alta, muro se e' bassa) sono le due
+    relazioni; `slegato` e' nessuna delle due; `tace` se la parte non suona.
+    `cattura` e' `None` quando il riferimento non ha accenti distinguibili.
+    """
+    pp = _presenza_per_cella(parte, cella)
+    pr = _presenza_per_cella(riferimento, cella)
+    nc = max(len(pp), len(pr), celle or 0)
+    pp = pp + [0] * (nc - len(pp))
+    pr = pr + [0] * (nc - len(pr))
+
+    r = _pearson(pp, pr)
+    acc = _celle_con_accento(riferimento, cella, nc)
+    cattura = (sum(1 for c in acc if pp[c]) / len(acc)) if acc else None
+
+    if sum(pp) == 0:
+        verdetto = 'tace'
+    elif r is None:
+        verdetto = 'slegato'
+    elif r <= -INTERAZIONE_SOGLIA:
+        verdetto = 'risponde'
+    elif r >= INTERAZIONE_SOGLIA:
+        verdetto = 'insieme'
+    else:
+        verdetto = 'slegato'
+    return Interazione(pp, pr, r, cattura, verdetto)
+
+
+def racconta_interazione(parte, riferimento, *, cella: int = INTERAZIONE_CELLA,
+                         celle: int | None = None,
+                         nomi: tuple[str, str] = ('parte', 'riferimento')) -> str:
+    """L'interazione a parole (regola 4). ASCII soltanto (console cp1252)."""
+    it = interazione(parte, riferimento, cella=cella, celle=celle)
+    corr = 'piatto' if it.correlazione is None else f'{it.correlazione:+.2f}'
+    catt = 'n/d' if it.cattura is None else f'{it.cattura:.0%}'
+    spiega = {
+        'risponde': 'risponde: mette gli eventi nei BUCHI del riferimento (call-and-response)',
+        'insieme': 'insieme: suona sui colpi del riferimento (figure se cattura alta, muro se bassa)',
+        'slegato': 'SLEGATO: gli eventi non c entrano coi buchi del riferimento',
+        'tace': 'tace: la parte non suona',
+    }
+    return '\n'.join([
+        f'{nomi[0]} vs {nomi[1]}: {spiega[it.verdetto]}',
+        f'  presenza {nomi[0]:<10} {it.presenza}',
+        f'  presenza {nomi[1]:<10} {it.presenza_rif}',
+        f'  correlazione {corr} (neg = risponde), cattura accenti {catt}',
+    ])
+
+
 def racconta_armonia(spec: str, *, voicing: str = 'chiuso',
                      registro: str = 'do3', condotta: bool = True) -> str:
     """Cosa e' diventata ogni sigla, e quali ambiguita' sono state sciolte.
