@@ -8607,6 +8607,59 @@ def test_aggancio_scritto():
     check('il pezzo AGGANCIO01 e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
 
 
+def test_funk_scritto():
+    """Il funk dritto (funk_scritto.py): batteria + basso, l'esempio di
+    docs/istruzioni/batteria-funk.md e basso-funk.md.
+
+    Verdetto dell'ascolto (16 settembre 2026): batteria «va bene», basso
+    «meglio, soddisfacente per il test». Salta se manca il Groove MIDI o una
+    fixture.
+    """
+    from delugexml import musica as MU                        # noqa: PLC0415
+    try:
+        import funk_scritto as FK                              # noqa: PLC0415
+    except FileNotFoundError:
+        salta('test_funk_scritto', 'manca una fixture')
+        return
+
+    # il basso e' FITTO (~7 note/battuta, la mediana MISURATA su 40 basslinee),
+    # non scarno: era il difetto della prima versione
+    basso = FK.note_basso()
+    n_basso = sum(len(v) for v in basso.values())
+    dens = n_basso / FK.BATTUTE
+    check('il basso funk e fitto (~7 note/battuta)', 6.0 <= dens <= 8.5, f'{dens:.1f}')
+
+    # il basso e' DRITTO: ogni nota sul sedicesimo esatto (nessuno swing)
+    fuori = sum(1 for v in basso.values() for n in v if n.pos % FK.P)
+    check('il basso e dritto (sulla griglia dei sedicesimi)', fuori == 0, str(fuori))
+
+    # la fondamentale RIBATTUTA c'e' (E1=28 suona piu' volte, l'intervallo 0)
+    check('la fondamentale e ribattuta (E1 piu volte)',
+          len(basso.get(28, [])) >= 8, str(len(basso.get(28, []))))
+
+    # la batteria: the one sul kick, backbeat 2 e 4 sul rullante (pattern grezzo)
+    kick = FK.note_voce('kick')
+    snare = FK.note_voce('rullante')
+    check('la cassa e sul the one di ogni battuta',
+          all(any(n.pos == b * FK.B for n in kick) for b in range(FK.BATTUTE)),
+          'the one')
+    snare_b1 = sorted((n.pos // FK.P) for n in snare if n.pos < FK.B)
+    check('il rullante ha il backbeat su 2 e 4',
+          4 in snare_b1 and 12 in snare_b1, str(snare_b1))
+
+    # il pezzo e' dritto e valido, e il tocco si aggancia al groove template
+    try:
+        doc, rap = FK.costruisci()
+    except FileNotFoundError:
+        salta('test_funk_scritto (build)', 'manca il Groove MIDI o una fixture')
+        return
+    check('il pezzo FUNK e dritto (swing 50)',
+          doc.root.get('swingAmount') == '0', str(doc.root.get('swingAmount')))
+    check('il pezzo FUNK e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('la cassa e agganciata al groove template (0 passi orfani)',
+          rap.get('KICK', {}).get('senza_appoggio') == [], str(rap.get('KICK')))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 

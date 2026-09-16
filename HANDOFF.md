@@ -156,14 +156,68 @@ ARCHIVIATA il 15 settembre** — data bloccata e payload impercettibile, §6-sep
 Poi l'**interazione a livello di evento** — chiamata e risposta, la parte che mette gli
 eventi *dove* l'altra li chiede (§6-octiestrigies, con `MU.interazione`): la faccia
 **udibile** dell'interazione, verdetto *«ok funziona»*, e coglie ciò che la densità
-di `reazione` non vede. Resta del ritmo l'interazione a **più di due parti** e i feel
-diversi dallo swing. ⚠️ **Il metodo cambia per area:** l'armonia si
+di `reazione` non vede. ⚠️ **Poi sono cominciati i FEEL diversi dallo swing**
+(16 settembre 2026), in ordine di priorità dall'utente — **funk, ballad,
+twobeat**. ⚠️ **Il FUNK è FATTO:** batteria e basso *dritti*, in
+`docs/istruzioni/batteria-funk.md` e `docs/istruzioni/basso-funk.md`, con
+l'esempio lavorato `tools/funk_scritto.py` (e `test_funk_scritto`) — verdetto
+d'ascolto batteria *«va bene»*, basso *«meglio, soddisfacente per il test,
+niente di stellare»*. Il carattere: cassa sincopata sul *the one*, backbeat
+forte + ghost, charleston in crome, `swing` a 50; il basso non cammina — riff
+fitto (~7 note/battuta), fondamentale ribattuta + ottave + ghost + cromatismi,
+agganciato alla cassa. ⚠️ **Una lezione di metodo, la stessa del Jazz Trio
+Database:** il basso funk pareva senza corpus (JTD è walking, Weimar è la linea
+solista) — invece stava in `to-read/MIDI/The_Magic_of_MIDI` (40 basslinee
+misurate) e sul web; la domanda giusta era al disco, non «non c'è». **La
+prossima è la BALLAD.** L'agenda, le disponibilità di corpus e i
+sottogeneri (un altro asse, per più avanti) stanno qui sotto in «I feel ritmici, e
+i sottogeneri». (Resta anche l'interazione a più di due parti, più in là.) ⚠️ **Il metodo cambia per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
 letteratura nuova (Levine ×2, Piston *Counterpoint*, Crook) e tutta l'armonia è
 stata rivista con Levine: §6-octovicies** — Levine nomina le chord-scale che Smith
 rifiutava, e ora hanno `[LIB]`. I tool djvu sono installati (memoria
 `letteratura-composizione`).
+
+### I feel ritmici, e i sottogeneri — l'agenda del ritmo, 15 settembre 2026
+
+⚠️ **Finora il ritmo è tutto SWING** (walking, ride col giggidì, la misura dello
+swing, i groove template scelti). Il corpus ne ha molto di più. L'utente ha
+deciso di restare sul **feel** (non sui sottogeneri, per ora) e ha dato la
+priorità: **1) funk, 2) ballad, 3) twobeat**. Conteggi presi il 15 settembre
+2026 (stato del disco: `wjazzd.db`, Groove MIDI).
+
+⚠️ **Il cancello di sempre:** un'etichetta con pochi musicisti è `[OSS]` su un
+esecutore, non `[MIS]` su un repertorio (la lezione del reggae). Per il feel
+servono i solisti in Weimar (armonia/frase/vocabolario) **e** i batteristi in
+Groove MIDI (il groove template) — e i due lati non hanno la stessa copertura.
+
+| feel | Weimar `rhythmfeel` (assoli / solisti) | Groove MIDI (beat / batteristi) | nota |
+|---|---|---|---|
+| ~~SWING~~ | 361 / 67 | jazz 24/4, jazz/swing 11/2 | **fatto** |
+| ~~1. FUNK~~ | 20 / 9 | funk 36/4 (33 dritte) | **fatto** (16 set 2026): batteria+basso dritti. Etichetta `funk` esatta, BUR 1,02 (esclusi `purdieshuffle`/`fast`, swingati); basso ~7 note/battuta `[MIS]` su 40 basslinee di `The_Magic_of_MIDI`. Template `drummer8/session1/1`. Verdetto «va bene» / «soddisfacente» |
+| **2. BALLAD** ⬅ | 10 / 7 | — (nessun feel «ballad») | **la prossima.** Weimar regge la frase; il groove **no** — è lento/rubato, spazio e spazzole. Rubato su una griglia è la difficoltà |
+| **3. TWOBEAT** | 32 / 8 | — (nessun feel «twobeat») | Il 2-feel (basso su 1 e 3, mezzo tempo) è un cambio di **basso/comping**, non un groove template di batteria. Dixieland / swing antico |
+
+⚠️ **Metodo: ritmo = ascolto pieno.** E il feel non è solo `set_swing`: cambia il
+vocabolario del basso (il funk non cammina), del ride/comping, degli accenti. Il
+primo passo del funk è probabilmente spegnere lo swing e riscrivere basso e
+batteria dritti — ma va disegnato, non dedotto.
+
+**I sottogeneri jazz — l'ALTRO asse, per più avanti.** Non sono un feel: sono il
+**dialetto** melodico/armonico del solista (frase, scelte d'accordo), e toccano la
+priorità 1-2 più del ritmo. Salvati qui su richiesta dell'utente («ci torneremo»),
+da `wjazzd.db` (assoli / solisti):
+
+| sottogenere | assoli / solisti | | sottogenere | assoli / solisti |
+|---|---|---|---|---|
+| POSTBOP | 147 / 29 | | TRADITIONAL | 32 / 8 |
+| HARDBOP | 76 / 17 | | FUSION | 20 / 9 |
+| SWING | 66 / 14 | | FREE | 5 / 1 (`[OSS]`) |
+| BEBOP | 56 / 12 | | COOL | 54 / 9 |
+
+Si filtrano con `WJ.elenco(db, rhythmfeel=…)` e `WJ.elenco(db, style=…)`; le
+etichette esatte con `WJ.valori(db, 'rhythmfeel')` / `'style'`.
 
 Il testo qui sotto è la formulazione ORIGINALE del lavoro, tenuta perché resta
 vera nel merito — «serie competenze compositive» — ma ora ha una direzione
