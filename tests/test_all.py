@@ -8660,6 +8660,50 @@ def test_funk_scritto():
           rap.get('KICK', {}).get('senza_appoggio') == [], str(rap.get('KICK')))
 
 
+def test_ballad_scritto():
+    """La ballad (ballad_scritto.py): comping + basso in 2 + spazzole, l'esempio
+    di docs/istruzioni/basso-ballad.md e batteria-ballad.md.
+
+    Verdetto dell'ascolto (16 settembre 2026): «va bene». ⚠️ La sezione ritmica
+    della ballad NON ha corpus (Groove MIDI senza feel ballad, JTD da 102 BPM,
+    Weimar solo il solista): e' [LIB]+[DEC]. Il test protegge la correzione dello
+    spang-a-lang -- che era un riflesso, non dalle fonti. Salta se manca una fixture.
+    """
+    from delugexml import musica as MU                        # noqa: PLC0415
+    try:
+        import ballad_scritto as BL                            # noqa: PLC0415
+    except FileNotFoundError:
+        salta('test_ballad_scritto', 'manca una fixture')
+        return
+
+    # basso in 2: ~2 note/battuta (minime), non walking
+    basso = BL.basso_due()
+    dens = sum(len(v) for v in basso.values()) / BL.BATTUTE
+    check('il basso e in 2 (~2 note/battuta, non walking)', 1.8 <= dens <= 2.6, f'{dens:.1f}')
+    pos_b1 = sorted(n.pos for v in basso.values() for n in v if n.pos < BL.B)
+    check('il basso ha la fondamentale sul 1 e la quinta sul 3',
+          0 in pos_b1 and 2 * BL.MOV in pos_b1, str(pos_b1))
+
+    # batteria: lo strofinio (rullante) e il motore; NIENTE spang-a-lang sul ride
+    dr = BL.batteria()
+    check('lo strofinio (rullante) e il motore', len(dr['SNARE']) >= 2 * BL.BATTUTE,
+          str(len(dr['SNARE'])))
+    check('niente spang-a-lang: il ride e sporadico',
+          len(dr['RIDE']) <= BL.BATTUTE // 2, str(len(dr['RIDE'])))
+    vmax = max((n.velocity for v in dr.values() for n in v), default=0)
+    check('la batteria e tutta soft (nessun colpo forte)', vmax < 60, str(vmax))
+
+    # il pezzo e valido, col lilt di terzina (swing 66 -> grezzo 16)
+    try:
+        doc, _ = BL.costruisci()
+    except FileNotFoundError:
+        salta('test_ballad_scritto (build)', 'manca una fixture')
+        return
+    check('il pezzo BALLAD e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('il feel e a terzina (swing 66)',
+          doc.root.get('swingAmount') == '16', str(doc.root.get('swingAmount')))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 

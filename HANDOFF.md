@@ -168,8 +168,23 @@ fitto (~7 note/battuta), fondamentale ribattuta + ottave + ghost + cromatismi,
 agganciato alla cassa. ⚠️ **Una lezione di metodo, la stessa del Jazz Trio
 Database:** il basso funk pareva senza corpus (JTD è walking, Weimar è la linea
 solista) — invece stava in `to-read/MIDI/The_Magic_of_MIDI` (40 basslinee
-misurate) e sul web; la domanda giusta era al disco, non «non c'è». **La
-prossima è la BALLAD.** L'agenda, le disponibilità di corpus e i
+misurate) e sul web; la domanda giusta era al disco, non «non c'è». ⚠️ **Anche
+la BALLAD è FATTA** (16 settembre 2026), in `docs/istruzioni/basso-ballad.md` e
+`batteria-ballad.md`, esempio `tools/ballad_scritto.py` (e `test_ballad_scritto`),
+verdetto *«va bene»*. ⚠️ **Il caso difficile, e la lezione:** la sezione ritmica
+della ballad **non ha corpus** (Groove MIDI senza feel «ballad», JTD parte da
+102 BPM, Weimar dà solo il solista) — quindi è `[LIB]`+`[DEC]`, non `[MIS]`,
+dichiarato. Il carattere: tempo lento (~58-60), basso in **2** (fondamentale sul
+1, quinta sul 3, minime, scuro), batteria a **spazzole** (lo strofinìo sul
+rullante è il motore, non il ride), comping tenuto rootless; il lilt di terzina
+via `set_swing(66)`. ⚠️ **Due cose restano dichiarate mancanti:** il *rubato*
+(non rappresentabile a BPM fisso, resta al solista) e le *spazzole vere* (un
+campione; qui un kit soft di ripiego). ⚠️ **E una lezione di riflesso, colta
+dall'utente:** avevo messo lo **spang-a-lang sul ride** su ogni battuta — un mio
+automatismo dallo swing, **non dalle fonti**, e contro la mia stessa istruzione;
+a tempo di ballad il ride col bastone non si usa (*«the volume isn't there»*), il
+tempo lo tiene lo strofinìo. Corretto. **La prossima è la TWOBEAT.** L'agenda, le
+disponibilità di corpus e i
 sottogeneri (un altro asse, per più avanti) stanno qui sotto in «I feel ritmici, e
 i sottogeneri». (Resta anche l'interazione a più di due parti, più in là.) ⚠️ **Il metodo cambia per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
@@ -196,8 +211,8 @@ Groove MIDI (il groove template) — e i due lati non hanno la stessa copertura.
 |---|---|---|---|
 | ~~SWING~~ | 361 / 67 | jazz 24/4, jazz/swing 11/2 | **fatto** |
 | ~~1. FUNK~~ | 20 / 9 | funk 36/4 (33 dritte) | **fatto** (16 set 2026): batteria+basso dritti. Etichetta `funk` esatta, BUR 1,02 (esclusi `purdieshuffle`/`fast`, swingati); basso ~7 note/battuta `[MIS]` su 40 basslinee di `The_Magic_of_MIDI`. Template `drummer8/session1/1`. Verdetto «va bene» / «soddisfacente» |
-| **2. BALLAD** ⬅ | 10 / 7 | — (nessun feel «ballad») | **la prossima.** Weimar regge la frase; il groove **no** — è lento/rubato, spazio e spazzole. Rubato su una griglia è la difficoltà |
-| **3. TWOBEAT** | 32 / 8 | — (nessun feel «twobeat») | Il 2-feel (basso su 1 e 3, mezzo tempo) è un cambio di **basso/comping**, non un groove template di batteria. Dixieland / swing antico |
+| ~~2. BALLAD~~ | 10 / 7 | — (nessun feel «ballad») | **fatto** (16 set 2026): comping + basso in 2 + spazzole, `[LIB]`+`[DEC]` (niente corpus). Lo strofinìo tiene il tempo, non il ride; lilt via `set_swing(66)`. Restano rubato e spazzole vere. Verdetto «va bene» |
+| **3. TWOBEAT** ⬅ | 32 / 8 | — (nessun feel «twobeat») | **la prossima.** Il 2-feel (basso su 1 e 3, mezzo tempo) è un cambio di **basso/comping**, non un groove template di batteria. Dixieland / swing antico. ⚠️ Il basso in 2 è già scritto per la ballad ([basso-ballad.md](docs/istruzioni/basso-ballad.md)) — il twobeat lo riusa, veloce e saltellante |
 
 ⚠️ **Metodo: ritmo = ascolto pieno.** E il feel non è solo `set_swing`: cambia il
 vocabolario del basso (il funk non cammina), del ride/comping, degli accenti. Il
