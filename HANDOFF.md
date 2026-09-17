@@ -212,11 +212,23 @@ levare, basso **fuori** dalla cassa a ottave (l'opposto dell'hip hop), kit 808.
 `docs/istruzioni/batteria-house.md` e `basso-house.md`, esempio
 `tools/house_scritto.py` (e `test_house_scritto`), **scheda
 `docs/repertori/house.md`** con la sua riga nell'indice. Verdetto *«funziona»*.
-⚠️ **Ma l'essenza di house/techno resta da fare** — l'**arrangiamento** (build/drop)
-e il **filtro/sidechain**, dichiarati vuoti nelle caselle 9 e 10 della scheda: è il
-prossimo lavoro vero sul genere. La scelta del genere è dell'utente (gusti
-eclettici); gli altri contemporanei (DnB/jungle = break tagliato, che vuole prima
-lo slicing in `audio.py`; trip hop; elettronica/IDM) restano da aprire. ⚠️ **Il metodo cambia
+⚠️ **E il 17 settembre 2026 l'essenza di house/techno è FATTA** — l'**arrangiamento**
+(build/drop) e il **suono in movimento** (filtro + **sidechain interno del Deluge,
+NON il compressore** — sono due elementi XML distinti, `<sidechain>` vs
+`<audioCompressor>`; correzione esplicita dell'utente). Due primitive nuove in
+`musica.py`: **`MU.apri_filtro`** (la rampa del cutoff in unità display 0-50, vive
+nella clip) e **`MU.sidechain`** (send pieno sul kick + `sidechainCompressorVolume`
+nei `<params>` di ogni clip del bersaglio + sync nell'elemento `<sidechain>`).
+L'arco a 32 battute (intro/build/drop/breakdown/drop) in `tools/house2_scritto.py`
+(e `test_house2_scritto`), steso con `MU.forma`; l'istruzione
+`docs/istruzioni/arrangiamento-house.md`; **caselle 9 e 10 della scheda piene** e
+l'indice aggiornato. ⚠️ **Il corpus NON aveva un esempio di volume-ducking**
+(memoria `corpus-non-autoritativo`): la struttura si è presa dallo schema c1.3.0 e
+dai file veri (`[OSS]`), la magnitudine (`0xDE000000`) si è tarata all'orecchio.
+Caricato come `HOUSE02`, verdetto *«va bene»*. **1477 test.** Resta la **casella 8**
+(lead/topline, vocal chop — materiale di `audio.py`). La scelta del genere è
+dell'utente (gusti eclettici); gli altri contemporanei (DnB/jungle = break tagliato,
+che vuole prima lo slicing in `audio.py`; trip hop; elettronica/IDM) restano da aprire. ⚠️ **Il metodo cambia
 per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
