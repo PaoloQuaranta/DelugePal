@@ -1108,7 +1108,8 @@ casella della scheda corrispondente: la scheda è la fonte, questa matrice ne
 | [reggae / dub](repertori/reggae-dub.md) | ◐ | ● | ● | ◐ | ● | ● | ◐ | ○ | ◐ | ◐ | ● |
 | [jazz](repertori/jazz.md) | ◐ | ○ | ◐ | ● | ● | ● | ● | ● | ● | ◐ | ◐ |
 | classica · barocca · antica | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
-| elettronica · IDM · techno · hip hop · trip hop · DnB · jungle | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| [hip hop](repertori/hiphop.md) | ◐ | ● | ● | ● | ◐ | ● | ◐ | ○ | ○ | ◐ | ◐ |
+| elettronica · IDM · techno · trip hop · DnB · jungle | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 
 `●` compilata · `◐` parziale, e la scheda dice di cosa · `○` vuota.
 
@@ -1117,8 +1118,10 @@ stanno dentro la scheda, accanto all'affermazione che qualificano. La matrice
 dice solo dove c'è qualcosa.
 
 Gli altri repertori del perimetro — classica, barocca, antica; elettronica,
-IDM, techno, hip hop, trip hop, DnB, jungle — non hanno un file, e non è una
+IDM, techno, trip hop, DnB, jungle — non hanno un file, e non è una
 dimenticanza: un file che dicesse soltanto «vuota» undici volte è rumore da
 aprire, mentre una riga d'indice è la stessa informazione a costo zero. Le due
 righe aggregate qui sopra, senza link, sono quella informazione: undici
-caselle vuote, ripetuto per i due gruppi.
+caselle vuote, ripetuto per i due gruppi. ⚠️ **L'hip hop invece ha una scheda
+dal 17 settembre 2026** (il boom-bap): è la prima riga del **perimetro 3** con
+un file, e per questo sta staccata, col link.

@@ -199,7 +199,16 @@ Armstrong, Bechet, Kid Ory, Bix, Dodds), tempo (mediana 184) e swing (jazz.md
 casella 4, fascia 180-240: levare 63,7%, `set_swing(62)`). ⚠️ **Con questo i tre
 feel prioritari — funk, ballad, twobeat — sono FATTI.** Restano i **sottogeneri**
 (l'altro asse, qui sotto in «I feel ritmici, e i sottogeneri») e l'**interazione a
-più di due parti**, più in là. ⚠️ **Il metodo cambia per area:** l'armonia si
+più di due parti**, più in là. ⚠️ **E il 17 settembre 2026 è aperto il PERIMETRO 3
+(i contemporanei) col primo genere: l'hip hop boom-bap** — batteria `[MIS]` (Groove
+MIDI, dritto, BUR 1,03), basso `[LIB]`+`[DEC]`, sub rado agganciato alla cassa. Sta
+in `docs/istruzioni/batteria-hiphop.md` e `basso-hiphop.md`, esempio
+`tools/hiphop_scritto.py` (e `test_hiphop_scritto`), **scheda
+`docs/repertori/hiphop.md`** con la sua riga nell'indice di `MUSICA.md`. Verdetto
+*«ok funziona»*. La scelta del genere è dell'utente (gusti eclettici); gli altri
+contemporanei (techno/house = groove-macchina + suono; DnB/jungle = break tagliato,
+che vuole prima lo slicing in `audio.py`) restano da aprire. ⚠️ **Il metodo cambia
+per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
 letteratura nuova (Levine ×2, Piston *Counterpoint*, Crook) e tutta l'armonia è
