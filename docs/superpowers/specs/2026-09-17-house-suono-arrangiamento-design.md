@@ -113,18 +113,24 @@ d'arranger:
 |---|---|---|---|
 | **intro** | 8 | cassa + closed hat; open hat da metà | filtro un po' chiuso |
 | **build** | 4 | entrano basso e stab | **cutoff apre** (rampa) |
-| **drop** | 8 | tutto | **sidechain acceso**, filtro aperto |
-| **breakdown** | 4 | via la cassa; stab + basso | stab **filtrato** |
-| **drop 2** | 8 | rientro pieno | sidechain, filtro aperto |
+| **drop** | 8 | tutto | filtro aperto (il sidechain pompa: c'è la cassa) |
+| **breakdown** | 4 | via la cassa; stab + basso | stab **filtrato** (niente pompa: niente cassa) |
+| **drop 2** | 8 | rientro pieno | filtro aperto (torna la pompa) |
 
 - realizzato con `MU.forma` (entra/esce) + `arranger.place`/`place_unique` per le
   clip di sezione;
 - la cassa **si buca solo** nel breakdown (l'unica eccezione ammessa dalle
   istruzioni house);
-- il sidechain acceso nei drop, spento altrove → il pezzo respira;
+- ⚠️ **il sidechain si imposta UNA volta** (sui suoni basso/stab + send sulla
+  cassa), a livello di suono — **non** per-clip. Pompa **da sé** dovunque batte la
+  cassa: nei drop sì, nel breakdown no (la cassa è fuori, manca il trigger),
+  nell'intro è muto (basso/stab non ci sono ancora). L'arrangiamento accende e
+  spegne la pompa **senza automazione**, ed è la scelta più pulita e più corretta
+  del meccanismo del Deluge;
 - `verifica()` vuota prima del caricamento; test `test_house2_scritto` che
-  costruisce il doc, controlla la forma (le parti giuste per sezione), il
-  sidechain presente sui bersagli e assente altrove, e la rampa del cutoff.
+  costruisce il doc, controlla la forma (le parti giuste per sezione), che il
+  sidechain sia configurato sui bersagli e il send sul kick, e la rampa del
+  cutoff nel build.
 
 ### 3. L'istruzione — `docs/istruzioni/arrangiamento-house.md`
 
