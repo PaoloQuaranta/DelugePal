@@ -9126,6 +9126,43 @@ def test_sidechain():
     check('il documento resta valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
 
 
+def test_house2_scritto():
+    """house2_scritto.py: l'arco a 32 battute (build/drop) con filtro e sidechain.
+    Chiude le caselle 9 e 10 della scheda house."""
+    from delugexml import musica as MU                          # noqa: PLC0415
+    from delugexml import sound as SND, arranger as AR          # noqa: PLC0415
+    try:
+        import house2_scritto as H2                             # noqa: PLC0415
+    except FileNotFoundError:
+        salta('test_house2_scritto', 'manca una fixture')
+        return
+    try:
+        doc, _ = H2.costruisci()
+    except FileNotFoundError:
+        salta('test_house2_scritto (build)', 'manca una fixture')
+        return
+    check('il pezzo HOUSE2 e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('nessuna avvertenza sul pezzo HOUSE2',
+          MU.avvertenze(doc) == [], str(MU.avvertenze(doc)))
+    # l'arco copre 32 battute
+    est = AR.extent(doc)
+    check('l arco e lungo 32 battute',
+          est is not None and est[1] == 32 * MU.TICK_PER_BATTUTA, str(est))
+    # il sidechain e' impostato sui bersagli (nei params delle loro clip)
+    bass_clip = [c for _, c in S.clips(doc)
+                 if S.instrument_of(doc, c) is H2.strumento(doc, 'BASS')][0]
+    stab_clip = [c for _, c in S.clips(doc)
+                 if S.instrument_of(doc, c) is H2.strumento(doc, 'STAB')][0]
+    check('il basso duck',
+          SND.container(bass_clip).get('sidechainCompressorVolume') is not None)
+    check('lo stab duck',
+          SND.container(stab_clip).get('sidechainCompressorVolume') is not None)
+    # il kick manda al sidechain
+    kit = H2.strumento(doc, 'K808')
+    kick = MU._sound_di_drum(kit, H2.KICK)
+    check('il kick manda al sidechain', kick.get('sideChainSend') == '2147483647')
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
