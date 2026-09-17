@@ -8762,6 +8762,63 @@ def test_twobeat_scritto():
           doc.root.get('swingAmount') == '12', str(doc.root.get('swingAmount')))
 
 
+def test_hiphop_scritto():
+    """L'hip hop boom-bap (hiphop_scritto.py): batteria + sub + loop Rhodes,
+    l'esempio di docs/istruzioni/batteria-hiphop.md e basso-hiphop.md. Primo
+    genere del perimetro 3 (contemporanei).
+
+    La BATTERIA e' [MIS] (Groove MIDI hiphop, 34 beat, 5 batteristi, BUR 1,03 =
+    dritto); il BASSO e' [LIB]+[DEC] (nessun corpus). Il test protegge il
+    carattere: boom-bap DRITTO (non swingato), cassa 1-3, backbeat v127, hi-hat in
+    CROME (non sedicesimi), sub RADO e grave. Verdetto d'ascolto (17 settembre
+    2026): «ok funziona». Salta se manca una fixture.
+    """
+    from delugexml import musica as MU                        # noqa: PLC0415
+    try:
+        import hiphop_scritto as HH                            # noqa: PLC0415
+    except FileNotFoundError:
+        salta('test_hiphop_scritto', 'manca una fixture')
+        return
+
+    dr = HH.batteria()
+    # la cassa fa il boom su 1 e 3 di ogni battuta
+    check('la cassa fa il boom su 1 e 3',
+          all(any(n.pos == b * HH.B for n in dr['KICK'])
+              and any(n.pos == b * HH.B + HH.MIN for n in dr['KICK'])
+              for b in range(HH.BATTUTE)), 'boom')
+    # il rullante spacca sul 2 e 4 a v127 (il bap)
+    sn0 = {n.pos: n.velocity for n in dr['SNARE'] if n.pos < HH.B}
+    check('il backbeat spacca sul 2 e 4 a v127',
+          sn0.get(HH.MOV) == 127 and sn0.get(3 * HH.MOV) == 127, str(sorted(sn0)))
+    # i ghost restano molli (il divario e' il groove)
+    vmin = min(n.velocity for n in dr['SNARE'])
+    check('i ghost del rullante restano molli (< 60)', vmin < 60, str(vmin))
+    # l'hi-hat sono CROME, non sedicesimi: 8 colpi per battuta
+    check('l hi-hat e in crome (8 colpi/battuta, non sedicesimi)',
+          len(dr['HATC']) == 8 * HH.BATTUTE, str(len(dr['HATC'])))
+
+    # il sub e' RADO e GRAVE, agganciato alla cassa sul 1
+    basso = HH.basso()
+    dens = sum(len(v) for v in basso.values()) / HH.BATTUTE
+    check('il sub e rado (2-3.5 note/battuta, non un riff funk)',
+          2.0 <= dens <= 3.5, f'{dens:.2f}')
+    alt_max = max(basso.keys())
+    check('il sub e grave (nessuna nota sopra do3=48)', alt_max <= 48, str(alt_max))
+    check('il sub aggancia la cassa sul 1 (nota sul passo 0)',
+          any(n.pos == 0 for v in basso.values() for n in v), 'agganciato')
+
+    # il pezzo e' valido e DRITTO (boom-bap, swing 50 -> grezzo 0)
+    try:
+        doc, _ = HH.costruisci()
+    except FileNotFoundError:
+        salta('test_hiphop_scritto (build)', 'manca una fixture')
+        return
+    check('il pezzo HIP HOP e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('il boom-bap e dritto (swing 50)',
+          doc.root.get('swingAmount') == '0', str(doc.root.get('swingAmount')))
+    check('il tempo e lento (~90 BPM)', HH.BPM == 90, str(HH.BPM))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 
