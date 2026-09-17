@@ -1,15 +1,20 @@
 # House / techno
 
-**Parziale.** Compilata il 17 settembre 2026, **secondo genere del perimetro 3**.
-Copre la **four-on-the-floor** (house e techno, sullo stesso asse): la sezione
-ritmica è scritta e ascoltata (*«funziona»*). ⚠️ **Niente corpus** — sono generi
-**programmati** — quindi è `[LIB]`+`[DEC]`, la convenzione di genere. ⚠️ E manca
-proprio ciò che *fa* il genere: l'**arrangiamento** (build/drop, casella 9) e il
-**suono/filtro in movimento** (casella 10).
+**Quasi completa.** Compilata il 17 settembre 2026, **secondo genere del
+perimetro 3**. Copre la **four-on-the-floor** (house e techno, sullo stesso asse):
+la sezione ritmica è scritta e ascoltata (*«funziona»*), e il **17 settembre**
+si è aggiunta **l'essenza del genere** — l'**arrangiamento** (build/drop, casella
+9) e il **suono in movimento** (filtro + **sidechain interno**, casella 10): scritti
+e con `verifica()` pulita, **in attesa dell'ascolto** (suono+arrangiamento =
+ascolto pieno). ⚠️ **Niente corpus** — sono generi **programmati** — quindi è
+`[LIB]`+`[DEC]`, la convenzione di genere; la sola struttura XML del sidechain è
+`[OSS]` (file veri), la sua magnitudine `[da verificare]`.
 
-Il dettaglio operativo sta in [batteria-house.md](../istruzioni/batteria-house.md)
-e [basso-house.md](../istruzioni/basso-house.md), l'esempio in
-`tools/house_scritto.py`. Questa scheda è la vista per casella.
+Il dettaglio operativo sta in [batteria-house.md](../istruzioni/batteria-house.md),
+[basso-house.md](../istruzioni/basso-house.md) e
+[arrangiamento-house.md](../istruzioni/arrangiamento-house.md); gli esempi in
+`tools/house_scritto.py` (il groove) e `tools/house2_scritto.py` (l'arco). Questa
+scheda è la vista per casella.
 
 Il grado di prova: `[LIB]` convenzione documentata · `[DEC]` decisione presa qui.
 
@@ -56,10 +61,10 @@ hat sul levare, clap sul 2-4).
 
 ## 6. Dinamica
 
-**Parziale.** `[DEC]` Le velocity decise: cassa **112** (forte, uniforme), clap
-**100**, open hat **80**, closed hat **46**. ⚠️ Ma la vera dinamica di house/techno
-è il **sidechain** — il pompaggio di tutto sotto la cassa — che è una scelta di
-**mix**, non una nota, e qui **manca**. Per questo la casella è parziale.
+`[DEC]` Le velocity decise: cassa **112** (forte, uniforme), clap **100**, open hat
+**80**, closed hat **46**. ⚠️ Ma la vera dinamica di house/techno è il **sidechain**
+— il pompaggio di tutto sotto la cassa — che è una scelta di **mix**, non una nota:
+è coperto nella **casella 10** (`MU.sidechain`, il sidechain interno del Deluge).
 
 ## 7. Armonia
 
@@ -78,20 +83,52 @@ vocal-chop campionato (materiale di `audio.py`).
 
 ## 9. Forma e densità
 
-**Vuota**, ed è **l'essenza mancante del genere.** House e techno *sono* forma: il
-**build/drop** su 16-32-64 battute (entrano ed escono le parti, il filtro si apre,
-il breakdown toglie la cassa e la riporta). Una battuta non dice niente di un pezzo
-techno. Cosa manca: la mappa di forma dance — vive in `arranger.py` e
-nell'automazione, ed è il prossimo lavoro vero su questo genere.
+`[LIB]`+`[DEC]` **L'essenza del genere.** House e techno *sono* forma: il
+**build/drop** su 16-32-64 battute — entrano ed escono le parti, il filtro apre, il
+breakdown toglie la cassa e il drop la riporta. Una battuta non dice niente di un
+pezzo dance.
+
+L'arco si stende con **`MU.forma`** (la mappa delle sezioni nel tempo) +
+`arranger`: una clip per stato (intro scarna, piena, stab che apre, stab
+filtrato), riusate fra sezioni uguali; una clip corta piazzata su una sezione
+lunga **si ripete in loop**. L'arco minimo, nell'esempio `tools/house2_scritto.py`
+(32 battute):
+
+| sezione | batt. | cosa suona |
+|---|---|---|
+| intro | 8 | cassa + closed hat |
+| build | 4 | entrano basso e stab; il filtro apre |
+| drop | 8 | tutto + il sidechain pompa |
+| breakdown | 4 | via la cassa; stab filtrato + basso |
+| drop | 8 | rientro pieno |
+
+⚠️ Il **breakdown** è l'unico posto dove la cassa **si buca**: è l'eccezione che
+crea il vuoto da cui il drop rientra. Dettaglio in
+[arrangiamento-house.md](../istruzioni/arrangiamento-house.md).
 
 ## 10. Sul Deluge
 
-**Parziale.** `[DEC]` L'esempio `tools/house_scritto.py`: kit **808 From Mars** (il
-suono elettronico giusto, non un ripiego), `Square Saw Bass` scurito per il sub,
-`Pianism I` per lo stab, `set_swing(55)`. ⚠️ **Cosa manca:** il **filtro in
-movimento** (LFO→cutoff via `sound.set_patch_cable`, o l'automazione del cutoff) e
-il **sidechain** — metà del carattere del genere. La libreria c'è; l'esempio non li
-usa ancora.
+`[DEC]` I suoni: kit **808 From Mars** (il suono elettronico giusto, non un
+ripiego), `Square Saw Bass` scurito per il sub, `Pianism I` per lo stab,
+`set_swing(55)`.
+
+**Il suono in movimento** (l'esempio `tools/house2_scritto.py` lo usa):
+
+- **filtro che apre** — `MU.apri_filtro(doc, clip, da, a, da_tick, a_tick)` stende
+  una rampa del cutoff in unità display (0-50) sulla clip; vive nella clip, quindi
+  vale solo dove quella clip suona (il build apre, il drop è spalancato). Per lo
+  stab scuro del breakdown, un `lpfFrequency` fisso basso;
+- **sidechain interno** — `MU.sidechain(doc, bersaglio, quanto, sync, manda_da)`.
+  ⚠️ È il **sidechain** del Deluge, **non** il compressore (`<audioCompressor>`):
+  sono due elementi XML distinti. Tre pezzi: `sideChainSend` pieno sul kick (il
+  trigger), `sidechainCompressorVolume` nei `<params>` di ogni clip del bersaglio
+  (il ducking — è la clip che suona), `<sidechain>` sync sullo strumento. Si
+  imposta **una volta**: pompa da sé dove batte la cassa (drop sì, breakdown no).
+
+⚠️ La **struttura** del sidechain è `[OSS]` (verificata sui file veri, schema
+c1.3.0: valori `0xF2000000`/`0xDE000000`/`0xFC000000`); la **magnitudine/il verso**
+del duck sono `[da verificare]` — `sidechainCompressorVolume` non è in `param_ids`,
+quindi non ha scala di display e si tara all'orecchio.
 
 ## 11. Trappole del generatore
 
@@ -102,13 +139,21 @@ usa ancora.
   e il groove smette di pompare (l'opposto dell'hip hop);
 - **il suono è elettronico**: un kit acustico non fa house/techno (serve 808/909/CR-78);
 - **il movimento è nel filtro e nell'arrangiamento**, non nei colpi: aggiungere note
-  non fa progredire un pezzo dance — lo fanno il build/drop e lo sweep.
+  non fa progredire un pezzo dance — lo fanno il build/drop e lo sweep;
+- **il drop non aggiunge, rimette**: si tolgono e si rimettono parti + si apre il
+  filtro, non si accumulano colpi;
+- **il sidechain col SIDECHAIN, non col compressore**: sono due elementi XML
+  distinti (`<sidechain>` vs `<audioCompressor>`); il compressore non pompa.
 
 ### Fonti
 
 - ⚠️ **Nessun corpus**: techno/house sono programmati. Il `dance` di Groove MIDI è
   **7 esecuzioni di 2 batteristi** (`[OSS]`, non `[MIS]` — la lezione del reggae), e
-  non è four-on-the-floor;
+  non è four-on-the-floor. La struttura XML del sidechain è invece `[OSS]` (file
+  veri, schema c1.3.0);
 - istruzioni [batteria-house.md](../istruzioni/batteria-house.md),
-  [basso-house.md](../istruzioni/basso-house.md); esempio `tools/house_scritto.py`;
-- **verdetto d'ascolto (17 settembre 2026): «funziona».**
+  [basso-house.md](../istruzioni/basso-house.md),
+  [arrangiamento-house.md](../istruzioni/arrangiamento-house.md); esempi
+  `tools/house_scritto.py` (groove) e `tools/house2_scritto.py` (arco);
+- **verdetto d'ascolto:** il groove (17 settembre 2026) *«funziona»*; l'arco +
+  filtro + sidechain (17 settembre 2026) **è scritto, in attesa d'ascolto**.
