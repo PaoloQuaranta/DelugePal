@@ -70,6 +70,67 @@ di tutti gli stili «classici» — BUR 1,49 contro 1,80 dell'hardbop (casella 4
 (`record_info.releasedate`), e infatti il tradizionale risulta 1990-2007:
 sono incisioni di revival. Per datare uno stile questa colonna non serve.
 
+### I sottogeneri NON si distinguono per armonia — `[MIS]`
+
+Misurato il 17 settembre 2026, per rispondere a una domanda precisa dell'utente:
+*«per i sottogeneri jazz mi interessa l'aspetto armonico; ma un lavoro sulle
+sorgenti ha senso solo se aggiunge qualcosa a quello che abbiamo già estratto
+dalla letteratura, altrimenti è inutile»*. La domanda è il cancello del progetto
+— **il corpus dà relazioni, non superfici, e per l'armonia la teoria è
+autoritativa** — e la misura dice di **non aprire** un lavoro-corpus sull'armonia
+dei sottogeneri.
+
+Le changes annotate di **456 assoli** (`WJ.armonia`), la qualità di ogni accordo
+dedotta da `MU.sigla(...).gradi` (terza, settima, quinta), più il **ritmo
+armonico** (accordi per battuta) e la sovrapposizione di **repertorio** (titoli
+condivisi):
+
+| stile | acc/bar | dom7 | min7 | maj7/6 | m7b5/dim | maj/6 | sus |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| TRADITIONAL | 1,07 | 49 | 4 | 1 | 7 | **28** | 0 |
+| SWING | 1,14 | 45 | 23 | 6 | 5 | 17 | 0 |
+| BEBOP | 1,21 | 48 | 23 | 10 | 7 | 6 | 0 |
+| COOL | 1,10 | 44 | 26 | 13 | 7 | 7 | 0 |
+| HARDBOP | 1,11 | 53 | 23 | 14 | 4 | 2 | 0 |
+| POSTBOP | **0,80** | 44 | 24 | 12 | 5 | 6 | **5** |
+
+(percentuali sugli accordi annotati; n = 898/3316/3443/4113/6781/10860)
+
+**Tre cose, e portano tutte alla stessa conclusione:**
+
+1. **il repertorio non è il trucco.** I sottogeneri moderni condividono
+   pochissimi titoli (da **1 a 6** a coppia fra bebop/cool/hardbop/postbop):
+   ognuno suona brani suoi, quindi le differenze *potrebbero* essere di lingua,
+   non solo di canzoni. Ma —
+2. **la lingua armonica è la stessa.** Bebop, cool, hardbop e postbop hanno un
+   mix di qualità **quasi identico**: dom7 ~44-53%, min7 ~23-26%, maj7/6 ~10-14%.
+   È la **pratica unica** che Levine descrive. Rimacinarla dal corpus sarebbe
+   reverse engineering di ciò che il manuale spiega in una frase — il difetto
+   ricorrente di regola 0;
+3. **escono solo due segnali veri, e li abbiamo già:**
+   - **TRADITIONAL**: triadi + seste (28% `maj/6`), niente `maj7`, pochi `min7` —
+     la lingua funzionale del ragtime, già catturata (il twobeat, e la catena di
+     dominanti in [basso-twobeat.md](../istruzioni/basso-twobeat.md));
+   - **POSTBOP**: unico con **sus/quartali** (5% contro 0% ovunque) e **ritmo
+     armonico più lento** (0,80 acc/bar contro ~1,1) — cioè più modale/statico.
+     È l'asse bebop→modale, già in [armonia-modale.md](../istruzioni/armonia-modale.md)
+     e [ritmo-armonico.md](../istruzioni/ritmo-armonico.md).
+
+**Conclusione.** Il "sapore" armonico di un sottogenere è già ottenibile come
+**scelta compositiva** fra i moduli d'armonia che il progetto ha (funzionale vs
+modale, ritmo armonico più o meno fitto): non serve estrarlo. L'unica cosa che il
+corpus aggiungerebbe davvero **non è armonia**: è il **dialetto del solista sopra
+le changes** — quali tensioni, cromatismi e note "fuori" sceglie un bebopper
+contro un postbopper — che Weimar ha allineato all'accordo e la letteratura non
+quantifica. Ma quello è **vocabolario melodico (casella 8)**, e si aprirà solo il
+giorno in cui l'interesse passa dall'armonia **alla linea**.
+
+⚠️ **Il limite della misura, dichiarato:** guarda la **qualità d'accordo** e il
+**ritmo armonico**, non la *riarmonizzazione* né le *sostituzioni* fini. Quelle
+però vivono nella **linea** del solista (implicite), non nelle changes annotate —
+quindi una passata più fine non ribalterebbe il verdetto sull'armonia, lo
+sposterebbe sul dialetto melodico, che è la casella 8.
+
 ### Cosa cambia fra un feel e l'altro
 
 | feel | il basso | la batteria |

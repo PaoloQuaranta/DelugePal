@@ -247,6 +247,18 @@ da `wjazzd.db` (assoli / solisti):
 Si filtrano con `WJ.elenco(db, rhythmfeel=…)` e `WJ.elenco(db, style=…)`; le
 etichette esatte con `WJ.valori(db, 'rhythmfeel')` / `'style'`.
 
+⚠️ **Ma la faccia ARMONICA di quest'asse è un vicolo cieco, MISURATO il 17
+settembre 2026** (`docs/repertori/jazz.md`, casella 1, «I sottogeneri NON si
+distinguono per armonia»): bebop/cool/hardbop/postbop parlano la **stessa lingua
+armonica** (dom7 ~45-50%, min7 ~24%, maj7 ~12%), e i due soli stili che spiccano —
+TRADITIONAL (triadi + seste) e POSTBOP (sus/quartali + ritmo armonico più lento) —
+sono **già nei moduli** (`armonia-funzionale`, `armonia-modale`, `ritmo-armonico`).
+Il sapore armonico di un sottogenere è una **scelta compositiva**, non
+un'estrazione. Del corpus resta da aprire solo la faccia **melodica** — il
+dialetto del solista sopra le changes (tensioni, cromatismi, note «fuori») — che è
+**casella 8 (la linea)**, non armonia. Decisione dell'utente: non aprire il
+corpus finché l'interesse è armonico.
+
 Il testo qui sotto è la formulazione ORIGINALE del lavoro, tenuta perché resta
 vera nel merito — «serie competenze compositive» — ma ora ha una direzione
 precisa.
