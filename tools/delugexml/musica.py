@@ -1464,6 +1464,83 @@ def apri_filtro(doc, clip, da: int, a: int, da_tick: int, a_tick: int,
             'da_tick': da_tick, 'a_tick': a_tick, 'passi': passi}
 
 
+def _sound_di_drum(kit, nome: str):
+    """Il nodo <sound> del drum che si chiama `nome`, dentro un <kit>."""
+    from . import song as S                                     # noqa: PLC0415
+    from . import kit as K                                      # noqa: PLC0415
+    return S.drums(kit)[K.drum_index_of(kit, nome)]
+
+
+def sidechain(doc, bersaglio, *, quanto: str = '0xDE000000', sync: int = 7,
+              manda_da=None) -> dict:
+    """Accende il SIDECHAIN interno del Deluge -- il pompaggio della house.
+
+    NON e' il compressore (`<audioCompressor>`): quello e' un'altra cosa e non si
+    tocca. Il sidechain e' un inviluppo attack/release innescato dalle note di un
+    kit; qui si fanno i tre pezzi:
+
+    1. il TRIGGER -- `manda_da=(kit, nome_drum)` mette `sideChainSend` al massimo
+       sul <sound> di quel drum (di solito il kick): e' lui a innescare la pompa;
+    2. il DUCKING -- sul `bersaglio` (nodo strumento synth: basso, stab) scrive
+       `sidechainCompressorVolume=quanto` nel defaultParams E nei <params> di OGNI
+       sua clip, e assicura `sidechainCompressorShape`: e' il volume che respira
+       sotto la cassa. Va nei params della clip perche' e' LEI che suona;
+    3. il TEMPO -- `syncLevel=sync`/`syncType=0` nel figlio <sidechain> dello
+       strumento.
+
+    ⚠️ STRUTTURA verificata dai file veri (schema c1.3.0); la MAGNITUDINE e il
+    VERSO del duck sono `[da verificare]` all'orecchio -- `sidechainCompressorVolume`
+    non e' in `param_ids`, quindi si scrive come attributo grezzo, non via
+    `sound.set`. I valori osservati nei file: 0xF2000000, 0xDE000000, 0xFC000000.
+    Il pompaggio si sente solo DOVE batte il kick: l'arrangiamento lo accende e lo
+    spegne senza automazione (nel break manca il trigger).
+    """
+    from . import sound as SND                                  # noqa: PLC0415
+    from . import song as S                                     # noqa: PLC0415
+    from .parser import Node                                    # noqa: PLC0415
+
+    def _duck(nodo):
+        cont = SND.container(nodo)
+        if cont is None:
+            return False
+        cont.set('sidechainCompressorVolume', quanto)
+        if not cont.has('sidechainCompressorShape'):
+            cont.set('sidechainCompressorShape', '0xDC28F5B2')
+        return True
+
+    # il ducking va nei <params> di OGNI clip del bersaglio: e' il params della
+    # clip che suona. Uno strumento synth creato da `add_track` NON ha piu' un
+    # contenitore proprio (il suo defaultParams e' finito sulla clip), quindi
+    # scriverci e' opzionale; a contare sono le clip. Se il bersaglio e' invece
+    # un nodo con container (una clip passata direttamente, un kit), lo si scrive
+    # comunque. Se non si tocca nulla, e' un errore: non pomperebbe niente.
+    toccati = 1 if _duck(bersaglio) else 0
+    n_clip = 0
+    for _, clip in S.clips(doc):
+        if S.instrument_of(doc, clip) is bersaglio and _duck(clip):
+            n_clip += 1
+            toccati += 1
+    if toccati == 0:
+        raise ValueError('sidechain(): nessun contenitore di parametri su cui '
+                         'scrivere il ducking (ne bersaglio ne sue clip)')
+
+    # il tempo del pompaggio: l'elemento <sidechain> sta sullo STRUMENTO
+    sc = bersaglio.find('sidechain')
+    if sc is None:
+        sc = bersaglio.append(Node(tag='sidechain'))
+    sc.set('syncLevel', str(sync))
+    sc.set('syncType', '0')
+
+    inviato = None
+    if manda_da is not None:
+        kit, nome = manda_da
+        _sound_di_drum(kit, nome).set('sideChainSend', '2147483647')
+        inviato = nome
+    return {'bersaglio': getattr(bersaglio, 'tag', '?'), 'quanto': quanto,
+            'sync': sync, 'clip_ducked': n_clip, 'manda_da': inviato,
+            'da_verificare': True}
+
+
 # -------------------------------------------------------------------- il fill
 #
 # Il fill e' la transizione nella BATTERIA: una battuta, al giunto fra due

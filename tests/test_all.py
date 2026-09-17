@@ -9080,6 +9080,52 @@ def test_apri_filtro():
     check('apri_filtro racconta cosa ha fatto', r['param'] == 'lpfFrequency', str(r))
 
 
+def test_sidechain():
+    """MU.sidechain: send sul kick + volume-ducking sul bersaglio + <sidechain> sync.
+
+    Struttura verificata dai file veri (schema c1.3.0). La MAGNITUDINE del duck
+    e' [da verificare] all'orecchio: il test controlla la struttura, non il suono.
+    """
+    from delugexml import musica as MU                          # noqa: PLC0415
+    from delugexml import sound as SND                          # noqa: PLC0415
+    from delugexml import create as C                           # noqa: PLC0415
+    import warnings                                             # noqa: PLC0415
+    piano = REFS / 'synths' / 'Pianism I.XML'
+    kitf = REFS / 'kits' / '808 From Mars.XML'
+    tem = REFS / 'songs' / 'TEMPL0.XML'
+    if not (piano.exists() and kitf.exists() and tem.exists()):
+        salta('test_sidechain', 'manca una fixture')
+        return
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        doc = parse_file(tem)
+        iP, cP = C.add_track(doc, str(piano), name='STAB', folder='SYNTHS',
+                             length=384, playing=True)
+        kit, cK = C.add_track(doc, str(kitf), name='K808', folder='KITS',
+                              length=384, playing=True)
+        r = MU.sidechain(doc, iP, quanto='0xDE000000', sync=7,
+                         manda_da=(kit, 'BD A 808 Decay C 04'))
+    # il ducking vive nei <params> della clip (e' lei che suona): lo strumento
+    # synth creato da add_track non ha piu' un container proprio.
+    check('il ducking e scritto nei params della clip',
+          SND.container(cP).get('sidechainCompressorVolume') == '0xDE000000',
+          SND.container(cP).get('sidechainCompressorVolume'))
+    check('sidechain conta le clip toccate', r.get('clip_ducked') == 1, str(r))
+    check('lo shape del sidechain e presente sulla clip',
+          SND.container(cP).get('sidechainCompressorShape') == '0xDC28F5B2',
+          SND.container(cP).get('sidechainCompressorShape'))
+    sc = iP.find('sidechain')
+    check('il <sidechain> ha il sync chiesto',
+          sc is not None and sc.get('syncLevel') == '7', str(sc and sc.attrs))
+    # il kick manda al sidechain
+    kick = MU._sound_di_drum(kit, 'BD A 808 Decay C 04')
+    check('il kick manda al sidechain (send pieno)',
+          kick.get('sideChainSend') == '2147483647', kick.get('sideChainSend'))
+    check('sidechain dichiara il valore da verificare',
+          r.get('da_verificare') is True, str(r))
+    check('il documento resta valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
