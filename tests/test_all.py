@@ -8819,6 +8819,60 @@ def test_hiphop_scritto():
     check('il tempo e lento (~90 BPM)', HH.BPM == 90, str(HH.BPM))
 
 
+def test_house_scritto():
+    """La house four-on-the-floor (house_scritto.py): 808 + basso in levare +
+    stab, l'esempio di docs/istruzioni/batteria-house.md e basso-house.md. Secondo
+    genere del perimetro 3.
+
+    ⚠️ NIENTE CORPUS (techno/house sono programmati): e' [LIB]+[DEC]. Il test
+    protegge il carattere: cassa su OGNI movimento (four-on-the-floor), open hat
+    sui LEVARE, e il basso FUORI dalla cassa (l'opposto dell'hip hop), a ottave.
+    Verdetto d'ascolto (17 settembre 2026): «funziona». Salta se manca una fixture.
+    """
+    from delugexml import musica as MU                        # noqa: PLC0415
+    try:
+        import house_scritto as HS                             # noqa: PLC0415
+    except FileNotFoundError:
+        salta('test_house_scritto', 'manca una fixture')
+        return
+
+    movimenti = {0, HS.MOV, 2 * HS.MOV, 3 * HS.MOV}
+    dr = HS.batteria()
+    # la cassa e' su OGNI movimento (four-on-the-floor)
+    k0 = {n.pos for n in dr[HS.KICK] if n.pos < HS.B}
+    check('la cassa e four-on-the-floor (ogni movimento)', k0 == movimenti, str(sorted(k0)))
+    # l'open hat sta sui LEVARE, mai sul movimento
+    oh0 = {n.pos for n in dr[HS.OH] if n.pos < HS.B}
+    check('l open hat sta sui levare (48,144,240,336), non sul movimento',
+          oh0 == {48, 144, 240, 336} and not (oh0 & movimenti), str(sorted(oh0)))
+    # il clap sul 2 e 4
+    cl0 = {n.pos for n in dr[HS.CLAP] if n.pos < HS.B}
+    check('il clap sul 2 e 4', cl0 == {HS.MOV, 3 * HS.MOV}, str(sorted(cl0)))
+
+    # il basso e' FUORI dalla cassa: nessuna nota su un movimento
+    basso = HS.basso()
+    sul_mov = [n.pos for v in basso.values() for n in v if (n.pos % HS.B) in movimenti]
+    check('il basso e FUORI dalla cassa (nessuna nota sul movimento)',
+          sul_mov == [], str(sul_mov[:4]))
+    # e rimbalza all'OTTAVA (esiste una coppia di altezze a 12 semitoni)
+    alt = set(basso.keys())
+    check('il basso rimbalza all ottava', any(a + 12 in alt for a in alt), str(sorted(alt)))
+    # grave: le fondamentali sono deep, le ottave non salgono oltre il basso (fa3=53)
+    check('il basso e grave con rimbalzo d ottava (fond. deep, ottave <= fa3)',
+          min(alt) <= 36 and max(alt) <= 53, f'{min(alt)}-{max(alt)}')
+
+    # valido, con lo shuffle house (55 -> grezzo 5) e ~124 BPM
+    try:
+        doc, _ = HS.costruisci()
+    except FileNotFoundError:
+        salta('test_house_scritto (build)', 'manca una fixture')
+        return
+    check('il pezzo HOUSE e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('lo shuffle house e leggero (swing 55)',
+          doc.root.get('swingAmount') == '5', str(doc.root.get('swingAmount')))
+    check('il tempo e ~124 BPM', HS.BPM == 124, str(HS.BPM))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 
