@@ -16,9 +16,10 @@ Il grado di prova: `[MIS]` misurato su un corpus · `[LIB]` letteratura ·
 
 ---
 
-## 1. Cos'è, e cosa non è — `[MIS]`+`[DEC]`
+## 1. Cos'è, e cosa non è
 
-Il **boom-bap**: dritto, lento (~90 BPM), cassa pesante sul 1 e sul 3, backbeat
+**Parziale.** Copre il **boom-bap** — un solo angolo di un genere vastissimo —
+`[MIS]`+`[DEC]`: dritto, lento (~90 BPM), cassa pesante sul 1 e sul 3, backbeat
 forte, hi-hat in crome, molta aria. DJ Premier, Pete Rock, l'East Coast.
 
 **Cosa NON è**, e con cosa lo si scambia:
@@ -31,18 +32,18 @@ forte, hi-hat in crome, molta aria. DJ Premier, Pete Rock, l'East Coast.
 - ⚠️ come per ogni feel, «hip hop» è un **ombrello**: qui è il boom-bap, non il
   genere intero.
 
-## 2. Metro e griglia — `[DEC]`
+## 2. Metro e griglia
 
 4/4, **16 passi** (sedicesimi), la stessa griglia del resto del progetto.
 Rigida: il boom-bap è dritto.
 
-## 3. Tempo — `[MIS]`
+## 3. Tempo
 
 `[MIS]` Groove MIDI, etichetta `hiphop`: da **67 a 140 BPM**, **mediana 91**. Il
 centro del boom-bap sta ~**85-95**. (I vicini: il lo-fi ~70-90, il trap spesso in
 half-time.)
 
-## 4. Feel — `[MIS]` (la casella forte)
+## 4. Feel
 
 `[MIS]` Groove MIDI `hiphop`, `beat_type='beat'`: **34 esecuzioni, 5 batteristi**.
 La BUR mediana è **1,03** — cioè **dritto** (quartili 1,01-1,07), col pocket
@@ -54,7 +55,7 @@ crome swingate e il ritardo dietro la griglia sono di altri esecutori. Resta
 spacciare per il boom-bap dritto. È la lezione del reggae, *un esecutore non è un
 repertorio*, qui in un verso.
 
-## 5. Ruoli e spartizione — `[MIS]`+`[LIB]`
+## 5. Ruoli e spartizione
 
 La spartizione: **basso + cassa = il grave** (1 e 3), **rullante + hi-hat =
 l'alto** (backbeat 2-4 e crome), **il loop campionato = l'armonia**. L'**aria**
@@ -67,7 +68,7 @@ fra il boom e il bap è la firma.
   e 3 — nessun corpus in casa lo trascrive. Dettaglio in
   [basso-hiphop.md](../istruzioni/basso-hiphop.md).
 
-## 6. Dinamica — `[MIS]`
+## 6. Dinamica
 
 `[MIS]` `GR.scala()` su `hiphop`: numeri, non aggettivi.
 
@@ -81,7 +82,7 @@ fra il boom e il bap è la firma.
 ⚠️ **Il divario 127 / 40-50 È il groove.** Se i ghost e l'hi-hat salgono alla
 forza del backbeat, il boom-bap sparisce.
 
-## 7. Armonia — `[LIB]`, presa dai moduli
+## 7. Armonia
 
 ⚠️ L'armonia dell'hip hop **è il loop campionato**: un giro breve (2-4 battute),
 spesso jazzy/soul, ripetuto in modo ipnotico — min7/9, maj7/9, sus, il 7#9. Non è
@@ -91,31 +92,32 @@ sottogeneri jazz — *il sapore è una scelta compositiva, non un'estrazione*
 ([jazz.md](jazz.md), casella 1). L'esempio: `Am9 | Dm9 | Fmaj7 | E7#9`, rootless,
 sul Rhodes polveroso.
 
-## 8. Melodia e ornamentazione — ○
+## 8. Melodia e ornamentazione
 
 **Vuota.** La «melodia» dell'hip hop è la **topline campionata** o il **flow del
 rap** — che il Deluge non canta e che il progetto non ha toccato. Cosa manca: il
 rapporto col **sample-chop** (una linea tagliata da un disco), che è materiale di
 `audio.py`, non note suonate.
 
-## 9. Forma e densità — ○
+## 9. Forma e densità
 
 **Vuota.** La forma hip hop è **basata sul loop** (4/8/16 battute) con
 intro/strofa/hook e i **drop** (togliere e rimettere parti). Cosa manca: la mappa
 di forma del genere — l'apparato `MU.forma`/`MU.dinamica` del jazz si può
 **provare** qui, su domanda.
 
-## 10. Sul Deluge — `[DEC]`, parziale
+## 10. Sul Deluge
 
-L'esempio `tools/hiphop_scritto.py`: kit acustico (`KIT009`) di ripiego, `Square
-Saw Bass` scurito per il sub, `Tal Rhodes` per il loop polveroso, `set_swing(50)`.
+**Parziale.** `[DEC]` L'esempio `tools/hiphop_scritto.py`: kit acustico (`KIT009`)
+di ripiego, `Square Saw Bass` scurito per il sub, `Tal Rhodes` per il loop
+polveroso, `set_swing(50)`.
 
 ⚠️ **Cosa manca: il SUONO.** Il boom-bap vive del **campione polveroso** —
 batteria vinilica filtrata e saturata, il sub 808 col glide e la distorsione. È
 **sound design** (`dsp-recipes`), non note: qui c'è un kit di ripiego, ed è il
 buco più grande all'ascolto.
 
-## 11. Trappole del generatore — `[DEC]`
+## 11. Trappole del generatore
 
 - **il basso non è un riff funk**: 2-4 note rade, non 7; è il fondo, non una voce;
 - **l'hi-hat non sono sedicesimi fitti**: crome — l'hip hop lascia aria;

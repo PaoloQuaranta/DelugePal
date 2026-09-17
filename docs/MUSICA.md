@@ -1108,7 +1108,7 @@ casella della scheda corrispondente: la scheda è la fonte, questa matrice ne
 | [reggae / dub](repertori/reggae-dub.md) | ◐ | ● | ● | ◐ | ● | ● | ◐ | ○ | ◐ | ◐ | ● |
 | [jazz](repertori/jazz.md) | ◐ | ○ | ◐ | ● | ● | ● | ● | ● | ● | ◐ | ◐ |
 | classica · barocca · antica | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
-| [hip hop](repertori/hiphop.md) | ◐ | ● | ● | ● | ◐ | ● | ◐ | ○ | ○ | ◐ | ◐ |
+| [hip hop](repertori/hiphop.md) | ◐ | ● | ● | ● | ● | ● | ● | ○ | ○ | ◐ | ● |
 | elettronica · IDM · techno · trip hop · DnB · jungle | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
 
 `●` compilata · `◐` parziale, e la scheda dice di cosa · `○` vuota.
