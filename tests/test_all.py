@@ -9052,6 +9052,34 @@ def test_passaggio_scritto():
     check('ogni nota della melodia e una nota del suo accordo', ok, '')
 
 
+def test_apri_filtro():
+    """MU.apri_filtro: una rampa del cutoff in unita' display (0-50), sulla clip."""
+    from delugexml import musica as MU                          # noqa: PLC0415
+    from delugexml import automation as A, sound as SND, params as P  # noqa: PLC0415
+    p = REFS / 'songs' / 'TEMPL4.XML'
+    if not p.exists():
+        salta('test_apri_filtro', 'TEMPL4.XML assente')
+        return
+    doc = parse_file(p)
+    clip = [c for _, c in S.clips(doc)][1]        # una clip di synth
+    r = MU.apri_filtro(doc, clip, 10, 45, 0, 384, passi=7)
+    grezzo = SND.container(clip).get('lpfFrequency')
+    check('apri_filtro scrive un blob di automazione su lpfFrequency',
+          A.is_automation(grezzo), str(grezzo)[:40])
+    testa, punti = A.decode(grezzo)
+    disp = [P.to_display(pt.hex) for pt in punti]
+    check('la rampa parte da ~10 e arriva a ~45',
+          disp[0] <= 12 and disp[-1] >= 43, str(disp))
+    check('la rampa sale davvero, punto per punto',
+          all(b >= a for a, b in zip(disp, disp[1:])), str(disp))
+    check('le posizioni vanno da 0 a 384',
+          (punti[0].pos, punti[-1].pos) == (0, 384),
+          f'{punti[0].pos}..{punti[-1].pos}')
+    check('la vista automazione e sulla clip',
+          clip.get('lastSelectedParamID') == '24', clip.get('lastSelectedParamID'))
+    check('apri_filtro racconta cosa ha fatto', r['param'] == 'lpfFrequency', str(r))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

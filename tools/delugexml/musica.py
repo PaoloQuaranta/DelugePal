@@ -1435,6 +1435,35 @@ def variazione(doc, sorgente, pos: int, *, length: int | None = None):
     return copia
 
 
+def apri_filtro(doc, clip, da: int, a: int, da_tick: int, a_tick: int,
+                *, passi: int = 7) -> dict:
+    """Una rampa lineare del cutoff (lpfFrequency) sulla clip, in unita' display.
+
+    `da` e `a` sono il cutoff 0-50 come sul display; `da_tick`/`a_tick` il tratto
+    in tick. Scrive il blob di automazione e rende la vista visibile (senno' sul
+    dispositivo l'automazione, pur corretta, non si vede -- `automation.mark_view`).
+    E' il "filtro che apre" del build house. Wrapper di `automation.ramp_internal`,
+    che tiene i punti sulla griglia interna (come fa il firmware). L'automazione
+    vive nella clip, quindi si applica solo dove QUELLA clip suona: e' cosi' che il
+    build ha lo sweep e il resto no.
+    """
+    from . import automation as AU                              # noqa: PLC0415
+    from . import sound as SND                                  # noqa: PLC0415
+    from . import params as P                                   # noqa: PLC0415
+    if not (0 <= da <= 50 and 0 <= a <= 50):
+        raise ValueError(f'cutoff fuori da 0-50: da={da}, a={a}')
+    def _interno(d):
+        return min(P.INTERNO_MAX, round(d * P.INTERNI / 50))
+    testa, punti = AU.ramp_internal(_interno(da), _interno(a), da_tick, a_tick, passi)
+    cont = SND.container(clip)
+    if cont is None:
+        raise ValueError('la clip non ha un contenitore di parametri')
+    cont.set('lpfFrequency', AU.encode(testa, punti))
+    AU.mark_view(doc, clip, 'lpfFrequency')
+    return {'param': 'lpfFrequency', 'da': da, 'a': a,
+            'da_tick': da_tick, 'a_tick': a_tick, 'passi': passi}
+
+
 # -------------------------------------------------------------------- il fill
 #
 # Il fill e' la transizione nella BATTERIA: una battuta, al giunto fra due
