@@ -177,10 +177,15 @@ def test_sidechain():
                               length=384, playing=True)
         r = MU.sidechain(doc, iP, quanto='0xDE000000', sync=7,
                          manda_da=(kit, 'BD A 808 Decay C 04'))
-    # il bersaglio duck: l'attributo c'e' nel container, col valore chiesto
+    # il bersaglio duck: l'attributo c'e' nel defaultParams dello strumento...
     check('il ducking e scritto sul bersaglio',
           SND.container(iP).get('sidechainCompressorVolume') == '0xDE000000',
           SND.container(iP).get('sidechainCompressorVolume'))
+    # ...e PROPAGATO ai <params> della clip (e' lei che suona)
+    check('il ducking e propagato alla clip',
+          SND.container(cP).get('sidechainCompressorVolume') == '0xDE000000',
+          SND.container(cP).get('sidechainCompressorVolume'))
+    check('sidechain conta le clip toccate', r.get('clip_ducked') == 1, str(r))
     check('lo shape del sidechain e presente',
           SND.container(iP).get('sidechainCompressorShape') == '0xDC28F5B2',
           SND.container(iP).get('sidechainCompressorShape'))
@@ -236,27 +241,47 @@ def sidechain(doc, bersaglio, *, quanto: str = '0xDE000000', sync: int = 7,
     lo spegne senza automazione (nel breakdown manca il trigger).
     """
     from . import sound as SND                                  # noqa: PLC0415
-    cont = SND.container(bersaglio)
-    if cont is None:
+    from . import song as S                                     # noqa: PLC0415
+
+    def _duck(nodo):
+        cont = SND.container(nodo)
+        if cont is None:
+            return False
+        cont.set('sidechainCompressorVolume', quanto)
+        if not cont.has('sidechainCompressorShape'):
+            cont.set('sidechainCompressorShape', '0xDC28F5B2')
+        return True
+
+    # il ducking va nel defaultParams dello strumento E nei <params> di OGNI sua
+    # clip: e' il params della clip che suona (creata come copia del default). Se
+    # si scrivesse solo sul default, le clip gia' create non pomperebbero.
+    if not _duck(bersaglio):
         raise ValueError(f'<{bersaglio.tag}> non ha un contenitore di parametri')
-    cont.set('sidechainCompressorVolume', quanto)
-    if not cont.has('sidechainCompressorShape'):
-        cont.set('sidechainCompressorShape', '0xDC28F5B2')
+    n_clip = 0
+    for _, clip in S.clips(doc):
+        if S.instrument_of(doc, clip) is bersaglio and _duck(clip):
+            n_clip += 1
+
+    # il tempo del pompaggio: l'elemento <sidechain> sta sullo STRUMENTO
     sc = bersaglio.find('sidechain')
     if sc is None:
         sc = bersaglio.append(Node(tag='sidechain'))
     sc.set('syncLevel', str(sync))
     sc.set('syncType', '0')
+
     inviato = None
     if manda_da is not None:
         kit, nome = manda_da
         _sound_di_drum(kit, nome).set('sideChainSend', '2147483647')
         inviato = nome
     return {'bersaglio': getattr(bersaglio, 'tag', '?'), 'quanto': quanto,
-            'sync': sync, 'manda_da': inviato, 'da_verificare': True}
+            'sync': sync, 'clip_ducked': n_clip, 'manda_da': inviato,
+            'da_verificare': True}
 ```
 
 Nota: `Node` è già importato in `musica.py` (usato da `passi`/`scrivi`). Se non lo fosse, aggiungere `from .parser import Node` in cima; verificare con un grep prima di aggiungerlo.
+
+⚠️ **Ordine in `house2_scritto`:** chiamare `MU.sidechain` **dopo** aver creato tutte le clip dei bersagli, così la propagazione le raggiunge tutte.
 
 - [ ] **Step 4: Run test to verify it passes**
 
