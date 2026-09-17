@@ -4,11 +4,12 @@
 perimetro 3**. Copre la **four-on-the-floor** (house e techno, sullo stesso asse):
 la sezione ritmica è scritta e ascoltata (*«funziona»*), e il **17 settembre**
 si è aggiunta **l'essenza del genere** — l'**arrangiamento** (build/drop, casella
-9) e il **suono in movimento** (filtro + **sidechain interno**, casella 10): scritti
-e con `verifica()` pulita, **in attesa dell'ascolto** (suono+arrangiamento =
-ascolto pieno). ⚠️ **Niente corpus** — sono generi **programmati** — quindi è
+9) e il **suono in movimento** (filtro + **sidechain interno**, casella 10):
+scritti, con `verifica()` pulita, e **ascoltati sul dispositivo** (*«va bene»*, 17
+settembre 2026). ⚠️ **Niente corpus** — sono generi **programmati** — quindi è
 `[LIB]`+`[DEC]`, la convenzione di genere; la sola struttura XML del sidechain è
-`[OSS]` (file veri), la sua magnitudine `[da verificare]`.
+`[OSS]` (file veri), e la sua magnitudine (`0xDE000000`) è **confermata
+all'orecchio**.
 
 Il dettaglio operativo sta in [batteria-house.md](../istruzioni/batteria-house.md),
 [basso-house.md](../istruzioni/basso-house.md) e
@@ -126,9 +127,10 @@ ripiego), `Square Saw Bass` scurito per il sub, `Pianism I` per lo stab,
   imposta **una volta**: pompa da sé dove batte la cassa (drop sì, breakdown no).
 
 ⚠️ La **struttura** del sidechain è `[OSS]` (verificata sui file veri, schema
-c1.3.0: valori `0xF2000000`/`0xDE000000`/`0xFC000000`); la **magnitudine/il verso**
-del duck sono `[da verificare]` — `sidechainCompressorVolume` non è in `param_ids`,
-quindi non ha scala di display e si tara all'orecchio.
+c1.3.0: valori `0xF2000000`/`0xDE000000`/`0xFC000000`); la **magnitudine** del duck
+(`sidechainCompressorVolume = 0xDE000000`) è `[OSS]`+`[ascolto]` — non ha scala di
+display (`sidechainCompressorVolume` non è in `param_ids`), quindi si è tarata
+all'orecchio: verdetto *«va bene»* (17 settembre 2026).
 
 ## 11. Trappole del generatore
 
@@ -156,4 +158,4 @@ quindi non ha scala di display e si tara all'orecchio.
   [arrangiamento-house.md](../istruzioni/arrangiamento-house.md); esempi
   `tools/house_scritto.py` (groove) e `tools/house2_scritto.py` (arco);
 - **verdetto d'ascolto:** il groove (17 settembre 2026) *«funziona»*; l'arco +
-  filtro + sidechain (17 settembre 2026) **è scritto, in attesa d'ascolto**.
+  filtro + sidechain (17 settembre 2026) *«va bene»*.

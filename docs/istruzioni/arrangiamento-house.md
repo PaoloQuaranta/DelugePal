@@ -16,8 +16,8 @@ House e techno **sono forma**: una battuta non dice niente di un pezzo, è il
 ⚠️ **NIENTE CORPUS, come per tutto house/techno** (generi programmati): questo
 documento è **`[LIB]`+`[DEC]`**, la convenzione di produzione elettronica. La
 **struttura XML del sidechain** è invece `[OSS]` (verificata sui file veri del
-Deluge, schema c1.3.0); la **magnitudine** del ducking è `[da verificare]`
-all'orecchio.
+Deluge, schema c1.3.0); la **magnitudine** del ducking (`0xDE000000`) è stata
+tarata e **confermata all'orecchio** (*«va bene»*, 17 settembre 2026).
 
 **Cosa ti serve prima di cominciare:**
 
@@ -116,11 +116,12 @@ dove batte la cassa**: nei drop sì; nel breakdown no, perché manca la cassa ch
 innesca; nell'intro è muto perché basso e stab non ci sono ancora.
 **L'arrangiamento accende e spegne la pompa senza automazione.**
 
-⚠️ **`quanto` è `[da verificare]`.** La struttura è presa dai file veri, ma la
-*forza* e il *verso* del duck si tarano **suonando** (`sidechainCompressorVolume`
+⚠️ **`quanto` si tara all'orecchio.** La struttura è presa dai file veri, ma la
+*forza* e il *verso* del duck si giudicano **suonando** (`sidechainCompressorVolume`
 non sta nella tabella dei parametri, quindi non ha una scala di display pulita).
-Valori visti in file veri: `0xF2000000`, `0xDE000000`, `0xFC000000`. Si parte da
-uno di questi e si corregge all'orecchio.
+Valori visti in file veri: `0xF2000000`, `0xDE000000`, `0xFC000000`. Per la house
+dell'esempio **`0xDE000000` è confermato all'orecchio** (*«va bene»*, 17 settembre
+2026); per un kit o un pezzo diverso, ri-giudicare da uno di questi.
 
 ---
 
@@ -155,15 +156,13 @@ uno di questi e si corregge all'orecchio.
 `Am9 | Dm9 | Fmaj9 | Em9`, kit 808, `Square Saw Bass` scurito, `Pianism I` per lo
 stab. Il filtro apre nel build, lo stab del breakdown è filtrato scuro, il
 sidechain pompa nei drop. `verifica()` vuota, nessuna avvertenza.
-⚠️ **Verdetto dell'ascolto: da dare** (suono+arrangiamento = ascolto pieno).
+⚠️ **Verdetto dell'ascolto (17 settembre 2026): *«va bene»*.**
 
 ---
 
 ## Cosa manca a questo documento
 
 - il **`[MIS]`**: non esiste (generi programmati), e non è una lacuna da colmare;
-- la **taratura del duck** (`quanto`/`sync`/attack-release): `[da verificare]`
-  finché l'orecchio non la chiude sul dispositivo;
 - la **techno acid** (LFO sul cutoff, continuo): nominata, non implementata;
 - il **lead/topline** e il **vocal chop** (casella 8 della scheda): materiale di
   `audio.py`, fuori da qui.

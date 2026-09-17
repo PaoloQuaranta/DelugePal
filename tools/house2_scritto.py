@@ -18,10 +18,12 @@ Il suono in movimento:
   kick 808 + volume-ducking su basso e stab). NON e' il compressore. Si imposta
   una volta: pompa da se' dove batte la cassa (drop si', break no).
 
-⚠️ NIENTE CORPUS (generi programmati): [LIB]+[DEC]. ⚠️ La MAGNITUDINE del duck
-(`QUANTO`) e' [DA VERIFICARE] all'orecchio: struttura dai file veri, valore no.
+⚠️ NIENTE CORPUS (generi programmati): [LIB]+[DEC]. La struttura del sidechain e'
+[OSS] (file veri); la MAGNITUDINE del duck (`QUANTO=0xDE000000`) e' stata tarata
+all'orecchio.
 
-Metodo: suono+arrangiamento = ascolto pieno dell'utente. Verdetto: da dare.
+Metodo: suono+arrangiamento = ascolto pieno dell'utente.
+Verdetto (17 settembre 2026): «va bene».
 """
 from __future__ import annotations
 
@@ -55,8 +57,9 @@ LOOP = ['Am9', 'Dm9', 'Fmaj9', 'Em9']      # il giro, 4 battute
 BARS = len(LOOP)                           # 4 -- la lunghezza di ogni clip-loop
 LUNG = BARS * B                            # una clip dura 4 battute e si ripete
 
-# ⚠️ [DA VERIFICARE] all'orecchio: la profondita' del ducking. Valore osservato
-# in file veri del Deluge (schema c1.3.0). Il verso e la forza si tarano suonando.
+# La profondita' del ducking. Valore osservato in file veri del Deluge (schema
+# c1.3.0) e CONFERMATO all'orecchio per questa house (verdetto «va bene», 17 set
+# 2026). Per un kit o un pezzo diverso, ri-giudicare suonando.
 QUANTO = '0xDE000000'
 
 
