@@ -183,10 +183,23 @@ campione; qui un kit soft di ripiego). ⚠️ **E una lezione di riflesso, colta
 dall'utente:** avevo messo lo **spang-a-lang sul ride** su ogni battuta — un mio
 automatismo dallo swing, **non dalle fonti**, e contro la mia stessa istruzione;
 a tempo di ballad il ride col bastone non si usa (*«the volume isn't there»*), il
-tempo lo tiene lo strofinìo. Corretto. **La prossima è la TWOBEAT.** L'agenda, le
-disponibilità di corpus e i
-sottogeneri (un altro asse, per più avanti) stanno qui sotto in «I feel ritmici, e
-i sottogeneri». (Resta anche l'interazione a più di due parti, più in là.) ⚠️ **Il metodo cambia per area:** l'armonia si
+tempo lo tiene lo strofinìo. Corretto. ⚠️ **E il TWOBEAT è FATTO** (17 settembre
+2026), in `docs/istruzioni/basso-twobeat.md` e `batteria-twobeat.md`, esempio
+`tools/twobeat_scritto.py` (e `test_twobeat_scritto`), verdetto *«ok funziona»*.
+Il 2-feel dixieland: come la ballad (1 e 3, minime) ma **veloce e saltellante** —
+basso corto e brillante col **rilancio** cromatico e una battuta **«in 4»** al V7,
+l'**oom-pah** (cassa 1-3 / charleston croccante 2-4), il **press roll**
+approssimato sul rullante, comping **«stride»** sul 2 e 4, e **niente
+spang-a-lang** (Riley p. 57: nel 2-feel meno figure di semiminima sul ride, e il
+charleston croccante «con un po' di scatto» — è ciò che separa il twobeat dalla
+ballad). ⚠️ **La sezione ritmica è `[LIB]`+`[DEC]` come la ballad** (nessun corpus:
+Weimar dà il solista, JTD walking da 102 BPM, Groove MIDI senza feel «twobeat»);
+il `[MIS]` copre solo genere (Weimar TWOBEAT = 100% TRADITIONAL, 8 solisti —
+Armstrong, Bechet, Kid Ory, Bix, Dodds), tempo (mediana 184) e swing (jazz.md
+casella 4, fascia 180-240: levare 63,7%, `set_swing(62)`). ⚠️ **Con questo i tre
+feel prioritari — funk, ballad, twobeat — sono FATTI.** Restano i **sottogeneri**
+(l'altro asse, qui sotto in «I feel ritmici, e i sottogeneri») e l'**interazione a
+più di due parti**, più in là. ⚠️ **Il metodo cambia per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
 letteratura nuova (Levine ×2, Piston *Counterpoint*, Crook) e tutta l'armonia è
@@ -212,7 +225,7 @@ Groove MIDI (il groove template) — e i due lati non hanno la stessa copertura.
 | ~~SWING~~ | 361 / 67 | jazz 24/4, jazz/swing 11/2 | **fatto** |
 | ~~1. FUNK~~ | 20 / 9 | funk 36/4 (33 dritte) | **fatto** (16 set 2026): batteria+basso dritti. Etichetta `funk` esatta, BUR 1,02 (esclusi `purdieshuffle`/`fast`, swingati); basso ~7 note/battuta `[MIS]` su 40 basslinee di `The_Magic_of_MIDI`. Template `drummer8/session1/1`. Verdetto «va bene» / «soddisfacente» |
 | ~~2. BALLAD~~ | 10 / 7 | — (nessun feel «ballad») | **fatto** (16 set 2026): comping + basso in 2 + spazzole, `[LIB]`+`[DEC]` (niente corpus). Lo strofinìo tiene il tempo, non il ride; lilt via `set_swing(66)`. Restano rubato e spazzole vere. Verdetto «va bene» |
-| **3. TWOBEAT** ⬅ | 32 / 8 | — (nessun feel «twobeat») | **la prossima.** Il 2-feel (basso su 1 e 3, mezzo tempo) è un cambio di **basso/comping**, non un groove template di batteria. Dixieland / swing antico. ⚠️ Il basso in 2 è già scritto per la ballad ([basso-ballad.md](docs/istruzioni/basso-ballad.md)) — il twobeat lo riusa, veloce e saltellante |
+| ~~3. TWOBEAT~~ | 32 / 8 | — (nessun feel «twobeat») | **fatto** (17 set 2026): 2-feel dixieland — basso 1-3 corto e saltellante (rilancio + una battuta «in 4»), **oom-pah** (cassa 1-3 / charleston croccante 2-4), press roll approssimato, comping «stride» 2-4, niente spang-a-lang (Riley p. 57). `[LIB]`+`[DEC]` come la ballad; `[MIS]` solo su genere (100% TRADITIONAL, 8 solisti) e tempo (mediana 184). Verdetto «ok funziona». `basso-twobeat.md`/`batteria-twobeat.md`, `tools/twobeat_scritto.py` |
 
 ⚠️ **Metodo: ritmo = ascolto pieno.** E il feel non è solo `set_swing`: cambia il
 vocabolario del basso (il funk non cammina), del ride/comping, degli accenti. Il

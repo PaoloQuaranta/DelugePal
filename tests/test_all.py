@@ -8704,6 +8704,64 @@ def test_ballad_scritto():
           doc.root.get('swingAmount') == '16', str(doc.root.get('swingAmount')))
 
 
+def test_twobeat_scritto():
+    """Il twobeat dixieland (twobeat_scritto.py): basso in 2 saltellante +
+    oom-pah + press roll, l'esempio di docs/istruzioni/basso-twobeat.md e
+    batteria-twobeat.md.
+
+    ⚠️ La sezione ritmica del twobeat NON ha corpus (Groove MIDI senza feel
+    twobeat, JTD da 102 BPM e walking, Weimar solo il solista): e' [LIB]+[DEC].
+    Il [MIS] copre solo il genere (Weimar TWOBEAT = 100% TRADITIONAL) e il tempo
+    (mediana 184). Il test protegge il carattere: 2-feel CORTO (non le minime
+    tenute della ballad), oom-pah, niente spang-a-lang. Verdetto d'ascolto
+    (17 settembre 2026): «ok funziona». Salta se manca una fixture.
+    """
+    from delugexml import musica as MU                        # noqa: PLC0415
+    try:
+        import twobeat_scritto as TB                           # noqa: PLC0415
+    except FileNotFoundError:
+        salta('test_twobeat_scritto', 'manca una fixture')
+        return
+
+    # 2-feel saltellante: 1 e 3, ma piu' fitto della ballad (rilanci + una in 4),
+    # non walking pieno
+    basso = TB.basso()
+    dens = sum(len(v) for v in basso.values()) / TB.BATTUTE
+    check('il basso e in 2 saltellante (~2.5-3 note/battuta, non walking)',
+          2.3 <= dens <= 3.4, f'{dens:.2f}')
+    pos_b1 = sorted(n.pos for v in basso.values() for n in v if n.pos < TB.B)
+    check('il basso ha la fondamentale sul 1 e la quinta sul 3',
+          0 in pos_b1 and TB.MIN in pos_b1, str(pos_b1))
+    # ⚠️ il contrasto con la ballad: note CORTE (staccate), non minime tenute
+    lmax = max(n.length for v in basso.values() for n in v)
+    check('il basso e corto e staccato (nessuna nota >= un movimento)',
+          lmax < TB.MOV, str(lmax))
+
+    # oom-pah: cassa su 1 e 3, charleston croccante su 2 e 4
+    dr = TB.batteria()
+    check('la cassa fa l oom su 1 e 3 di ogni battuta',
+          all(any(n.pos == b * TB.B for n in dr['KICK'])
+              and any(n.pos == b * TB.B + TB.MIN for n in dr['KICK'])
+              for b in range(TB.BATTUTE)), 'oom')
+    hat0 = sorted(n.pos for n in dr['HATC'] if n.pos < TB.B)
+    check('il charleston fa il pah su 2 e 4',
+          TB.MOV in hat0 and 3 * TB.MOV in hat0, str(hat0))
+    # niente spang-a-lang: il ride e' solo uno splash a inizio frase
+    check('niente spang-a-lang: il ride e sporadico',
+          len(dr['RIDE']) <= TB.BATTUTE // 2, str(len(dr['RIDE'])))
+
+    # il pezzo e' valido, con lo swing pieno dei 180-240 (62 -> grezzo 12),
+    # NON la terzina della ballad (66 -> 16)
+    try:
+        doc, _ = TB.costruisci()
+    except FileNotFoundError:
+        salta('test_twobeat_scritto (build)', 'manca una fixture')
+        return
+    check('il pezzo TWOBEAT e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('lo swing e pieno (62), non la terzina della ballad',
+          doc.root.get('swingAmount') == '12', str(doc.root.get('swingAmount')))
+
+
 def test_prestito_scritto():
     """Il pezzo di prova del prestito modale sta in piedi (non che sia bello).
 
