@@ -205,9 +205,18 @@ MIDI, dritto, BUR 1,03), basso `[LIB]`+`[DEC]`, sub rado agganciato alla cassa. 
 in `docs/istruzioni/batteria-hiphop.md` e `basso-hiphop.md`, esempio
 `tools/hiphop_scritto.py` (e `test_hiphop_scritto`), **scheda
 `docs/repertori/hiphop.md`** con la sua riga nell'indice di `MUSICA.md`. Verdetto
-*«ok funziona»*. La scelta del genere è dell'utente (gusti eclettici); gli altri
-contemporanei (techno/house = groove-macchina + suono; DnB/jungle = break tagliato,
-che vuole prima lo slicing in `audio.py`) restano da aprire. ⚠️ **Il metodo cambia
+*«ok funziona»*. ⚠️ **E il SECONDO genere è HOUSE/TECHNO** (four-on-the-floor):
+`[LIB]`+`[DEC]` — niente corpus (generi programmati; il `dance` di Groove MIDI è
+7 esecuzioni, 2 batteristi = `[OSS]`). Cassa su ogni movimento, open hat sui
+levare, basso **fuori** dalla cassa a ottave (l'opposto dell'hip hop), kit 808.
+`docs/istruzioni/batteria-house.md` e `basso-house.md`, esempio
+`tools/house_scritto.py` (e `test_house_scritto`), **scheda
+`docs/repertori/house.md`** con la sua riga nell'indice. Verdetto *«funziona»*.
+⚠️ **Ma l'essenza di house/techno resta da fare** — l'**arrangiamento** (build/drop)
+e il **filtro/sidechain**, dichiarati vuoti nelle caselle 9 e 10 della scheda: è il
+prossimo lavoro vero sul genere. La scelta del genere è dell'utente (gusti
+eclettici); gli altri contemporanei (DnB/jungle = break tagliato, che vuole prima
+lo slicing in `audio.py`; trip hop; elettronica/IDM) restano da aprire. ⚠️ **Il metodo cambia
 per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
