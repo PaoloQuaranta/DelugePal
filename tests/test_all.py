@@ -9386,6 +9386,30 @@ def test_affetta():
     check('il documento resta valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
 
 
+def test_vocalchop_scritto():
+    """vocalchop_scritto.py: house + l'mmyeah in 8 fette come hook."""
+    from delugexml import musica as MU, song as S             # noqa: PLC0415
+    try:
+        import vocalchop_scritto as VC                          # noqa: PLC0415
+    except FileNotFoundError:
+        salta('test_vocalchop_scritto', 'manca una fixture')
+        return
+    try:
+        doc, _ = VC.costruisci()
+    except FileNotFoundError:
+        salta('test_vocalchop_scritto (build)', 'manca una fixture')
+        return
+    check('il pezzo VOCALCHOP e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('nessuna avvertenza', MU.avvertenze(doc) == [], str(MU.avvertenze(doc)))
+    iChop = VC.strumento(doc, 'CHOP')
+    drums = S.drums(iChop)
+    check('il kit CHOP ha 8 fette', len(drums) == 8, str(len(drums)))
+    check('le fette puntano all mmyeah',
+          all(d.find('osc1').get('fileName') == VC.SAMPLE for d in drums))
+    starts = [int(d.find('osc1').find('zone').get('startSamplePos')) for d in drums]
+    check('le zone sono crescenti', starts == sorted(starts), str(starts))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
