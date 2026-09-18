@@ -75,9 +75,12 @@ verificato col calcolo.
 ## 8. Melodia e ornamentazione
 
 **Parziale.** `[DEC]` La linea di superficie del trip-hop è spesso un **vocal
-breathy** o un **sample/hook** — materiale di `audio.py` (campioni), non note.
-L'armonia (casella 7) porta il colore; una topline strumentale (un tema al Rhodes,
-un lead) è possibile ma non è la firma. Cosa manca: il vocal e il vocal-chop.
+breathy** o un **sample/hook**. Il **vocal chop** (il sample tagliato) ora è coperto:
+`kit.affetta` fa un kit di fette (loopMode ONCE), innescate a ritmo — vedi
+[vocal-chop.md](../istruzioni/vocal-chop.md), esempio `tools/vocalchop_scritto.py`.
+L'armonia (casella 7) porta il colore. ⚠️ **Resta fuori** il **vocal cantato** vero
+(breathy, una registrazione, non generabile): per questo la casella è ancora
+parziale.
 
 ## 9. Forma e densità
 
