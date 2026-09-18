@@ -94,7 +94,9 @@ kit **KIT009** (polveroso). Lo **spazio**:
 - **eco dub** — `MU.eco_dub(doc, bersaglio, feedback, sync, analog=True, pingpong=True)`:
   sull'strumento l'elemento `<delay>` con **`analog=1`** (il degrado caldo a ogni
   ripetizione, il suono del dub), sincronizzato; sulle clip `delayFeedback`. `[OSS]`
-  la struttura (attributi nel preset), `[da verificare]` i livelli;
+  la struttura (attributi nel preset), `[da verificare]` i livelli. ⚠️ **Il feedback
+  non resta positivo (oltre il 50%) a fine brano** o l'eco non decade (drone/runaway):
+  default 24, gate in `MU.avvertenze()` (memoria `delay-feedback-non-positivo`);
 - **riverbero** — un velo (`reverbAmount`) per la profondità hazy.
 
 ## 11. Trappole del generatore
@@ -117,5 +119,6 @@ kit **KIT009** (polveroso). Lo **spazio**:
 - istruzione [trip-hop.md](../istruzioni/trip-hop.md), che rimanda a
   [batteria-hiphop.md](../istruzioni/batteria-hiphop.md) e
   [basso-hiphop.md](../istruzioni/basso-hiphop.md); esempio `tools/triphop_scritto.py`;
-- **verdetto d'ascolto (18 settembre 2026): in sospeso** (l'armonia è già chiusa col
-  `[CALC]`; batteria, basso e spazio attendono l'orecchio).
+- **verdetto d'ascolto (18 settembre 2026): *«per il resto va bene»*** — con una
+  correzione: l'eco aveva feedback positivo (runaway), portato a 24 (decade).
+  L'armonia era già chiusa col `[CALC]`.

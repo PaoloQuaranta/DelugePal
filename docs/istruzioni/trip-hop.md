@@ -91,7 +91,13 @@ calcolo **sostituisce** l'ascolto.
 sull'strumento un delay **analog** (che **degrada** a ogni ripetizione, il suono
 del dub), **sincronizzato** al tempo, con feedback; sulle clip il `delayFeedback`.
 Più un velo di **riverbero** (`reverbAmount`). Sul Rhodes e su colpi isolati, l'eco
-crea la profondità hazy. I livelli si giudicano all'orecchio (sono sfumature).
+crea la profondità hazy.
+
+⚠️ **Il feedback non deve restare positivo (oltre il 50%, display > 25) a fine
+brano:** l'eco non decade e resta un drone/runaway (peggio con `analog`, che
+auto-oscilla). `MU.eco_dub` ha default 24 apposta, e `MU.avvertenze()` segnala ogni
+feedback positivo lasciato. Un feedback alto va bene solo se automatizzato **giù**
+prima della fine. È una **regola di sicurezza**, non una sfumatura.
 
 ---
 
@@ -124,8 +130,9 @@ crea la profondità hazy. I livelli si giudicano all'orecchio (sono sfumature).
 `tools/triphop_scritto.py`: ~84 BPM, Do minore, il vamp `Cm9 | Cm9 | A♭maj7 | G7♭9`
 sul Rhodes con eco dub + riverbero (armonia chiusa col `[CALC]`), batteria boom-bap
 rallentata laid-back, basso sub dub, forma intro → full. `verifica()` vuota.
-⚠️ **Verdetto dell'ascolto: da dare** (armonia già chiusa col calcolo; il resto,
-l'orecchio).
+⚠️ **Verdetto dell'ascolto (18 settembre 2026): *«per il resto va bene»*** — con
+una correzione: l'eco aveva un feedback positivo (runaway), portato a 24 (decade).
+L'armonia era già chiusa col calcolo.
 
 ---
 
