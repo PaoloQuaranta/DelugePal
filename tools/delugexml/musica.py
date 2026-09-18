@@ -1608,7 +1608,7 @@ def acid(doc, bersaglio, *, onda: str = 'saw', risonanza: int = 40,
             'clip': n, 'da_verificare': True}
 
 
-def eco_dub(doc, bersaglio, *, feedback: int = 35, sync: int = 7,
+def eco_dub(doc, bersaglio, *, feedback: int = 24, sync: int = 7,
             analog: bool = True, pingpong: bool = True, rate=None) -> dict:
     """Accende l'ECO DUB sul synth `bersaglio` (nodo strumento) -- l'eco a tempo
     che degrada, il respiro del dub e del trip-hop. Riusabile per dub e reggae.
@@ -1620,8 +1620,12 @@ def eco_dub(doc, bersaglio, *, feedback: int = 35, sync: int = 7,
     - OGNI CLIP del bersaglio: `delayFeedback` (le ripetizioni, unita' display
       0-50); se `rate` e' dato, anche `delayRate` (eco libera, non sincronizzata).
 
-    ⚠️ I livelli (feedback, sync) sono `[DEC]`+`[da verificare]`: si giudicano
-    all'orecchio. La struttura e' `[OSS]` (attributi nel preset).
+    ⚠️ **Il feedback default e' 24 (sotto il 50%) apposta:** a fine brano il
+    feedback NON deve restare positivo (display > 25, hex > 0x0) o l'eco non
+    decade e resta un drone/runaway -- regola dell'utente (memoria
+    `delay-feedback-non-positivo`), sorvegliata da `avvertenze()`. Un feedback
+    alto va bene solo se automatizzato giu' prima della fine. I livelli sono
+    `[DEC]`+`[da verificare]`; la struttura e' `[OSS]` (attributi nel preset).
     """
     from . import sound as SND                                  # noqa: PLC0415
     from . import song as S                                     # noqa: PLC0415
@@ -2210,7 +2214,47 @@ def avvertenze(doc) -> list[str]:
     from . import song as S                               # import locale: ciclo
 
     return (S.same_section_conflicts(doc) + S.notes_beyond_clip_end(doc)
-            + S.notes_hidden_by_scroll(doc) + S.no_playing_clip(doc))
+            + S.notes_hidden_by_scroll(doc) + S.no_playing_clip(doc)
+            + _delay_feedback_positivo(doc))
+
+
+def _delay_feedback_positivo(doc) -> list[str]:
+    """Un `delayFeedback` POSITIVO (oltre il 50%: display > 25, hex > 0x0) lasciato
+    su una clip a fine brano: l'eco non decade e resta un drone/runaway (peggio con
+    `analog`, che auto-oscilla). Regola dell'utente, memoria
+    `delay-feedback-non-positivo`. Non blocca -- il file carica e suona -- ma va
+    saputo: e' un pericolo musicale, non una sfumatura.
+
+    Guarda il valore FINALE: se il feedback e' automatizzato, l'ultimo punto (un
+    feedback alto durante il brano ma portato giu' prima della fine e' ammesso).
+    """
+    from . import song as S                               # noqa: PLC0415
+    from . import sound as SND                            # noqa: PLC0415
+    from . import automation as AU                        # noqa: PLC0415
+    visti: set[str] = set()
+    fuori: list[str] = []
+    for _, clip in S.clips(doc):
+        raw = SND.get_raw(clip, 'delayFeedback')
+        if raw is None:
+            continue
+        if AU.is_automation(raw):
+            punti = AU.decode(raw)[1]
+            if not punti:
+                continue
+            v = punti[-1].raw                            # il valore finale
+        else:
+            try:
+                v = int(raw, 16)
+            except ValueError:
+                continue
+        if 0 < v < 0x80000000:                           # positivo con segno = oltre il 50%
+            nome = _nome_strumento(S.instrument_of(doc, clip) or clip)
+            if nome not in visti:
+                visti.add(nome)
+                fuori.append(
+                    f'delayFeedback positivo (oltre il 50%) su {nome}: l eco non '
+                    f'decade, rischia il drone/runaway a fine brano')
+    return fuori
 
 
 # ------------------------------------------------------------------ il racconto

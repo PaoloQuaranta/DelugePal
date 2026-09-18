@@ -9269,17 +9269,51 @@ def test_eco_dub():
         doc = parse_file(tem)
         iR, cR = C.add_track(doc, str(preset), name='RHODES', folder='SYNTHS',
                              length=384, playing=True)
-        r = MU.eco_dub(doc, iR, feedback=36, sync=7, analog=True, pingpong=True)
+        r = MU.eco_dub(doc, iR, feedback=24, sync=7, analog=True, pingpong=True)
     d = iR.find('delay')
     check('il delay e analog (il degrado dub)', d is not None and d.get('analog') == '1',
           str(d and d.attrs))
     check('il delay e sincronizzato', d.get('syncLevel') == '7', d.get('syncLevel'))
     check('il ping-pong e acceso', d.get('pingPong') == '1', d.get('pingPong'))
-    check('il feedback e scritto sulla clip', SND.get(cR, 'delayFeedback') == 36,
+    check('il feedback e scritto sulla clip', SND.get(cR, 'delayFeedback') == 24,
           str(SND.get(cR, 'delayFeedback')))
     check('eco_dub conta le clip e dichiara da_verificare',
           r.get('clip') == 1 and r.get('da_verificare') is True, str(r))
+    check('il default 24 non lascia un feedback positivo (avvertenze pulite)',
+          MU.avvertenze(doc) == [], str(MU.avvertenze(doc)))
     check('il documento resta valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+
+
+def test_delay_feedback_gate():
+    """avvertenze() segnala un delayFeedback positivo (oltre il 50%): l'eco non
+    decade, drone/runaway a fine brano (memoria delay-feedback-non-positivo)."""
+    from delugexml import musica as MU                          # noqa: PLC0415
+    from delugexml import sound as SND, create as C            # noqa: PLC0415
+    import warnings                                             # noqa: PLC0415
+    preset = REFS / 'synths' / 'Tal Rhodes.XML'
+    tem = REFS / 'songs' / 'TEMPL0.XML'
+    if not (preset.exists() and tem.exists()):
+        salta('test_delay_feedback_gate', 'manca una fixture')
+        return
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        doc = parse_file(tem)
+        iR, cR = C.add_track(doc, str(preset), name='RHODES', folder='SYNTHS',
+                             length=384, playing=True)
+        SND.set(cR, 'delayFeedback', 40)                        # 40 > 25 = positivo
+    avv = MU.avvertenze(doc)
+    check('un feedback positivo (40) e segnalato',
+          any('delayFeedback positivo' in a for a in avv), str(avv))
+    # portandolo sotto il 50% (24) l'avvertenza sparisce
+    from delugexml import sound as SND2                         # noqa: PLC0415
+    SND2.set(cR, 'delayFeedback', 24)
+    check('a feedback 24 l avvertenza sparisce',
+          not any('delayFeedback positivo' in a for a in MU.avvertenze(doc)),
+          str(MU.avvertenze(doc)))
+    # e non blocca: verifica resta pulita anche col feedback alto
+    SND2.set(cR, 'delayFeedback', 40)
+    check('il feedback alto NON blocca verifica (solo avvertenza)',
+          MU.verifica(doc) == [], str(MU.verifica(doc)))
 
 
 def test_triphop_scritto():

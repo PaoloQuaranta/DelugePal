@@ -142,8 +142,10 @@ def costruisci() -> tuple[object, dict]:
             if note:
                 MU.scrivi(doc, cK, note, dove=drum)
 
-        # lo spazio: l'eco dub sul Rhodes + un velo di riverbero
-        MU.eco_dub(doc, iR, feedback=36, sync=7, analog=True, pingpong=True)
+        # lo spazio: l'eco dub sul Rhodes + un velo di riverbero. feedback 24
+        # (sotto il 50%): l'eco DECADE, non resta un drone a fine brano
+        # (memoria delay-feedback-non-positivo, sorvegliata da avvertenze()).
+        MU.eco_dub(doc, iR, feedback=24, sync=7, analog=True, pingpong=True)
         try:
             SND.set(cR, 'reverbAmount', 22)
         except Exception:                               # noqa: BLE001
