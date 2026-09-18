@@ -255,9 +255,26 @@ resto va bene»*. ⚠️ **REGOLA NUOVA dell'utente, e vale SEMPRE col delay:** 
 brano il **feedback non deve restare positivo** (oltre il 50%, hex > `0x0`) o l'eco
 non decade (drone/runaway, peggio con `analog` che auto-oscilla) — `MU.eco_dub`
 default 24, **gate in `MU.avvertenze()`** che guarda il valore finale (memoria
-`delay-feedback-non-positivo`). **1515 test.** La scelta del genere è dell'utente
-(gusti eclettici); gli altri contemporanei (DnB/jungle = break tagliato, che vuole
-prima lo slicing in `audio.py`; elettronica/IDM) restano da aprire. ⚠️ **Il metodo cambia
+`delay-feedback-non-positivo`). **1515 test.**
+⚠️ **E il 19 settembre 2026 il VOCAL CHOP** — la casella 8 (il sample tagliato) di
+house/trip-hop, il primo lavoro sui **campioni**. Primitiva **`kit.affetta`** (in
+`kit.py`): affetta un campione in un kit di N drum-fetta (copie di un drum base, una
+`<zone>` `[i*frames//n, (i+1)*frames//n]` per drum, REPEAT MODE **ONCE**). Riusabile
+per il **break** di jungle/DnB (stesso gesto). Pezzo `tools/vocalchop_scritto.py`
+(l'«mmyeah» dell'utente, `SAMPLES/RECORD/REC00027.WAV`, 142725 frame, in 8 fette su
+un beat house), istruzione `docs/istruzioni/vocal-chop.md`, casella 8 aggiornata.
+Caricato come `VOCALCHOP03`, verdetto *«ora sento le fette»*. ⚠️ **Due lezioni
+pagate** (memoria `rappresentazione-o-pattern`): (1) una **fetta e' ONCE + `<zone>`**
+— e' la ZONA a delimitare, non il mode; ONCE non suona «tutto il file», suona la
+zona caricata (mi ero sbagliato due volte, ipotizzando CUT). L'ho scoperto facendo
+**affettare il campione all'utente sul dispositivo** e confrontando i byte: il mio
+drum era identico a quello dello Slicer nativo. (2) Il difetto udibile era il
+**pattern** (fette in fila = la parola ricostruita), non il formato. ⚠️ **`dir` via
+SysEx FUNZIONA** su c1.3.0 (cartelle non enormi) — il vecchio HANDOFF diceva di no.
+**1527 test.** ⚠️ **Ora lo slicing c'e'**, quindi DnB/jungle (break tagliato) non
+aspettano piu' un prerequisito: restano da aprire, ma il pezzo grosso (`kit.affetta`)
+e' fatto. La scelta del genere è dell'utente (gusti eclettici); gli altri
+contemporanei (DnB/jungle; elettronica/IDM) restano da aprire. ⚠️ **Il metodo cambia
 per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
