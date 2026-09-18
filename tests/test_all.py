@@ -9222,6 +9222,38 @@ def test_acid():
     check('il documento resta valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
 
 
+def test_acid_scritto():
+    """acid_scritto.py: techno acid -- il 303, la linea, il filtro che evolve."""
+    from delugexml import musica as MU                          # noqa: PLC0415
+    from delugexml import sound as SND, arranger as AR, automation as A  # noqa: PLC0415
+    try:
+        import acid_scritto as AC                               # noqa: PLC0415
+    except FileNotFoundError:
+        salta('test_acid_scritto', 'manca una fixture')
+        return
+    try:
+        doc, _ = AC.costruisci()
+    except FileNotFoundError:
+        salta('test_acid_scritto (build)', 'manca una fixture')
+        return
+    check('il pezzo ACID e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('nessuna avvertenza', MU.avvertenze(doc) == [], str(MU.avvertenze(doc)))
+    est = AR.extent(doc)
+    check('l arco e lungo 32 battute',
+          est is not None and est[1] == 32 * MU.TICK_PER_BATTUTA, str(est))
+    iA = AC.strumento(doc, 'ACID')
+    check('l acid e mono', iA.get('polyphonic') == 'mono', iA.get('polyphonic'))
+    acid_clips = [c for _, c in S.clips(doc) if S.instrument_of(doc, c) is iA]
+    cav = {(c['source'], c['destination'])
+           for cl in acid_clips for c in SND.patch_cables(cl)}
+    check('ogni clip acid ha env2->cutoff e velocity->cutoff',
+          ('envelope2', 'lpfFrequency') in cav and ('velocity', 'lpfFrequency') in cav,
+          str(cav))
+    ha_ramp = any(A.is_automation(SND.container(cl).get('lpfFrequency') or '')
+                  for cl in acid_clips)
+    check('una clip acid ha il filtro che apre (automazione)', ha_ramp)
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
