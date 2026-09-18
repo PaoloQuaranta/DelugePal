@@ -3,9 +3,10 @@
 Riempie la casella 8 (il vocal chop) di house/trip-hop. Il campione
 SAMPLES/RECORD/REC00027.WAV (il «mmyeah» dell'utente, 142725 frame, ~3,24 s) e'
 tagliato in 8 fette uguali con kit.affetta -- un kit dove ogni drum e' una <zone>
-dello stesso file, REPEAT MODE CUT (la fetta si ferma con la nota -- dal manuale,
-cap. 9.13; ONCE suonerebbe tutto il file). Le fette si innescano a ritmo: la parola
-in crome, poi uno stutter.
+dello stesso file, REPEAT MODE ONCE (come lo Slicer nativo del Deluge: la ZONA
+delimita la fetta, ogni innesco la suona intera). Le fette si innescano a ritmo,
+SPEZZETTATE -- buchi, stutter, salti: le fette in fila ricostruirebbero la parola,
+il chop sta nel romperla.
 
 Contesto: house four-on-the-floor (808), la casa del vocal chop; basso in levare.
 
@@ -92,13 +93,16 @@ def basso() -> dict:
 
 
 def chop(fette: list[str]) -> dict:
-    """Le fette dell'mmyeah a ritmo: la parola in crome (fette 1-8), poi uno stutter.
-    Un motivo di 2 battute ripetuto. [DEC], da rifinire all'orecchio. Con CUT la
-    durata della nota decide quanto lunga si sente la fetta."""
+    """Le fette dell'mmyeah SPEZZETTATE: buchi (silenzio), stutter (ripetizioni) e
+    salti fra fette non contigue -- NON 1-2-3-... in fila, che ricostruirebbe la
+    parola. Con ONCE ogni innesco suona la fetta intera; il chop e' nel ritmo. Un
+    motivo di 2 battute ripetuto. [DEC], da rifinire all'orecchio (anche QUALI fette
+    stanno bene insieme si decide sentendo)."""
     from delugexml.notes import Note                          # noqa: PLC0415
-    # (passo in sedicesimi su 2 battute, fetta 1-based)
-    motivo = [(0, 1), (2, 2), (4, 3), (6, 4), (8, 5), (10, 6), (12, 7), (14, 8),
-              (16, 1), (17, 1), (18, 1), (20, 8), (24, 4), (26, 5), (28, 8)]
+    # (passo in sedicesimi su 2 battute, fetta 1-based). I passi non elencati sono
+    # SILENZIO -> frammenti staccati. Salti e uno stutter, non la parola in fila.
+    motivo = [(0, 8), (3, 8), (6, 5), (10, 1), (13, 6),
+              (16, 8), (17, 8), (18, 8), (22, 5), (24, 1), (28, 6), (30, 6)]
     voci: dict = {}
     for rep in range(BATTUTE // 2):                # 4 ripetizioni del motivo di 2 battute
         base = rep * 2 * B

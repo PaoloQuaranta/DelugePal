@@ -53,32 +53,33 @@ fette = kit.affetta(doc, iChop, 'SAMPLES/RECORD/REC00027.WAV', frames, n=8)
 ⚠️ **Fette uguali** (N chunk): semplice e deterministico, come lo Slicer. Il taglio
 sui **transienti** (sulle sillabe) è più musicale ma vuole analisi audio — futuro.
 
-## 2. Il MODE — CUT (dal manuale)
+## 2. Il MODE — ONCE (come lo Slicer nativo)
 
-`[LIB]` (guidebook cap. 9.13, «Sample Playback Modes»). Il REPEAT MODE della fetta
-deve essere **CUT** (`loopMode=0`), **non ONCE**. La differenza è la chiave del
-vocal chop:
+`[OSS]` **Verificato copiando una fetta salvata dallo Slicer nativo del Deluge**
+(`MMYEAH.XML`): l'osc1 della fetta ha REPEAT MODE **ONCE** (`loopMode=1`) più la
+`<zone>` `[start,end]`. La chiave che avevo sbagliato all'inizio:
 
-- **ONCE** «plays once, always the whole way through» → suona **tutto il file**,
-  ignorando la fine della zona. Con ONCE una fetta si sente come la **parola
-  intera**, non come un frammento — l'errore del primo tentativo;
-- **CUT** «plays only as long as the sequenced note is sounding on that row» → la
-  fetta **si ferma con la nota**. È così che la si taglia corta. ⚠️ Il Deluge mette
-  di default in CUT proprio i campioni **> 2 s** (l'mmyeah è 3,24 s).
+- **è la ZONA a delimitare la fetta, non il mode.** ONCE «plays once, always the
+  whole way through» significa «tutta la ZONA CARICATA `[start,end]`», non l'intero
+  file. Un one-shot suona tutto solo perché la sua zona *è* tutto il file;
+- quindi con ONCE **ogni innesco suona la fetta intera** (`[start,end]`), che è
+  esattamente ciò che serve al chop: un colpo = un frammento.
 
-Quindi con CUT **la lunghezza del frammento la decide la durata della nota** del
-chop (una nota corta = uno stab corto), e la `<zone>` fa da tetto (non sconfina
-nella fetta dopo). `kit.affetta(..., mode='cut')` lo imposta (default).
+`kit.affetta(..., mode='once')` (default) fa così. ⚠️ Se una fetta suona come la
+**parola intera**, il difetto NON è il mode: è il **pattern** (le fette in fila,
+contigue, ricostruiscono la parola) — vedi §3.
 
 ## 3. Come si compone il chop
 
 `[DEC]` La musica è il **ritmo del taglio**. Le mosse:
 
-- **ricostruisci** la parola: le fette in ordine (1-2-3-…) sui sedicesimi/crome — si
-  risente l'«mmyeah»;
-- **stuttera**: ripeti una fetta (`1 1 1`), il glitch ritmico;
-- **ri-ordina**: salta fra le fette (`1 · 8 · 4 · 8`), il chop che non è più la parola
-  ma un pattern;
+- ⚠️ **NON metterle in fila (1-2-3-…-8) contigue**: ricostruiscono la parola e si
+  risente l'«mmyeah» intero, non un chop — è l'errore che è costato tre ascolti;
+- **buchi**: lascia silenzio fra i frammenti (non un colpo per sedicesimo) — è il
+  silenzio a rendere «staccati» i pezzi;
+- **stuttera**: ripeti una fetta (`8 8 8`), il glitch ritmico;
+- **ri-ordina**: salta fra fette non contigue (`8 · 5 · 1 · 6`), il pattern che non è
+  più la parola;
 - **innesca a tempo**: sui movimenti, sui levare, in sincope — è una parte ritmica.
 
 Si scrive come una batteria: `MU.scrivi(doc, clip, note, dove='fetta 3')`.
@@ -95,7 +96,7 @@ su materiale diverso. (Il break vero è un altro pezzo/genere; qui c'è il mecca
 
 | vincolo | perché |
 |---|---|
-| **la fetta e' in CUT, non ONCE** | ONCE suona tutto il file (la parola intera); CUT si ferma con la nota → il frammento |
+| **la fetta e' in ONCE, la zona la delimita** | ONCE suona la ZONA `[start,end]`, non tutto il file (come lo Slicer nativo); se senti la parola intera e' il PATTERN, non il mode |
 | **il campione è sulla SD** | il `fileName` è relativo (`SAMPLES/...`); se il file non c'è, silenzio |
 | **il chop è ritmo, non melodia** | si riordinano/ripetono le fette a tempo, non si suonano altezze |
 | **le fette uguali sono un punto di partenza** | se cadono male sulle sillabe, cambia N o (in futuro) taglia sui transienti |

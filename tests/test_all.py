@@ -9377,8 +9377,8 @@ def test_affetta():
     check('ogni fetta punta al campione',
           all(d.find('osc1').get('fileName') == 'SAMPLES/RECORD/REC00027.WAV'
               for d in drums))
-    check('il loopMode e CUT (0): la fetta si ferma con la nota, non suona tutto',
-          all(d.find('osc1').get('loopMode') == '0' for d in drums),
+    check('il loopMode e ONCE (1) come lo Slicer nativo: la zona delimita la fetta',
+          all(d.find('osc1').get('loopMode') == '1' for d in drums),
           str([d.find('osc1').get('loopMode') for d in drums]))
     check('le clip hanno una noteRow per fetta',
           all(len([r for r in S.note_rows(c) if r.has('drumIndex')]) == 4

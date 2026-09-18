@@ -258,16 +258,17 @@ def sample_of(drum: Node, osc: int = 1) -> str | None:
     return nodo.get('fileName') if nodo is not None else None
 
 
-#: I `loopMode` (REPEAT MODE del guidebook, cap. 9.13). CUT=0 e ONCE=1 sono
-#: certi: il BD A di `808 From Mars` ha loopMode=1 e suona TUTTO il file (ONCE,
-#: confermato dall'ascolto dell'utente sul suo one-shot); il cymbal, che si
-#: chocca, ha 0 (CUT). LOOP/STRETCH seguono l'ordine naturale dell'enum, non
-#: verificati singolarmente perche' non servono qui.
+#: I `loopMode` (REPEAT MODE del guidebook, cap. 9.13): CUT=0, ONCE=1, LOOP=2,
+#: STRETCH=3. ONCE=1 e CUT=0 sono verificati contro lo Slicer NATIVO del Deluge:
+#: una fetta salvata dal dispositivo (`MMYEAH.XML`) ha osc1 `loopMode=1` (ONCE)
+#: con la zona `[start,end]` -- e ONCE suona la ZONA CARICATA `[start,end]`, non
+#: l'intero file. (Un one-shot ha zona = tutto il file, e per quello suona tutto:
+#: e' la zona a delimitare, non il mode.)
 LOOP_MODE = {'cut': 0, 'once': 1, 'loop': 2, 'stretch': 3}
 
 
 def affetta(doc: Document, kit: Node, path: str, frames: int, *,
-            n: int = 16, base: int = 0, mode: str = 'cut') -> list[str]:
+            n: int = 16, base: int = 0, mode: str = 'once') -> list[str]:
     """Affetta un campione in un kit di N drum-fetta -- il vocal chop, o il break.
 
     Ogni drum-fetta e' una COPIA del drum `base` (per ereditarne inviluppi e
@@ -275,13 +276,13 @@ def affetta(doc: Document, kit: Node, path: str, frames: int, *,
     `[i*frames//n, (i+1)*frames//n]` (l'ultima fino a `frames`), e il REPEAT MODE
     `mode`.
 
-    ⚠️ `mode='cut'` (default) e' quello GIUSTO per una fetta, e viene dal manuale
-    (guidebook cap. 9.13): **CUT** «plays only as long as the sequenced note is
-    sounding» -- la fetta si ferma con la nota, quindi la si taglia corta. Un
-    campione > 2 s il Deluge lo mette di default in CUT. **ONCE** invece «plays
-    always the whole way through» -- suona TUTTO il file ignorando la fine della
-    zona, ed e' l'errore che fa sentire la parola intera invece dei frammenti.
-    Con CUT, la lunghezza dei frammenti la decide la durata delle note del chop.
+    ⚠️ `mode='once'` (default) e' quello che usa lo **Slicer NATIVO del Deluge**:
+    verificato copiando una fetta salvata dal dispositivo -- osc1 `loopMode=1`
+    (ONCE) + `<zone>`, byte per byte come questa funzione produce. **ONCE suona la
+    ZONA `[start,end]`** (la fetta), non tutto il file: e' la zona a delimitare.
+    Quindi ogni innesco riproduce l'intera fetta, che e' cio' che serve al chop.
+    (`mode='cut'` esiste -- la fetta si ferma con la nota -- ma non e' come slicea
+    il Deluge.)
 
     `path` e' relativo alla SD (`SAMPLES/...`); `frames` da
     `audio.wav_frames(path_locale)[0]`. Riusabile per il break di jungle/DnB.
@@ -309,7 +310,7 @@ def affetta(doc: Document, kit: Node, path: str, frames: int, *,
         a = i * dur
         b = frames if i == n - 1 else (i + 1) * dur
         set_sample(fette[i], path, start=a, end=b)
-        osc = fette[i].find('osc1')                # REPEAT MODE: CUT per una fetta
+        osc = fette[i].find('osc1')                # REPEAT MODE (ONCE = come lo Slicer)
         if osc is not None:
             osc.set('loopMode', str(LOOP_MODE[mode]))
         nomi.append(f'fetta {i + 1}')
