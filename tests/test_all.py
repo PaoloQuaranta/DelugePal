@@ -9188,6 +9188,40 @@ def test_automatizza():
           A.is_automation(SND.container(clip).get('lpfFrequency')))
 
 
+def test_acid():
+    """MU.acid: il 303 -- mono/saw sullo strumento, risonanza+env->cutoff+accento
+    sulle clip. Struttura verificata; i valori sono [da verificare] all'orecchio."""
+    from delugexml import musica as MU                          # noqa: PLC0415
+    from delugexml import sound as SND, create as C            # noqa: PLC0415
+    import warnings                                             # noqa: PLC0415
+    preset = REFS / 'synths' / 'Square Saw Bass.XML'
+    tem = REFS / 'songs' / 'TEMPL0.XML'
+    if not (preset.exists() and tem.exists()):
+        salta('test_acid', 'manca una fixture')
+        return
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        doc = parse_file(tem)
+        iA, cA = C.add_track(doc, str(preset), name='ACID', folder='SYNTHS',
+                             length=384, playing=True)
+        r = MU.acid(doc, iA, onda='saw', risonanza=40, cutoff=8)
+    check('lo strumento e mono', iA.get('polyphonic') == 'mono', iA.get('polyphonic'))
+    check('osc1 e saw', iA.find('osc1').get('type') == 'saw',
+          iA.find('osc1').get('type'))
+    check('la risonanza e alta', SND.get(cA, 'lpfResonance') == 40,
+          str(SND.get(cA, 'lpfResonance')))
+    check('il cutoff base e basso', SND.get(cA, 'lpfFrequency') == 8,
+          str(SND.get(cA, 'lpfFrequency')))
+    cables = {(c['source'], c['destination']) for c in SND.patch_cables(cA)}
+    check('c e il cavo env2 -> cutoff (lo squelch)',
+          ('envelope2', 'lpfFrequency') in cables, str(cables))
+    check('c e il cavo velocity -> cutoff (l accento)',
+          ('velocity', 'lpfFrequency') in cables, str(cables))
+    check('acid conta le clip toccate e dichiara da_verificare',
+          r.get('clip') == 1 and r.get('da_verificare') is True, str(r))
+    check('il documento resta valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

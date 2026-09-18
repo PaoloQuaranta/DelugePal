@@ -1556,6 +1556,58 @@ def sidechain(doc, bersaglio, *, quanto: str = '0xDE000000', sync: int = 7,
             'da_verificare': True}
 
 
+def acid(doc, bersaglio, *, onda: str = 'saw', risonanza: int = 40,
+         cutoff: int = 8, env_cutoff: float = 30, acc_cutoff: float = 15,
+         glide: int = 15, env2_decay: int = 18) -> dict:
+    """Rende `bersaglio` (nodo strumento synth) un TB-303 -- il suono acid.
+
+    Il carattere del 303 e' il FILTRO, non le note: LPF molto risonante, un
+    inviluppo (env2) che ne apre il cutoff a ogni nota (lo "squelch"), l'accento
+    (velocity->cutoff) e lo slide (glide del mono). Tocca due livelli, come
+    `MU.sidechain`:
+
+    - STRUMENTO: `polyphonic='mono'` e osc1 `type=onda` ('saw' o 'square', le due
+      forme d'onda vere del 303, default saw -- l'acid iconico);
+    - OGNI CLIP del bersaglio (e' li' che vivono param e patch cable dei synth):
+      `lpfResonance` alto, `lpfFrequency` basso (spazio per l'inviluppo),
+      `portamento` (glide), env2 percussivo (attacco 0, decay corto, sustain 0),
+      e i due patch cable attestati nel corpus -- `envelope2->lpfFrequency`
+      (amount `env_cutoff`, 157x nel corpus) e `velocity->lpfFrequency`
+      (amount `acc_cutoff`, 129x).
+
+    ⚠️ I valori sono `[DEC]`+`[da verificare]`: il 303 si tara all'orecchio. Sono
+    argomenti apposta, cosi' la correzione e' una parola.
+    """
+    from . import structure as ST                              # noqa: PLC0415
+    from . import sound as SND                                 # noqa: PLC0415
+    from . import song as S                                    # noqa: PLC0415
+
+    ST.set_attr(bersaglio, 'polyphonic', 'mono')
+    ST.set_osc(bersaglio, 1, type=onda)
+
+    def _voce(clip):
+        SND.set(clip, 'lpfResonance', risonanza)
+        SND.set(clip, 'lpfFrequency', cutoff)
+        SND.set(clip, 'portamento', glide)
+        for nome, val in (('envelope2.attack', 0), ('envelope2.decay', env2_decay),
+                          ('envelope2.sustain', 0)):
+            try:
+                SND.set(clip, nome, val)
+            except ValueError:
+                pass                       # il preset non ha quello stadio: pazienza
+        SND.set_patch_cable(clip, 'envelope2', 'lpfFrequency', env_cutoff)
+        SND.set_patch_cable(clip, 'velocity', 'lpfFrequency', acc_cutoff)
+
+    n = 0
+    for _, clip in S.clips(doc):
+        if S.instrument_of(doc, clip) is bersaglio:
+            _voce(clip)
+            n += 1
+    return {'onda': onda, 'risonanza': risonanza, 'cutoff': cutoff,
+            'env_cutoff': env_cutoff, 'acc_cutoff': acc_cutoff, 'glide': glide,
+            'clip': n, 'da_verificare': True}
+
+
 # -------------------------------------------------------------------- il fill
 #
 # Il fill e' la transizione nella BATTERIA: una battuta, al giunto fra due
