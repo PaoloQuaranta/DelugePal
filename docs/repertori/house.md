@@ -143,8 +143,9 @@ ripiego), `Square Saw Bass` scurito per il sub, `Pianism I` per lo stab,
   [acid.md](../istruzioni/acid.md), esempio `tools/acid_scritto.py`;
 - **il filtro che evolve** — `MU.automatizza(doc, clip, param, …)` rampa **qualunque**
   parametro in unità display (0-50): cutoff **e** risonanza, l'anima dell'acid
-  (`apri_filtro` ne è il wrapper su `lpfFrequency`). ⚠️ Solo `lpfFrequency` è
-  verificato sul device; la risonanza in automazione è `[da verificare]`.
+  (`apri_filtro` ne è il wrapper su `lpfFrequency`). ⚠️ Entrambe le rampe (cutoff e
+  risonanza) sono **viste sul dispositivo** (18 set 2026); i livelli sono sfumature
+  compositive, non leggi.
 
 ⚠️ La **struttura** del sidechain è `[OSS]` (verificata sui file veri, schema
 c1.3.0: valori `0xF2000000`/`0xDE000000`/`0xFC000000`); la **magnitudine** del duck

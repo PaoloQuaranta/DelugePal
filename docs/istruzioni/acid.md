@@ -85,9 +85,9 @@ da_tick, a_tick)` stende una rampa (unità display 0-50) di **qualunque** parame
 `lpfFrequency` per il cutoff, `lpfResonance` per la risonanza. Nel build il filtro
 apre; nel drop è spalancato; in intro/breakdown resta chiuso (muffled).
 
-⚠️ **Solo `lpfFrequency` è verificato sul dispositivo**; la **risonanza in
-automazione** è `[da verificare]`. Se non regge all'ascolto, si tiene la risonanza
-fissa alta e si rampa il solo cutoff.
+⚠️ La rampa del cutoff **e** quella della risonanza sono **viste sul dispositivo**
+(18 settembre 2026): entrambe funzionano. I *livelli* (quanto risuona, quanto apre)
+sono sfumature compositive, non leggi — si scelgono, non si tarano al millimetro.
 
 ---
 

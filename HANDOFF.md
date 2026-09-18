@@ -236,10 +236,14 @@ wrapper). ⚠️ Il preset `Square Saw Bass` **era già quasi un 303** (aveva po
 `<envelope2>`, `envelope2→lpfFrequency`): niente scritture al buio. Pezzo
 `tools/acid_scritto.py` (e `test_acid_scritto`), istruzione `docs/istruzioni/acid.md`,
 casella 8 della scheda piena. Caricato come `ACID01`, verdetto *«l'idea generale
-c'è»* (risonanza 40 lasciata, semmai un pelo più bassa — ritocco rimandato per
-scelta dell'utente). ⚠️ La **risonanza in automazione non è verificata sul device**
-(solo `lpfFrequency` lo è): resta `[da verificare]`. **1496 test.** Di house/techno
-resta solo il **vocal chop** (l'altra faccia del lead, materiale di `audio.py`). La
+c'è»*. ⚠️ **Le rampe di cutoff E risonanza sono viste sul dispositivo** (l'utente
+le ha guardate, 18 set 2026): il `[da verificare]` sulla risonanza in automazione è
+sciolto. ⚠️ **E una direttiva dell'utente, data qui:** i *livelli* (risonanza 40,
+gli amount, i decay) sono **sfumature compositive, non leggi assolute** — sono buoni
+punti di partenza, non si tarano al millimetro né si trattano come `[da verificare]`
+bloccanti (memoria `livelli-sfumature-non-leggi`). La risonanza 40 è lasciata così.
+**1496 test.** Di house/techno resta solo il **vocal chop** (l'altra faccia del
+lead, materiale di `audio.py`). La
 scelta del genere è dell'utente (gusti eclettici); gli altri contemporanei
 (DnB/jungle = break tagliato, che vuole prima lo slicing in `audio.py`; trip hop;
 elettronica/IDM) restano da aprire. ⚠️ **Il metodo cambia
