@@ -9254,6 +9254,34 @@ def test_acid_scritto():
     check('una clip acid ha il filtro che apre (automazione)', ha_ramp)
 
 
+def test_eco_dub():
+    """MU.eco_dub: delay analog+synced sullo strumento, feedback sulle clip."""
+    from delugexml import musica as MU                          # noqa: PLC0415
+    from delugexml import sound as SND, create as C            # noqa: PLC0415
+    import warnings                                             # noqa: PLC0415
+    preset = REFS / 'synths' / 'Tal Rhodes.XML'
+    tem = REFS / 'songs' / 'TEMPL0.XML'
+    if not (preset.exists() and tem.exists()):
+        salta('test_eco_dub', 'manca una fixture')
+        return
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        doc = parse_file(tem)
+        iR, cR = C.add_track(doc, str(preset), name='RHODES', folder='SYNTHS',
+                             length=384, playing=True)
+        r = MU.eco_dub(doc, iR, feedback=36, sync=7, analog=True, pingpong=True)
+    d = iR.find('delay')
+    check('il delay e analog (il degrado dub)', d is not None and d.get('analog') == '1',
+          str(d and d.attrs))
+    check('il delay e sincronizzato', d.get('syncLevel') == '7', d.get('syncLevel'))
+    check('il ping-pong e acceso', d.get('pingPong') == '1', d.get('pingPong'))
+    check('il feedback e scritto sulla clip', SND.get(cR, 'delayFeedback') == 36,
+          str(SND.get(cR, 'delayFeedback')))
+    check('eco_dub conta le clip e dichiara da_verificare',
+          r.get('clip') == 1 and r.get('da_verificare') is True, str(r))
+    check('il documento resta valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

@@ -1608,6 +1608,44 @@ def acid(doc, bersaglio, *, onda: str = 'saw', risonanza: int = 40,
             'clip': n, 'da_verificare': True}
 
 
+def eco_dub(doc, bersaglio, *, feedback: int = 35, sync: int = 7,
+            analog: bool = True, pingpong: bool = True, rate=None) -> dict:
+    """Accende l'ECO DUB sul synth `bersaglio` (nodo strumento) -- l'eco a tempo
+    che degrada, il respiro del dub e del trip-hop. Riusabile per dub e reggae.
+
+    Due livelli, come `MU.acid`/`MU.sidechain`:
+    - STRUMENTO (elemento <delay>): `analog` = il degrado caldo a ogni ripetizione
+      (il suono del dub); `pingPong` per l'ampiezza; `syncLevel=sync`/`syncType=0`
+      = l'eco sincronizzata al tempo;
+    - OGNI CLIP del bersaglio: `delayFeedback` (le ripetizioni, unita' display
+      0-50); se `rate` e' dato, anche `delayRate` (eco libera, non sincronizzata).
+
+    ⚠️ I livelli (feedback, sync) sono `[DEC]`+`[da verificare]`: si giudicano
+    all'orecchio. La struttura e' `[OSS]` (attributi nel preset).
+    """
+    from . import sound as SND                                  # noqa: PLC0415
+    from . import song as S                                     # noqa: PLC0415
+    from .parser import Node                                    # noqa: PLC0415
+
+    d = bersaglio.find('delay')
+    if d is None:
+        d = bersaglio.append(Node(tag='delay'))
+    d.set('analog', '1' if analog else '0')
+    d.set('pingPong', '1' if pingpong else '0')
+    d.set('syncLevel', str(sync))
+    d.set('syncType', '0')
+
+    n = 0
+    for _, clip in S.clips(doc):
+        if S.instrument_of(doc, clip) is bersaglio:
+            SND.set(clip, 'delayFeedback', feedback)
+            if rate is not None:
+                SND.set(clip, 'delayRate', rate)
+            n += 1
+    return {'feedback': feedback, 'sync': sync, 'analog': analog,
+            'pingpong': pingpong, 'clip': n, 'da_verificare': True}
+
+
 # -------------------------------------------------------------------- il fill
 #
 # Il fill e' la transizione nella BATTERIA: una battuta, al giunto fra due
