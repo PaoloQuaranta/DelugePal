@@ -6,16 +6,18 @@ la sezione ritmica è scritta e ascoltata (*«funziona»*), e il **17 settembre*
 si è aggiunta **l'essenza del genere** — l'**arrangiamento** (build/drop, casella
 9) e il **suono in movimento** (filtro + **sidechain interno**, casella 10):
 scritti, con `verifica()` pulita, e **ascoltati sul dispositivo** (*«va bene»*, 17
-settembre 2026). ⚠️ **Niente corpus** — sono generi **programmati** — quindi è
-`[LIB]`+`[DEC]`, la convenzione di genere; la sola struttura XML del sidechain è
-`[OSS]` (file veri), e la sua magnitudine (`0xDE000000`) è **confermata
-all'orecchio**.
+settembre 2026). Il **18 settembre** si è aggiunto il **techno acid** — il TB-303
+(casella 8, il lead; casella 10, il suono): la linea che rotola e il filtro
+risonante che evolve, in attesa dell'ascolto. ⚠️ **Niente corpus** — sono generi
+**programmati** — quindi è `[LIB]`+`[DEC]`, la convenzione di genere; la sola
+struttura XML del sidechain e i patch cable del 303 sono `[OSS]` (file veri/corpus).
 
 Il dettaglio operativo sta in [batteria-house.md](../istruzioni/batteria-house.md),
-[basso-house.md](../istruzioni/basso-house.md) e
-[arrangiamento-house.md](../istruzioni/arrangiamento-house.md); gli esempi in
-`tools/house_scritto.py` (il groove) e `tools/house2_scritto.py` (l'arco). Questa
-scheda è la vista per casella.
+[basso-house.md](../istruzioni/basso-house.md),
+[arrangiamento-house.md](../istruzioni/arrangiamento-house.md) e
+[acid.md](../istruzioni/acid.md); gli esempi in `tools/house_scritto.py` (il
+groove), `tools/house2_scritto.py` (l'arco) e `tools/acid_scritto.py` (l'acid).
+Questa scheda è la vista per casella.
 
 Il grado di prova: `[LIB]` convenzione documentata · `[DEC]` decisione presa qui.
 
@@ -39,7 +41,8 @@ la cassa è **il metronomo**, e la musica sta in ciò che le gira intorno.
 
 ## 3. Tempo
 
-`[LIB]`+`[DEC]` **house ~120-126**, **techno ~128-140**. L'esempio è a **124**.
+`[LIB]`+`[DEC]` **house ~120-126**, **techno ~128-140** (l'**acid techno** ~130-140).
+Gli esempi: la house a **124**, l'acid a **132**.
 
 ## 4. Feel
 
@@ -78,9 +81,15 @@ assente** (un drone, un accordo solo): comanda il timbro. L'esempio:
 
 ## 8. Melodia e ornamentazione
 
-**Vuota.** Il *topline*/lead (il riff di synth, l'hook, il vocal chop) non è stato
-toccato — lo stab è armonia, non melodia. Cosa manca: il lead in levare e il
-vocal-chop campionato (materiale di `audio.py`).
+`[LIB]`+`[DEC]` Il lead del techno è la **linea acid** (il riff del TB-303): **rada
+in altezza** (una-due note che rotolano sui sedicesimi, con ottava/♭7/quinta),
+**fitta in ritmo**, con **accenti** (velocity) e **slide** (legato in mono). Non è
+melodia nel senso della frase: è ritmo + filtro. Il carattere lo dà lo *squelch*
+del 303, non le altezze — vedi [acid.md](../istruzioni/acid.md) e la casella 10.
+Esempio: `tools/acid_scritto.py`.
+
+⚠️ **Resta fuori** il **vocal chop** campionato (l'altra faccia del lead dance):
+è materiale di `audio.py`, non note.
 
 ## 9. Forma e densità
 
@@ -124,7 +133,16 @@ ripiego), `Square Saw Bass` scurito per il sub, `Pianism I` per lo stab,
   sono due elementi XML distinti. Tre pezzi: `sideChainSend` pieno sul kick (il
   trigger), `sidechainCompressorVolume` nei `<params>` di ogni clip del bersaglio
   (il ducking — è la clip che suona), `<sidechain>` sync sullo strumento. Si
-  imposta **una volta**: pompa da sé dove batte la cassa (drop sì, breakdown no).
+  imposta **una volta**: pompa da sé dove batte la cassa (drop sì, breakdown no);
+- **il suono acid (TB-303)** — `MU.acid(doc, bersaglio, onda='saw'|'square', …)`:
+  mono + osc + risonanza alta + `envelope2→lpfFrequency` (lo squelch) +
+  `velocity→lpfFrequency` (l'accento) + portamento (slide). I due patch cable sono
+  `[OSS]` (corpus: 157× e 129×); i valori sono `[da verificare]` all'orecchio. Vedi
+  [acid.md](../istruzioni/acid.md), esempio `tools/acid_scritto.py`;
+- **il filtro che evolve** — `MU.automatizza(doc, clip, param, …)` rampa **qualunque**
+  parametro in unità display (0-50): cutoff **e** risonanza, l'anima dell'acid
+  (`apri_filtro` ne è il wrapper su `lpfFrequency`). ⚠️ Solo `lpfFrequency` è
+  verificato sul device; la risonanza in automazione è `[da verificare]`.
 
 ⚠️ La **struttura** del sidechain è `[OSS]` (verificata sui file veri, schema
 c1.3.0: valori `0xF2000000`/`0xDE000000`/`0xFC000000`); la **magnitudine** del duck
@@ -145,17 +163,22 @@ all'orecchio: verdetto *«va bene»* (17 settembre 2026).
 - **il drop non aggiunge, rimette**: si tolgono e si rimettono parti + si apre il
   filtro, non si accumulano colpi;
 - **il sidechain col SIDECHAIN, non col compressore**: sono due elementi XML
-  distinti (`<sidechain>` vs `<audioCompressor>`); il compressore non pompa.
+  distinti (`<sidechain>` vs `<audioCompressor>`); il compressore non pompa;
+- **l'acid è il filtro, non le note**: risonanza alta o non è acid; la linea è
+  rada in altezza; l'accento è la velocity, lo slide è il legato in mono.
 
 ### Fonti
 
 - ⚠️ **Nessun corpus**: techno/house sono programmati. Il `dance` di Groove MIDI è
   **7 esecuzioni di 2 batteristi** (`[OSS]`, non `[MIS]` — la lezione del reggae), e
-  non è four-on-the-floor. La struttura XML del sidechain è invece `[OSS]` (file
-  veri, schema c1.3.0);
+  non è four-on-the-floor. Sono invece `[OSS]` (file veri/corpus) la struttura XML
+  del sidechain e i patch cable del 303 (`envelope2→cutoff` 157×,
+  `velocity→cutoff` 129×);
 - istruzioni [batteria-house.md](../istruzioni/batteria-house.md),
   [basso-house.md](../istruzioni/basso-house.md),
-  [arrangiamento-house.md](../istruzioni/arrangiamento-house.md); esempi
-  `tools/house_scritto.py` (groove) e `tools/house2_scritto.py` (arco);
+  [arrangiamento-house.md](../istruzioni/arrangiamento-house.md),
+  [acid.md](../istruzioni/acid.md); esempi `tools/house_scritto.py` (groove),
+  `tools/house2_scritto.py` (arco), `tools/acid_scritto.py` (acid);
 - **verdetto d'ascolto:** il groove (17 settembre 2026) *«funziona»*; l'arco +
-  filtro + sidechain (17 settembre 2026) *«va bene»*.
+  filtro + sidechain (17 settembre 2026) *«va bene»*; il **techno acid** (18
+  settembre 2026) **in attesa d'ascolto**.
