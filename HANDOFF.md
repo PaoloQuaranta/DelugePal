@@ -225,10 +225,24 @@ L'arco a 32 battute (intro/build/drop/breakdown/drop) in `tools/house2_scritto.p
 l'indice aggiornato. ⚠️ **Il corpus NON aveva un esempio di volume-ducking**
 (memoria `corpus-non-autoritativo`): la struttura si è presa dallo schema c1.3.0 e
 dai file veri (`[OSS]`), la magnitudine (`0xDE000000`) si è tarata all'orecchio.
-Caricato come `HOUSE02`, verdetto *«va bene»*. **1477 test.** Resta la **casella 8**
-(lead/topline, vocal chop — materiale di `audio.py`). La scelta del genere è
-dell'utente (gusti eclettici); gli altri contemporanei (DnB/jungle = break tagliato,
-che vuole prima lo slicing in `audio.py`; trip hop; elettronica/IDM) restano da aprire. ⚠️ **Il metodo cambia
+Caricato come `HOUSE02`, verdetto *«va bene»*.
+⚠️ **E il 18 settembre 2026 il TECHNO ACID chiude la casella 8** — il TB-303. Due
+primitive nuove: **`MU.acid`** (sullo strumento mono + osc `saw`/`square`; su ogni
+clip risonanza alta + cutoff basso + portamento + env2 percussivo + i patch cable
+`envelope2→lpfFrequency` lo squelch e `velocity→lpfFrequency` l'accento — attestati
+`[OSS]` nel corpus, 157×/129×) e **`MU.automatizza`** (generalizza `apri_filtro` a
+QUALUNQUE parametro, per rampare cutoff **e** risonanza; `apri_filtro` ne è ora il
+wrapper). ⚠️ Il preset `Square Saw Bass` **era già quasi un 303** (aveva portamento,
+`<envelope2>`, `envelope2→lpfFrequency`): niente scritture al buio. Pezzo
+`tools/acid_scritto.py` (e `test_acid_scritto`), istruzione `docs/istruzioni/acid.md`,
+casella 8 della scheda piena. Caricato come `ACID01`, verdetto *«l'idea generale
+c'è»* (risonanza 40 lasciata, semmai un pelo più bassa — ritocco rimandato per
+scelta dell'utente). ⚠️ La **risonanza in automazione non è verificata sul device**
+(solo `lpfFrequency` lo è): resta `[da verificare]`. **1496 test.** Di house/techno
+resta solo il **vocal chop** (l'altra faccia del lead, materiale di `audio.py`). La
+scelta del genere è dell'utente (gusti eclettici); gli altri contemporanei
+(DnB/jungle = break tagliato, che vuole prima lo slicing in `audio.py`; trip hop;
+elettronica/IDM) restano da aprire. ⚠️ **Il metodo cambia
 per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
