@@ -242,11 +242,22 @@ sciolto. ⚠️ **E una direttiva dell'utente, data qui:** i *livelli* (risonanz
 gli amount, i decay) sono **sfumature compositive, non leggi assolute** — sono buoni
 punti di partenza, non si tarano al millimetro né si trattano come `[da verificare]`
 bloccanti (memoria `livelli-sfumature-non-leggi`). La risonanza 40 è lasciata così.
-**1496 test.** Di house/techno resta solo il **vocal chop** (l'altra faccia del
-lead, materiale di `audio.py`). La
-scelta del genere è dell'utente (gusti eclettici); gli altri contemporanei
-(DnB/jungle = break tagliato, che vuole prima lo slicing in `audio.py`; trip hop;
-elettronica/IDM) restano da aprire. ⚠️ **Il metodo cambia
+**1496 test.** Di house/techno resta solo il **vocal chop** (materiale di `audio.py`).
+⚠️ **E il 18 settembre 2026 il TRIP-HOP** (terzo genere del perimetro 3) — la
+**fusione** hip-hop + dub + armonia minore jazzy (sapore Portishead), non una
+capacità nuova ma una ricombinazione. Una primitiva: **`MU.eco_dub`** (l'eco dub —
+elemento `<delay>` `analog` che degrada + sync + `delayFeedback`; riusabile per
+dub/reggae). Pezzo `tools/triphop_scritto.py` (vamp `Cm9|Cm9|A♭maj7|G7♭9` chiuso col
+`[CALC]`, batteria boom-bap rallentata, basso dub, forma intro→full), istruzione
+`docs/istruzioni/trip-hop.md`, **scheda nuova** `docs/repertori/trip-hop.md`
+scorporata dall'aggregato dell'indice. Caricato come `TRIPHOP02`, verdetto *«per il
+resto va bene»*. ⚠️ **REGOLA NUOVA dell'utente, e vale SEMPRE col delay:** a fine
+brano il **feedback non deve restare positivo** (oltre il 50%, hex > `0x0`) o l'eco
+non decade (drone/runaway, peggio con `analog` che auto-oscilla) — `MU.eco_dub`
+default 24, **gate in `MU.avvertenze()`** che guarda il valore finale (memoria
+`delay-feedback-non-positivo`). **1515 test.** La scelta del genere è dell'utente
+(gusti eclettici); gli altri contemporanei (DnB/jungle = break tagliato, che vuole
+prima lo slicing in `audio.py`; elettronica/IDM) restano da aprire. ⚠️ **Il metodo cambia
 per area:** l'armonia si
 chiude col solo `[CALC]`; il **voicing** (parte d'orecchio) con `[CALC]` **+ un
 ascolto**; il ritmo con l'ascolto pieno. Decisione dell'utente. ⚠️ **È arrivata
