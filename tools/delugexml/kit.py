@@ -258,26 +258,45 @@ def sample_of(drum: Node, osc: int = 1) -> str | None:
     return nodo.get('fileName') if nodo is not None else None
 
 
+#: I `loopMode` (REPEAT MODE del guidebook, cap. 9.13). CUT=0 e ONCE=1 sono
+#: certi: il BD A di `808 From Mars` ha loopMode=1 e suona TUTTO il file (ONCE,
+#: confermato dall'ascolto dell'utente sul suo one-shot); il cymbal, che si
+#: chocca, ha 0 (CUT). LOOP/STRETCH seguono l'ordine naturale dell'enum, non
+#: verificati singolarmente perche' non servono qui.
+LOOP_MODE = {'cut': 0, 'once': 1, 'loop': 2, 'stretch': 3}
+
+
 def affetta(doc: Document, kit: Node, path: str, frames: int, *,
-            n: int = 16, base: int = 0) -> list[str]:
+            n: int = 16, base: int = 0, mode: str = 'cut') -> list[str]:
     """Affetta un campione in un kit di N drum-fetta -- il vocal chop, o il break.
 
-    Ogni drum-fetta e' una COPIA del drum `base`, cosi' ne EREDITA `loopMode`
-    (one-shot), gli inviluppi e il resto: un drum che funziona, invece di
-    scrivere `loopMode` alla cieca (regola del progetto). Su ognuno si cambia
-    solo `fileName=path` e la `<zone>` a `[i*frames//n, (i+1)*frames//n]`
-    (l'ultima fino a `frames`, per coprire il resto). `path` e' relativo alla SD
-    (`SAMPLES/...`); `frames` da `audio.wav_frames(path_locale)[0]`. Riusabile
-    per il break di jungle/DnB. Ritorna i nomi `['fetta 1', ...]`.
+    Ogni drum-fetta e' una COPIA del drum `base` (per ereditarne inviluppi e
+    struttura -- un drum che funziona), con `fileName=path`, una `<zone>` a
+    `[i*frames//n, (i+1)*frames//n]` (l'ultima fino a `frames`), e il REPEAT MODE
+    `mode`.
+
+    ⚠️ `mode='cut'` (default) e' quello GIUSTO per una fetta, e viene dal manuale
+    (guidebook cap. 9.13): **CUT** «plays only as long as the sequenced note is
+    sounding» -- la fetta si ferma con la nota, quindi la si taglia corta. Un
+    campione > 2 s il Deluge lo mette di default in CUT. **ONCE** invece «plays
+    always the whole way through» -- suona TUTTO il file ignorando la fine della
+    zona, ed e' l'errore che fa sentire la parola intera invece dei frammenti.
+    Con CUT, la lunghezza dei frammenti la decide la durata delle note del chop.
+
+    `path` e' relativo alla SD (`SAMPLES/...`); `frames` da
+    `audio.wav_frames(path_locale)[0]`. Riusabile per il break di jungle/DnB.
+    Ritorna i nomi `['fetta 1', ...]`.
     """
     from . import song as S                                    # noqa: PLC0415
     if n < 1:
         raise ValueError('servono almeno 1 fetta')
+    if mode not in LOOP_MODE:
+        raise ValueError(f'mode {mode!r} sconosciuto, usare {sorted(LOOP_MODE)}')
     orig = S.drums(kit)
     if not 0 <= base < len(orig):
         raise ValueError(f'drum base {base} inesistente (ce ne sono {len(orig)})')
     n_orig = len(orig)
-    modello = copy_drum(kit, base)                 # copia staccata: loopMode ereditato
+    modello = copy_drum(kit, base)                 # copia staccata
     # aggiungi N fette in fondo, poi togli gli n_orig originali dal fronte
     for i in range(n):
         add_drum(doc, kit, modello.copy_detached(), name=f'fetta {i + 1}')
@@ -290,6 +309,9 @@ def affetta(doc: Document, kit: Node, path: str, frames: int, *,
         a = i * dur
         b = frames if i == n - 1 else (i + 1) * dur
         set_sample(fette[i], path, start=a, end=b)
+        osc = fette[i].find('osc1')                # REPEAT MODE: CUT per una fetta
+        if osc is not None:
+            osc.set('loopMode', str(LOOP_MODE[mode]))
         nomi.append(f'fetta {i + 1}')
     return nomi
 

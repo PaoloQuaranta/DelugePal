@@ -76,7 +76,7 @@ verificato col calcolo.
 
 **Parziale.** `[DEC]` La linea di superficie del trip-hop è spesso un **vocal
 breathy** o un **sample/hook**. Il **vocal chop** (il sample tagliato) ora è coperto:
-`kit.affetta` fa un kit di fette (loopMode ONCE), innescate a ritmo — vedi
+`kit.affetta` fa un kit di fette (MODE CUT, si fermano con la nota), innescate a ritmo — vedi
 [vocal-chop.md](../istruzioni/vocal-chop.md), esempio `tools/vocalchop_scritto.py`.
 L'armonia (casella 7) porta il colore. ⚠️ **Resta fuori** il **vocal cantato** vero
 (breathy, una registrazione, non generabile): per questo la casella è ancora

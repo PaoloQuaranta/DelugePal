@@ -53,14 +53,22 @@ fette = kit.affetta(doc, iChop, 'SAMPLES/RECORD/REC00027.WAV', frames, n=8)
 ⚠️ **Fette uguali** (N chunk): semplice e deterministico, come lo Slicer. Il taglio
 sui **transienti** (sulle sillabe) è più musicale ma vuole analisi audio — futuro.
 
-## 2. Il MODE — ONCE
+## 2. Il MODE — CUT (dal manuale)
 
-`[OSS]` Ogni fetta deve **suonare intera** quando la innes­chi, a prescindere dalla
-durata della nota: è il MODE **ONCE** (`loopMode`). `kit.affetta` NON lo scrive a
-mano: costruisce le fette **copiando un drum one-shot vero** (il BD A di `808 From
-Mars`, `loopMode=1`), così il valore è **ereditato da un drum che funziona**. ⚠️ Se
-all'ascolto una fetta si tronca invece di suonare intera, è lì che si interviene
-(verifica sul dispositivo).
+`[LIB]` (guidebook cap. 9.13, «Sample Playback Modes»). Il REPEAT MODE della fetta
+deve essere **CUT** (`loopMode=0`), **non ONCE**. La differenza è la chiave del
+vocal chop:
+
+- **ONCE** «plays once, always the whole way through» → suona **tutto il file**,
+  ignorando la fine della zona. Con ONCE una fetta si sente come la **parola
+  intera**, non come un frammento — l'errore del primo tentativo;
+- **CUT** «plays only as long as the sequenced note is sounding on that row» → la
+  fetta **si ferma con la nota**. È così che la si taglia corta. ⚠️ Il Deluge mette
+  di default in CUT proprio i campioni **> 2 s** (l'mmyeah è 3,24 s).
+
+Quindi con CUT **la lunghezza del frammento la decide la durata della nota** del
+chop (una nota corta = uno stab corto), e la `<zone>` fa da tetto (non sconfina
+nella fetta dopo). `kit.affetta(..., mode='cut')` lo imposta (default).
 
 ## 3. Come si compone il chop
 
@@ -87,7 +95,7 @@ su materiale diverso. (Il break vero è un altro pezzo/genere; qui c'è il mecca
 
 | vincolo | perché |
 |---|---|
-| **la fetta suona intera (ONCE)** | ereditato da un drum one-shot; senza, la fetta si tronca |
+| **la fetta e' in CUT, non ONCE** | ONCE suona tutto il file (la parola intera); CUT si ferma con la nota → il frammento |
 | **il campione è sulla SD** | il `fileName` è relativo (`SAMPLES/...`); se il file non c'è, silenzio |
 | **il chop è ritmo, non melodia** | si riordinano/ripetono le fette a tempo, non si suonano altezze |
 | **le fette uguali sono un punto di partenza** | se cadono male sulle sillabe, cambia N o (in futuro) taglia sui transienti |

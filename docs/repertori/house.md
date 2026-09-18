@@ -93,7 +93,7 @@ Esempio: `tools/acid_scritto.py`.
 L'altra faccia del lead dance è il **vocal chop** — un campione vocale tagliato in
 un kit di fette e innescato a ritmo. `[LIB]`+`[DEC]` (struttura della fetta `[OSS]`):
 `kit.affetta(doc, kit, path, frames, n=…)` taglia il campione in N fette (una `<zone>`
-per drum, loopMode ONCE ereditato), poi si compongono le fette come una parte
+per drum, MODE **CUT** — la fetta si ferma con la nota, dal manuale), poi si compongono le fette come una parte
 ritmica. Vedi [vocal-chop.md](../istruzioni/vocal-chop.md), esempio
 `tools/vocalchop_scritto.py` (l'«mmyeah» in 8 fette). ⚠️ Resta fuori il **vocal
 cantato** vero (una registrazione, non generabile).

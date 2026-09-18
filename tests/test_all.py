@@ -9364,7 +9364,6 @@ def test_affetta():
         doc = parse_file(tem)
         kit, clip = C.add_track(doc, str(preset), name='CHOP', folder='KITS',
                                 length=384, playing=True)
-        base_loop = S.drums(kit)[0].find('osc1').get('loopMode')
         nomi = K.affetta(doc, kit, 'SAMPLES/RECORD/REC00027.WAV', 142725, n=4)
     drums = S.drums(kit)
     check('il kit ha 4 fette', len(drums) == 4, str(len(drums)))
@@ -9378,8 +9377,9 @@ def test_affetta():
     check('ogni fetta punta al campione',
           all(d.find('osc1').get('fileName') == 'SAMPLES/RECORD/REC00027.WAV'
               for d in drums))
-    check('il loopMode e ereditato dal base (one-shot), non scritto a caso',
-          all(d.find('osc1').get('loopMode') == base_loop for d in drums), base_loop)
+    check('il loopMode e CUT (0): la fetta si ferma con la nota, non suona tutto',
+          all(d.find('osc1').get('loopMode') == '0' for d in drums),
+          str([d.find('osc1').get('loopMode') for d in drums]))
     check('le clip hanno una noteRow per fetta',
           all(len([r for r in S.note_rows(c) if r.has('drumIndex')]) == 4
               for _, c in S.clips(doc) if S.instrument_of(doc, c) is kit))

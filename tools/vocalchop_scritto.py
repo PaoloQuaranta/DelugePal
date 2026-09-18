@@ -3,8 +3,9 @@
 Riempie la casella 8 (il vocal chop) di house/trip-hop. Il campione
 SAMPLES/RECORD/REC00027.WAV (il «mmyeah» dell'utente, 142725 frame, ~3,24 s) e'
 tagliato in 8 fette uguali con kit.affetta -- un kit dove ogni drum e' una <zone>
-dello stesso file, loopMode ONCE (ereditato da un drum one-shot vero). Le fette si
-innescano a ritmo: la parola in crome, poi uno stutter.
+dello stesso file, REPEAT MODE CUT (la fetta si ferma con la nota -- dal manuale,
+cap. 9.13; ONCE suonerebbe tutto il file). Le fette si innescano a ritmo: la parola
+in crome, poi uno stutter.
 
 Contesto: house four-on-the-floor (808), la casa del vocal chop; basso in levare.
 
@@ -92,8 +93,8 @@ def basso() -> dict:
 
 def chop(fette: list[str]) -> dict:
     """Le fette dell'mmyeah a ritmo: la parola in crome (fette 1-8), poi uno stutter.
-    Un motivo di 2 battute ripetuto. [DEC], da rifinire all'orecchio. ONCE = la fetta
-    suona intera all'innesco."""
+    Un motivo di 2 battute ripetuto. [DEC], da rifinire all'orecchio. Con CUT la
+    durata della nota decide quanto lunga si sente la fetta."""
     from delugexml.notes import Note                          # noqa: PLC0415
     # (passo in sedicesimi su 2 battute, fetta 1-based)
     motivo = [(0, 1), (2, 2), (4, 3), (6, 4), (8, 5), (10, 6), (12, 7), (14, 8),
