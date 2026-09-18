@@ -122,7 +122,9 @@ fissa alta e si rampa il solo cutoff.
 `tools/acid_scritto.py`: techno minimale dritta (~132), four-on-the-floor 808, la
 linea 303 su La (sedicesimi, accenti, slide), `MU.acid(onda='saw')`, e l'arco
 intro → build (il filtro apre: cutoff **e** risonanza) → drop. `verifica()` vuota,
-nessuna avvertenza. ⚠️ **Verdetto dell'ascolto: da dare** (suono = ascolto pieno).
+nessuna avvertenza. ⚠️ **Verdetto dell'ascolto (18 settembre 2026): *«l'idea
+generale c'è»*** — la risonanza (40) regge, semmai da abbassare un pelo (ritocco
+rimandato). I valori restano dei buoni punti di partenza.
 
 ---
 

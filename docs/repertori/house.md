@@ -8,7 +8,9 @@ si è aggiunta **l'essenza del genere** — l'**arrangiamento** (build/drop, cas
 scritti, con `verifica()` pulita, e **ascoltati sul dispositivo** (*«va bene»*, 17
 settembre 2026). Il **18 settembre** si è aggiunto il **techno acid** — il TB-303
 (casella 8, il lead; casella 10, il suono): la linea che rotola e il filtro
-risonante che evolve, in attesa dell'ascolto. ⚠️ **Niente corpus** — sono generi
+risonante che evolve, **ascoltato** (*«l'idea generale c'è»*, 18 settembre 2026;
+la risonanza regge, semmai da abbassare un pelo — ritocco rimandato). ⚠️ **Niente
+corpus** — sono generi
 **programmati** — quindi è `[LIB]`+`[DEC]`, la convenzione di genere; la sola
 struttura XML del sidechain e i patch cable del 303 sono `[OSS]` (file veri/corpus).
 
@@ -181,4 +183,5 @@ all'orecchio: verdetto *«va bene»* (17 settembre 2026).
   `tools/house2_scritto.py` (arco), `tools/acid_scritto.py` (acid);
 - **verdetto d'ascolto:** il groove (17 settembre 2026) *«funziona»*; l'arco +
   filtro + sidechain (17 settembre 2026) *«va bene»*; il **techno acid** (18
-  settembre 2026) **in attesa d'ascolto**.
+  settembre 2026) *«l'idea generale c'è»* — la risonanza regge (semmai un pelo più
+  bassa, ritocco rimandato).

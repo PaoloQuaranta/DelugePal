@@ -17,7 +17,9 @@ L'arco (32 battute, con MU.forma):
 ⚠️ NIENTE CORPUS (generi programmati): [LIB]+[DEC]. I patch cable del 303 sono
 [OSS] (corpus). I valori del suono sono [DEC]+[da verificare] all'orecchio.
 
-Metodo: suono = ascolto pieno dell'utente. Verdetto: da dare.
+Metodo: suono = ascolto pieno dell'utente.
+Verdetto (18 settembre 2026): «l'idea generale c'e'». La risonanza (40) regge --
+semmai da abbassare un pelo, ritocco rimandato per scelta dell'utente.
 """
 from __future__ import annotations
 
