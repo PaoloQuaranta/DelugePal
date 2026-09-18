@@ -14,7 +14,7 @@ Contesto: house four-on-the-floor (808), la casa del vocal chop; basso in levare
 che sblocca il break di jungle/DnB.
 
 Metodo: audio -> ascolto pieno dell'utente. Il pattern del chop e' [DEC], da rifinire
-all'orecchio. Verdetto: da dare.
+all'orecchio. Verdetto (19 settembre 2026): «ora sento le fette» -- funziona.
 """
 from __future__ import annotations
 

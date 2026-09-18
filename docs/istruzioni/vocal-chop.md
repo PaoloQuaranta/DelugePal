@@ -108,9 +108,9 @@ su materiale diverso. (Il break vero è un altro pezzo/genere; qui c'è il mecca
 
 `tools/vocalchop_scritto.py`: l'«mmyeah» (`SAMPLES/RECORD/REC00027.WAV`, 142725 frame)
 in **8 fette**, innescate su un beat **house** four-on-the-floor (808) + basso in
-levare. Il chop ricostruisce la parola in crome, poi stuttera. `verifica()` vuota.
-⚠️ **Verdetto dell'ascolto: da dare** (audio = ascolto pieno; il pattern e N sono
-`[DEC]`, da rifinire).
+levare. Il chop è **spezzettato** (buchi, stutter, salti), non la parola in fila.
+⚠️ **Verdetto dell'ascolto (19 settembre 2026): *«ora sento le fette»* — funziona.**
+Il pattern e N restano `[DEC]`, da rifinire (quali fette valorizzare si sente).
 
 ---
 

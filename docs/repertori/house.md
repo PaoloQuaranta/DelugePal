@@ -190,4 +190,5 @@ all'orecchio: verdetto *«va bene»* (17 settembre 2026).
 - **verdetto d'ascolto:** il groove (17 settembre 2026) *«funziona»*; l'arco +
   filtro + sidechain (17 settembre 2026) *«va bene»*; il **techno acid** (18
   settembre 2026) *«l'idea generale c'è»* — la risonanza regge (semmai un pelo più
-  bassa, ritocco rimandato).
+  bassa, ritocco rimandato); il **vocal chop** (19 settembre 2026) *«ora sento le
+  fette»* — funziona (vedi [vocal-chop.md](../istruzioni/vocal-chop.md)).
