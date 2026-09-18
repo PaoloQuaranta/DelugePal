@@ -9282,6 +9282,40 @@ def test_eco_dub():
     check('il documento resta valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
 
 
+def test_triphop_scritto():
+    """triphop_scritto.py: la fusione -- vamp minore sul Rhodes con eco dub,
+    batteria hip-hop rallentata, basso dub."""
+    from delugexml import musica as MU                          # noqa: PLC0415
+    from delugexml import sound as SND, arranger as AR         # noqa: PLC0415
+    try:
+        import triphop_scritto as TH                            # noqa: PLC0415
+    except FileNotFoundError:
+        salta('test_triphop_scritto', 'manca una fixture')
+        return
+    try:
+        doc, _ = TH.costruisci()
+    except FileNotFoundError:
+        salta('test_triphop_scritto (build)', 'manca una fixture')
+        return
+    check('il pezzo TRIP-HOP e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('nessuna avvertenza', MU.avvertenze(doc) == [], str(MU.avvertenze(doc)))
+    est = AR.extent(doc)
+    check('l arco e lungo 12 battute',
+          est is not None and est[1] == 12 * MU.TICK_PER_BATTUTA, str(est))
+    iR = TH.strumento(doc, 'RHODES')
+    d = iR.find('delay')
+    check('il Rhodes ha l eco dub (analog)', d is not None and d.get('analog') == '1',
+          str(d and d.attrs))
+    rho = [c for _, c in S.clips(doc) if S.instrument_of(doc, c) is iR][0]
+    check('il feedback dell eco e sulla clip del Rhodes',
+          SND.get(rho, 'delayFeedback') is not None)
+    # l'armonia: le classi di altezza del vamp (l'altezza e' la chiave del dict).
+    # Cm9 rootless = Eb(3) G(7) Bb(10) D(2); il vamp intero le contiene tutte.
+    pcs = {alt % 12 for alt in TH.comping()}
+    check('l armonia contiene le note del vamp (Eb,G,Bb,D di Cm9)',
+          {3, 7, 10, 2} <= pcs, str(sorted(pcs)))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
