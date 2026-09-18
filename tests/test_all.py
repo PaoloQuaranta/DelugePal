@@ -9163,6 +9163,31 @@ def test_house2_scritto():
     check('il kick manda al sidechain', kick.get('sideChainSend') == '2147483647')
 
 
+def test_automatizza():
+    """MU.automatizza: una rampa di QUALUNQUE parametro (qui lpfResonance)."""
+    from delugexml import musica as MU                          # noqa: PLC0415
+    from delugexml import automation as A, sound as SND, params as P  # noqa: PLC0415
+    p = REFS / 'songs' / 'TEMPL4.XML'
+    if not p.exists():
+        salta('test_automatizza', 'TEMPL4.XML assente')
+        return
+    doc = parse_file(p)
+    clip = [c for _, c in S.clips(doc)][1]
+    r = MU.automatizza(doc, clip, 'lpfResonance', 5, 40, 0, 384, passi=5)
+    grezzo = SND.container(clip).get('lpfResonance')
+    check('automatizza scrive un blob su lpfResonance', A.is_automation(grezzo),
+          str(grezzo)[:40])
+    disp = [P.to_display(pt.hex) for pt in A.decode(grezzo)[1]]
+    check('la rampa di risonanza sale', disp[0] <= 7 and disp[-1] >= 38, str(disp))
+    check('automatizza segna la vista (lpfResonance e in tabella)',
+          r.get('vista') is True, str(r))
+    # apri_filtro resta un wrapper funzionante
+    r2 = MU.apri_filtro(doc, clip, 10, 45, 0, 384)
+    check('apri_filtro e ancora lpfFrequency', r2['param'] == 'lpfFrequency', str(r2))
+    check('apri_filtro scrive automazione',
+          A.is_automation(SND.container(clip).get('lpfFrequency')))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
