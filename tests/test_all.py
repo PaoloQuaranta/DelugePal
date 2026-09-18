@@ -9350,6 +9350,42 @@ def test_triphop_scritto():
           {3, 7, 10, 2} <= pcs, str(sorted(pcs)))
 
 
+def test_affetta():
+    """kit.affetta: N drum-fetta da un campione, zone sequenziali, loopMode ereditato."""
+    from delugexml import kit as K, song as S, create as C, musica as MU  # noqa: PLC0415
+    import warnings                                             # noqa: PLC0415
+    preset = REFS / 'kits' / '808 From Mars.XML'
+    tem = REFS / 'songs' / 'TEMPL0.XML'
+    if not (preset.exists() and tem.exists()):
+        salta('test_affetta', 'manca una fixture')
+        return
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        doc = parse_file(tem)
+        kit, clip = C.add_track(doc, str(preset), name='CHOP', folder='KITS',
+                                length=384, playing=True)
+        base_loop = S.drums(kit)[0].find('osc1').get('loopMode')
+        nomi = K.affetta(doc, kit, 'SAMPLES/RECORD/REC00027.WAV', 142725, n=4)
+    drums = S.drums(kit)
+    check('il kit ha 4 fette', len(drums) == 4, str(len(drums)))
+    check('i nomi sono fetta 1..4', nomi == ['fetta 1', 'fetta 2', 'fetta 3', 'fetta 4'],
+          str(nomi))
+    zone = [(int(d.find('osc1').find('zone').get('startSamplePos')),
+             int(d.find('osc1').find('zone').get('endSamplePos'))) for d in drums]
+    check('le zone sono sequenziali e coprono il file',
+          zone == [(0, 35681), (35681, 71362), (71362, 107043), (107043, 142725)],
+          str(zone))
+    check('ogni fetta punta al campione',
+          all(d.find('osc1').get('fileName') == 'SAMPLES/RECORD/REC00027.WAV'
+              for d in drums))
+    check('il loopMode e ereditato dal base (one-shot), non scritto a caso',
+          all(d.find('osc1').get('loopMode') == base_loop for d in drums), base_loop)
+    check('le clip hanno una noteRow per fetta',
+          all(len([r for r in S.note_rows(c) if r.has('drumIndex')]) == 4
+              for _, c in S.clips(doc) if S.instrument_of(doc, c) is kit))
+    check('il documento resta valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

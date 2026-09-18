@@ -258,6 +258,42 @@ def sample_of(drum: Node, osc: int = 1) -> str | None:
     return nodo.get('fileName') if nodo is not None else None
 
 
+def affetta(doc: Document, kit: Node, path: str, frames: int, *,
+            n: int = 16, base: int = 0) -> list[str]:
+    """Affetta un campione in un kit di N drum-fetta -- il vocal chop, o il break.
+
+    Ogni drum-fetta e' una COPIA del drum `base`, cosi' ne EREDITA `loopMode`
+    (one-shot), gli inviluppi e il resto: un drum che funziona, invece di
+    scrivere `loopMode` alla cieca (regola del progetto). Su ognuno si cambia
+    solo `fileName=path` e la `<zone>` a `[i*frames//n, (i+1)*frames//n]`
+    (l'ultima fino a `frames`, per coprire il resto). `path` e' relativo alla SD
+    (`SAMPLES/...`); `frames` da `audio.wav_frames(path_locale)[0]`. Riusabile
+    per il break di jungle/DnB. Ritorna i nomi `['fetta 1', ...]`.
+    """
+    from . import song as S                                    # noqa: PLC0415
+    if n < 1:
+        raise ValueError('servono almeno 1 fetta')
+    orig = S.drums(kit)
+    if not 0 <= base < len(orig):
+        raise ValueError(f'drum base {base} inesistente (ce ne sono {len(orig)})')
+    n_orig = len(orig)
+    modello = copy_drum(kit, base)                 # copia staccata: loopMode ereditato
+    # aggiungi N fette in fondo, poi togli gli n_orig originali dal fronte
+    for i in range(n):
+        add_drum(doc, kit, modello.copy_detached(), name=f'fetta {i + 1}')
+    for _ in range(n_orig):
+        remove_drum(doc, kit, 0)
+    dur = frames // n
+    fette = S.drums(kit)
+    nomi = []
+    for i in range(n):
+        a = i * dur
+        b = frames if i == n - 1 else (i + 1) * dur
+        set_sample(fette[i], path, start=a, end=b)
+        nomi.append(f'fetta {i + 1}')
+    return nomi
+
+
 def check_indices(doc: Document, kit: Node) -> list[str]:
     """Verifica l'invariante drum <-> noteRow. Vuoto se e' tutto a posto."""
     n = len(S.drums(kit))
