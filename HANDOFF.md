@@ -282,6 +282,39 @@ letteratura nuova (Levine ×2, Piston *Counterpoint*, Crook) e tutta l'armonia �
 stata rivista con Levine: §6-octovicies** — Levine nomina le chord-scale che Smith
 rifiutava, e ora hanno `[LIB]`. I tool djvu sono installati (memoria
 `letteratura-composizione`).
+⚠️ **E il 19 settembre 2026 il DnB/JUNGLE** — primo genere della riga aggregata
+«elettronica · IDM · DnB · jungle», **scorporato** dall'aggregato dell'indice. Non una
+capacità nuova: lo slicing (`kit.affetta`) è **lo stesso gesto del vocal chop** — cambia
+il materiale (un break, non una voce) e il fine del chop (**ricostruire** un groove e poi
+editarlo, non rompere una parola). Il break: `original AMEN.wav` (già stretchato a **171
+BPM**, 4 battute, 268795 frame, su `SAMPLES/sampleswap/...`) in **64 fette** da 1/16 —
+⚠️ **a song = tempo nativo del break** la durata della fetta combacia col passo di 1/16,
+quindi in ordine il break si ricostruisce esatto (ONCE + zona), ri-sequenziato dà il
+chop. Il chop lavora **per beat** (4 fette contigue = un movimento coerente), casse gravi
+(fette 0/24/56, `[OSS]` da un'**analisi di energia stdlib** — RMS + banda grave, niente
+numpy) sui movimenti forti, due rullate a chiudere le frasi. ⚠️ **Feel DRITTO
+(swing 50):** il micro-timing del break è **nell'audio** delle fette; uno swing di song
+lo sposterebbe due volte — è il rovescio dello swing jazz (memoria
+`riflesso-idioma-fuori-contesto`, ora citata anche qui). Sotto, il **half-time** lo dà il
+contrasto: **sub** rado e gravissimo (Square Saw Bass scurito, fondamentale sul 1 +
+spinta sul 4) e **armonia** minore cinematica `Cm9 | A♭maj7 | Cm9 | G7♭9` (i–♭VI–i–V7♭9,
+`[CALC]`, il colore del trip-hop) su Tal Rhodes tenuto + velo di riverbero. Forma
+intro→drop→breakdown→drop, 32 battute, `MU.forma`. Pezzo `tools/dnb_scritto.py` (e
+`test_dnb_scritto`), istruzione `docs/istruzioni/dnb-jungle.md` (rimanda a
+`vocal-chop.md`), **scheda nuova** `docs/repertori/dnb-jungle.md` con la sua riga
+nell'indice. ⚠️ **NIENTE CORPUS** DnB/jungle (Groove MIDI non ha l'etichetta):
+`[LIB]`+`[DEC]`; break e analisi fette `[OSS]`, armonia `[CALC]`, chop/arco/livelli
+`[DEC]`. **DNB01.XML** scritto sulla SD direttamente (era in `E:`), 64 fette. ⚠️ **Poi,
+su richiesta dell'utente («aggiungi solo il campione, poi lo suono io»), aggiunto al kit
+AMEN un drum in più — l'AMEN INTERO in one-shot** (zona `[0, FRAMES]`, ONCE; NON
+sequenziato, per sentire il break originale innescandolo a mano). Kit a **65 righe**.
+Trasferito **via SysEx come DNB02.XML** (la SD era tornata nel Deluge; `put` non
+sovrascrive DNB01 e via SysEx non c'è delete → versione nuova), **verificato per
+rilettura (hash identico)**. ⚠️ **`dir` via SysEx non rispondeva** (lettura larga, perdita
+pacchetti in ricezione) mentre `ping` e `put` (scrittura, riparata dal firmware) vanno:
+per il numero di versione mi sono fidato dello stato noto, e `put` è comunque un cancello.
+**Verdetto d'ascolto (19 settembre 2026): «va bene»** (come house/hip-hop) — il chop,
+l'arco e i livelli restano `[DEC]`, rifinibili. **1540 test.**
 
 ### I feel ritmici, e i sottogeneri — l'agenda del ritmo, 15 settembre 2026
 

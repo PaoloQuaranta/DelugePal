@@ -9410,6 +9410,51 @@ def test_vocalchop_scritto():
     check('le zone sono crescenti', starts == sorted(starts), str(starts))
 
 
+def test_dnb_scritto():
+    """dnb_scritto.py: l'amen affettato (64 fette) e ri-sequenziato, sub half-time,
+    vamp minore cinematico. La forma intro/drop/break/drop su 32 battute."""
+    from delugexml import musica as MU, song as S             # noqa: PLC0415
+    from delugexml import arranger as AR                      # noqa: PLC0415
+    try:
+        import dnb_scritto as DN                               # noqa: PLC0415
+    except FileNotFoundError:
+        salta('test_dnb_scritto', 'manca una fixture')
+        return
+    try:
+        doc, _ = DN.costruisci()
+    except FileNotFoundError:
+        salta('test_dnb_scritto (build)', 'manca un preset di refs/synths')
+        return
+    check('il pezzo DnB e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('nessuna avvertenza', MU.avvertenze(doc) == [], str(MU.avvertenze(doc)))
+    est = AR.extent(doc)
+    check('l arco e lungo 32 battute',
+          est is not None and est[1] == 32 * MU.TICK_PER_BATTUTA, str(est))
+    iBreak = DN.strumento(doc, 'AMEN')
+    drums = S.drums(iBreak)
+    check('il break AMEN ha 64 fette + il loop intero', len(drums) == DN.NFETTE + 1,
+          str(len(drums)))
+    check('tutti i drum puntano all amen',
+          all(d.find('osc1').get('fileName') == DN.SAMPLE for d in drums))
+    check('il loopMode e ONCE (1): la zona delimita (fette e loop intero)',
+          all(d.find('osc1').get('loopMode') == '1' for d in drums))
+    fette = drums[:DN.NFETTE]
+    starts = [int(d.find('osc1').find('zone').get('startSamplePos')) for d in fette]
+    check('le zone delle fette sono crescenti e coprono il file',
+          starts == sorted(starts) and starts[0] == 0, str(starts[:3]))
+    intero = drums[DN.NFETTE].find('osc1').find('zone')
+    check('l amen intero e una sola zona [0, FRAMES] (one-shot)',
+          int(intero.get('startSamplePos')) == 0
+          and int(intero.get('endSamplePos')) == DN.FRAMES,
+          f"{intero.get('startSamplePos')}..{intero.get('endSamplePos')}")
+    # l'armonia: le classi di altezza del vamp. Cm9 rootless = Eb(3) G(7) Bb(10) D(2)
+    pcs = {alt % 12 for alt in DN.pad()}
+    check('l armonia contiene le note del vamp (Eb,G,Bb,D di Cm9)',
+          {3, 7, 10, 2} <= pcs, str(sorted(pcs)))
+    # il feel e' DRITTO: swing 50 (il break porta il suo micro-timing nell audio)
+    check('lo swing e dritto (50)', S.get_swing(doc)[0] == 50, str(S.get_swing(doc)))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
