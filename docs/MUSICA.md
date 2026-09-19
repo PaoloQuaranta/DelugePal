@@ -1112,7 +1112,7 @@ casella della scheda corrispondente: la scheda è la fonte, questa matrice ne
 | [house / techno](repertori/house.md) | ◐ | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
 | [trip hop](repertori/trip-hop.md) | ◐ | ● | ● | ● | ● | ● | ● | ◐ | ◐ | ● | ● |
 | [DnB / jungle](repertori/dnb-jungle.md) | ◐ | ● | ● | ● | ● | ● | ● | ○ | ◐ | ● | ● |
-| elettronica · IDM | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| [elettronica / IDM](repertori/idm.md) | ◐ | ● | ● | ● | ● | ● | ◐ | ◐ | ◐ | ● | ● |
 
 `●` compilata · `◐` parziale, e la scheda dice di cosa · `○` vuota.
 
@@ -1120,14 +1120,14 @@ Il **grado di prova** non sta qui: `[MIS]`, `[WEB]`, `[OSS]`, `[IPO]`, `[MAN]`
 stanno dentro la scheda, accanto all'affermazione che qualificano. La matrice
 dice solo dove c'è qualcosa.
 
-Gli altri repertori del perimetro — classica, barocca, antica; elettronica,
-IDM — non hanno un file, e non è una
+Gli altri repertori del perimetro — classica, barocca e antica — non hanno un
+file, e non è una
 dimenticanza: un file che dicesse soltanto «vuota» undici volte è rumore da
-aprire, mentre una riga d'indice è la stessa informazione a costo zero. Le due
-righe aggregate qui sopra, senza link, sono quella informazione: undici
-caselle vuote, ripetuto per i due gruppi. ⚠️ **Hip hop, house/techno, trip hop e
+aprire, mentre una riga d'indice è la stessa informazione a costo zero. La riga
+aggregata qui sopra, senza link, è quella informazione: undici caselle vuote per
+il gruppo storico. ⚠️ **Hip hop, house/techno, trip hop e
 DnB/jungle hanno invece una scheda** (il boom-bap e la four-on-the-floor dal 17
 settembre 2026, il trip-hop e DnB/jungle dal 18-19): sono le prime righe del
-**perimetro 3** con un file, e per questo stanno staccate, col link. DnB/jungle è
-stato **scorporato** dalla riga aggregata «elettronica · IDM · DnB · jungle», che
-resta «elettronica · IDM».
+**perimetro 3** con un file, e per questo stanno staccate, col link. DnB/jungle e
+poi elettronica/IDM sono stati **scorporati** dalla vecchia riga aggregata:
+ognuno ha ora la propria scheda.

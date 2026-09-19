@@ -1,4 +1,4 @@
-﻿# HANDOFF — Deluge Pal
+# HANDOFF — Deluge Pal
 
 **Data:** 18 agosto 2026
 **Progetto:** `D:\DelugePal` (fino al 14 agosto si chiamava `deluge-xml-workflow`)
@@ -4158,6 +4158,61 @@ L'interazione a **più di due parti** (il basso rispetto a melodia *e* batteria
 insieme: oggi `interazione` e `reazione` guardano una coppia per volta), e i **feel
 diversi dallo swing** (spazzole, terzine). Poi, fuori dal ritmo, si sale di
 priorità o di repertorio.
+
+---
+
+## 6-novemtrigies. Elettronica / IDM: il pezzo corretto dall'ascolto — 19 settembre 2026
+
+È stata aperta la riga **elettronica / IDM** dell'indice con una scheda propria,
+un'istruzione compositiva e un esempio lavorato di 40 battute. Il perimetro è
+deliberatamente stretto: IDM astratta e meccanica, polimetro deterministico,
+precisione dritta, metallo, glitch discontinuo e un centro tonale minimo. Non è
+un tentativo di coprire tutta l'IDM né di replicare la superficie di un artista.
+
+### Cosa c'è adesso
+
+| | |
+|---|---|
+| `tools/idm_scritto.py` | quattro periodi indipendenti di 5/6/7/11 sedicesimi, tre cellule THUD sullo stesso periodo di 6/16, due gesti glitch, drone Re–La♭ e forma per accrezione/mutazione |
+| `docs/istruzioni/idm.md` | vocabolario, vincoli, realizzazione sul Deluge e storia delle quattro versioni |
+| `docs/repertori/idm.md` | la nuova scheda: 6 caselle piene, 5 parziali; il limite è dichiarato per territorio, non nascosto sotto l'etichetta “IDM” |
+| `docs/MUSICA.md` | la vecchia riga aggregata è diventata una scheda collegata nell'indice |
+| `tests/test_all.py` | forma, densità minima, periodi, tre kick realmente diversi, alternanza degli otto glitch, cromatismo e catena synth del drone |
+
+### Le quattro versioni, e ciò che ha deciso l'orecchio
+
+`IDM01` era tecnicamente valida ma musicalmente scarna: prima metà vuota,
+interludio ridotto alla sola cassa, glitch troppo radi, cassa identica per tutto
+il pezzo; inoltre il drone era muto perché la rampa di cutoff restava sotto la
+fascia udibile nel registro grave. `IDM03` ha chiuso ritmo e forma: almeno tre
+ruoli nelle prime 28 battute, niente cassa sola, otto glitch alternati e tre
+cellule THUD. Verdetto: *«meglio»* e *«il resto va bene»*.
+
+Restava il drone. Alzare il cutoff aveva corretto il silenzio, non la natura del
+suono: `Tal Rhodes` usa un **multisample one-shot**. Il suo inviluppo poteva avere
+sustain alto, ma la registrazione continuava a decadere come un piano elettrico.
+`IDM04` parte invece dal synth vuoto del Deluge: triangolo + `analogSaw` a −7
+cent, unisono 2 (`detune 5`, `spread 14`), livelli 30/18, ENV1 attacco 12,
+sustain 50, release 24. Il filtro continua a muoversi 40→48 e la risonanza
+12→30. Verdetto finale: *«ok»*.
+
+⚠️ **La lezione tecnica:** un drone richiede una **sorgente continua**. Note
+lunghe, sustain alto e release lungo non trasformano un campione percussivo in
+un drone; il filtro cambia lo spettro disponibile, non ricrea l'energia che il
+campione ha già perso.
+
+⚠️ **La lezione compositiva:** “sottrarre” non significa lasciare un ruolo solo
+senza una funzione. Qui il contrasto funziona quando CLICK e HAT si alternano
+sopra una base di almeno tre ruoli. E la ripetizione di periodo non obbliga a
+una cassa invariata: THUD-A/B/C mantengono 6/16 ma cambiano attacchi e accento.
+
+### Stato tecnico finale
+
+`IDM04.XML` è stata scritta come nuova versione in
+`/SONGS/DelugePal/IDM04.XML`, senza cancellare o sovrascrivere le precedenti.
+La rilettura SysEx è byte-identica: SHA-256
+`8a37531ec94d286df7c41a780d000ac7bf50bf504257f64313cd3179f8f3ebe9`.
+`MU.verifica()` vuota, `MU.avvertenze()` nessuna; suite **1560/1560**.
 
 ---
 

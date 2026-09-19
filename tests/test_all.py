@@ -9455,6 +9455,154 @@ def test_dnb_scritto():
     check('lo swing e dritto (50)', S.get_swing(doc)[0] == 50, str(S.get_swing(doc)))
 
 
+def test_idm_scritto():
+    """idm_scritto.py: polimetro meccanico, drone cromatico e forma per
+    accrezione/sottrazione su 40 battute."""
+    from delugexml import musica as MU, song as S             # noqa: PLC0415
+    from delugexml import arranger as AR, sound as SND        # noqa: PLC0415
+    from delugexml import automation as AU, params as PA      # noqa: PLC0415
+    try:
+        import idm_scritto as IDM                              # noqa: PLC0415
+    except ModuleNotFoundError:
+        check('il generatore IDM esiste', False, 'modulo idm_scritto assente')
+        return
+    try:
+        doc, _ = IDM.costruisci()
+    except FileNotFoundError:
+        salta('test_idm_scritto (build)', 'manca un preset di refs')
+        return
+
+    check('il pezzo IDM e valido', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('nessuna avvertenza', MU.avvertenze(doc) == [], str(MU.avvertenze(doc)))
+    est = AR.extent(doc)
+    check('l arco e lungo 40 battute',
+          est is not None and est[1] == 40 * MU.TICK_PER_BATTUTA, str(est))
+    check('lo swing e dritto (50)', S.get_swing(doc)[0] == 50, str(S.get_swing(doc)))
+    check('il tempo lascia leggere gli incastri (90 BPM)',
+          abs(S.get_bpm(doc.root) - 90) < 1e-6, str(S.get_bpm(doc.root)))
+
+    # Le lunghezze sono derivate a mano dal disegno: 6, 5, 7 e 11 sedicesimi,
+    # ognuno da 24 tick. Cambiare una lunghezza rompe il polimetro.
+    attese = {'THUD': 144, 'CLICK': 120, 'HAT': 168, 'METAL': 264}
+    trovate = {}
+    for inst in S.instruments(doc):
+        nome = inst.get('presetName') or inst.get('name')
+        clip_inst = [c for _, c in S.clips(doc) if S.instrument_of(doc, c) is inst]
+        if nome in attese and clip_inst:
+            trovate[nome] = int(clip_inst[0].get('length'))
+    check('i quattro strati hanno periodi 6/5/7/11 sedicesimi',
+          trovate == attese, str(trovate))
+
+    iDrone = IDM.strumento(doc, 'DRONE')
+    cDrone = [c for _, c in S.clips(doc) if S.instrument_of(doc, c) is iDrone][0]
+    tipi_osc = [iDrone.find(f'osc{n}').get('type') for n in (1, 2)]
+    check('il drone nasce da oscillatori synth continui, non da campioni',
+          all(t in {'sine', 'triangle', 'saw', 'square',
+                    'analogSquare', 'analogSaw'} for t in tipi_osc)
+          and SND.get(cDrone, 'oscBVolume') > 0,
+          f'osc={tipi_osc}, oscB={SND.get(cDrone, "oscBVolume")}')
+    inviluppo = {p: SND.get(cDrone, f'envelope1.{p}')
+                 for p in ('attack', 'sustain', 'release')}
+    check('il drone ha un inviluppo di ampiezza lento e sostenuto',
+          inviluppo['attack'] >= 8 and inviluppo['sustain'] >= 45
+          and inviluppo['release'] >= 15,
+          str(inviluppo))
+    check('il drone e cromatico: il tritono fuori scala resta suonabile',
+          cDrone.get('inKeyMode') == '0', str(cDrone.get('inKeyMode')))
+    pcs = {int(r.get('y')) % 12 for r in S.note_rows(cDrone) if r.has('y')}
+    check('il drone contiene Re e Lab', {2, 8} <= pcs, str(sorted(pcs)))
+    params_drone = SND.container(cDrone)
+    check('il drone trasforma cutoff e risonanza',
+          AU.is_automation(params_drone.get('lpfFrequency') or '')
+          and AU.is_automation(params_drone.get('lpfResonance') or ''))
+    _, cutoff = AU.decode(params_drone.get('lpfFrequency'))
+    cutoff_display = [PA.to_display(f'0x{p.raw:08X}') for p in cutoff]
+    check('il cutoff del drone resta nella fascia aperta approvata',
+          min(cutoff_display) >= 40 and max(cutoff_display) >= 48,
+          str(cutoff_display))
+
+    # La mappa e' la forma rivista dopo l'ascolto: prima meta' gia' popolata,
+    # interludio senza cassa nuda e otto punteggiature glitch.
+    attesa_forma = {
+        'THUD': [(0, 8 * MU.TICK_PER_BATTUTA),
+                 (8 * MU.TICK_PER_BATTUTA, 8 * MU.TICK_PER_BATTUTA),
+                 (16 * MU.TICK_PER_BATTUTA, 8 * MU.TICK_PER_BATTUTA),
+                 (24 * MU.TICK_PER_BATTUTA, 8 * MU.TICK_PER_BATTUTA),
+                 (32 * MU.TICK_PER_BATTUTA, 8 * MU.TICK_PER_BATTUTA)],
+        'CLICK': [(0, 24 * MU.TICK_PER_BATTUTA),
+                  (28 * MU.TICK_PER_BATTUTA, 12 * MU.TICK_PER_BATTUTA)],
+        'HAT': [(0, 12 * MU.TICK_PER_BATTUTA),
+                (16 * MU.TICK_PER_BATTUTA, 6 * MU.TICK_PER_BATTUTA),
+                (24 * MU.TICK_PER_BATTUTA, 16 * MU.TICK_PER_BATTUTA)],
+        'METAL': [(4 * MU.TICK_PER_BATTUTA, 16 * MU.TICK_PER_BATTUTA),
+                  (24 * MU.TICK_PER_BATTUTA, 16 * MU.TICK_PER_BATTUTA)],
+        'DRONE': [(4 * MU.TICK_PER_BATTUTA, 36 * MU.TICK_PER_BATTUTA)],
+        'GLITCH': [(4 * MU.TICK_PER_BATTUTA, MU.TICK_PER_BATTUTA),
+                   (9 * MU.TICK_PER_BATTUTA, MU.TICK_PER_BATTUTA),
+                   (14 * MU.TICK_PER_BATTUTA, MU.TICK_PER_BATTUTA),
+                   (18 * MU.TICK_PER_BATTUTA, MU.TICK_PER_BATTUTA),
+                   (22 * MU.TICK_PER_BATTUTA, MU.TICK_PER_BATTUTA),
+                   (27 * MU.TICK_PER_BATTUTA, MU.TICK_PER_BATTUTA),
+                   (32 * MU.TICK_PER_BATTUTA, MU.TICK_PER_BATTUTA),
+                   (37 * MU.TICK_PER_BATTUTA, MU.TICK_PER_BATTUTA)],
+    }
+    forma = {}
+    for nome in attesa_forma:
+        forma[nome] = [(i.pos, i.length) for i in AR.instances(IDM.strumento(doc, nome))]
+    check('la forma tiene popolata la prima meta e distribuisce otto glitch',
+          forma == attesa_forma, str(forma.get('GLITCH')))
+
+    # Non basta spezzare l'istanza: le cinque regioni devono puntare davvero a
+    # tre cellule di cassa differenti, tutte ancora lunghe 6/16.
+    iThud = IDM.strumento(doc, 'THUD')
+    ist_thud = AR.instances(iThud)
+    codici_thud = {i.code for i in ist_thud}
+    firme_thud = set()
+    lunghezze_thud = set()
+    for ist in ist_thud:
+        clip = AR.clip_of(doc, ist)
+        lunghezze_thud.add(int(clip.get('length')))
+        firme_thud.add(tuple(sorted(
+            (n.pos, n.length, n.velocity)
+            for r in S.note_rows(clip) for n in S.read_notes(r))))
+    check('la cassa alterna tre cellule realmente diverse',
+          len(codici_thud) == 3 and len(firme_thud) == 3
+          and lunghezze_thud == {6 * IDM.P},
+          f'codici={sorted(codici_thud)}, firme={len(firme_thud)}, '
+          f'lunghezze={sorted(lunghezze_thud)}')
+
+    # Nelle prime 28 battute il glitch non deve mascherare buchi strutturali:
+    # almeno tre ruoli di base sono attivi in ogni battuta.
+    ruoli = ('THUD', 'CLICK', 'HAT', 'METAL', 'DRONE')
+    densita = []
+    for battuta in range(28):
+        tick = battuta * MU.TICK_PER_BATTUTA
+        attivi = sum(any(i.pos <= tick < i.fine
+                         for i in AR.instances(IDM.strumento(doc, nome)))
+                     for nome in ruoli)
+        densita.append(attivi)
+    check('la prima parte e l interludio non scendono sotto tre ruoli',
+          min(densita) >= 3, str(densita))
+
+    iGlitch = IDM.strumento(doc, 'GLITCH')
+    ist_glitch = AR.instances(iGlitch)
+    clip_glitch = {i.code: AR.clip_of(doc, i) for i in ist_glitch}
+    posizioni = []
+    for clip in clip_glitch.values():
+        posizioni.append(sorted(n.pos for r in S.note_rows(clip)
+                                for n in S.read_notes(r)))
+    check('gli otto interventi alternano due gesti glitch',
+          len(ist_glitch) == 8 and len(clip_glitch) == 2
+          and all(a.code != b.code
+                  for a, b in zip(ist_glitch, ist_glitch[1:])),
+          f'istanze={len(ist_glitch)}, '
+          f'codici={[i.code for i in ist_glitch]}')
+    check('i due gesti glitch contengono retrigger a trentaduesimi',
+          len(posizioni) == 2 and all(
+              12 in {b - a for a, b in zip(pos, pos[1:])}
+              for pos in posizioni), str(posizioni))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
