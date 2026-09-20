@@ -40,9 +40,21 @@ and be invisible.
 | **Removing and transforming** | delete a track or just a stretch of it; transpose chromatically or diatonically; half and double time |
 | **MIDI import** | dependency-free Standard MIDI File reader, validated note-for-note against `mido` |
 
-**284 tests pass** out of the box. Another **73 skip**, because they need a
-corpus of Deluge songs this repository deliberately does not ship — see
+Run `python tests/test_all.py` for the authoritative count. Tests that need a
+corpus of Deluge songs skip cleanly when that private material is absent — see
 [Bring your own corpus](#bring-your-own-corpus).
+
+### Feature coverage
+
+The table above describes the proven core workflow, not every feature of the
+Deluge. The canonical capability matrix is
+[`docs/COPERTURA_DELUGE.md`](docs/COPERTURA_DELUGE.md). It tracks each feature
+separately across reading, lossless preservation, authoring and verification
+on the device, and assigns a priority and next experiment to every gap.
+
+The regression suite validates the structure of that matrix. A high test count
+therefore means the implemented behavior is well protected; it does not mean
+that all Deluge features are implemented.
 
 ---
 
@@ -256,6 +268,10 @@ Reading order, all Italian:
 
 ## Known limits
 
+The complete and current inventory is
+[`docs/COPERTURA_DELUGE.md`](docs/COPERTURA_DELUGE.md); the bullets below are
+only the small set of format cautions worth seeing during onboarding.
+
 - **The corpus teaches only what it contains.** An element never seen falls back
   to a heuristic, which has always worked in leave-one-out testing but is not
   guaranteed.
@@ -306,4 +322,3 @@ Source of the measured swing and the harmonic grids.
 > Burkhart, Benjamin (eds.) (2017): *Inside the Jazzomat — New Perspectives for
 > Jazz Research*. Schott Campus.
 > <https://jazzomat.hfm-weimar.de/>
-

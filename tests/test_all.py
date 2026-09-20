@@ -6,6 +6,7 @@ alla fine viene restituito un exit code diverso da zero se qualcosa e' rotto.
 from __future__ import annotations
 
 import collections
+import re
 import statistics
 import sys
 from pathlib import Path
@@ -5822,6 +5823,80 @@ def test_indice_repertori_coerente_con_le_schede():
         check(f'{s.name}: l indice coincide con la scheda',
               indice.get(s.name) == vero,
               f'indice {indice.get(s.name)} vs scheda {vero}')
+
+
+def test_matrice_copertura_deluge():
+    """La matrice e' un registro strutturato, non prosa libera.
+
+    Il guasto che questo test deve cogliere e' una feature aggiunta senza uno
+    stato verificabile, oppure una lacuna che perde priorita' o prossimo passo.
+    """
+    path = ROOT / 'docs' / 'COPERTURA_DELUGE.md'
+    check('esiste la matrice canonica della copertura Deluge', path.is_file(),
+          str(path))
+    if not path.is_file():
+        return
+
+    testo = path.read_text(encoding='utf-8')
+    inizio = '<!-- capability-matrix:start -->'
+    fine = '<!-- capability-matrix:end -->'
+    check('la matrice ha delimitatori stabili per il controllo automatico',
+          testo.count(inizio) == 1 and testo.count(fine) == 1)
+    if testo.count(inizio) != 1 or testo.count(fine) != 1:
+        return
+
+    blocco = testo.split(inizio, 1)[1].split(fine, 1)[0]
+    righe = [r for r in blocco.splitlines() if r.startswith('|')]
+    dati = []
+    for riga in righe[2:]:                  # intestazione + separatore
+        celle = [c.strip() for c in riga.strip('|').split('|')]
+        if len(celle) == 10:
+            dati.append(celle)
+    check('la matrice contiene almeno trenta capacita concrete',
+          len(dati) >= 30, str(len(dati)))
+    if not dati:
+        return
+
+    stati = {'completa', 'parziale', 'solo-conservazione', 'assente', 'n/a'}
+    priorita = {'P0', 'P1', 'P2', 'P3', '—'}
+    aree = {'fondazioni', 'song-arranger', 'sequencer', 'synth-fx',
+            'kit-sampler', 'audio', 'midi-cv', 'artefatti-settings',
+            'compatibilita'}
+    ids = [r[0] for r in dati]
+    check('gli ID della matrice sono unici e adatti ai link',
+          len(ids) == len(set(ids))
+          and all(re.fullmatch(r'[a-z][a-z0-9-]*', x) for x in ids),
+          str(ids))
+    check('la matrice copre tutte le aree dichiarate',
+          {r[1] for r in dati} == aree,
+          f'{sorted({r[1] for r in dati})}')
+
+    stati_errati = [(r[0], v) for r in dati for v in r[3:7] if v not in stati]
+    check('lettura conservazione scrittura e device usano stati chiusi',
+          not stati_errati, str(stati_errati))
+    priorita_errate = [(r[0], r[8]) for r in dati if r[8] not in priorita]
+    check('ogni capacita usa una priorita ammessa',
+          not priorita_errate, str(priorita_errate))
+
+    incomplete = [r for r in dati
+                  if any(v not in {'completa', 'n/a'} for v in r[3:7])]
+    senza_azione = [r[0] for r in incomplete
+                    if r[8] == '—' or r[9] in {'', '—'}]
+    check('ogni copertura incompleta ha priorita e prossimo passo',
+          not senza_azione, str(senza_azione))
+
+    riferimenti_rotti = []
+    for r in dati:
+        trovati = re.findall(r'`([^`]+)`', r[7])
+        if not trovati:
+            riferimenti_rotti.append((r[0], 'nessuna evidenza locale'))
+            continue
+        for ref in trovati:
+            file = ref.split(':', 1)[0]
+            if not (ROOT / file).exists():
+                riferimenti_rotti.append((r[0], file))
+    check('ogni riga punta a evidenze locali esistenti',
+          not riferimenti_rotti, str(riferimenti_rotti))
 
 
 def test_bur_in_comune():

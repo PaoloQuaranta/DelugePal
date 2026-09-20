@@ -128,6 +128,14 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > La **regola 0**, aggiunta il 16 agosto, è l'ordine in cui si cerca una
 > risposta — vedi §0 qui sotto.
 
+⚠️ **Dal 20 settembre 2026 l'inventario funzionale canonico è
+[`docs/COPERTURA_DELUGE.md`](docs/COPERTURA_DELUGE.md).** Se bisogna decidere
+cosa sviluppare, si parte da lì: 60 capacità, separate in lettura,
+conservazione, scrittura e verifica sul dispositivo. La suite ne controlla
+struttura, stati, evidenze, priorità e prossimo passo. «Il piano tecnico è
+finito» in questo documento significa che il ciclo compositivo fondamentale
+funziona; non significa che ogni feature del Deluge sia coperta.
+
 ---
 
 ## Il prossimo lavoro
@@ -4233,8 +4241,9 @@ La rilettura SysEx è byte-identica: SHA-256
 ## 7. Punti aperti
 
 > Le **lacune funzionali** — cosa il sistema non sa ancora fare — stanno in
-> testa a questo documento, sotto «Il prossimo lavoro». Qui sotto ci sono i
-> punti aperti sul *formato* e sulle verifiche mancanti.
+> [`docs/COPERTURA_DELUGE.md`](docs/COPERTURA_DELUGE.md), che è l'inventario
+> canonico e testato. Qui sotto resta la storia ragionata dei punti aperti sul
+> *formato* e delle verifiche mancanti; non va usata come una seconda matrice.
 
 - ~~`set_scale()` vuole i nomi inglesi (`D`) mentre `musica.altezza()`
   accetta anche gli italiani (`re`)~~ — **risolto, revisione finale del 15

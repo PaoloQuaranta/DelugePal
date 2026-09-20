@@ -1,5 +1,12 @@
 # Prossimi passi
 
+> **Documento storico.** Questo file conserva il piano tecnico avviato il 12
+> agosto 2026 e le decisioni che lo hanno chiuso. Non è più l'inventario del
+> lavoro futuro: la fonte canonica, strutturata e controllata dalla suite è
+> [`COPERTURA_DELUGE.md`](COPERTURA_DELUGE.md). Le voci ancora valide qui
+> devono comparire anche in quella matrice con stato, priorità ed esperimento
+> successivo.
+
 ## Il piano per la copertura massima
 
 **Deciso il 12 agosto 2026: copertura massima conseguibile, niente
