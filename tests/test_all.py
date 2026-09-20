@@ -9603,6 +9603,628 @@ def test_idm_scritto():
               for pos in posizioni), str(posizioni))
 
 
+def test_junglevar_scritto():
+    """JUNGLEVAR: tutte le sette clip sorgente, Scorpio affettato, polimetro
+    IDM e cadenza francese dentro una forma completa di 72 battute."""
+    from delugexml import arranger as AR, musica as MU, song as S  # noqa: PLC0415
+    try:
+        import junglevar_scritto as JV                           # noqa: PLC0415
+    except ModuleNotFoundError:
+        check('il compositore JUNGLEVAR esiste', False,
+              'modulo junglevar_scritto assente')
+        return
+
+    # Questi controlli non dipendono dalle fixture private: in un checkout
+    # pubblico il build salta, ma la logica specifica del break resta provata.
+    check('il solo break dichiarato e Dennis Coffey - Scorpio',
+          JV.SAMPLE == ('SAMPLES/01_DRUMS_Jungle Breaks/'
+                        'Dennis Coffey - Scorpio (cd).wav')
+          and 'amen' not in JV.SAMPLE.lower(), JV.SAMPLE)
+    bpm_nativo = 16 * 60 / (JV.FRAMES / 44100)
+    bpm_trasposto = bpm_nativo * (2 ** (JV.TRASPOSIZIONE_BREAK / 12))
+    check('Scorpio +6 semitoni combacia con 169 BPM',
+          abs(bpm_trasposto - JV.BPM) < 0.5,
+          f'{bpm_nativo:.2f} -> {bpm_trasposto:.2f} vs {JV.BPM}')
+    fette_finte = [f'fetta {n + 1}' for n in range(JV.NFETTE)]
+    pattern_a = JV._pattern_fette(fette_finte, editato=False)
+    pattern_b = JV._pattern_fette(fette_finte, editato=True)
+    eventi_a = sorted((n.pos, nome) for nome, note in pattern_a.items() for n in note)
+    eventi_b = sorted((n.pos, nome) for nome, note in pattern_b.items() for n in note)
+    check('entrambi i pattern Scorpio coprono tutti i 64 sedicesimi',
+          len(eventi_a) == len(eventi_b) == 64
+          and [p for p, _ in eventi_a] == [n * JV.P for n in range(64)]
+          and [p for p, _ in eventi_b] == [n * JV.P for n in range(64)],
+          f'A={len(eventi_a)} B={len(eventi_b)}')
+    check('A ricostruisce il loop e B lo trasforma davvero',
+          [nome for _, nome in eventi_a] == fette_finte
+          and [nome for _, nome in eventi_b] != fette_finte)
+
+    try:
+        doc, meta = JV.costruisci()
+    except FileNotFoundError:
+        salta('test_junglevar_scritto (build)', 'manca JUNGLEVAR o una fixture')
+        return
+
+    check('JUNGLEVAR e valida', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('JUNGLEVAR non ha avvertenze',
+          MU.avvertenze(doc) == [], str(MU.avvertenze(doc)))
+    check('la forma dura 72 battute',
+          AR.extent(doc) == (0, 72 * MU.TICK_PER_BATTUTA), str(AR.extent(doc)))
+    check('il break trasposto porta il loop nativo vicino a 169 BPM',
+          abs(S.get_bpm(doc.root) - 169) < 1e-6, str(S.get_bpm(doc.root)))
+    check('lo swing globale e dritto',
+          S.get_swing(doc)[0] == 50, str(S.get_swing(doc)))
+
+    originali = []
+    for nome in ('Kaleidoscope', '31-BASS1', '097', '972'):
+        inst = JV.strumento(doc, nome)
+        originali.extend((f'{nome}/{c.get("section")}', inst, c)
+                         for _, c in S.clips(doc)
+                         if S.instrument_of(doc, c) is inst and c.has('section'))
+    check('dal documento si ritrovano sette clip originali di sessione',
+          len(originali) == 7, str([x[0] for x in originali]))
+    mancanti = []
+    for etichetta, inst, clip in originali:
+        durata = int(clip.get('length'))
+        if not any(AR.clip_of(doc, i) is clip and i.length >= durata
+                   for i in AR.instances(inst)):
+            mancanti.append(etichetta)
+    check('ogni clip originale suona integralmente almeno una volta',
+          mancanti == [], str(mancanti))
+
+    iBreak = JV.strumento(doc, 'SCORPIO')
+    drums = S.drums(iBreak)
+    check('Scorpio e affettato in 64 zone',
+          len(drums) == 64, str(len(drums)))
+    check('ogni fetta usa Dennis Coffey - Scorpio e mai l Amen',
+          all(d.find('osc1').get('fileName') == JV.SAMPLE for d in drums)
+          and all('amen' not in (d.find('osc1').get('fileName') or '').lower()
+                  for d in drums))
+    check('le 64 fette sono accelerate di sei semitoni',
+          all(d.find('osc1').get('transpose') == '6' for d in drums),
+          str({d.find('osc1').get('transpose') for d in drums}))
+    zone = [d.find('osc1').find('zone') for d in drums]
+    estremi = [(int(z.get('startSamplePos')), int(z.get('endSamplePos')))
+               for z in zone]
+    check('le zone Scorpio sono contigue e coprono tutti i frame',
+          estremi[0][0] == 0 and estremi[-1][1] == JV.FRAMES
+          and all(a[1] == b[0] for a, b in zip(estremi, estremi[1:])),
+          f'{estremi[:2]} ... {estremi[-2:]}')
+    check('ogni fetta Scorpio e ONCE, quindi la zona delimita il colpo',
+          all(d.find('osc1').get('loopMode') == '1' for d in drums))
+    clip_break = [c for _, c in S.clips(doc)
+                  if S.instrument_of(doc, c) is iBreak]
+    note_break = [sum(len(S.read_notes(r)) for r in S.note_rows(c))
+                  for c in clip_break]
+    check('entrambi i pattern Scorpio hanno 64 trigger udibili',
+          note_break == [64, 64], str(note_break))
+    check('A e B di Scorpio sono entrambe piazzate nell arranger',
+          {id(AR.clip_of(doc, i)) for i in AR.instances(iBreak)}
+          == {id(c) for c in clip_break})
+
+    periodi = {}
+    for nome in ('IDM5', 'IDM7', 'IDM11'):
+        inst = JV.strumento(doc, nome)
+        clip = next(c for _, c in S.clips(doc) if S.instrument_of(doc, c) is inst)
+        periodi[nome] = int(clip.get('length'))
+    check('gli strati IDM hanno periodi 5 7 11 sedicesimi',
+          periodi == {'IDM5': 120, 'IDM7': 168, 'IDM11': 264}, str(periodi))
+
+    francese = meta['francese']
+    pcs = {int(r.get('y')) % 12 for r in S.note_rows(francese) if r.has('y')}
+    check('la sesta aumentata francese e Eb G A C#',
+          pcs == {1, 3, 7, 9}, str(sorted(pcs)))
+    note_francesi = sum(len(S.read_notes(r)) for r in S.note_rows(francese))
+    iPad = JV.strumento(doc, 'SYMBOLIST PAD')
+    clip_pad = [c for _, c in S.clips(doc)
+                if S.instrument_of(doc, c) is iPad]
+    principale = next(c for c in clip_pad if not c.get('clipName'))
+    ritorno = next(c for c in clip_pad if c.get('clipName') == 'RITORNO')
+    piazzate_pad = {id(AR.clip_of(doc, i)): (i.pos, i.length)
+                    for i in AR.instances(iPad)}
+    check('la sesta francese contiene quattro note ed e piazzata per 4 battute',
+          note_francesi == 4
+          and piazzate_pad.get(id(francese)) == (48 * MU.TICK_PER_BATTUTA,
+                                                 4 * MU.TICK_PER_BATTUTA),
+          f'note={note_francesi} istanza={piazzate_pad.get(id(francese))}')
+    note_armonia = {
+        'principale': sum(len(S.read_notes(r)) for r in S.note_rows(principale)),
+        'ritorno': sum(len(S.read_notes(r)) for r in S.note_rows(ritorno)),
+    }
+    check('campo jazz e ritorno hanno voicing scritti e istanze estese',
+          note_armonia == {'principale': 73, 'ritorno': 19}
+          and piazzate_pad.get(id(principale)) == (0, 48 * MU.TICK_PER_BATTUTA)
+          and piazzate_pad.get(id(ritorno)) == (52 * MU.TICK_PER_BATTUTA,
+                                               20 * MU.TICK_PER_BATTUTA),
+          f'{note_armonia} {piazzate_pad}')
+
+
+def test_junglevar2_scritto():
+    """JUNGLEVAR02: niente slicer aggiunto; il 972 sviluppa groove, fill e
+    parameter lock per-riga senza perdere nessuna clip originale."""
+    from delugexml import arranger as AR, automation as AU        # noqa: PLC0415
+    from delugexml import musica as MU, song as S, sound as SND   # noqa: PLC0415
+    try:
+        import junglevar2_scritto as JV2                         # noqa: PLC0415
+    except ModuleNotFoundError:
+        check('il revisore JUNGLEVAR02 esiste', False,
+              'modulo junglevar2_scritto assente')
+        return
+
+    try:
+        doc, meta = JV2.costruisci()
+    except FileNotFoundError:
+        salta('test_junglevar2_scritto (build)', 'manca JUNGLEVAR01 fresca')
+        return
+
+    check('JUNGLEVAR02 e valida', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('JUNGLEVAR02 non ha avvertenze',
+          MU.avvertenze(doc) == [], str(MU.avvertenze(doc)))
+    check('la forma resta di 72 battute',
+          AR.extent(doc) == (0, 72 * MU.TICK_PER_BATTUTA), str(AR.extent(doc)))
+
+    nomi_strumenti = {(i.get('presetName') or i.get('name') or '').upper()
+                      for i in S.instruments(doc)}
+    sample = [d.find('osc1').get('fileName') or ''
+              for i in S.instruments(doc) if i.tag == 'kit'
+              for d in S.drums(i) if d.find('osc1') is not None]
+    check('Scorpio e lo slicer aggiunto sono rimossi completamente',
+          'SCORPIO' not in nomi_strumenti
+          and not any('scorpio' in p.lower() or 'dennis coffey' in p.lower()
+                      for p in sample), str(sorted(nomi_strumenti)))
+    check('il vecchio kit GLITCH lascia le chiusure di frase al 972',
+          'GLITCH' not in nomi_strumenti, str(sorted(nomi_strumenti)))
+
+    originali = []
+    for nome in ('Kaleidoscope', '31-BASS1', '097', '972'):
+        inst = JV2.strumento(doc, nome)
+        originali.extend((f'{nome}/{c.get("section")}', inst, c)
+                         for _, c in S.clips(doc)
+                         if S.instrument_of(doc, c) is inst
+                         and c.has('section')
+                         and not (c.get('clipName') or '').startswith('972-'))
+    check('le sette clip sorgente sono ancora riconoscibili',
+          len(originali) == 7, str([x[0] for x in originali]))
+    check('le sette clip sorgente suonano ancora integralmente',
+          all(any(AR.clip_of(doc, i) is c and i.length >= int(c.get('length'))
+                  for i in AR.instances(inst))
+              for _, inst, c in originali))
+
+    i972 = JV2.strumento(doc, '972')
+    variazioni = [c for _, c in S.clips(doc)
+                  if S.instrument_of(doc, c) is i972
+                  and (c.get('clipName') or '').startswith('972-')]
+    nomi_var = {c.get('clipName') for c in variazioni}
+    attesi = {'972-MOTOR', '972-FRACTURE', '972-MIRROR',
+              '972-FILL-A', '972-FILL-B', '972-FILL-C'}
+    check('il 972 ha tre groove sviluppati e tre fill diversi',
+          nomi_var == attesi, str(sorted(nomi_var)))
+    check('ogni nuova clip 972 e udibile e piazzata nell arranger',
+          all(sum(len(S.read_notes(r)) for r in S.note_rows(c)) > 0
+              and any(AR.clip_of(doc, i) is c for i in AR.instances(i972))
+              for c in variazioni))
+
+    # Le nuove clip programmano colpi individuali: non riusano la riga del
+    # loop intero "Liqu", pur conservandola nelle quattro clip originali.
+    liqu_usato = []
+    firme_fill = []
+    parametri = set()
+    righe_bloccate = {}
+    punti_su_note = 0
+    for c in variazioni:
+        nomi = S.drum_names(doc, c)
+        bloccate = 0
+        firma = []
+        for r in S.note_rows(c):
+            note = S.read_notes(r)
+            if not note:
+                continue
+            nome = nomi[int(r.get('drumIndex'))]
+            if nome == 'Liqu':
+                liqu_usato.append(c.get('clipName'))
+            firma.extend((nome, n.pos) for n in note)
+            cont = SND.container(r)
+            auto = [(k, AU.decode(v)[1]) for k, v in cont.attrs
+                    if AU.is_automation(v)] if cont is not None else []
+            if auto:
+                bloccate += 1
+            onset = {n.pos for n in note}
+            for param, punti in auto:
+                parametri.add(param)
+                punti_su_note += sum(p.pos in onset for p in punti)
+                check(f'i lock di {c.get("clipName")}/{nome}/{param} stanno nella clip',
+                      all(0 <= p.pos < int(c.get('length')) for p in punti))
+        righe_bloccate[c.get('clipName')] = bloccate
+        if 'FILL' in c.get('clipName'):
+            firme_fill.append(tuple(sorted(firma)))
+    check('le variazioni non innescano il loop intero Liqu',
+          liqu_usato == [], str(liqu_usato))
+    check('ogni groove nuovo ha parameter lock su almeno due righe',
+          all(righe_bloccate[n] >= 2
+              for n in ('972-MOTOR', '972-FRACTURE', '972-MIRROR')),
+          str(righe_bloccate))
+    check('i lock usano almeno cinque dimensioni timbriche',
+          len(parametri) >= 5, str(sorted(parametri)))
+    check('i parameter lock coincidono spesso con attacchi reali',
+          punti_su_note >= 12, str(punti_su_note))
+    check('i tre fill hanno disegni realmente differenti',
+          len(set(firme_fill)) == 3, str([len(f) for f in firme_fill]))
+
+    # La API accetta anche i nomi qualificati restituiti da SND.names(): il
+    # blob deve finire nel figlio <envelope1>, non in un attributo letterale
+    # "envelope1.attack" sul contenitore principale.
+    motor = next(c for c in variazioni if c.get('clipName') == '972-MOTOR')
+    MU.blocca_passi(doc, motor, '6', 'envelope1.attack', [(0, 8), (10 * JV2.P, 23)])
+    riga6 = S.drum_row(doc, motor, '6')
+    cont6 = SND.container(riga6)
+    inviluppo = cont6.find('envelope1')
+    check('un lock qualificato viene scritto nel nodo parametro corretto',
+          inviluppo is not None
+          and AU.is_automation(inviluppo.get('attack') or '')
+          and not cont6.has('envelope1.attack'))
+
+
+def test_junglevar3_scritto():
+    """JUNGLEVAR03 parte dal file dell'utente e rende prudenti delay,
+    pad, batteria e bassi senza cambiare i livelli del SYMBOLIST PAD."""
+    from delugexml import arranger as AR, automation as AU        # noqa: PLC0415
+    from delugexml import musica as MU, params as P, song as S    # noqa: PLC0415
+    from delugexml import sound as SND                            # noqa: PLC0415
+    try:
+        import junglevar3_scritto as JV3                         # noqa: PLC0415
+    except ModuleNotFoundError:
+        check('il revisore JUNGLEVAR03 esiste', False,
+              'modulo junglevar3_scritto assente')
+        return
+
+    try:
+        sorgente = JV3.carica_sorgente()
+        doc, meta = JV3.costruisci()
+    except FileNotFoundError:
+        salta('test_junglevar3_scritto (build)', 'manca JUNGLEVAR02 utente')
+        return
+
+    check('JUNGLEVAR03 e valida', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('JUNGLEVAR03 non ha avvertenze',
+          MU.avvertenze(doc) == [], str(MU.avvertenze(doc)))
+    check('la forma di JUNGLEVAR03 resta di 72 battute',
+          AR.extent(doc) == (0, 72 * MU.TICK_PER_BATTUTA), str(AR.extent(doc)))
+
+    def clips_named(d, instrument, names):
+        return {c.get('clipName') or 'SYMBOLIST PAD': c for _, c in S.clips(d)
+                if S.instrument_of(d, c) is instrument
+                and (c.get('clipName') or 'SYMBOLIST PAD') in names}
+
+    pad0 = JV3.strumento(sorgente, 'SYMBOLIST PAD')
+    pad = JV3.strumento(doc, 'SYMBOLIST PAD')
+    nomi_pad = {'SYMBOLIST PAD', 'FRANCESE', 'RITORNO'}
+    prima = clips_named(sorgente, pad0, nomi_pad)
+    dopo = clips_named(doc, pad, nomi_pad)
+    livelli = ('volume', 'oscAVolume', 'oscBVolume')
+    check('i livelli pad dell utente sono preservati esattamente',
+          all(SND.get_raw(prima[n], p) == SND.get_raw(dopo[n], p)
+              for n in nomi_pad for p in livelli),
+          str({n: {p: SND.get(dopo[n], p) for p in livelli} for n in nomi_pad}))
+
+    evoluzioni = {c.get('clipName'): c for _, c in S.clips(doc)
+                  if S.instrument_of(doc, c) is pad
+                  and c.get('clipName') in ('PAD-EVOLVE', 'RITORNO-EVOLVE')}
+    check('il pad ha due archi evolutivi lunghi',
+          set(evoluzioni) == {'PAD-EVOLVE', 'RITORNO-EVOLVE'}
+          and int(evoluzioni['PAD-EVOLVE'].get('length')) == 48 * MU.TICK_PER_BATTUTA
+          and int(evoluzioni['RITORNO-EVOLVE'].get('length')) == 20 * MU.TICK_PER_BATTUTA,
+          str({n: c.get('length') for n, c in evoluzioni.items()}))
+    check('le due clip pad realmente suonate ereditano i livelli dell utente',
+          all(SND.get_raw(evoluzioni['PAD-EVOLVE'], p)
+              == SND.get_raw(prima['SYMBOLIST PAD'], p)
+              and SND.get_raw(evoluzioni['RITORNO-EVOLVE'], p)
+              == SND.get_raw(prima['RITORNO'], p)
+              for p in livelli))
+    param_pad = {'lpfFrequency', 'lpfResonance', 'pan', 'reverbAmount'}
+    curve_ok = True
+    for c in evoluzioni.values():
+        cont = SND.container(c)
+        auto = {k: AU.decode(v)[1] for k, v in cont.attrs if AU.is_automation(v)}
+        curve_ok &= param_pad <= set(auto)
+        curve_ok &= all(len(auto[p]) >= 5
+                        and auto[p][0].raw == auto[p][-1].raw
+                        and auto[p][-1].pos >= int(c.get('length')) - 1
+                        for p in param_pad)
+    check('cutoff risonanza pan e riverbero evolvono lentamente e chiudono il loop',
+          curve_ok)
+
+    livello = lambda raw: (int(raw, 16) + P.HALF) % P.SPAN
+    feedback = []
+    finali = []
+    for nodo in doc.root.iter():
+        raw = nodo.get('delayFeedback')
+        if not raw:
+            continue
+        if AU.is_automation(raw):
+            testa, punti = AU.decode(raw)
+            feedback.append(livello(f'0x{testa:08X}'))
+            feedback.extend(livello(p.hex) for p in punti)
+            finali.append(livello(punti[-1].hex))
+        else:
+            feedback.append(livello(raw))
+    soglia18 = livello(P.from_display(18))
+    soglia25 = livello(P.from_display(25))
+    soglia28 = livello(P.from_display(28))
+    soglia14 = livello(P.from_display(14))
+    picchi_brevi = True
+    for nodo in doc.root.iter():
+        raw = nodo.get('delayFeedback')
+        if not raw or not AU.is_automation(raw):
+            continue
+        punti = AU.decode(raw)[1]
+        valori = [livello(p.hex) for p in punti]
+        for j, valore in enumerate(valori):
+            if valore > soglia25:
+                picchi_brevi &= (j + 1 < len(punti)
+                                 and punti[j + 1].pos - punti[j].pos <= JV3.S32
+                                 and valori[j + 1] <= soglia18
+                                 and not punti[j].interp)
+    check('il feedback resta entro 28 e oltre 25 dura al massimo un trentaduesimo',
+          feedback and all(v <= soglia28 for v in feedback)
+          and picchi_brevi and any(v > soglia25 for v in feedback),
+          str(feedback))
+    check('ogni automazione feedback finisce al massimo a 14',
+          finali and all(v <= soglia14 for v in finali), str(finali))
+
+    # Il Deluge puo salvare valori fini fuori dalle griglie 50/128: se sono
+    # gia prudenti il limiter deve conservarne i byte, non rifiutarli o
+    # quantizzarli.
+    fine_doc = JV3.carica_sorgente()
+    fine_nodo = next(n for n in fine_doc.root.iter() if n.get('delayFeedback'))
+    sicuro = (int(P.from_display(20), 16) + 1) & 0xFFFFFFFF
+    sicuro_hex = f'0x{sicuro:08X}'
+    fine_nodo.set('delayFeedback', sicuro_hex)
+    MU.limita_feedback_delay(fine_doc, massimo=25, finale=14)
+    check('il limiter preserva byte-esatti i feedback fini gia sicuri',
+          fine_nodo.get('delayFeedback') == sicuro_hex,
+          str(fine_nodo.get('delayFeedback')))
+
+    kit = JV3.strumento(doc, '972')
+    kit0 = JV3.strumento(sorgente, '972')
+    nomi_fill = {'972-FILL-A', '972-FILL-B', '972-FILL-C'}
+    fill0 = clips_named(sorgente, kit0, nomi_fill)
+    fill = clips_named(doc, kit, nomi_fill)
+    conta = lambda c: sum(len(S.read_notes(r)) for r in S.note_rows(c))
+    check('tutti i fill hanno nuove fioriture',
+          all(conta(fill[n]) > conta(fill0[n]) for n in nomi_fill),
+          str({n: (conta(fill0[n]), conta(fill[n])) for n in nomi_fill}))
+
+    tipi, ratchet, one_shot = set(), 0, 0
+    for _, c in S.clips(doc):
+        if S.instrument_of(doc, c) is not kit or not (c.get('clipName') or '').startswith('972-'):
+            continue
+        for r in S.note_rows(c):
+            cont = SND.container(r)
+            if cont is None:
+                continue
+            for nome in SND.names(r):
+                raw = SND.get_raw(r, nome)
+                if not raw or not AU.is_automation(raw):
+                    continue
+                tipi.add(nome)
+                punti = AU.decode(raw)[1]
+                if nome in ('ratchetAmount', 'ratchetProbability'):
+                    ratchet += len(punti)
+                if nome in ('envelope1.decay', 'lpfFrequency', 'pan',
+                            'bitCrush', 'sampleRateReduction'):
+                    onset = {n.pos for n in S.read_notes(r)}
+                    one_shot += sum(1 for a, b in zip(punti, punti[1:])
+                                    if a.pos in onset
+                                    and 0 < b.pos - a.pos <= JV3.S32)
+    check('il kit usa ratchet selettivo su entrambe le dimensioni',
+          {'ratchetAmount', 'ratchetProbability'} <= tipi and 6 <= ratchet <= 40,
+          f'punti={ratchet} tipi={sorted(tipi)}')
+    check('il kit ha one-shot su almeno quattro famiglie timbriche',
+          len(tipi & {'envelope1.decay', 'lpfFrequency', 'pan',
+                      'bitCrush', 'sampleRateReduction'}) >= 4 and one_shot >= 6,
+          f'pairs={one_shot} tipi={sorted(tipi)}')
+
+    basso = JV3.strumento(doc, '31-BASS1')
+    bassi = clips_named(doc, basso, {'BASS-PUSH', 'BASS-CLIMAX'})
+    piazzati_basso = {(c.get('clipName'), i.pos, i.length)
+                      for i in AR.instances(basso)
+                      for c in [AR.clip_of(doc, i)] if c is not None}
+    check('i nuovi bassi incidono nelle sezioni 40-47 e 56-71',
+          set(bassi) == {'BASS-PUSH', 'BASS-CLIMAX'}
+          and ('BASS-PUSH', 40 * MU.TICK_PER_BATTUTA,
+               8 * MU.TICK_PER_BATTUTA) in piazzati_basso
+          and ('BASS-CLIMAX', 56 * MU.TICK_PER_BATTUTA,
+               16 * MU.TICK_PER_BATTUTA) in piazzati_basso
+          and all(conta(c) >= 16 for c in bassi.values()), str(piazzati_basso))
+
+    kaleido = JV3.strumento(doc, 'Kaleidoscope')
+    doppio = clips_named(doc, kaleido, {'KALEIDO-DOUBLE'}).get('KALEIDO-DOUBLE')
+    def eventi(c):
+        return {(n.pos, int(r.get('y'))) for r in S.note_rows(c) if r.has('y')
+                for n in S.read_notes(r)}
+    eb = eventi(bassi['BASS-CLIMAX'])
+    ek = eventi(doppio) if doppio is not None else set()
+    check('Kaleidoscope raddoppia selettivamente il climax con vuoti',
+          doppio is not None and 0 < len(ek) < len(eb)
+          and all((pos, pitch - 12) in eb or (pos, pitch - 24) in eb
+                  for pos, pitch in ek)
+          and any(AR.clip_of(doc, i) is doppio
+                  and i.pos == 56 * MU.TICK_PER_BATTUTA
+                  and i.length == 16 * MU.TICK_PER_BATTUTA
+                  for i in AR.instances(kaleido)),
+          f'basso={len(eb)} kaleido={len(ek)}')
+
+
+def test_junglevar5_scritto():
+    """JUNGLEVAR05 anticipa l'hook BASS-PUSH e umanizza il kit 972 con
+    un profilo jazz reale senza spostare i trigger di loop Liqu."""
+    from delugexml import arranger as AR, automation as AU        # noqa: PLC0415
+    from delugexml import groove as GR, musica as MU, song as S   # noqa: PLC0415
+    from delugexml import sound as SND                            # noqa: PLC0415
+    try:
+        import junglevar5_scritto as JV5                         # noqa: PLC0415
+    except ModuleNotFoundError:
+        check('il revisore JUNGLEVAR05 esiste', False,
+              'modulo junglevar5_scritto assente')
+        return
+
+    try:
+        sorgente = JV5.carica_sorgente()
+        doc, meta = JV5.costruisci()
+    except FileNotFoundError:
+        salta('test_junglevar5_scritto (build)', 'manca JUNGLEVAR04 fresca')
+        return
+
+    check('JUNGLEVAR05 e valida', MU.verifica(doc) == [], str(MU.verifica(doc)))
+    check('JUNGLEVAR05 non ha avvertenze',
+          MU.avvertenze(doc) == [], str(MU.avvertenze(doc)))
+    check('la durata della forma non cambia',
+          AR.extent(doc) == AR.extent(sorgente),
+          f'{AR.extent(sorgente)} -> {AR.extent(doc)}')
+
+    tpb = S.ticks_per_bar(doc.root)
+    basso = JV5.strumento(doc, '31-BASS1')
+    istanze = [(i.pos // tpb + 1, i.length // tpb,
+                (AR.clip_of(doc, i).get('clipName') or 'ORIGINALE'))
+               for i in AR.instances(basso)]
+    check('BASS-PUSH diventa hook a battuta 33 e torna a 81',
+          (33, 16, 'BASS-PUSH') in istanze
+          and (81, 16, 'BASS-PUSH') in istanze, str(istanze))
+    check('il basso originale resta intero come contrasto da battuta 49',
+          (49, 16, 'ORIGINALE') in istanze, str(istanze))
+    check('l hook non si sovrappone ad altre clip dello stesso basso',
+          all(a[0] + a[1] <= b[0]
+              for a, b in zip(sorted(istanze), sorted(istanze)[1:])),
+          str(sorted(istanze)))
+
+    check('il feel dichiara la performance jazz di provenienza',
+          meta['groove_id'] == 'drummer1/session1/77'
+          and meta['groove_style'] == 'jazz/mediumfast'
+          and meta['groove_bpm'] == 180, str(meta))
+
+    kit0 = JV5.strumento(sorgente, '972')
+    kit = JV5.strumento(doc, '972')
+    def chiave(c):
+        return (c.get('section'), c.get('clipName') or '')
+    prima = {chiave(c): c for _, c in S.clips(sorgente)
+             if S.instrument_of(sorgente, c) is kit0}
+    dopo = {chiave(c): c for _, c in S.clips(doc)
+            if S.instrument_of(doc, c) is kit}
+    check('nessuna clip di batteria viene aggiunta o perduta',
+          set(prima) == set(dopo), str(set(prima) ^ set(dopo)))
+
+    cambiati = totali = 0
+    scarti = []
+    liqu_intatti = True
+    lock_su_note_prima = lock_su_note_dopo = 0
+    for key in prima:
+        c0, c1 = prima[key], dopo[key]
+        nomi0, nomi1 = S.drum_names(sorgente, c0), S.drum_names(doc, c1)
+        righe0 = {nomi0[int(r.get('drumIndex'))]: r for r in S.note_rows(c0)}
+        righe1 = {nomi1[int(r.get('drumIndex'))]: r for r in S.note_rows(c1)}
+        for drum in set(righe0) & set(righe1):
+            n0 = sorted(S.read_notes(righe0[drum]), key=lambda n: n.pos)
+            n1 = sorted(S.read_notes(righe1[drum]), key=lambda n: n.pos)
+            if drum == 'Liqu':
+                liqu_intatti &= n0 == n1
+                continue
+            check(f'umanizzazione conserva i colpi {key}/{drum}',
+                  len(n0) == len(n1), f'{len(n0)} -> {len(n1)}')
+            for a, b in zip(n0, n1):
+                totali += 1
+                scarti.append(b.pos - a.pos)
+                cambiati += (a.pos != b.pos or a.velocity != b.velocity)
+                check(f'colpo umanizzato resta valido {key}/{drum}/{a.pos}',
+                      0 <= b.pos < int(c1.get('length'))
+                      and 1 <= b.velocity <= 127)
+            for riga, verso in ((righe0[drum], 0), (righe1[drum], 1)):
+                onset = {n.pos for n in S.read_notes(riga)}
+                for param in SND.names(riga):
+                    raw = SND.get_raw(riga, param)
+                    if raw and AU.is_automation(raw):
+                        quanti = sum(p.pos in onset for p in AU.decode(raw)[1])
+                        if verso == 0:
+                            lock_su_note_prima += quanti
+                        else:
+                            lock_su_note_dopo += quanti
+    check('i trigger Liqu restano esattamente sulla griglia originale',
+          liqu_intatti)
+    check('almeno due terzi dei colpi discreti ricevono timing o dinamica',
+          totali > 0 and cambiati / totali >= 2 / 3,
+          f'{cambiati}/{totali}')
+    check('il microtiming jazz resta entro quattro tick',
+          scarti and max(abs(x) for x in scarti) <= 4
+          and any(x < 0 for x in scarti) and any(x > 0 for x in scarti),
+          str(sorted(set(scarti))))
+    check('l umanizzazione non separa i parameter lock dagli onset',
+          lock_su_note_dopo >= lock_su_note_prima,
+          f'{lock_su_note_prima} -> {lock_su_note_dopo}')
+
+    # Il profilo e misurato sulla griglia canonica di 96 tick/movimento; la
+    # song fresca ne usa 48. Fase, residuo e finestra dei reset vanno quindi
+    # riscalati, non letti direttamente coi 24 tick/sedicesimo canonici.
+    profilo = GR.profilo(JV5.GROOVE_BASE, JV5.GROOVE_ID)
+    passo_song = tpb // 16
+    scala = MU.TICK_PER_PASSO / passo_song
+    finestra = max(1, passo_song // 2)
+    errori_note = []
+    errori_lock = []
+    for key in prima:
+        c0, c1 = prima[key], dopo[key]
+        nomi0, nomi1 = S.drum_names(sorgente, c0), S.drum_names(doc, c1)
+        righe0 = {nomi0[int(r.get('drumIndex'))]: r for r in S.note_rows(c0)}
+        righe1 = {nomi1[int(r.get('drumIndex'))]: r for r in S.note_rows(c1)}
+        for drum in set(righe0) & set(righe1):
+            if drum == 'Liqu':
+                continue
+            r0, r1 = righe0[drum], righe1[drum]
+            n0 = sorted(S.read_notes(r0), key=lambda n: n.pos)
+            n1 = sorted(S.read_notes(r1), key=lambda n: n.pos)
+            ruolo = JV5.RUOLO.get(drum, 'rullante')
+            per_passo = {p.passo: p for p in profilo.passi[ruolo]}
+            delta_atteso = {}
+            for a, b in zip(n0, n1):
+                misura = per_passo.get((a.pos // passo_song) % 16)
+                if misura is None:
+                    pos, vel = a.pos, a.velocity
+                else:
+                    scarto = max(-4, min(4, round(
+                        misura.scarto / scala * meta['timing_mix'])))
+                    pos = min(int(c1.get('length')) - 1, max(0, a.pos + scarto))
+                    vel = max(1, min(127, round(
+                        a.velocity * (1 - meta['velocity_mix'])
+                        + misura.velocity * meta['velocity_mix'])))
+                delta_atteso[a.pos] = pos - a.pos
+                if (b.pos, b.velocity) != (pos, vel):
+                    errori_note.append((key, drum, a.pos,
+                                        (pos, vel), (b.pos, b.velocity)))
+
+            onset = sorted(delta_atteso)
+            for param in SND.names(r0):
+                raw0 = SND.get_raw(r0, param)
+                raw1 = SND.get_raw(r1, param)
+                if not raw0 or not AU.is_automation(raw0):
+                    continue
+                testa0, punti0 = AU.decode(raw0)
+                testa1, punti1 = AU.decode(raw1)
+                attesi = []
+                for p in punti0:
+                    scarto = delta_atteso.get(p.pos)
+                    if scarto is None:
+                        precedenti = [x for x in onset
+                                      if 0 < p.pos - x <= finestra]
+                        scarto = delta_atteso[precedenti[-1]] if precedenti else 0
+                    attesi.append((min(int(c1.get('length')) - 1,
+                                       max(0, p.pos + scarto)), p.raw, p.interp))
+                ottenuti = [(p.pos, p.raw, p.interp) for p in punti1]
+                if testa0 != testa1 or attesi != ottenuti:
+                    errori_lock.append((key, drum, param, attesi, ottenuti))
+    check('fase velocity e residuo jazz seguono i sedicesimi reali della song',
+          errori_note == [], str(errori_note[:5]))
+    check('i lock seguono la stessa risoluzione e conservano valori e curve',
+          errori_lock == [], str(errori_lock[:3]))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

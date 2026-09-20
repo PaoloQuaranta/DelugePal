@@ -1468,6 +1468,133 @@ def automatizza(doc, clip, param: str, da: int, a: int, da_tick: int,
             'a_tick': a_tick, 'passi': passi, 'vista': vista}
 
 
+def automatizza_punti(doc, clip, param: str,
+                      punti: list[tuple[int, int]]) -> dict:
+    """Disegna una curva arbitraria, in unita display 0-50, su una clip.
+
+    I punti sono interpolati dal Deluge. A differenza di ``automatizza``, la
+    curva puo quindi salire, scendere e tornare al valore iniziale: e utile
+    per modulazioni lente che devono chiudere senza uno scalino al loop.
+    """
+    from . import automation as AU                              # noqa: PLC0415
+    from . import params as P, sound as SND                     # noqa: PLC0415
+    if len(punti) < 2:
+        raise ValueError('servono almeno due punti di automazione')
+    lunghezza = int(clip.get('length') or 0)
+    posizioni = [int(pos) for pos, _ in punti]
+    if posizioni != sorted(posizioni) or len(set(posizioni)) != len(posizioni):
+        raise ValueError('i punti devono avere tick crescenti e distinti')
+    if any(pos < 0 or pos >= lunghezza for pos in posizioni):
+        raise ValueError(f'automazione fuori dalla clip 0..{lunghezza - 1}')
+    if any(not 0 <= int(valore) <= 50 for _, valore in punti):
+        raise ValueError('i valori devono stare fra 0 e 50')
+    nodi = [AU.Punto(pos=int(pos), raw=int(P.from_display(int(valore))[2:], 16),
+                     interp=True)
+            for pos, valore in punti]
+    SND.set_raw(clip, param, AU.encode(nodi[0].raw, nodi))
+    try:
+        AU.mark_view(doc, clip, param)
+        vista = True
+    except ValueError:
+        vista = False
+    return {'param': param, 'punti': len(nodi), 'da_tick': posizioni[0],
+            'a_tick': posizioni[-1], 'vista': vista}
+
+
+def limita_feedback_delay(doc, massimo: int = 25, finale: int = 14) -> dict:
+    """Rende prudente ogni ``delayFeedback`` fisso o automatizzato della song.
+
+    Il limite si applica anche alla testa del blob. L'ultimo punto di ogni
+    curva viene inoltre abbassato a ``finale`` per evitare che una ripetizione
+    riparta da una coda gia carica.
+    """
+    from . import automation as AU                              # noqa: PLC0415
+    from . import params as P                                   # noqa: PLC0415
+    if not 0 <= finale <= massimo <= 50:
+        raise ValueError('serve 0 <= finale <= massimo <= 50')
+
+    def _livello(raw: int) -> int:
+        """Ordine lineare 0..2^32-1 usato dai parametri Deluge."""
+        return (raw + P.HALF) % P.SPAN
+
+    raw_massimo = int(P.from_display(massimo)[2:], 16)
+    raw_finale = int(P.from_display(finale)[2:], 16)
+    soglia = _livello(raw_massimo)
+    soglia_finale = _livello(raw_finale)
+    cambiati = curve = 0
+    for nodo in doc.root.iter():
+        raw = nodo.get('delayFeedback')
+        if not raw:
+            continue
+        if AU.is_automation(raw):
+            testa, punti = AU.decode(raw)
+            valori = []
+            for p in punti:
+                valori.append(p.raw if _livello(p.raw) <= soglia else raw_massimo)
+            if _livello(valori[-1]) > soglia_finale:
+                valori[-1] = raw_finale
+            nuova_testa = testa if _livello(testa) <= soglia else raw_massimo
+            nuovi = [AU.Punto(pos=p.pos, raw=v, interp=p.interp)
+                     for p, v in zip(punti, valori)]
+            nodo.set('delayFeedback',
+                     AU.encode(nuova_testa, nuovi))
+            curve += 1
+            cambiati += (nuova_testa != testa)
+            cambiati += sum(v != p.raw for p, v in zip(punti, valori))
+        else:
+            valore = int(raw[2:], 16)
+            if _livello(valore) > soglia:
+                nodo.set('delayFeedback', P.from_display(massimo))
+                cambiati += 1
+    return {'massimo': massimo, 'finale': finale,
+            'curve': curve, 'valori_cambiati': cambiati}
+
+
+def blocca_passi(doc, clip, drum: str, param: str,
+                 punti: list[tuple[int, int]]) -> dict:
+    """Parameter lock a gradini su una riga di kit.
+
+    ``punti`` contiene coppie ``(tick, valore_display_0_50)``. Sul Deluge il
+    gesto si chiama step automation: il lock appartiene al passo temporale,
+    non alla nota. Qui si pretende comunque una clip di kit e una riga per
+    nome, cosi' il parametro finisce nel ``soundParams`` del singolo drum e
+    non nei ``kitParams`` globali della clip.
+
+    La funzione non forza la Automation View: ``automation.mark_view`` sa
+    aprire una clip, ma al momento descrive solo la vista strumento intero.
+    Il blob per-riga e' completo e il dispositivo lo suona anche senza stato
+    UI aggiuntivo.
+    """
+    from . import automation as AU                              # noqa: PLC0415
+    from . import params as P, song as S, sound as SND          # noqa: PLC0415
+    if not S.is_kit_clip(clip):
+        raise ValueError('blocca_passi() richiede una clip di kit')
+    if not punti:
+        raise ValueError('servono uno o piu parameter lock')
+    lunghezza = int(clip.get('length'))
+    posizioni = [int(pos) for pos, _ in punti]
+    if len(set(posizioni)) != len(posizioni):
+        raise ValueError('due parameter lock sullo stesso tick')
+    if any(pos < 0 or pos >= lunghezza for pos in posizioni):
+        raise ValueError(f'parameter lock fuori dalla clip 0..{lunghezza - 1}')
+    if any(not 0 <= int(valore) <= 50 for _, valore in punti):
+        raise ValueError('i valori dei parameter lock devono stare fra 0 e 50')
+
+    riga = S.drum_row(doc, clip, drum, create=True)
+    cont = SND.container(riga)
+    if cont is None or param not in SND.names(riga):
+        disponibili = ', '.join(SND.names(riga)) if cont is not None else '(nessuno)'
+        raise ValueError(f'parametro {param!r} assente dalla riga {drum!r}. '
+                         f'Disponibili: {disponibili}')
+    nodi = []
+    for pos, valore in punti:
+        raw = int(P.from_display(int(valore))[2:], 16)
+        nodi.append(AU.Punto(pos=int(pos), raw=raw))
+    SND.set_raw(riga, param, AU.encode(nodi[0].raw, nodi))
+    return {'drum': drum, 'param': param, 'punti': len(nodi),
+            'da_tick': min(posizioni), 'a_tick': max(posizioni)}
+
+
 def apri_filtro(doc, clip, da: int, a: int, da_tick: int, a_tick: int,
                 *, passi: int = 7) -> dict:
     """Il filtro che apre: una rampa del cutoff (lpfFrequency) sulla clip.

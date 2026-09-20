@@ -2578,6 +2578,23 @@ che un template il quale portasse anche lo swing lo farebbe applicare due volte
 — non è del jazz e sta nel comune, «Il groove template»; del jazz sono i numeri
 qui sopra e la figura da swingare.
 
+#### La prova jazz+ contemporanea — 20 settembre 2026
+
+Il template è stato speso anche fuori dal trio, dentro un arrangiamento
+jungle/IDM completo: `JUNGLEVAR05`. La batteria è interamente programmata e
+usa il profilo nominato `drummer1/session1/77` (jazz/mediumfast, 180 BPM), con
+il **35% del residuo temporale** e il **30% della dinamica**, senza muovere i
+trigger di loop `Liqu`. Sulle 201 note discrete del kit, **193** cambiano in
+posizione o velocity; gli scarti finali sono fra −2 e +1 tick e 79 punti di
+automazione seguono il proprio onset. L'utente ha chiuso la quinta versione
+con *«mi ritengo soddisfatto»* `[OSS]`: un ascoltatore, una sessione, quindi è
+una validazione del brano e del flusso, non una misura generale di percezione.
+
+Questa prova ha anche trovato un vincolo di macchina che non appartiene al
+jazz: la song usa 192 tick per battuta, metà della griglia canonica della
+libreria. La regola e il modo corretto di scalare template e lock stanno nel
+comune, [`../MUSICA.md`](../MUSICA.md), «Il groove template».
+
 ⚠️ **Il dispositivo ha un quantize/humanize che cancella il template.** Il
 meccanismo è di macchina e vale per ogni repertorio, quindi il suo posto è il
 comune di [`../MUSICA.md`](../MUSICA.md), «La macchina» — «Il quantize/humanize

@@ -892,6 +892,19 @@ si legge da un corpus. Due funzioni, e la seconda è l'unica che scriva:
   inventa**: un passo su cui quel batterista non ha mai suonato lascia la nota
   com'è e finisce in `senza_appoggio`, che va letto.
 
+⚠️ **Su una song esistente, la griglia del file viene prima delle costanti
+canoniche della libreria.** `MU.TICK_PER_BATTUTA` e `MU.TICK_PER_PASSO`
+descrivono la griglia su cui costruiscono le primitive, non promettono che un
+file importato usi la stessa risoluzione. Il passo reale si ricava da
+`S.ticks_per_bar(doc.root)` — per una griglia di sedicesimi,
+`passo = ticks_per_bar // 16` — e su quello si scalano scarti del groove,
+finestre dei parameter lock, ratchet e ogni altra distanza in tick. La prova
+che ha reso esplicita la regola è `JUNGLEVAR05`: **192 tick per battuta**, non
+384. Usare direttamente `MU.applica_groove()` su quel file avrebbe assegnato
+alcuni colpi al passo sbagliato e raddoppiato gli scarti. Il suo generatore
+(`tools/junglevar5_scritto.py`) applica perciò il profilo sulla fase reale e
+riconverte il residuo prima di scriverlo.
+
 ⚠️ **Uno scarto può valere quasi un passo intero, e il template può posare una
 nota nel territorio del passo accanto.** Dal 26 agosto 2026 `GR.profilo()`
 sceglie il passo di un colpo spostando il **confine** fra due passi sulla fase

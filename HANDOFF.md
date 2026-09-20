@@ -1,6 +1,6 @@
 # HANDOFF — Deluge Pal
 
-**Data:** 18 agosto 2026
+**Data:** 20 settembre 2026
 **Progetto:** `D:\DelugePal` (fino al 14 agosto si chiamava `deluge-xml-workflow`)
 **Pubblico su:** <https://github.com/PaoloQuaranta/DelugePal>, GPL-3.0 — vedi §9
 **SD card:** `E:` quando è nel lettore del PC (spesso è nel Deluge, quindi assente)
@@ -107,6 +107,20 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > per battuta**, e le primitive fanno i conti. Basso e batteria del blues sono
 > scritti così e sono stati approvati: *«la linea regge»*, *«molto meglio»*.
 > **1124 test.**
+>
+> **Il 20 settembre 2026 si è chiusa anche la prova compositiva
+> jazz+ contemporanea.** Da idee già presenti in `JUNGLEVAR` è nato un brano
+> completo jungle/IDM: armonia jazz con colore simbolista francese, batteria
+> interamente programmata (niente Amen e niente slicing), pad in lenta
+> evoluzione, parameter lock e ratchet, e `BASS-PUSH` anticipato come hook.
+> Dopo cinque versioni e correzioni d'ascolto, l'utente ha approvato
+> `JUNGLEVAR05`: *«mi ritengo soddisfatto»* `[OSS]`, un ascoltatore e una
+> sessione. Il file scritto via SysEx e quello riletto dal Deluge hanno lo
+> stesso SHA-256. La suite conta **1997 test**. Il giro ha inoltre fissato una
+> regola di macchina: su una song esistente la griglia si legge con
+> `S.ticks_per_bar()`, perché `JUNGLEVAR` usa **192 tick per battuta** mentre
+> le costanti canoniche del modulo ne usano 384; groove, ratchet e lock
+> devono essere scalati su quella griglia.
 >
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
