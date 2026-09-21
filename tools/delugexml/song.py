@@ -507,16 +507,15 @@ def notes_beyond_clip_end(doc: Document) -> list[str]:
     documento cosi' com'e', non solo a un cambio di lunghezza esplicito.
 
     "Fine effettiva" NON e' sempre `clip.get('length')`: una `<noteRow>`
-    puo' portare un `length` proprio, piu' lungo di quello della clip (vedi
-    HANDOFF.md sezione 7, il poliritmo) -- una nota entro quella lunghezza propria
-    NON e' oltre la fine, anche se supera quella della clip. Ignorare
-    questo e' esattamente la trappola gia' costata cara due volte in questo
-    progetto ("same_section_conflicts" e "check_notes_playable"): un
-    controllo nuovo che accusa file sani. Misurato sui 139 file scritti dal
-    dispositivo (refs/songs + corpus_versions): un controllo che guarda
-    solo `clip.length` trova 254 note "fuori" in 22 file, TUTTE dentro una
-    noteRow con un length proprio piu' lungo -- zero, considerando la fine
-    effettiva.
+    puo' portare un `length` proprio, piu' corto o piu' lungo della clip (vedi
+    HANDOFF.md sezione 7, il poliritmo). In quel caso e' il ciclo della riga
+    a decidere cosa suona. Ignorarlo e' esattamente la trappola gia' costata
+    cara due volte in questo progetto ("same_section_conflicts" e
+    "check_notes_playable"): un controllo nuovo che accusa file sani.
+    Misurato sui 139 file scritti dal dispositivo (refs/songs +
+    corpus_versions): un controllo che guarda solo `clip.length` trova 254
+    note "fuori" in 22 file, TUTTE dentro una noteRow con un length proprio
+    piu' lungo -- zero, considerando la fine effettiva.
     """
     fuori = []
     for _, clip in clips(doc):
@@ -526,8 +525,8 @@ def notes_beyond_clip_end(doc: Document) -> list[str]:
         attr = row_index_attr(clip)
         for r in note_rows(clip):
             lunghezza_riga = r.get('length')
-            effettiva = max(lunghezza_clip, int(lunghezza_riga)) \
-                if lunghezza_riga else lunghezza_clip
+            effettiva = int(lunghezza_riga) if lunghezza_riga \
+                else lunghezza_clip
             ns = [n for n in read_notes(r) if n.pos >= effettiva]
             if ns:
                 fuori.append(
@@ -567,6 +566,33 @@ def set_clip_length(clip: Node, ticks: int) -> list[str]:
     return avvisi
 
 
+def set_row_length(row: Node, ticks: int | None) -> list[str]:
+    """Imposta il ciclo indipendente di una ``noteRow``.
+
+    ``None`` toglie l'attributo e fa tornare la riga al ciclo della clip.
+    Le note oltre una nuova lunghezza piu' corta restano nel file, come in
+    :func:`set_clip_length`, ma vengono riferite perche' non suoneranno.
+    """
+    if row.tag != 'noteRow':
+        raise ValueError(f'set_row_length() vuole una <noteRow>, non '
+                         f'<{row.tag}>')
+    if ticks is None:
+        if row.has('length'):
+            row.remove('length')
+        return []
+    if isinstance(ticks, bool) or not isinstance(ticks, int) or ticks <= 0:
+        raise ValueError(f'lunghezza riga {ticks!r} non valida: servono tick '
+                         'interi positivi, oppure None per seguire la clip')
+
+    fuori = [n for n in read_notes(row) if n.pos >= ticks]
+    row.set('length', str(ticks))
+    if not fuori:
+        return []
+    attr = 'drumIndex' if row.has('drumIndex') else 'y'
+    return [f'{attr}={row.get(attr)}: {len(fuori)} note oltre {ticks} tick '
+            '(restano nel file, non suonano)']
+
+
 #: Righe di clip view. Come in song view, la griglia ne mostra 8.
 CLIP_VIEW_ROWS = 8
 
@@ -574,10 +600,11 @@ CLIP_VIEW_ROWS = 8
 def set_key_mode(clip: Node, in_key: bool) -> None:
     """`inKeyMode`: la griglia mostra i gradi della scala, o i semitoni.
 
-    In key mode le righe SONO i gradi della scala. Una nota fuori scala non ha
-    una riga dove stare: non si vede e **non si suona**, per quanto si scrolli.
-    In modalita' cromatica ogni semitono ha la sua riga e qualunque altezza e'
-    rappresentabile.
+    In key mode le righe SONO i gradi della scala. Se il file contiene note
+    incompatibili con la scala dichiarata, quelle righe possono restare
+    invisibili finche' non si esce e rientra da Scale: in quel momento il
+    Deluge ricalcola una scala compatibile. In modalita' cromatica ogni
+    semitono ha la sua riga e qualunque altezza e' subito rappresentabile.
     """
     clip.set('inKeyMode', '1' if in_key else '0')
 
@@ -586,16 +613,11 @@ def notes_out_of_scale(doc: Document, clip: Node) -> list[tuple[int, int, int]]:
     """(altezza, quante note, altezza in scala piu' vicina) per le note fuori
     dalla scala dichiarata dalla song.
 
-    ⚠ NON E' UN ERRORE. Le song scritte dal dispositivo ne sono piene:
-    su 70 song del corpus con note melodiche, 7 hanno note fuori scala, e
-    `Progsong.XML` ne ha **315**. In scale mode il Deluge non le scarta —
-    adatta la scala per includerle. Il nodo `<scales>` porta un `userScale`
-    che e' una maschera a 12 bit (4095 = tutti i semitoni).
-
-    Questa funzione serve solo a *sapere* cosa si sta scrivendo, per esempio
-    per decidere se applicare `snap_to_scale()`. Non e' una diagnosi di
-    malfunzionamento: una precedente versione la presentava come tale, ed era
-    sbagliata.
+    Non implica che un file esistente sia corrotto: il dispositivo puo'
+    ricalcolare una scala preset o USER quando si rientra in Scale. E' pero'
+    uno stato incoerente da non produrre in una song nuova gia' marcata
+    `inKeyMode=1`, perche' all'apertura il ricalcolo non e' garantito e alcune
+    righe possono non comparire.
     """
     fuori = []
     if is_kit_clip(clip):
@@ -610,6 +632,47 @@ def notes_out_of_scale(doc: Document, clip: Node) -> list[tuple[int, int, int]]:
         if not in_scale(doc.root, y):
             fuori.append((y, len(ns), snap_to_scale(doc.root, y)))
     return fuori
+
+
+def ensure_scale_mode_compatible(doc: Document,
+                                 changed_clip: Node | None = None
+                                 ) -> dict[str, object] | None:
+    """Sceglie Chromatic se le note non appartengono alla scala della song.
+
+    La scala e' condivisa da tutti i clip in Scale mode. Una song generata
+    deve quindi fare una scelta coerente: o tutte le note melodiche rispettano
+    la scala dichiarata, oppure tutti i clip melodici passano a Scale OFF
+    (`inKeyMode=0`). Root e mode restano nel file: se l'utente rientra in
+    Scale, il Deluge puo' usarli o inferire una scala preset/USER compatibile.
+
+    Ritorna il rapporto della conversione, oppure ``None`` se non serve.
+    """
+    melodici = [clip for _, clip in clips(doc)
+                if clip.tag != 'audioClip' and not is_kit_clip(clip)]
+    candidati = [changed_clip] if changed_clip is not None else melodici
+    candidati = [clip for clip in candidati
+                 if clip in melodici and clip.get('inKeyMode') == '1']
+    if not candidati:
+        return None
+
+    fuori = {clip_label(clip): notes_out_of_scale(doc, clip)
+             for clip in candidati}
+    fuori = {nome: note for nome, note in fuori.items() if note}
+    if not fuori:
+        return None
+
+    cambiati = []
+    for clip in melodici:
+        if clip.get('inKeyMode') == '1':
+            set_key_mode(clip, False)
+            cambiati.append(clip_label(clip))
+        # Cambiando modalita', yScroll cambia unita': da gradi a semitoni.
+        fit_clip_scroll_to_notes(doc, clip)
+    return {'modalita': 'cromatica',
+            'scala_precedente': scale_name(doc),
+            'clip_cambiate': len(cambiati),
+            'clip_cambiate_nomi': cambiati,
+            'note_fuori_scala': fuori}
 
 
 def check_notes_playable(doc: Document, clip: Node) -> list[str]:

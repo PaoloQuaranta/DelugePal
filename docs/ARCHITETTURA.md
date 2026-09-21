@@ -294,8 +294,12 @@ colonna hanno la stessa percentuale [MAN]:
 E fra i suggerimenti community: «the displayed dot indicates whether
 probabilities are **linked or independent**».
 
-È il candidato più probabile per i valori del byte 10 compresi fra 21 e 127,
-che i 20 gradini di probabilità non spiegano. Non verificato. [APERTO]
+La vecchia ipotesi che identificava il LATCHING coi valori 21..127 è
+**superata**. Nel corpus quei valori compaiono nel formato storico a 11 byte
+`noteDataWithLift`, dove probability, iterance e fill condividevano la stessa
+condizione; nelle righe a 14 byte `noteDataWithSplitProb` osservate qui il byte
+vale soltanto 7 o 20. I codici storici oltre 20 restano opachi e non vanno
+chiamati LATCHING senza una coppia controllata. [OSS]
 
 ### La codifica, confermata da codice ufficiale
 
@@ -324,6 +328,69 @@ Che si legge campo per campo, e **conferma per intero il layout derivato in
 Conferma indipendente di ogni campo, inclusi i due che avevo ricavato per
 ipotesi (iterance) e il valore 20 = 100% dedotto dalla frequenza nel corpus.
 
+### Iterance classica e CUSTOM
+
+I byte 11-12 sono ora esposti da `notes.iterance_to_fields()` e
+`musica.iterance(parte, passi, ogni=...)`. `passi=3, ogni=4` scrive `3of4`;
+`passi=[1, 3], ogni=4` scrive la maschera CUSTOM `1+3of4`; `passi=None` la
+disattiva. Divisore, passi, duplicati e maschere fuori range vengono rifiutati,
+non corretti silenziosamente. Quando coesistono i due attributi di nota, la
+lettura preferisce `noteDataWithSplitProb`: il blob storico a 11 byte non porta
+i campi iterance/fill. [CALC]
+
+La fixture `ITERANCE01.XML` ha verificato sul dispositivo entrambe le forme:
+Do `1of4`, Sol CUSTOM `1+3of4`, comportamento corretto su quattro giri e
+rilettura SysEx byte-identica (SHA-256
+`3741c64e1f7ad95c92d975a4a4a14cb7b389e2beb35587b63cbce8164b927b78`).
+Sul Deluge la scorciatoia nota tenuta + rotazione di SELECT mostra soltanto
+`CUSTOM`; per modificare divisore e singoli passi il manuale community indica
+il sottomenu `NOTE ITERANCE > CUSTOM`, che espone `DIVISOR` e i toggle
+`ITERATION 1...N`. [CONF]+[MAN]
+
+### Condizione FILL per nota
+
+Il byte 13 usa direttamente l'enum del firmware: `OFF=0`, `NOT_FILL=1`,
+`FILL=2`. `notes.fill_to_byte()` / `Note.fill_mode` espongono la codifica e
+`musica.fill(parte, stato)` applica uno dei tre stati a una nota, lista o parte
+melodica. Il vocabolario pubblico e' chiuso (`off`, `not-fill`, `fill`): valori
+diversi vengono rifiutati e byte futuri restano conservati senza ricevere un
+nome inventato. [CONF]+[CALC]
+
+La fixture `FILLCOND01.XML` ha verificato sul dispositivo le due condizioni:
+Do OFF suona sempre, Mi NOT-FILL viene sostituito da Sol FILL quando il comando
+si attiva. Il trasferimento e la rilettura SysEx sono byte-identici (SHA-256
+`33377dda9d1a1e3977bd656365a903aadf2968cdf6239030ba57d46c91ee5742`), e
+l'utente ha confermato «ok funziona». [CONF, 21 settembre 2026]
+
+Questa condizione appartiene alla **nota**. Il launch style FILL di una clip e'
+un'altra funzione e non condivide questa API.
+
+### Codifica semantica della probability indipendente
+
+Il sorgente del firmware chiude anche la mappa completa: il valore salvato e'
+un gradino da 1 a 20 e il display lo moltiplica per 5. Quindi `1 = 5%`,
+`5 = 25%`, `13 = 65%`, `20 = 100%`. In
+`src/deluge/gui/menu_item/note_row/probability.h` il ramo LATCHING è separato:
+applica `& 127` prima di mostrare la percentuale. Nel formato split, una base
+valida 1..20 col bit 7 impostato diventa quindi 129..148 (`0x81..0x94`); è
+questa classe, non il generico intervallo 21..127, il candidato LATCHING. Il
+codice usa una condizione più larga (`> 20`), ma ciò non autorizza a
+reinterpretare i codici del formato storico a 11 byte. La serializzazione
+LATCHING resta da confermare con una coppia controllata. [CONF]+[DER]
+
+DelugePal espone questa distinzione come `Note.probability` e
+`musica.probabilita(parte, percentuale)`. L'API accetta soltanto interi fra 5
+e 100 divisibili per 5 e non arrotonda. La lettura, la scrittura e i 20 gradini
+sono coperti localmente. `PROBABILITY01.XML` è stata caricata in
+`/SONGS/DelugePal/PROBABILITY01.XML` e riletta con SHA-256
+`1c2955adb21470e0b9142a9b89dacbc9a72379923eb9744196dd4db4a6abc347` il 20
+settembre 2026. L'utente ha poi confermato «probability funziona» e l'ha
+risalvata come `PROBABILITY01 2.XML`: le quattro note al 25% conservano tutte
+`condition=5`, le quattro al 100% conservano `condition=20`. Il problema di
+visibilità incontrato nella stessa prova era indipendente: la song generata
+era in Re maggiore ma conteneva un Do, e ciclare SCALE ha cambiato `rootNote`
+da 2 (Re) a 5 (Fa), rendendo visibili Do e Sol. [CONF]
+
 ---
 
 ## 7. Scale
@@ -336,6 +403,25 @@ ipotesi (iterance) e il valore 20 = 100% dedotto dalla frequenza nel corpus.
   cromatica. Verificato che i bit accesi coincidano con i `<modeNotes>`, **8 su
   8** [OSS]
 - `inKeyMode` sulla clip: `1` in scala, `0` cromatica [DER]
+
+Per una song **generata**, questi campi formano una decisione unica [CONF]:
+
+- Scale mode: scegliere esplicitamente **tonica** (`rootNote`) e **scala**
+  (`modeNotes`) con `set_scale()`, poi tenere i clip melodici a
+  `inKeyMode=1` soltanto se tutte le note vi appartengono;
+- Chromatic: mettere tutti i clip melodici a `inKeyMode=0`. Non equivale a
+  selezionare una finta scala cromatica di dodici note.
+
+Il manuale community spiega che uscendo e rientrando da Scale il Deluge
+analizza le note dei clip, preferisce una scala preset compatibile e, se
+nessuna lo e', puo' apprendere una USER scale. Questa analisi non e' garantita
+al semplice caricamento di un file gia' marcato Scale mode. La coppia
+`PROBABILITY01` / `PROBABILITY01 2` lo ha mostrato: il file generato dichiarava
+Re maggiore ma conteneva Do e Sol; inizialmente il Do non compariva, mentre il
+ciclo di Scale ha scelto Fa maggiore (`rootNote` 2→5), che contiene entrambe.
+`MU.scrivi()` ora chiama `ensure_scale_mode_compatible()`: se una scrittura
+introduce note estranee, converte l'intera parte melodica a Scale OFF e
+ricalcola `yScroll` in semitoni. [CONF]
 
 ### `y` è un'altezza MIDI assoluta [OSS]
 
@@ -513,8 +599,50 @@ della clip. [MAN] Emerge in due punti:
   (e.g. hi-hat at length 7, kick at length 11) to create unusual pattern
   ratios» — poliritmi
 
-Nel corpus non l'ho ancora cercato: le clip esaminate hanno righe tutte della
-stessa lunghezza della clip. Da verificare quale attributo lo esprima. [APERTO]
+Nel file è l'attributo `length` sulla `<noteRow>` stessa; vale sia sulle righe
+di kit (`drumIndex`) sia su quelle melodiche (`y`) e può essere più corto o
+più lungo della clip. `song.set_row_length()` è la primitiva in tick;
+`musica.lunghezza_riga(doc, clip, dove, passi, durata='1/16')` è l'API
+musicale: risolve drum o altezza, scala la figura sulla risoluzione reale della
+song e lascia intatte clip e righe vicine. `passi=None` rimuove l'attributo e
+fa tornare la riga a seguire la clip. [OSS]+[CALC]
+
+`ROWLENGTH01` isola il meccanismo in una singola clip kit di 16 sedicesimi:
+kick 5/16, rim 7/16, hi-hat 11/16, un impulso all'inizio di ogni riga. L'utente
+ha confermato «funziona» all'ascolto e l'ha risalvato come `ROWLENGTH01 2`.
+Nel file riletto dal dispositivo la clip resta a 384 tick, le tre righe restano
+a 120/168/264 tick e ciascuna conserva la propria nota a posizione 0, durata
+24, velocity 105; `verifica()` e `avvertenze()` sono vuote. L'hash cambia,
+com'e' normale dopo il risalvataggio (`61680ff5...cff12`), ma la semantica
+5/7/11 sopravvive esattamente. [CONF, 21 settembre 2026]
+
+### 10b-bis. Sequencer euclideo: note normali, non uno stato persistente
+
+Il sorgente del firmware chiude la rappresentazione che manuale e corpus da
+soli non esplicitano. Il comando Euclidean non salva `eventi`, `passi` o
+`rotazione` come metadati: sostituisce le note della riga e usa il suo
+`length` come periodo. Per `E` eventi su `P` passi, l'evento `n` nasce al passo:
+
+    floor(n * P / E)
+
+La rotazione somma un offset in passi e applica il wrap modulo `P`. Ogni
+evento è una normale nota lunga un passo; nel file rimangono quindi soltanto
+il blob di note e l'attributo `length` della `<noteRow>`. [DER dal sorgente]
+
+`musica.euclideo(doc, clip, dove, eventi=…, passi=…, rotazione=0,
+durata='1/16', velocity=90)` replica questa semantica su kit e clip melodiche.
+Scala la figura sulla risoluzione reale della song, valida tutti gli argomenti
+prima di toccare la riga, sostituisce solo quella riga e lascia intatte clip e
+righe vicine. `eventi=0` la svuota mantenendo il ciclo. La fixture `EUCLID01`
+contiene kick 5/16, rim 4/13 ruotato di +2 e hi-hat 7/11 ruotato di -1; il file
+è valido, privo di avvertenze ed è stato caricato e riletto via SysEx con hash
+identico. L'utente ha poi confermato «funziona» e l'ha risalvato come
+`EUCLID01 2`: l'esecuzione sul dispositivo è chiusa; la rilettura del file
+risalvato conserva esattamente clip a 384 tick, cicli 384/312/264 e tutte le
+posizioni, durate e velocity delle 16 note. `verifica()` e `avvertenze()` sono
+vuote; SHA-256 del risalvato:
+`bc49aa6c7def228fae2b823f3eb1e0986ffc26795d4ff17deae34f5dd8e68a70`.
+[CONF, 21 settembre 2026]
 
 ## 10c. Scala dei parametri
 
@@ -642,7 +770,6 @@ clip registrata fissa lunghezza e tempo; le successive vi si allineano.
 - **come si rappresenta il collegamento fra due clip dello stesso strumento**
   — è il problema che blocca la duplicazione, e va risolto guardando una song
   in cui il dispositivo stesso ha clonato una clip
-- quale attributo esprime la **lunghezza propria di una noteRow**
 - il legame fra i tre livelli di scala dei parametri: int32 nel file, 0-128
   interno, 0-50 a display
 - struttura delle **istanze di clip** nell'arranger. Il manuale chiarisce il
@@ -653,9 +780,9 @@ clip registrata fissa lunghezza e tempo; le successive vi si allineano.
   ma la forma nel file non è stata guardata
 - perché **24** `<section>` e non 12
 - scala musicale dei **parametri esadecimali** (`0x7FFFFFFF` → dB, Hz)
-- il byte 10 assume valori fra 21 e 127 non spiegati dai 20 gradini di
-  probabilità: forse il LATCHING che il manuale cita quando più note hanno la
-  stessa percentuale
+- la mappa dei codici combinati oltre 20 nel formato storico a 11 byte:
+  l'ipotesi «21..127 = LATCHING» è superata; serve una coppia controllata per
+  distinguere dependency, iterance e fill senza contaminarli col formato split
 - **MPE**: il setup usa Exquis in Lower Zone, mai guardato nell'XML
 - come si distinguono **FILL** e **ONCE** da INFINITE nel file
 - confronto dello schema **fra versioni di firmware** — servono centinaia di

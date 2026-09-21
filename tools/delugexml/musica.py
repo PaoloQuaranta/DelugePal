@@ -97,7 +97,8 @@ def nome_altezza(midi: int, italiano: bool = True) -> str:
 
 # ------------------------------------------------------------------ ritmi
 
-from .notes import Note                                   # noqa: E402
+from .notes import (Note, fill_to_byte, iterance_to_fields,  # noqa: E402
+                    probability_to_condition)
 
 #: La griglia del Deluge e' larga 16 colonne per battuta, e una battuta e'
 #: 384 tick: ogni colonna e' un sedicesimo.
@@ -1909,9 +1910,55 @@ def racconta_fill(beat: dict[str, list[Note]],
 
 def _tutte_le_note(parte) -> list[Note]:
     """Le Note di una parte, sia essa `y -> [Note]`, `drum -> [Note]` o lista."""
+    if isinstance(parte, Note):
+        return [parte]
     if isinstance(parte, dict):
         return [n for ns in parte.values() for n in ns]
     return list(parte)
+
+
+def probabilita(parte, percentuale: int) -> dict[str, int]:
+    """Imposta la probability indipendente su una nota o parte musicale.
+
+    `parte` puo' essere una `Note`, una lista (anche una slice selettiva) o il
+    dizionario altezza/voce -> note prodotto dai costruttori musicali. Muta le
+    `Note` in posto e riferisce sempre quante ne ha toccate.
+    """
+    condition = probability_to_condition(percentuale)
+    note = _tutte_le_note(parte)
+    for n in note:
+        n.condition = condition
+    return {'probabilita': percentuale, 'note': len(note)}
+
+
+def iterance(parte, passi, ogni: int | None = None) -> dict[str, object]:
+    """Imposta l'iterance classica o CUSTOM su una nota o parte musicale.
+
+    ``passi`` e' un intero per la forma classica (``3, ogni=4``), una
+    sequenza per la forma CUSTOM (``[1, 3], ogni=4``), oppure ``None`` per
+    disattivarla. Muta le `Note` in posto e riferisce quante ne ha toccate.
+    """
+    divisor, mask = iterance_to_fields(passi, ogni)
+    note = _tutte_le_note(parte)
+    for n in note:
+        n.iterance_divisor = divisor
+        n.iterance_steps = mask
+    nome = Note(pos=0, length=1, iterance_divisor=divisor,
+                iterance_steps=mask).iterance
+    return {'iterance': nome, 'note': len(note)}
+
+
+def fill(parte, stato: str) -> dict[str, object]:
+    """Imposta OFF, NOT-FILL o FILL su una nota o parte musicale.
+
+    Muta le `Note` in posto e riferisce sempre lo stato applicato e quante
+    note ha toccato.
+    """
+    valore = fill_to_byte(stato)
+    note = _tutte_le_note(parte)
+    for n in note:
+        n.fill = valore
+    return {'fill': stato, 'note': len(note)}
 
 
 def _densita_per_battuta(parte, battute: int | None = None) -> list[int]:
@@ -2630,6 +2677,15 @@ def applica_verbo(doc, nodo, verbo: str, forza: int = 1) -> dict[str, object]:
 
 # ------------------------------------------------------------------ scrivere
 
+def _finalizza_scrittura_melodica(doc, clip, esito, S):
+    """Rende coerenti scala/griglia e poi calcola lo scroll nella sua unita'."""
+    decisione = S.ensure_scale_mode_compatible(doc, clip)
+    if decisione:
+        esito.update(decisione)
+    esito['scroll'] = S.fit_clip_scroll_to_notes(doc, clip)
+    return esito
+
+
 def scrivi(doc, clip, note, dove=None) -> dict[str, object]:
     """Scrive note in una clip, senza che chi chiama sappia di che tipo e'.
 
@@ -2673,8 +2729,7 @@ def scrivi(doc, clip, note, dove=None) -> dict[str, object]:
             righe += 1
             quante += len(ns)
         esito = {'clip': S.clip_label(clip), 'righe': righe, 'note': quante}
-        esito['scroll'] = S.fit_clip_scroll_to_notes(doc, clip)
-        return esito
+        return _finalizza_scrittura_melodica(doc, clip, esito, S)
 
     if dove is None:
         raise ValueError(
@@ -2694,8 +2749,7 @@ def scrivi(doc, clip, note, dove=None) -> dict[str, object]:
     S.write_notes(S.note_row(clip, y, create=True), note, create=True)
     esito = {'clip': S.clip_label(clip), 'righe': 1, 'note': len(note),
              'altezza': y}
-    esito['scroll'] = S.fit_clip_scroll_to_notes(doc, clip)
-    return esito
+    return _finalizza_scrittura_melodica(doc, clip, esito, S)
 
 
 # ------------------------------------------------------------------ trasformare
@@ -2877,6 +2931,117 @@ def sposta(doc, clip, tick: int | None = None,
             'tick')
     quante = S.map_notes(clip, lambda n: replace(n, pos=n.pos + tick))
     return {'tick': tick, 'note': quante}
+
+
+def _durata_riga_in_tick(doc, durata: str | int, S) -> int:
+    """Una figura sulla risoluzione reale della song, o tick gia' grezzi."""
+    if isinstance(durata, bool):
+        raise ValueError('durata True/False non valida: usa una figura '
+                         "come '1/16' oppure tick interi positivi")
+    unita = durata_in_tick(durata)
+    if not isinstance(durata, int):
+        unita = round(unita * S.ticks_per_bar(doc.root) / TICK_PER_BATTUTA)
+        if unita <= 0:
+            raise ValueError(f'{durata!r} e piu corta di un tick nella '
+                             'risoluzione di questa song')
+    return unita
+
+
+def lunghezza_riga(doc, clip, dove, passi: int | None, *,
+                   durata: str | int = '1/16') -> dict[str, object]:
+    """Dà a una riga un ciclo proprio, indipendente dalla clip.
+
+    ``passi`` conta figure di ``durata``: per esempio ``7`` col default crea
+    un ciclo di sette sedicesimi. ``None`` rimuove il ciclo proprio e fa
+    tornare la riga a seguire la lunghezza principale della clip.
+
+    ``dove`` e' il nome del drum su un kit e un'altezza (``'do3'`` o il suo
+    intero MIDI) su una clip melodica, come in :func:`scrivi`.
+    """
+    from . import song as S                                 # import locale: ciclo
+
+    _clip_o_no(doc, clip, 'lunghezza_riga')
+    if S.is_kit_clip(clip):
+        riga = S.drum_row(doc, clip, dove)
+        etichetta = f'drum={dove}'
+    else:
+        y = altezza(dove) if isinstance(dove, str) else int(dove)
+        riga = S.note_row(clip, y)
+        etichetta = f'y={y}'
+
+    if passi is None:
+        lunghezza = None
+    else:
+        if isinstance(passi, bool) or not isinstance(passi, int) or passi <= 0:
+            raise ValueError(f'passi {passi!r}: serve un intero positivo, '
+                             'oppure None per seguire la clip')
+        lunghezza = passi * _durata_riga_in_tick(doc, durata, S)
+    avvisi = S.set_row_length(riga, lunghezza)
+    return {'riga': etichetta, 'passi': passi, 'durata': durata,
+            'lunghezza': lunghezza, 'avvertenze': avvisi}
+
+
+def euclideo(doc, clip, dove, *, eventi: int, passi: int,
+             rotazione: int = 0, durata: str | int = '1/16',
+             velocity: int = VEL_COLPO) -> dict[str, object]:
+    """Sostituisce una riga con la distribuzione euclidea del Deluge.
+
+    Il firmware non salva metadati euclidei: materializza normali ``Note`` e
+    usa il ``length`` della noteRow come ciclo. La posizione dell'evento
+    ``n`` e' ``floor(n * passi / eventi)``; ``rotazione`` sposta il risultato
+    di altrettanti passi (positivo verso destra), con wrap sul ciclo.
+
+    ``dove`` e ``durata`` hanno lo stesso significato di
+    :func:`lunghezza_riga`. La riga scelta viene sostituita per intero, come
+    fa il comando Euclidean del dispositivo; clip e righe vicine restano
+    intatte. ``eventi=0`` svuota la riga conservandone il ciclo.
+    """
+    from . import song as S                                 # import locale: ciclo
+
+    _clip_o_no(doc, clip, 'euclideo')
+    if isinstance(passi, bool) or not isinstance(passi, int) or passi <= 0:
+        raise ValueError(f'passi {passi!r}: serve un intero positivo')
+    if (isinstance(eventi, bool) or not isinstance(eventi, int)
+            or not 0 <= eventi <= passi):
+        raise ValueError(f'eventi {eventi!r}: serve un intero fra 0 e '
+                         f'passi ({passi})')
+    if isinstance(rotazione, bool) or not isinstance(rotazione, int):
+        raise ValueError(f'rotazione {rotazione!r}: serve un intero')
+    if (isinstance(velocity, bool) or not isinstance(velocity, int)
+            or not 1 <= velocity <= 127):
+        raise ValueError(f'velocity {velocity!r}: serve un intero fra 1 e 127')
+    unita = _durata_riga_in_tick(doc, durata, S)
+
+    if S.is_kit_clip(clip):
+        riga = S.drum_row(doc, clip, dove, create=True)
+        etichetta = f'drum={dove}'
+    else:
+        y = altezza(dove) if isinstance(dove, str) else int(dove)
+        riga = S.note_row(clip, y, create=True)
+        etichetta = f'y={y}'
+    sostituite = len(S.read_notes(riga))
+
+    posizioni = [] if eventi == 0 else sorted(
+        ((((n * passi) // eventi) + rotazione) % passi) * unita
+        for n in range(eventi)
+    )
+    note = [Note(pos=pos, length=unita, velocity=velocity)
+            for pos in posizioni]
+    scrivi(doc, clip, note, dove=dove)
+    ciclo = lunghezza_riga(doc, clip, dove, passi, durata=durata)
+    return {
+        'riga': etichetta,
+        'eventi': eventi,
+        'passi': passi,
+        'rotazione': rotazione,
+        'durata': durata,
+        'passo_tick': unita,
+        'lunghezza': ciclo['lunghezza'],
+        'note': len(note),
+        'sostituite': sostituite,
+        'posizioni': posizioni,
+        'avvertenze': ciclo['avvertenze'],
+    }
 
 
 def repeat(doc, clip, volte: int) -> dict[str, object]:

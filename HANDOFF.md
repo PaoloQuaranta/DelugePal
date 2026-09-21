@@ -122,6 +122,69 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > le costanti canoniche del modulo ne usano 384; groove, ratchet e lock
 > devono essere scalati su quella griglia.
 >
+> **Il 20 settembre 2026 è stata chiusa anche la probability indipendente per
+> nota.** `Note.probability` e `MU.probabilita()` espongono i venti gradini
+> 5–100% senza confonderli coi codici storici o col LATCHING. La fixture
+> `PROBABILITY01` è stata caricata, ascoltata e risalvata: verdetto dell'utente
+> «probability funziona»; i byte 5 (25%) e 20 (100%) sono sopravvissuti al
+> round-trip. La stessa prova ha corretto una regola più generale: una song
+> generata in Scale mode deve selezionare esplicitamente **tonica e scala** e
+> contenere soltanto note compatibili. Se il materiale e' cromatico, tutti i
+> clip melodici vanno a Scale OFF (`inKeyMode=0`). `MU.scrivi()` lo garantisce
+> come rete di sicurezza; `probability_scritto.py` ora sceglie Do maggiore.
+> giro sul dispositivo. La stessa prova ha riaperto un vecchio difetto distinto:
+> una clip in scale mode con note fuori dalla scala dichiarata può mostrarne
+> solo alcune finché non si cicla SCALE. Qui il file partiva in Re maggiore
+> con Do e Sol; il risalvataggio dopo il toggle è in Fa maggiore.
+>
+> **Il 21 settembre 2026 e' stata chiusa anche l'iterance per nota, classica
+> e CUSTOM.** `MU.iterance()` costruisce e valida `NofM` e maschere multi-step;
+> `ITERANCE01` ha verificato sul Deluge `1of4` e CUSTOM `1+3of4`, con verdetto
+> «funziona» e rilettura SysEx byte-identica. La prova ha trovato anche un bug
+> locale: quando una riga portava entrambi i blob, il lettore preferiva quello
+> storico a 11 byte e nascondeva iterance/fill. Ora preferisce il formato split
+> a 14 byte. Sul dispositivo, la scorciatoia nota+rotazione SELECT mostra
+> soltanto `CUSTOM`; i bit si modificano dal sottomenu `NOTE ITERANCE > CUSTOM`
+> (`DIVISOR`, poi `ITERATION 1...N`). L'esecuzione e' verificata; l'editing
+> manuale dei toggle non e' stato ancora provato in questa sessione.
+>
+> **Il 21 settembre 2026 e' stata chiusa anche la condizione FILL per nota.**
+> Il firmware fissa la mappa del byte 13: `OFF=0`, `NOT_FILL=1`, `FILL=2`;
+> `Note.fill_mode` e `MU.fill()` la espongono con validazione stretta.
+> `FILLCOND01` ha quattro Do sempre attivi, quattro Mi NOT-FILL e quattro Sol
+> FILL: senza comando suona Do+Mi, col comando Do+Sol. Verdetto dell'utente:
+> «ok funziona»; trasferimento e rilettura SysEx byte-identici. La condizione
+> per nota non va confusa col launch style FILL di un'intera clip, che resta
+> una capacita' separata.
+>
+> **Il 21 settembre 2026 e' stata chiusa anche la lunghezza indipendente per
+> riga.**
+> `MU.lunghezza_riga(doc, clip, dove, passi, durata='1/16')` scrive il
+> `length` della sola `<noteRow>`, segue la risoluzione reale della song e con
+> `None` ripristina il ciclo della clip. `ROWLENGTH01` contiene una sola clip
+> da 16 sedicesimi e tre impulsi su righe da 5, 7 e 11 sedicesimi. Verdetto
+> dell'utente: «funziona». Il risalvataggio `ROWLENGTH01 2` conserva clip 384,
+> righe 120/168/264 e le tre note `(pos=0, length=24, velocity=105)`;
+> `verifica()` e `avvertenze()` restano vuote. SHA-256 del risalvato:
+> `61680ff58bde5103487a04d0f7a717cf2938130a360916268d2c0fd3382cff12`.
+>
+> **Il 21 settembre 2026 e' stata chiusa anche la scrittura del sequencer
+> euclideo per riga.**
+> `MU.euclideo(doc, clip, dove, eventi=…, passi=…, rotazione=…,
+> durata='1/16', velocity=90)` replica la formula intera del firmware,
+> sostituisce soltanto la riga scelta e ne imposta il ciclo indipendente. Il
+> firmware non conserva uno stato euclideo: materializza note normali e il
+> `length` della riga. `EUCLID01` prova kick 5/16, rim 4/13 ruotato +2 e
+> hi-hat 7/11 ruotato -1. `verifica()` e `avvertenze()` sono vuote; upload e
+> rilettura SysEx sono byte-identici, SHA-256
+> `fd5f3db47b877e847ec15ea74fb4271cbfdf2ed7352373330d9db1625653e2b7`.
+> Verdetto dell'utente: «funziona»; il file e' stato risalvato come
+> `EUCLID01 2`, quindi la colonna Device e' completa. Dopo un riavvio del
+> Deluge, la rilettura conserva esattamente clip 384, cicli 384/312/264 e
+> tutte le posizioni, durate e velocity delle 16 note; `verifica()` e
+> `avvertenze()` sono vuote. SHA-256 del risalvato:
+> `bc49aa6c7def228fae2b823f3eb1e0986ffc26795d4ff17deae34f5dd8e68a70`.
+>
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
 > regole di quel documento non sono consigli: ognuna nasce da un errore pagato.
@@ -854,13 +917,14 @@ giorno, con lo stesso metodo, cancellando `refs/` dalla copia.
 > `beingEdited` (si apriva un'altra clip) e con `inKeyMode` (note fuori scala
 > senza una riga su cui esistere). Ogni volta il dato era giusto.
 >
-> ⚠ **Attenzione al quarto caso: la mia diagnosi era SBAGLIATA.** Avevo
-> concluso che le note fuori scala non hanno una riga e non suonano. Falso —
-> il dispositivo adatta la scala, e `Progsong.XML` ha 315 note fuori scala.
-> Il difetto reale era che una clip creata da un modello eredita `yScroll` e
-> `inKeyScrollOffset` dal modello: usare `fit_clip_scroll_to_notes()`.
-> Il racconto dell'errore, con i due sbagli di metodo che l'hanno prodotto,
-> è in FINDINGS.md — vale più della conclusione.
+> ⚠ **Correzione definitiva dal test PROBABILITY01.** Le note fuori scala
+> possono esistere e vanno conservate nei file storici, ma un file generato
+> gia' in Scale mode con scala incompatibile puo' non mostrarle all'apertura.
+> Il Deluge ricalcola una scala preset o USER quando si esce e rientra da
+> Scale; non bisogna affidarsi a quel gesto manuale. In generazione: scegliere
+> tonica+scala compatibili oppure Scale OFF per tutti i clip melodici. Lo
+> scroll ereditato resta un difetto distinto, corretto da
+> `fit_clip_scroll_to_notes()`.
 
 ---
 
@@ -4293,9 +4357,12 @@ La rilettura SysEx è byte-identica: SHA-256
   superare quella della clip** (clip 384, riga 552), quindi è indipendente, non
   una suddivisione. Nel corpus c1.3.0 c'è un solo esempio (`Qbix.XML`, clip
   `KIT000`: righe da 384, 576 e 504 tick su una clip da 672); gli altri vengono
-  da `corpus_versions\`. **Osservato nei file, non ancora verificato sul
-  dispositivo** — resta da confermare che produca davvero il poliritmo, e da
-  capire cosa succede quando riga e clip non sono in rapporto intero
+  da `corpus_versions\`. Dal 21 settembre e' anche **verificato sul
+  dispositivo**: c'e' l'API
+  `MU.lunghezza_riga(doc, clip, dove, passi, durata='1/16')` e la fixture
+  `ROWLENGTH01`, una clip da 16 passi con righe da 5, 7 e 11. L'utente ha
+  confermato «funziona» e il file risalvato conserva esattamente 120/168/264
+  tick e le tre note: il poliritmo non e' piu' una deduzione dai file
 - ~~formula esatta fra i tre livelli di scala dei parametri~~ — **trovata il
   12 agosto**, ed è un'uguaglianza intera esatta, non una regressione:
 
@@ -4392,8 +4459,10 @@ La rilettura SysEx è byte-identica: SHA-256
   che il profilo **non ha**; una cella mal ancorata invece c'è, ed è il suo
   contenuto a essere spostato. Dichiarato in `docs/repertori/jazz.md`, «Il
   limite che resta: l'ancoraggio»
-- byte 10 delle note: i valori fra 21 e 127 non spiegati dai 20 gradini di
-  probabilità — probabilmente il LATCHING descritto nel manuale
+- byte 10 delle note nel formato storico a 11 byte: i valori oltre 20 sono
+  codici combinati di probability/dependency, iterance e fill. L'ipotesi
+  «21..127 = LATCHING» è superata; la probability indipendente 1..20 è ora
+  implementata e la parte storica richiede coppie controllate proprie
 - perché 24 `<section>` quando il manuale ne descrive 12
 - MPE nell'XML, mai guardato (il setup usa Exquis in Lower Zone)
 - confronto dello schema **fra versioni di firmware**: non è più bloccato, le

@@ -41,11 +41,100 @@ PROB_100 = 20          # valore osservato per "probabilita' 100%"
 DEFAULT_VELOCITY = 64
 DEFAULT_LIFT = 64
 
+FILL_OFF = 0
+FILL_NOT = 1
+FILL_ONLY = 2
+FILL_NAMES = {
+    'off': FILL_OFF,
+    'not-fill': FILL_NOT,
+    'fill': FILL_ONLY,
+}
+
 ATTR_WIDTH = {
     'noteDataWithLift': 11,
     'noteDataWithSplitProb': 14,
     'noteData': 10,        # formato piu' vecchio, non presente in c1.3.0
 }
+
+
+def probability_to_condition(percent: int) -> int:
+    """Converte 5..100% nel gradino 1..20 scritto dal firmware."""
+    if (isinstance(percent, bool) or not isinstance(percent, int)
+            or not 5 <= percent <= 100 or percent % 5):
+        raise ValueError(
+            f'probability deve essere un intero da 5 a 100, '
+            f'a passi di 5; ricevuto {percent!r}')
+    return percent // 5
+
+
+def condition_to_probability(condition: int) -> int | None:
+    """Legge solo la probability indipendente; non interpreta altre condizioni."""
+    if 1 <= condition <= PROB_100:
+        return condition * 5
+    return None
+
+
+def iterance_to_fields(steps, divisor: int | None) -> tuple[int, int]:
+    """Converte passi 1-based e divisore nei byte 11 e 12 del formato split.
+
+    Un intero esprime l'iterance classica (per esempio ``3, 4`` = ``3of4``);
+    un iterabile esprime la forma CUSTOM. ``None, None`` la disattiva.
+    """
+    if steps is None or divisor is None:
+        if steps is None and divisor is None:
+            return 0, 0
+        raise ValueError(
+            'iterance disattivata vuole passi=None e ogni=None; '
+            f'ricevuto passi={steps!r}, ogni={divisor!r}')
+    if (isinstance(divisor, bool) or not isinstance(divisor, int)
+            or not 1 <= divisor <= 8):
+        raise ValueError(
+            f'ogni deve essere un intero da 1 a 8; ricevuto {divisor!r}')
+
+    if isinstance(steps, bool):
+        valori = [steps]
+    elif isinstance(steps, int):
+        valori = [steps]
+    else:
+        if isinstance(steps, (str, bytes)):
+            raise ValueError(f'passi deve essere un intero o una sequenza; ricevuto {steps!r}')
+        try:
+            valori = list(steps)
+        except TypeError as exc:
+            raise ValueError(
+                f'passi deve essere un intero o una sequenza; ricevuto {steps!r}') from exc
+
+    if not valori:
+        raise ValueError('iterance attiva vuole almeno un passo')
+    if any(isinstance(step, bool) or not isinstance(step, int)
+           for step in valori):
+        raise ValueError(f'i passi devono essere interi; ricevuto {valori!r}')
+    if len(set(valori)) != len(valori):
+        raise ValueError(f'i passi non possono ripetersi; ricevuto {valori!r}')
+    fuori = [step for step in valori if not 1 <= step <= divisor]
+    if fuori:
+        raise ValueError(
+            f'ogni passo deve stare fra 1 e {divisor}; fuori range {fuori!r}')
+
+    mask = 0
+    for step in valori:
+        mask |= 1 << (step - 1)
+    return divisor, mask
+
+
+def fill_to_byte(state: str) -> int:
+    """Converte OFF / NOT-FILL / FILL nel byte 13 del formato split."""
+    if not isinstance(state, str) or state not in FILL_NAMES:
+        raise ValueError(
+            "fill deve essere 'off', 'not-fill' o 'fill'; "
+            f'ricevuto {state!r}')
+    return FILL_NAMES[state]
+
+
+def byte_to_fill(value: int) -> str | None:
+    """Nome pubblico di un byte fill noto; None preserva valori futuri."""
+    return next((name for name, byte in FILL_NAMES.items() if byte == value),
+                None)
 
 
 @dataclass
@@ -63,6 +152,15 @@ class Note:
     fill: int = 0
 
     @property
+    def probability(self) -> int | None:
+        """Probabilita' indipendente in percentuale, o None per altre condizioni."""
+        return condition_to_probability(self.condition)
+
+    @probability.setter
+    def probability(self, percent: int) -> None:
+        self.condition = probability_to_condition(percent)
+
+    @property
     def iterance(self) -> str | None:
         """L'iterance nella notazione del dispositivo, es. "3of4"."""
         if not self.iterance_divisor:
@@ -71,6 +169,11 @@ class Note:
         if len(steps) == 1:
             return f'{steps[0]}of{self.iterance_divisor}'
         return f'{"+".join(map(str, steps))}of{self.iterance_divisor}'
+
+    @property
+    def fill_mode(self) -> str | None:
+        """OFF, NOT-FILL o FILL; None se il byte appartiene a un formato futuro."""
+        return byte_to_fill(self.fill)
 
     def __repr__(self):
         bits = [f'pos={self.pos}', f'len={self.length}',
@@ -123,9 +226,16 @@ def encode(notes: list[Note], width: int) -> str:
     return '0x' + out.hex().upper()
 
 
+READ_ROW_ATTRS = ('noteDataWithSplitProb', 'noteDataWithLift', 'noteData')
+
+
 def read_row(node) -> tuple[str, int, list[Note]] | None:
     """(nome_attributo, larghezza, note) per una noteRow, o None se e' vuota."""
-    for attr, w in ATTR_WIDTH.items():
+    # Molte righe portano sia il formato storico sia quello split. Quello
+    # split contiene gli stessi campi piu' iterance e fill: leggerlo per primo
+    # evita di nascondere i byte 11-13 pur continuando a riscrivere entrambi.
+    for attr in READ_ROW_ATTRS:
+        w = ATTR_WIDTH[attr]
         v = node.get(attr)
         if v:
             return attr, w, decode(v, w)

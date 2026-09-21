@@ -310,11 +310,33 @@ Tutte le altre larghezze danno 0%. Il risultato non è ambiguo.
 | 10 | condizione / probabilità | 1 … 140 | **20 = 100%**, in 10386 note su 10511 |
 | 11 | solo `WithSplitProb` — divisore dell'iterance | 0 … 8 | 0 = disattivata |
 | 12 | solo `WithSplitProb` — maschera dei passi attivi | 0 … 128 | il bit *k* accende il passo *k+1* |
-| 13 | solo `WithSplitProb` | sempre 0 nel corpus | presumibilmente fill |
+| 13 | solo `WithSplitProb` — condizione fill | 0 nel corpus; 0–2 confermati | 0 = OFF, 1 = NOT-FILL, 2 = FILL |
 
-Il byte 10 vale 20 nella stragrande maggioranza dei casi; i valori ≥ 128 (133,
-136, 138) sono le condizioni "iteration dependence" del Deluge. Il byte 13 è
-sempre 0 nel corpus. [OSS]
+Il byte 10 vale 20 nella stragrande maggioranza dei casi. Nel formato storico
+a 11 byte, i valori oltre 20 (compresi 133, 136 e 138) appartengono allo spazio
+condiviso da probability, iteration dependence e fill; non bastano da soli a
+distinguere quale condizione rappresentino. Nel formato a 14 byte osservato qui
+il campo probability vale soltanto 7 o 20. Il byte 13 è sempre 0 nel corpus
+storico; i valori 1 e 2 sono stati aggiunti dalla fixture controllata.
+[OSS]+[CONF]
+
+Il sorgente del firmware rende esplicita la conversione che il corpus da solo
+non poteva dimostrare: per la probability indipendente il display calcola
+`byte * 5`, sui venti gradini `1..20`. Il ramo LATCHING applica `& 127` prima
+della conversione: nel formato split il candidato è quindi una base valida
+1..20 col bit 7 impostato (`0x81..0x94`), non i codici storici 21..127. Il
+primo fatto è nel file `src/deluge/gui/menu_item/note_row/probability.h`; la
+serializzazione precisa del LATCHING è ancora da confermare sul dispositivo.
+DelugePal conserva ogni valore oltre 20 senza presentarlo come probability
+indipendente. [CONF]+[DER]
+
+**Conferma sul dispositivo, 20 settembre 2026.** `PROBABILITY01.XML` porta
+quattro Do al 100% e quattro Sol al 25%. L'utente ha confermato «probability
+funziona»; nel file risalvato `PROBABILITY01 2.XML` i Do conservano
+`condition=20` e i Sol `condition=5`, senza una sola nota cambiata. Il toggle
+di SCALE necessario a rendere visibili inizialmente anche i Do ha una causa
+separata: la song era in Re maggiore, dove Do è fuori scala; il risalvataggio
+ha `rootNote=5` (Fa maggiore), che include entrambe le altezze. [CONF]
 
 Verifica indipendente: aggiungendo una nota con velocity 100 e lift 64 alla
 posizione 144 di durata 48, il blob prodotto è
@@ -349,6 +371,48 @@ leggono da sole:
 Che è esattamente la notazione `3of4` mostrata dal dispositivo. Nel corpus la
 maschera ha sempre **un solo bit acceso**, cioè la forma classica "N di M"; il
 modo CUSTOM con più passi è previsto dal firmware ma non usato in questi file.
+
+**Conferma sul dispositivo, 21 settembre 2026.** `ITERANCE01.XML` porta un Do
+con `(divisor=4, mask=0b0001)` = `1of4` e un Sol con
+`(divisor=4, mask=0b0101)` = CUSTOM `1+3of4`. Il file e' stato scritto via
+SysEx e riletto byte-identico (SHA-256
+`3741c64e1f7ad95c92d975a4a4a14cb7b389e2beb35587b63cbce8164b927b78`).
+Verdetto dell'utente: «funziona» — su quattro giri il Do suona una volta e il
+Sol due, nelle iterazioni previste. [CONF]
+
+La scorciatoia **nota tenuta + rotazione di SELECT** mostra `ITERANCE: CUSTOM`
+ma non espone i singoli bit della maschera. Non e' un difetto del file: il
+manuale community prescrive per CUSTOM il Note Editor — nota tenuta + pressione
+di SELECT, `NOTE ITERANCE`, `CUSTOM`, altra pressione di SELECT — che apre
+`DIVISOR` e i toggle `ITERATION 1...N`. L'esecuzione della maschera e'
+verificata; la modifica manuale di quei toggle non e' ancora stata provata in
+questa sessione. [MAN]+[OSS]
+
+DelugePal espone `iterance_to_fields()` e
+`musica.iterance(parte, passi, ogni=...)`: un intero produce la forma classica,
+una sequenza la maschera CUSTOM, `None` la disattiva. Il lettore preferisce
+`noteDataWithSplitProb` quando una riga contiene anche il blob storico a 11
+byte; prima della correzione leggeva quest'ultimo e nascondeva iterance e fill
+pur avendoli conservati correttamente. [CALC]
+
+### Fill per nota — byte 13 [CONF]
+
+La documentazione community distingue tre stati indipendenti da probability e
+iterance: OFF, NOT-FILL (suona soltanto quando il comando FILL non e' attivo)
+e FILL (suona soltanto quando e' attivo). Il sorgente firmware li enumera
+nell'ordine `OFF=0`, `NOT_FILL=1`, `FILL=2`; la serializzazione scrive quel
+valore direttamente nel byte 13. [MAN]+[CONF]
+
+`notes.fill_to_byte()` e `Note.fill_mode` espongono la mappa senza dare nomi a
+valori futuri; `musica.fill(parte, stato)` accetta soltanto `off`, `not-fill`
+e `fill`. `FILLCOND01.XML` porta quattro Do OFF, quattro Mi NOT-FILL e quattro
+Sol FILL. Scritto via SysEx e riletto byte-identico (SHA-256
+`33377dda9d1a1e3977bd656365a903aadf2968cdf6239030ba57d46c91ee5742`), sul
+dispositivo passa da Do+Mi senza FILL a Do+Sol col comando attivo. Verdetto
+dell'utente: «ok funziona». [CONF, 21 settembre 2026]
+
+Questa e' la **condizione per nota**. Non va confusa con il launch style FILL
+di un'intera clip, che usa un altro stato e resta una capacita' separata.
 
 ### `<scales>` e `userScale` [CONF]
 
@@ -580,14 +644,14 @@ dedurne il comportamento dell'interfaccia.
 > la `polarity` di quello successivo. Le liste vanno confrontate come
 > strutture, non come testo.
 
-### Le note fuori scala non sono un errore — e come mi sono convinto del contrario
+### Note fuori scala: valide nel file, ma non da generare in Scale mode
 
 **Il fatto:** una clip generata (`out/BASSO.XML`) mostrava all'apertura una
 nota su quattro. Toggling scale mode le rende **tutte visibili, e restano
 visibili** anche tornando in scale mode. Le note c'erano tutte.
 
-**La mia diagnosi era sbagliata.** Avevo concluso che una nota fuori dalla
-scala non ha una riga su cui esistere. Il corpus lo smentisce senza appello:
+**La prima diagnosi era incompleta.** Avevo concluso che una nota fuori dalla
+scala non potesse esistere nel file. Il corpus smentisce questo assoluto:
 
 | | |
 |---|---|
@@ -595,10 +659,19 @@ scala non ha una riga su cui esistere. Il corpus lo smentisce senza appello:
 | di cui **con note fuori scala** | 7 |
 | `Progsong.XML` | **315 note fuori scala**, `userScale="0"` |
 
-Song scritte dal dispositivo contengono note fuori scala di routine, con
-esattamente la stessa combinazione di attributi che credevo rotta. E chi usa
-il Deluge conferma il meccanismo: in scale mode le note fuori scala non
-vengono scartate, **la scala viene adattata** per includerle.
+Song scritte dal dispositivo possono quindi **conservare** note fuori scala.
+Questo non prova pero' che il loader le renda subito visibili quando il file
+nasce gia' con `inKeyMode=1` e una scala incompatibile.
+
+La prova controllata `PROBABILITY01` ha isolato proprio questa differenza
+[CONF, 20 settembre 2026]: il file dichiarava Re maggiore e conteneva Do e
+Sol; all'apertura compariva soltanto il Sol. Uscendo e rientrando da Scale sono
+comparse entrambe le note e il risalvataggio ha scritto Fa maggiore
+(`rootNote` 2→5). Do+Sol entrano in Fa maggiore, quindi non serviva una scala
+USER. Il manuale community conferma la sequenza: **quando si rientra in Scale
+da Chromatic**, il Deluge analizza le note, preferisce una scala preset che le
+contenga e, se nessuna basta, puo' apprendere una USER scale. Non risulta che
+questa inferenza debba avvenire al caricamento di un file gia' in Scale mode.
 
 `<scales>/userScale` è una **maschera a 12 bit**: `4095` = `0xFFF` = tutti i
 semitoni. Vale `0` in 28 song, `4095` in 4, e valori intermedi (`3837`,
@@ -618,14 +691,22 @@ semitoni. Vale `0` in 28 song, `4095` in 4, e valori intermedi (`3837`,
 mode senza problemi. Un fenomeno intermittente non è un segnale su cui
 bisezionare, e inseguirlo è stato tempo speso male.
 
-**Quello che resta vero, ed è un difetto nostro:** una clip creata istanziando
-un modello eredita `yScroll` e `inKeyScrollOffset` dal modello, cioè da una
-clip con altro preset e altre altezze. `song.fit_clip_scroll_to_notes()` li
-porta entrambi dove stanno le note — `yScroll` per la griglia cromatica,
-`inKeyScrollOffset` per quella in scala, dove le righe sono **gradi** e non
-semitoni.
+**Regola di generazione:** scegliere prima fra due stati coerenti. Se si usa
+Scale mode, selezionare esplicitamente tonica e scala e scrivere soltanto note
+appartenenti a quella scala. Se il materiale e' cromatico, impostare tutti i
+clip melodici a Scale OFF (`inKeyMode=0`). `MU.scrivi()` applica questa seconda
+scelta automaticamente se trova una nota incompatibile e ricalcola `yScroll`
+nella nuova unita' (semitoni). `PROBABILITY01` ora sceglie esplicitamente Do
+maggiore, compatibile con Do e Sol.
 
-`check_notes_playable()` è deprecata: dava una diagnosi sbagliata.
+Resta inoltre vero il difetto distinto dello scroll: una clip creata
+istanziando un modello eredita `yScroll` dal modello, cioe' da una clip con
+altre altezze. `song.fit_clip_scroll_to_notes()` lo porta dove stanno le note;
+in Scale mode le righe sono **gradi**, in Chromatic sono semitoni.
+
+`check_notes_playable()` resta deprecata: pretendeva di diagnosticare come
+corrotto qualunque file storico con note fuori scala. La politica nuova e'
+applicata in scrittura, non retroattivamente ai file del dispositivo.
 
 ---
 
@@ -1710,17 +1791,51 @@ visualizzazione per definizione.
 
 ---
 
+## 6-novies. Il sequencer euclideo viene materializzato — [CONF sorgente]
+
+Nel file non esiste uno stato euclideo persistente. Il firmware sostituisce le
+note della riga e calcola la posizione dell'evento `n` con aritmetica intera:
+
+    pos = floor(n * passi / eventi) * tick_per_passo
+
+La rotazione trasla ogni posizione di un numero intero di passi, con wrap sulla
+lunghezza effettiva della riga. Le note create hanno durata di un passo e la
+`<noteRow>` riceve `length = passi * tick_per_passo`. Questo spiega perche' i
+file osservati mostrano soltanto normali blob di note e la lunghezza per riga:
+la provenienza euclidea non e' ricostruibile in modo univoco dal risultato.
+
+`MU.euclideo()` implementa esattamente questa trasformazione, su drum o
+altezza melodica, scalando la figura sulla risoluzione reale della song. La
+fixture controllata `EUCLID01` contiene:
+
+- kick 5/16, rotazione 0: tick 0, 72, 144, 216, 288;
+- rim 4/13, rotazione +2: tick 48, 120, 192, 264;
+- hi-hat 7/11, rotazione -1: tick 0, 48, 72, 120, 144, 192, 240.
+
+Il 21 settembre 2026 il file ha superato `verifica()` e `avvertenze()`, e'
+stato caricato come `/SONGS/DelugePal/EUCLID01.XML` e riletto byte-identico
+(SHA-256 `fd5f3db47b877e847ec15ea74fb4271cbfdf2ed7352373330d9db1625653e2b7`).
+Questa chiudeva costruzione e trasporto; in quel momento ascolto e
+risalvataggio dal Deluge erano ancora pendenti. [stato intermedio]
+
+L'utente ha poi confermato «funziona» e ha risalvato la song come
+`EUCLID01 2`: la distribuzione euclidea è quindi verificata in esecuzione sul
+dispositivo. Il primo tentativo di scaricare il risalvataggio non ha ricevuto
+risposta dal servizio SysEx su nessuna delle tre coppie di porte esposte; il
+riavvio del Deluge ha ripristinato il servizio. `EUCLID01 2` e' stato quindi
+scaricato: il writer del dispositivo cambia dimensione e hash, ma conserva
+esattamente clip a 384 tick, cicli 384/312/264 e tutte le posizioni, durate e
+velocity delle 16 note. `verifica()` e `avvertenze()` sono vuote; SHA-256 del
+risalvato `bc49aa6c7def228fae2b823f3eb1e0986ffc26795d4ff17deae34f5dd8e68a70`.
+[CONF dispositivo, 21 settembre 2026]
+
+---
+
 ## 7. Cosa resta non verificato
 
-1. **La modifica delle note sul dispositivo.** Il tempo è validato, ma tocca due
-   attributi di testo; le note toccano la codifica binaria dei blob, che è il
-   pezzo dove un errore di layout non si vedrebbe fino al caricamento.
-2. Il byte 13 di `noteDataWithSplitProb`: sempre 0 nel corpus, quindi il
-   significato resta ipotetico (probabilmente *fill*).
-3. La scala musicale dei parametri esadecimali.
-4. Il comportamento con `<` `>` `"` nei nomi di sample (nessun campione).
-5. Che il servizio SysEx risponda su questa build, e cosa faccia `devSysexAllowed`.
-6. Non esistono synth standalone salvati da c1.3.0 sulla SD: la cartella
+1. La scala musicale dei parametri esadecimali.
+2. Il comportamento con `<` `>` `"` nei nomi di sample (nessun campione).
+3. Non esistono synth standalone salvati da c1.3.0 sulla SD: la cartella
    `SYNTHS/` è ferma a versioni 3.x/4.x. Lo schema dei sound è stato ricavato dai
    `<sound>` incorporati nelle song, che sono la stessa struttura, ma un file
    `SYNTHS/*.XML` scritto da questa build non è mai stato visto.

@@ -398,10 +398,10 @@ def remove_patch_cable(node: Node, source: str, destination: str) -> bool:
 #: percorso, usato solo per informare nel rapporto di
 #: `set_patch_cable`. Si ri-deriva con `tools/genera_coppie_cable.py`
 #: e la ricontrolla `test_patch_cable_tabelle`. Ultimo giro:
-#: 166 file, 16043 cable, 142 coppie.
+#: 167 file, 16091 cable, 142 coppie.
 COPPIE_OSSERVATE: dict[tuple[str, str], int] = {
-    ('velocity', 'volume'): 8101, ('aftertouch', 'volume'): 3084,
-    ('y', 'lpfFrequency'): 3010, ('lfo1', 'pitch'): 176,
+    ('velocity', 'volume'): 8117, ('aftertouch', 'volume'): 3100,
+    ('y', 'lpfFrequency'): 3026, ('lfo1', 'pitch'): 176,
     ('envelope2', 'lpfFrequency'): 157, ('velocity', 'lpfFrequency'): 129,
     ('compressor', 'volumePostReverbSend'): 122, ('note', 'lpfFrequency'): 94,
     ('y', 'modulator1Volume'): 73, ('velocity', 'oscAVolume'): 63,

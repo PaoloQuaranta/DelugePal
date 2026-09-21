@@ -6,6 +6,7 @@ alla fine viene restituito un exit code diverso da zero se qualcosa e' rotto.
 from __future__ import annotations
 
 import collections
+import importlib.util
 import re
 import statistics
 import sys
@@ -244,6 +245,50 @@ def test_notes_extra_preserved():
           N.encode(ns, 14) == blob, N.encode(ns, 14))
 
 
+def test_probability_percentuale_e_byte():
+    """La probability pubblica usa percentuali; il blob usa gradini 1..20."""
+    n = Note(pos=0, length=24)
+    n.probability = 25
+    check('probability 25% diventa il byte 5',
+          n.condition == 5, str(n.condition))
+    letta = N.decode('0x0000000000000018404005000000', 14)[0]
+    check('il byte 5 viene raccontato come probability 25%',
+          getattr(letta, 'probability', None) == 25,
+          str(getattr(letta, 'probability', None)))
+    check('probability 25% entra davvero nel blob a 14 byte',
+          N.encode([n], 14) == '0x0000000000000018404005000000',
+          N.encode([n], 14))
+    check('probability 25% entra anche nel formato a 11 byte',
+          N.encode([n], 11) == '0x0000000000000018404005',
+          N.encode([n], 11))
+
+
+def test_probability_valida_tutti_i_gradini_e_non_legge_il_latching():
+    coppie = ((5, 1), (10, 2), (15, 3), (20, 4), (25, 5),
+              (30, 6), (35, 7), (40, 8), (45, 9), (50, 10),
+              (55, 11), (60, 12), (65, 13), (70, 14), (75, 15),
+              (80, 16), (85, 17), (90, 18), (95, 19), (100, 20))
+    ottenute = []
+    for percentuale, byte in coppie:
+        n = Note(pos=0, length=24)
+        n.probability = percentuale
+        ottenute.append((n.probability, n.condition))
+    check('i 20 gradini probability hanno la mappa percentuale-byte esatta',
+          ottenute == list(coppie), str(ottenute))
+
+    invalidi = (0, 4, 6, 101, 25.0, True, '25')
+    check('probability rifiuta fuori range, non multipli e non interi',
+          all(_raises(lambda valore=valore: setattr(
+              Note(pos=0, length=24), 'probability', valore), ValueError)
+              for valore in invalidi), str(invalidi))
+
+    bit_latching_25 = N.decode(
+        '0x0000000000000018404085000000', 14)[0]
+    check('il bit latching su 25% non viene spacciato per probability indipendente',
+          bit_latching_25.probability is None,
+          str(bit_latching_25.probability))
+
+
 def test_iterance():
     # nota con iterance "4 di 4": divisore 4, maschera 0b1000 = 8
     blob = '0x000001B000000030644014040800'
@@ -270,6 +315,64 @@ def test_iterance():
     check('promozione a 14 byte senza inventare',
           N.encode([short], 14) == '0x000001B000000030644014000000',
           N.encode([short], 14))
+
+
+def test_iterance_costruttori_validati():
+    check('iterance classica costruisce divisore e singolo bit',
+          N.iterance_to_fields(3, 4) == (4, 0b0100),
+          str(N.iterance_to_fields(3, 4)))
+    check('iterance custom costruisce una maschera multi-step',
+          N.iterance_to_fields([1, 3, 4], 4) == (4, 0b1101),
+          str(N.iterance_to_fields([1, 3, 4], 4)))
+    check('iterance disattivata azzera entrambi i campi',
+          N.iterance_to_fields(None, None) == (0, 0),
+          str(N.iterance_to_fields(None, None)))
+
+    invalidi = (
+        (0, 4), (5, 4), ([1, 5], 4), ([], 4),
+        ([1, 1], 4), ([True], 4), ([1], 0), ([1], 9),
+        (None, 4), ([1], None),
+    )
+    check('iterance rifiuta passi e divisori incoerenti',
+          all(_raises(lambda p=p, d=d: N.iterance_to_fields(p, d), ValueError)
+              for p, d in invalidi), str(invalidi))
+
+    doc = parse(
+        '<song><noteRow '
+        'noteDataWithLift="0x0000000000000018404014" '
+        'noteDataWithSplitProb="0x0000000000000018404014040500" />'
+        '</song>')
+    letto = N.read_row(doc.root.find('noteRow'))
+    check('se entrambi i blob esistono il lettore preferisce quello split',
+          letto[0:2] == ('noteDataWithSplitProb', 14)
+          and letto[2][0].iterance == '1+3of4', str(letto))
+
+
+def test_fill_condizione_e_byte():
+    check('fill mappa i tre stati sull enum ufficiale',
+          [N.fill_to_byte(x) for x in ('off', 'not-fill', 'fill')]
+          == [0, 1, 2])
+    check('il byte fill torna a un nome leggibile',
+          [N.byte_to_fill(x) for x in (0, 1, 2)]
+          == ['off', 'not-fill', 'fill'])
+
+    not_fill = N.decode('0x0000000000000018404014000001', 14)[0]
+    only_fill = N.decode('0x0000000000000018404014000002', 14)[0]
+    check('il byte 1 viene letto come NOT-FILL',
+          not_fill.fill_mode == 'not-fill', str(not_fill.fill_mode))
+    check('il byte 2 viene letto come FILL',
+          only_fill.fill_mode == 'fill', str(only_fill.fill_mode))
+    check('FILL viene ricodificato identico nel byte 13',
+          N.encode([only_fill], 14)
+          == '0x0000000000000018404014000002',
+          N.encode([only_fill], 14))
+
+    invalidi = ('not fill', 'NOT_FILL', 'sempre', 1, True, object())
+    check('fill rifiuta stati diversi dal vocabolario pubblico',
+          all(_raises(lambda valore=valore: N.fill_to_byte(valore), ValueError)
+              for valore in invalidi), str(invalidi[:-1]))
+    check('byte fill sconosciuti non ricevono un nome inventato',
+          N.byte_to_fill(3) is None)
 
 
 def test_notes_sorted():
@@ -557,11 +660,12 @@ def test_kit_add_remove_drum():
 def test_key_mode_notes():
     """Note fuori scala e finestra verticale della clip.
 
-    Storia di un errore, tenuta come test perche' non si ripeta: avevo
-    concluso che le note fuori scala in key mode non hanno una riga e non
-    suonano. **Falso.** Il dispositivo adatta la scala, e nel corpus 7 song
-    hanno note fuori scala — `Progsong.XML` ne ha 315 — con `userScale="0"`,
-    esattamente la combinazione che credevo rotta.
+    Il corpus dimostra che i file possono conservare note fuori scala; non
+    dimostra pero' che una song generata gia' in Scale mode le mostri subito.
+    La prova PROBABILITY01 ha separato i due momenti: all'apertura il Do fuori
+    dal Re maggiore era invisibile; uscendo e rientrando da Scale il Deluge ha
+    ricalcolato Fa maggiore e lo ha mostrato. Per questo la scrittura di alto
+    livello non produce piu' questa incoerenza (test dedicato sotto).
 
     Cio' che resta vero, ed e' un difetto nostro: una clip creata da un
     modello eredita `yScroll` e `inKeyScrollOffset` dal modello, cioe' da
@@ -595,7 +699,7 @@ def test_key_mode_notes():
     fuori = S.notes_out_of_scale(doc, clip)
     check('le note fuori scala si sanno elencare',
           fuori == [(36, 1, 35)], str(fuori))
-    check('ma NON sono un errore: song reali ne contengono',
+    check('sono dati validi da conservare, ma non uno stato da generare',
           True, 'Progsong.XML ne ha 315 con userScale=0')
 
     # il difetto vero: la finestra verticale ereditata da un altro contesto
@@ -636,6 +740,54 @@ def test_key_mode_notes():
           S.fit_clip_scroll_to_notes(kdoc, kclip) == {'yScroll': '0'}
           and not kclip.has('drumsScrollOffset'),
           f'{kclip.get("yScroll")} / dso={kclip.get("drumsScrollOffset")}')
+
+
+def test_scrivi_sceglie_scale_mode_o_chromatic():
+    """Una song generata non resta mai in Scale mode con note incompatibili."""
+    from delugexml import musica as MU                    # noqa: PLC0415
+
+    def song_due_clip():
+        return parse(
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<song rootNote="2">\n'
+            '  <modeNotes>\n'
+            '    <modeNote>0</modeNote><modeNote>2</modeNote>\n'
+            '    <modeNote>4</modeNote><modeNote>5</modeNote>\n'
+            '    <modeNote>7</modeNote><modeNote>9</modeNote>\n'
+            '    <modeNote>11</modeNote>\n'
+            '  </modeNotes>\n'
+            '  <sessionClips>\n'
+            '    <instrumentClip clipName="MELODY" inKeyMode="1" '
+            'yScroll="37" length="384"><noteRows /></instrumentClip>\n'
+            '    <instrumentClip clipName="BASS" inKeyMode="1" '
+            'yScroll="25" length="384"><noteRows /></instrumentClip>\n'
+            '    <instrumentClip clipName="DRUMS" inKeyMode="1" '
+            'affectEntire="1" length="384"><noteRows>\n'
+            '      <noteRow drumIndex="0" />\n'
+            '    </noteRows></instrumentClip>\n'
+            '  </sessionClips>\n'
+            '</song>\n')
+
+    doc = song_due_clip()
+    melody, bass, drums = [c for _, c in S.clips(doc)]
+    in_scala = MU.scrivi(doc, melody, [Note(pos=0, length=48)], dove=38)
+    check('note di Re maggiore mantengono Scale mode',
+          melody.get('inKeyMode') == bass.get('inKeyMode') == '1',
+          str(in_scala))
+    check('la scrittura in scala non annuncia una conversione',
+          'modalita' not in in_scala, str(in_scala))
+
+    fuori_scala = MU.scrivi(doc, melody, [Note(pos=96, length=48)], dove=36)
+    check('un Do naturale su Re maggiore rende cromatici tutti i clip melodici',
+          melody.get('inKeyMode') == bass.get('inKeyMode') == '0',
+          str(fuori_scala))
+    check('la scelta cromatica non modifica il kit',
+          drums.get('inKeyMode') == '1')
+    check('il rapporto rende esplicita la decisione musicale',
+          fuori_scala.get('modalita') == 'cromatica'
+          and fuori_scala.get('scala_precedente') == 'D maggiore'
+          and fuori_scala.get('clip_cambiate') == 2,
+          str(fuori_scala))
 
 
 def test_song_notes_hidden_by_scroll():
@@ -2456,6 +2608,219 @@ def test_musica_accordi():
           posizioni_da == {300}, str(posizioni_da))
 
 
+def test_musica_probability_su_nota_lista_e_parte_melodica():
+    from delugexml import musica as MU                    # noqa: PLC0415
+
+    probabilita = getattr(MU, 'probabilita', None)
+    check('musica espone la trasformazione probabilita', callable(probabilita))
+    if not callable(probabilita):
+        return
+
+    pattern = MU.passi('x.x.')
+    rapporto = probabilita(pattern[1:], 25)
+    check('probabilita applica il 25% solo alla selezione passata',
+          [n.probability for n in pattern] == [100, 25],
+          str([n.probability for n in pattern]))
+    check('probabilita riferisce valore e numero di note toccate',
+          rapporto == {'probabilita': 25, 'note': 1}, str(rapporto))
+
+    melodia = MU.melodia('do4 mi4 sol4', durata='1/8')
+    probabilita(melodia, 65)
+    check('probabilita attraversa tutte le righe di una parte melodica',
+          [n.probability for ns in melodia.values() for n in ns]
+          == [65, 65, 65])
+
+    singola = Note(pos=0, length=24)
+    probabilita(singola, 40)
+    check('probabilita accetta anche una Note singola',
+          singola.probability == 40, str(singola.probability))
+    check('probabilita pubblica conserva la validazione rigorosa',
+          _raises(lambda: probabilita(pattern, 67), ValueError))
+
+
+def test_musica_iterance_classica_custom_e_disattivazione():
+    from delugexml import musica as MU                    # noqa: PLC0415
+
+    applica = getattr(MU, 'iterance', None)
+    check('musica espone la trasformazione iterance', callable(applica))
+    if not callable(applica):
+        return
+
+    pattern = MU.passi('x.x.x.x.')
+    rapporto = applica(pattern[1:3], 3, ogni=4)
+    check('iterance classica tocca solo la selezione passata',
+          [(n.iterance_divisor, n.iterance_steps) for n in pattern]
+          == [(0, 0), (4, 0b0100), (4, 0b0100), (0, 0)],
+          str([n.iterance for n in pattern]))
+    check('iterance classica riferisce forma e numero di note',
+          rapporto == {'iterance': '3of4', 'note': 2}, str(rapporto))
+
+    melodia = MU.melodia('do4 mi4 sol4', durata='1/8')
+    custom = applica(melodia, [1, 3, 4], ogni=4)
+    check('iterance custom attraversa una parte melodica',
+          [n.iterance for ns in melodia.values() for n in ns]
+          == ['1+3+4of4'] * 3)
+    check('iterance custom riferisce la maschera leggibile',
+          custom == {'iterance': '1+3+4of4', 'note': 3}, str(custom))
+
+    singola = Note(pos=0, length=24, iterance_divisor=8,
+                   iterance_steps=0b10000000)
+    spento = applica(singola, None)
+    check('iterance None disattiva una Note singola',
+          (singola.iterance_divisor, singola.iterance_steps) == (0, 0))
+    check('la disattivazione viene riferita esplicitamente',
+          spento == {'iterance': None, 'note': 1}, str(spento))
+    check('iterance pubblica conserva la validazione rigorosa',
+          _raises(lambda: applica(pattern, [1, 5], ogni=4), ValueError))
+
+
+def test_musica_fill_su_nota_lista_e_parte_melodica():
+    from delugexml import musica as MU                    # noqa: PLC0415
+
+    applica = getattr(MU, 'fill', None)
+    check('musica espone la trasformazione fill', callable(applica))
+    if not callable(applica):
+        return
+
+    pattern = MU.passi('x.x.x.x.')
+    rapporto = applica(pattern[1:3], 'not-fill')
+    check('NOT-FILL tocca solo la selezione passata',
+          [n.fill_mode for n in pattern]
+          == ['off', 'not-fill', 'not-fill', 'off'],
+          str([n.fill for n in pattern]))
+    check('NOT-FILL riferisce stato e numero di note',
+          rapporto == {'fill': 'not-fill', 'note': 2}, str(rapporto))
+
+    melodia = MU.melodia('do4 mi4 sol4', durata='1/8')
+    rapporto_fill = applica(melodia, 'fill')
+    check('FILL attraversa tutte le righe di una parte melodica',
+          [n.fill_mode for ns in melodia.values() for n in ns]
+          == ['fill', 'fill', 'fill'])
+    check('FILL riferisce le note toccate',
+          rapporto_fill == {'fill': 'fill', 'note': 3}, str(rapporto_fill))
+
+    singola = Note(pos=0, length=24, fill=2)
+    spento = applica(singola, 'off')
+    check('fill OFF disattiva una Note singola',
+          singola.fill == 0, str(singola.fill))
+    check('la disattivazione viene riferita esplicitamente',
+          spento == {'fill': 'off', 'note': 1}, str(spento))
+    check('fill pubblico conserva la validazione rigorosa',
+          _raises(lambda: applica(pattern, 'qualche-volta'), ValueError))
+
+
+def test_probability_fixture_controllata():
+    spec = importlib.util.find_spec('probability_scritto')
+    check('esiste la fixture controllata per la prova probability',
+          spec is not None)
+    if spec is None:
+        return
+
+    import probability_scritto as PS                       # noqa: PLC0415
+    from delugexml import musica as MU                    # noqa: PLC0415
+
+    if not (PS.TEMPL.exists() and PS.PRESET.exists()):
+        salta('fixture probability', 'TEMPL0.XML o TEMPL.XML assente')
+        return
+    doc, rapporto = PS.costruisci()
+    from delugexml import song as Song                     # noqa: PLC0415
+    clip = Song.clips(doc)[0][1]
+    per_altezza = {
+        int(r.get('y')): [n.probability for n in Song.read_notes(r)]
+        for r in Song.note_rows(clip)
+    }
+    check('la riga bassa della fixture suona sempre',
+          per_altezza[PS.BASSA] == [100, 100, 100, 100],
+          str(per_altezza[PS.BASSA]))
+    check('la riga alta della fixture ha probability 25%',
+          per_altezza[PS.ALTA] == [25, 25, 25, 25],
+          str(per_altezza[PS.ALTA]))
+    check('la fixture seleziona esplicitamente tonica e scala compatibili',
+          Song.scale_name(doc) == 'C maggiore'
+          and clip.get('inKeyMode') == '1',
+          f'{Song.scale_name(doc)}, inKeyMode={clip.get("inKeyMode")}')
+    check('la fixture probability supera il gate',
+          not MU.verifica(doc), str(MU.verifica(doc)))
+    check('la fixture riferisce le quattro note probabilistiche',
+          rapporto == {'probabilita': 25, 'note': 4}, str(rapporto))
+
+
+def test_iterance_fixture_controllata():
+    spec = importlib.util.find_spec('iterance_scritto')
+    check('esiste la fixture controllata per la prova iterance',
+          spec is not None)
+    if spec is None:
+        return
+
+    import iterance_scritto as IS                         # noqa: PLC0415
+    from delugexml import musica as MU                    # noqa: PLC0415
+    from delugexml import song as Song                    # noqa: PLC0415
+
+    if not (IS.TEMPL.exists() and IS.PRESET.exists()):
+        salta('fixture iterance', 'TEMPL0.XML o TEMPL.XML assente')
+        return
+    doc, rapporti = IS.costruisci()
+    clip = Song.clips(doc)[0][1]
+    per_altezza = {
+        int(r.get('y')): [n.iterance for n in Song.read_notes(r)]
+        for r in Song.note_rows(clip)
+    }
+    check('la riga bassa della fixture suona sul giro 1 di 4',
+          per_altezza[IS.BASSA] == ['1of4'], str(per_altezza[IS.BASSA]))
+    check('la riga alta prova la maschera custom 1+3 di 4',
+          per_altezza[IS.ALTA] == ['1+3of4'], str(per_altezza[IS.ALTA]))
+    check('la fixture iterance usa una scala dichiarata e compatibile',
+          Song.scale_name(doc) == 'C maggiore'
+          and clip.get('inKeyMode') == '1',
+          f'{Song.scale_name(doc)}, inKeyMode={clip.get("inKeyMode")}')
+    check('la fixture iterance supera il gate',
+          not MU.verifica(doc), str(MU.verifica(doc)))
+    check('la fixture riferisce entrambe le forme applicate',
+          rapporti == ({'iterance': '1of4', 'note': 1},
+                       {'iterance': '1+3of4', 'note': 1}),
+          str(rapporti))
+
+
+def test_fill_condition_fixture_controllata():
+    spec = importlib.util.find_spec('fill_condition_scritto')
+    check('esiste la fixture controllata per la condizione fill',
+          spec is not None)
+    if spec is None:
+        return
+
+    import fill_condition_scritto as FS                   # noqa: PLC0415
+    from delugexml import musica as MU                    # noqa: PLC0415
+    from delugexml import song as Song                    # noqa: PLC0415
+
+    if not (FS.TEMPL.exists() and FS.PRESET.exists()):
+        salta('fixture condizione fill', 'TEMPL0.XML o TEMPL.XML assente')
+        return
+    doc, rapporti = FS.costruisci()
+    clip = Song.clips(doc)[0][1]
+    per_altezza = {
+        int(r.get('y')): [n.fill_mode for n in Song.read_notes(r)]
+        for r in Song.note_rows(clip)
+    }
+    check('la riga bassa della fixture suona sempre',
+          per_altezza[FS.SEMPRE] == ['off'] * 4,
+          str(per_altezza[FS.SEMPRE]))
+    check('la riga centrale suona soltanto fuori dal fill',
+          per_altezza[FS.FUORI_FILL] == ['not-fill'] * 4,
+          str(per_altezza[FS.FUORI_FILL]))
+    check('la riga alta suona soltanto durante il fill',
+          per_altezza[FS.SOLO_FILL] == ['fill'] * 4,
+          str(per_altezza[FS.SOLO_FILL]))
+    check('la fixture fill usa una scala dichiarata e compatibile',
+          Song.scale_name(doc) == 'C maggiore'
+          and clip.get('inKeyMode') == '1',
+          f'{Song.scale_name(doc)}, inKeyMode={clip.get("inKeyMode")}')
+    check('la fixture fill supera il gate',
+          not MU.verifica(doc), str(MU.verifica(doc)))
+    check('la fixture riferisce entrambi gli stati condizionali',
+          rapporti == ({'fill': 'not-fill', 'note': 4},
+                       {'fill': 'fill', 'note': 4}), str(rapporti))
+
+
 def test_musica_articolazioni():
     """L'articolazione e' vocabolario espressivo, non un default tecnico.
 
@@ -2674,8 +3039,8 @@ def test_song_notes_beyond_clip_end():
     HANDOFF.md sezione 7): non sono affatto mute, suonano nel raggio della
     propria riga. E' esattamente il genere di trappola gia' costato caro
     due volte in questo progetto -- un controllo nuovo che accusa file
-    sani. Il controllo giusto guarda la lunghezza EFFETTIVA, clip o riga
-    (la maggiore delle due): con quella, zero casi sui 139 file.
+    sani. Il controllo giusto usa la lunghezza propria della riga quando
+    c'e', altrimenti quella della clip: con quella, zero casi sui 139 file.
     """
     from delugexml import musica as MU                    # noqa: PLC0415
 
@@ -4095,6 +4460,180 @@ def test_sposta_non_butta_via_le_note_prima_dello_zero():
     MU.sposta(doc, clip, tick=0)
     check('spostare di zero e legale e non fa niente',
           _pos(clip) == [0, 96, 192, 288])
+
+
+def test_lunghezza_riga_indipendente():
+    """Una riga cicla per conto suo senza cambiare clip o righe vicine.
+
+    Il guasto che coglie e' applicare il periodo alla clip intera (come faceva
+    finora ``idm_scritto`` con quattro clip separate), oppure lasciare un
+    ``length`` residuo quando si torna al ciclo della clip.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    doc, clip = _clip_ritmica()
+    MU.scrivi(doc, clip, MU.passi('x...............'), dove='re3')
+    do = S.note_row(clip, MU.altezza('do3'))
+    re = S.note_row(clip, MU.altezza('re3'))
+
+    esito = MU.lunghezza_riga(doc, clip, 're3', 7)
+
+    check('sette sedicesimi diventano 168 tick sulla sola riga scelta',
+          re.get('length') == '168', str(re.get('length')))
+    check('la lunghezza principale della clip resta una battuta',
+          clip.get('length') == '384', str(clip.get('length')))
+    check('la riga vicina continua a seguire la clip', not do.has('length'))
+    check('il rapporto rende esplicito il ciclo indipendente',
+          esito == {'riga': 'y=50', 'passi': 7, 'durata': '1/16',
+                    'lunghezza': 168, 'avvertenze': []}, str(esito))
+
+    ripristino = MU.lunghezza_riga(doc, clip, 're3', None)
+    check('None ripristina il ciclo della clip togliendo l attributo',
+          not re.has('length'))
+    check('il rapporto distingue il ripristino da un ciclo di zero tick',
+          ripristino['lunghezza'] is None and ripristino['passi'] is None,
+          str(ripristino))
+
+
+def test_lunghezza_riga_segue_la_risoluzione_della_song():
+    """I passi sono figure musicali, non tick fissi della griglia canonica.
+
+    Il guasto che coglie e' scrivere 168 tick anche in una song che ne usa
+    192 per battuta: sette sedicesimi li' valgono 84 tick.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    doc, clip = _clip_ritmica(lunghezza=192)
+    doc.root.set('inputTickMagnitude', '1')
+    riga = S.note_row(clip, MU.altezza('do3'))
+
+    MU.lunghezza_riga(doc, clip, 'do3', 7)
+
+    check('sette sedicesimi seguono i 192 tick per battuta della song',
+          riga.get('length') == '84', str(riga.get('length')))
+    check('un booleano non puo fingersi una durata grezza di un tick',
+          _raises(lambda: MU.lunghezza_riga(
+              doc, clip, 'do3', 7, durata=True), ValueError))
+
+
+def test_euclideo_replica_distribuzione_e_rotazione_del_firmware():
+    """Il generatore sostituisce una sola riga con le note del firmware.
+
+    Il guasto che coglie e' usare una variante Bjorklund diversa oppure
+    ruotare senza wrap. I valori attesi vengono direttamente dalla formula
+    del firmware, non dalla funzione sotto test: ``floor(n * 16 / 5)`` da'
+    0, 3, 6, 9, 12; due passi a destra danno 2, 5, 8, 11, 14.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    doc, clip = _clip_ritmica()
+    MU.scrivi(doc, clip, MU.passi('x...............'), dove='re3')
+    vicina = S.note_row(clip, MU.altezza('re3'))
+    prima_vicina = S.read_notes(vicina)
+
+    esito = MU.euclideo(doc, clip, 'do3', eventi=5, passi=16,
+                        rotazione=2, velocity=103)
+    riga = S.note_row(clip, MU.altezza('do3'))
+    note = S.read_notes(riga)
+
+    check('5 su 16 ruotato di due segue gli indici del firmware',
+          [n.pos for n in note] == [48, 120, 192, 264, 336],
+          str([n.pos for n in note]))
+    check('durata e velocity sono quelle richieste su ogni evento',
+          all((n.length, n.velocity) == (24, 103) for n in note),
+          str([(n.length, n.velocity) for n in note]))
+    check('la riga porta il ciclo euclideo di sedici passi',
+          riga.get('length') == '384', str(riga.get('length')))
+    check('clip e riga vicina restano intatte',
+          clip.get('length') == '384' and S.read_notes(vicina) == prima_vicina)
+    check('il rapporto dichiara sostituzione, griglia e posizioni',
+          esito == {
+              'riga': 'y=48', 'eventi': 5, 'passi': 16,
+              'rotazione': 2, 'durata': '1/16', 'passo_tick': 24,
+              'lunghezza': 384, 'note': 5, 'sostituite': 4,
+              'posizioni': [48, 120, 192, 264, 336],
+              'avvertenze': [],
+          }, str(esito))
+
+
+def test_euclideo_segue_risoluzione_reale_e_puo_svuotare():
+    """Passi e rotazione sono figure musicali, non tick canonici fissi.
+
+    A 192 tick per battuta un sedicesimo vale 12 tick. Per 3 eventi su 8
+    passi gli indici firmware sono 0, 2, 5; ruotati a sinistra di un passo
+    diventano, ordinati dopo il wrap, 1, 4, 7.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    doc, clip = _clip_ritmica(lunghezza=192)
+    doc.root.set('inputTickMagnitude', '1')
+
+    MU.euclideo(doc, clip, 'do3', eventi=3, passi=8, rotazione=-1,
+                velocity=77)
+    riga = S.note_row(clip, MU.altezza('do3'))
+    note = S.read_notes(riga)
+
+    check('3 su 8 usa sedicesimi da 12 tick e wrap sulla riga',
+          [n.pos for n in note] == [12, 48, 84],
+          str([n.pos for n in note]))
+    check('anche durata e ciclo seguono la risoluzione reale',
+          all(n.length == 12 for n in note)
+          and riga.get('length') == '96',
+          f'durate {[n.length for n in note]}, length={riga.get("length")}')
+
+    esito = MU.euclideo(doc, clip, 'do3', eventi=0, passi=8)
+    check('zero eventi svuota la riga ma ne conserva il ciclo',
+          S.read_notes(riga) == [] and riga.get('length') == '96', str(esito))
+    check('e il rapporto dichiara quante note ha sostituito',
+          esito['note'] == 0 and esito['sostituite'] == 3, str(esito))
+
+
+def test_euclideo_valida_senza_modificare_la_riga():
+    """Argomenti ambigui o impossibili sono rifiutati prima di scrivere."""
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    doc, clip = _clip_ritmica()
+    riga = S.note_row(clip, MU.altezza('do3'))
+    prima = S.read_notes(riga)
+    casi = [
+        {'eventi': -1, 'passi': 16},
+        {'eventi': 17, 'passi': 16},
+        {'eventi': True, 'passi': 16},
+        {'eventi': 3, 'passi': 0},
+        {'eventi': 3, 'passi': True},
+        {'eventi': 3, 'passi': 8, 'rotazione': 1.5},
+        {'eventi': 3, 'passi': 8, 'rotazione': True},
+        {'eventi': 3, 'passi': 8, 'durata': True},
+        {'eventi': 3, 'passi': 8, 'velocity': 0},
+        {'eventi': 3, 'passi': 8, 'velocity': 128},
+        {'eventi': 3, 'passi': 8, 'velocity': True},
+        {'eventi': 3, 'passi': 8, 'velocity': 90.0},
+    ]
+    for kwargs in casi:
+        check(f'euclideo rifiuta {kwargs}',
+              _raises(lambda kwargs=kwargs: MU.euclideo(
+                  doc, clip, 'do3', **kwargs), ValueError))
+    check('nessun errore parziale ha modificato note o lunghezza',
+          S.read_notes(riga) == prima and not riga.has('length'))
+
+
+def test_avvertenza_usa_la_lunghezza_propria_anche_se_piu_corta():
+    """Una noteRow col ciclo proprio finisce li', non alla fine della clip.
+
+    Il guasto che coglie e' usare ``max(clip.length, row.length)``: con una
+    riga corta nasconderebbe proprio le note che il nuovo ciclo rende mute.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    doc, clip = _clip_ritmica()
+    riga = S.note_row(clip, MU.altezza('do3'))
+    S.set_row_length(riga, 168)
+
+    avvisi = S.notes_beyond_clip_end(doc)
+
+    check('due note oltre il ciclo corto della riga vengono segnalate',
+          len(avvisi) == 1 and '2 note oltre la fine (168 tick)' in avvisi[0],
+          str(avvisi))
 
 
 def test_repeat_allunga_ripetendo():
@@ -9528,6 +10067,80 @@ def test_dnb_scritto():
           {3, 7, 10, 2} <= pcs, str(sorted(pcs)))
     # il feel e' DRITTO: swing 50 (il break porta il suo micro-timing nell audio)
     check('lo swing e dritto (50)', S.get_swing(doc)[0] == 50, str(S.get_swing(doc)))
+
+
+def test_row_length_scritto():
+    """ROWLENGTH01: una clip kit, tre cicli 5/7/11 realmente per riga."""
+    from delugexml import musica as MU, song as S             # noqa: PLC0415
+    try:
+        import row_length_scritto as RL                        # noqa: PLC0415
+    except ModuleNotFoundError:
+        check('il generatore row length esiste', False,
+              'modulo row_length_scritto assente')
+        return
+    try:
+        doc, rapporti = RL.costruisci()
+    except FileNotFoundError:
+        salta('test_row_length_scritto (build)', 'manca un preset di refs')
+        return
+
+    check('la fixture row length e valida', MU.verifica(doc) == [],
+          str(MU.verifica(doc)))
+    check('la fixture non nasconde note oltre i cicli', MU.avvertenze(doc) == [],
+          str(MU.avvertenze(doc)))
+    clip = doc.root.find('sessionClips').children[0]
+    check('il ciclo principale resta di sedici sedicesimi',
+          clip.get('length') == '384', str(clip.get('length')))
+    nomi = S.drum_names(doc, clip)
+    cicli = {nomi[int(r.get('drumIndex'))]: int(r.get('length'))
+             for r in S.note_rows(clip) if r.has('length')}
+    check('tre righe della stessa clip hanno cicli 5/7/11 sedicesimi',
+          cicli == {RL.KICK: 120, RL.RIM: 168, RL.HAT: 264}, str(cicli))
+    check('ogni riga indipendente porta un solo impulso in testa al ciclo',
+          all([n.pos for n in S.read_notes(S.drum_row(doc, clip, nome))] == [0]
+              for nome in (RL.KICK, RL.RIM, RL.HAT)))
+    check('i rapporti raccontano esattamente le tre lunghezze',
+          [r['passi'] for r in rapporti] == [5, 7, 11], str(rapporti))
+
+
+def test_euclideo_scritto():
+    """EUCLID01: tre righe controllate con eventi, cicli e rotazioni noti."""
+    from delugexml import musica as MU, song as S             # noqa: PLC0415
+    try:
+        import euclid_scritto as EU                            # noqa: PLC0415
+    except ModuleNotFoundError:
+        check('il generatore euclideo esiste', False,
+              'modulo euclid_scritto assente')
+        return
+    try:
+        doc, rapporti = EU.costruisci()
+    except FileNotFoundError:
+        salta('test_euclideo_scritto (build)', 'manca un preset di refs')
+        return
+
+    check('la fixture euclidea e valida', MU.verifica(doc) == [],
+          str(MU.verifica(doc)))
+    check('la fixture euclidea non nasconde note', MU.avvertenze(doc) == [],
+          str(MU.avvertenze(doc)))
+    clip = doc.root.find('sessionClips').children[0]
+    check('la clip resta lunga sedici sedicesimi',
+          clip.get('length') == '384', str(clip.get('length')))
+    attese = {
+        EU.KICK: (384, [0, 72, 144, 216, 288]),
+        EU.RIM: (312, [48, 120, 192, 264]),
+        EU.HAT: (264, [0, 48, 72, 120, 144, 192, 240]),
+    }
+    ottenute = {
+        nome: (int(riga.get('length')),
+               [n.pos for n in S.read_notes(riga)])
+        for nome in attese
+        for riga in [S.drum_row(doc, clip, nome)]
+    }
+    check('eventi, cicli e rotazioni sono quelli calcolati a mano',
+          ottenute == attese, str(ottenute))
+    check('i rapporti nominano 5/16, 4/13 e 7/11',
+          [(r['eventi'], r['passi'], r['rotazione']) for r in rapporti]
+          == [(5, 16, 0), (4, 13, 2), (7, 11, -1)], str(rapporti))
 
 
 def test_idm_scritto():

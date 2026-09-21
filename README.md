@@ -278,8 +278,13 @@ only the small set of format cautions worth seeing during onboarding.
 - **`preview` is a cached thumbnail** and is not recomputed on load, so generated
   songs show the wrong picture in the file browser until the device re-saves.
 - **Open questions remain**: what `inKeyScrollOffset` and `drumsScrollOffset`
-  actually govern, the section colour table, and whether a note row's own
-  `length` really produces the polyrhythm it appears to promise.
+  actually govern, and the section colour table. Independent note-row length
+  is generated and verified on the device with 5/7/11-step cycles. Euclidean
+  rows are now generated with the firmware's exact distribution formula;
+  `EUCLID01` has transferred to and back from the Deluge byte-identically and
+  the generated 5/16, 4/13 and 7/11 rows were confirmed working. The device
+  re-save `EUCLID01 2` preserves every cycle, note position, duration and
+  velocity exactly.
 - **A green test suite is not a substitute for listening.** Four successive
   wrong models of clip-view geometry were each covered by passing tests, because
   a test written by someone holding a wrong idea confirms the wrong idea. They
