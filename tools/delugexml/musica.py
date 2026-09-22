@@ -3406,3 +3406,13 @@ def origine(nome: str, cartella: str = 'SONGS') -> str:
     if not nome_pulito:
         raise ValueError('il nome non puo essere vuoto')
     return f'/{cartella_pulita}/{nome_pulito}'
+
+
+def arpeggiatore(clip: Node, **configurazione: object) -> dict[str, object]:
+    """Configura e rilegge l'arpeggiatore in unita' musicali/display.
+
+    Esempio: ``arpeggiatore(clip, preset='both', ottave=3,
+    ritmo='0-0', ratchet=25, probabilita_ratchet=40)``.
+    """
+    from . import arpeggiator as ARP  # evita un import circolare al bootstrap
+    return ARP.configura(clip, **configurazione)

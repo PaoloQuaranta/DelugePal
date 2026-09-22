@@ -152,10 +152,13 @@ insieme si decide sentendo, come il vocal chop).
 
 ---
 
+Il rilevamento automatico dei transienti è fuori perimetro: la prova
+`AMENTR01` ha prodotto fette senza colpi e altre che univano più colpi.
+Per quel taglio si usa un'applicazione audio dedicata; DNB02 mantiene
+64 fette uguali.
+
 ## Cosa manca a questo documento
 
-- il **taglio sui transienti** (onset) invece che a fette uguali: più fedele agli hit
-  dell'amen, ma vuole analisi audio più fine (stdlib, senza numpy) — futuro;
 - la **Reese bass** (il basso detunato del DnB darkside/neurofunk) e i **layer** di
   cassa/rullante sotto il break: sound design, non ancora fatto;
 - i **sottogeneri** (liquid, jungle ragga, neuro): qui c'è l'ossatura amen-led, non i

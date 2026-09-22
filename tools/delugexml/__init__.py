@@ -7,8 +7,8 @@ un parser tollerante scritto su misura, non xml.etree.
 from .parser import Node, Document, parse, parse_file, ParseProblem
 from .writer import FormatTable, serialize, write_file
 from .notes import Note
-from . import song, notes, arranger, midicv, audio, musica
+from . import song, notes, arranger, midicv, audio, musica, arpeggiator
 
 __all__ = ['Node', 'Document', 'parse', 'parse_file', 'ParseProblem',
            'FormatTable', 'serialize', 'write_file', 'Note', 'song', 'notes',
-           'arranger', 'midicv', 'audio', 'musica']
+           'arranger', 'midicv', 'audio', 'musica', 'arpeggiator']

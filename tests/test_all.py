@@ -216,6 +216,35 @@ def test_ticks_per_beat():
           S.ticks_per_beat(doc.root) == 48, str(S.ticks_per_beat(doc.root)))
 
 
+def test_clip_length_in_movimenti_segue_la_risoluzione_della_song():
+    """Una lunghezza 3/4 o 7/8 non deve usare 384 tick fissi."""
+    casi = ((1, 3, 144), (2, 3.5, 336))
+    for mag, movimenti, attesi in casi:
+        doc = parse(f'<song inputTickMagnitude="{mag}">'
+                    '<instrumentClip length="384"><noteRows /></instrumentClip>'
+                    '</song>')
+        clip = doc.root.find('instrumentClip')
+        avvisi = S.set_clip_length_beats(doc.root, clip, movimenti)
+        check(f'{movimenti} movimenti con magnitude {mag} danno {attesi} tick',
+              clip.get('length') == str(attesi) and avvisi == [],
+              f'{clip.get("length")} / {avvisi}')
+
+
+def test_clip_length_in_movimenti_rifiuta_valori_invalidi_senza_scrivere():
+    """Bool, non finiti e input errati non devono diventare lunghezze nel file."""
+    import math                                              # noqa: PLC0415
+
+    for beats in (True, 0, -1, 0.001, math.nan, math.inf, '3'):
+        doc = parse('<song inputTickMagnitude="2">'
+                    '<instrumentClip length="384"><noteRows /></instrumentClip>'
+                    '</song>')
+        clip = doc.root.find('instrumentClip')
+        check(f'movimenti invalidi {beats!r} rifiutati senza modificare',
+              _raises(lambda beats=beats: S.set_clip_length_beats(
+                  doc.root, clip, beats), ValueError)
+              and clip.get('length') == '384')
+
+
 def test_tempo_negative_fraction():
     doc = parse('<?xml version="1.0" encoding="UTF-8"?>\n'
                 '<song timePerTimerTick="401" timerTickFraction="-238609295" '
@@ -4615,6 +4644,204 @@ def test_euclideo_valida_senza_modificare_la_riga():
                   doc, clip, 'do3', **kwargs), ValueError))
     check('nessun errore parziale ha modificato note o lunghezza',
           S.read_notes(riga) == prima and not riga.has('length'))
+
+
+def test_arpeggiatore_configura_synth_e_racconta_i_valori_effettivi():
+    """Un synth tiene struttura e randomizer in due nodi diversi.
+
+    Il guasto che coglie e' scrivere rhythm / ratchet / probability dentro
+    ``<arpeggiator>`` come nelle clip MIDI/CV: il file resta XML valido, ma il
+    synth legge quei parametri da ``<soundParams>`` e li ignora.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    doc = parse(
+        '<song><instrumentClip>'
+        '<arpeggiator mode="off" arpMode="off" numOctaves="2" '
+        'noteMode="up" octaveMode="up" stepRepeat="1" '
+        'randomizerLock="0" />'
+        '<soundParams rhythm="0x80000000" ratchetAmount="0x80000000" '
+        'ratchetProbability="0x80000000" noteProbability="0x7FFFFFFF" '
+        'bassProbability="0x80000000" swapProbability="0x80000000" '
+        'glideProbability="0x80000000" reverseProbability="0x80000000" '
+        'chordProbability="0x80000000" sequenceLength="0x80000000" '
+        'chordPolyphony="0x80000000" spreadVelocity="0x80000000" '
+        'spreadGate="0x80000000" spreadOctave="0x80000000" />'
+        '</instrumentClip></song>')
+    clip = doc.root.find('instrumentClip')
+
+    rapporto = MU.arpeggiatore(
+        clip, preset='both', ottave=3, ripetizioni=2, ritmo='0-0',
+        ratchet=25, probabilita_ratchet=50, probabilita_nota=40,
+        probabilita_basso=5, spread_velocity=10, spread_ottava=15,
+        blocca_random=True)
+    arp = clip.find('arpeggiator')
+    params = clip.find('soundParams')
+
+    check('preset BOTH abilita arp con note UP e ottave ALTERNATE',
+          (arp.get('mode'), arp.get('arpMode'), arp.get('noteMode'),
+           arp.get('octaveMode')) == ('arp', 'arp', 'up', 'alt'),
+          str(arp.attrs))
+    check('ottave, repeat e lock sono attributi strutturali dell arp',
+          (arp.get('numOctaves'), arp.get('stepRepeat'),
+           arp.get('randomizerLock')) == ('3', '2', '1'), str(arp.attrs))
+    check('ritmo 0-0 e indice 3, sulla griglia del soundParams',
+          params.get('rhythm') == '0x90000000', params.get('rhythm'))
+    check('ratchet e probabilita finiscono nei parametri del synth',
+          params.get('ratchetAmount') == '0x00000000'
+          and params.get('ratchetProbability') == '0x7FFFFFFF'
+          and params.get('noteProbability') == '0x4C000000',
+          str(params.attrs))
+    check('gli spread toccano i rispettivi parametri, non uno solo',
+          params.get('spreadVelocity') == '0xB4000000'
+          and params.get('spreadOctave') == '0xCC000000', str(params.attrs))
+    check('il rapporto rilegge pattern e valori nelle unita del display',
+          rapporto['preset'] == 'both'
+          and rapporto['ritmo'] == '0-0'
+          and rapporto['ritmo_indice'] == 3
+          and rapporto['ratchet'] == 25
+          and rapporto['probabilita_nota'] == 40
+          and rapporto['spread_velocity'] == 10,
+          str(rapporto))
+
+
+def test_arpeggiatore_configura_midi_cv_nel_nodo_arpeggiatore():
+    """MIDI/CV serializza gli stessi valori come int32 decimali sull'arp.
+
+    Il guasto che coglie e' riusare ``sound.set`` dove non esiste alcun
+    ``soundParams`` oppure scrivere gli esadecimali del synth nel nodo arp.
+    """
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    doc = parse(
+        '<instrumentClip><arpeggiator mode="off" arpMode="off" '
+        'numOctaves="2" noteMode="up" octaveMode="up" stepRepeat="1" '
+        'randomizerLock="0" rhythm="0" ratchetAmount="0" '
+        'ratchetProbability="0" noteProbability="-1" '
+        'bassProbability="0" swapProbability="0" glideProbability="0" '
+        'reverseProbability="0" chordProbability="0" sequenceLength="0" '
+        'chordPolyphony="0" spreadVelocity="0" spreadGate="0" '
+        'spreadOctave="0" /></instrumentClip>')
+    clip = doc.root
+
+    rapporto = MU.arpeggiatore(
+        clip, modo_note='walk3', modo_ottave='random', ritmo=3,
+        ratchet=25, probabilita_ratchet=50, spread_gate=10)
+    arp = clip.find('arpeggiator')
+
+    check('i modi custom abilitano l arp senza fingere un preset classico',
+          (arp.get('mode'), arp.get('arpMode'), arp.get('noteMode'),
+           arp.get('octaveMode')) == ('arp', 'arp', 'walk3', 'random'),
+          str(arp.attrs))
+    check('MIDI/CV salva il ritmo come uint32 decimale con segno',
+          arp.get('rhythm') == '257698035', arp.get('rhythm'))
+    check('MIDI/CV salva ratchet e spread senza creare soundParams',
+          arp.get('ratchetAmount') == '2147483625'
+          and arp.get('ratchetProbability') == '-46'
+          and arp.get('spreadGate') == '858993450'
+          and clip.find('soundParams') is None,
+          str(arp.attrs))
+    check('anche la rilettura MIDI/CV torna alle unita del display',
+          rapporto['preset'] == 'custom'
+          and rapporto['ratchet'] == 25
+          and rapporto['probabilita_ratchet'] == 50
+          and rapporto['spread_gate'] == 10,
+          str(rapporto))
+
+
+def test_arpeggiatore_valida_tutto_prima_di_modificare():
+    """Un errore non lascia mezza configurazione applicata alla clip."""
+    from delugexml import musica as MU                      # noqa: PLC0415
+
+    doc = parse(
+        '<instrumentClip><arpeggiator mode="off" arpMode="off" '
+        'numOctaves="2" noteMode="up" octaveMode="up" stepRepeat="1" '
+        'randomizerLock="0" rhythm="0" ratchetAmount="0" '
+        'ratchetProbability="0" noteProbability="-1" '
+        'bassProbability="0" swapProbability="0" glideProbability="0" '
+        'reverseProbability="0" chordProbability="0" sequenceLength="0" '
+        'chordPolyphony="0" spreadVelocity="0" spreadGate="0" '
+        'spreadOctave="0" /></instrumentClip>')
+    clip = doc.root
+    arp = clip.find('arpeggiator')
+    prima = list(arp.attrs)
+    casi = [
+        {'preset': 'sideways'},
+        {'ottave': 9},
+        {'ottave': True},
+        {'ripetizioni': 0},
+        {'ritmo': '00--00--'},
+        {'ratchet': 51},
+        {'probabilita_nota': -1},
+        {'spread_ottava': 10.0},
+        {'preset': 'up', 'modo_note': 'walk1'},
+        # La build 2d7cdf8 serializza upDown ma lo rilegge come RANDOM:
+        # esporlo sarebbe un errore silenzioso, quindi viene rifiutato.
+        {'modo_ottave': 'up-down'},
+    ]
+    for kwargs in casi:
+        check(f'arpeggiatore rifiuta {kwargs}',
+              _raises(lambda kwargs=kwargs: MU.arpeggiatore(
+                  clip, **kwargs), ValueError))
+        check(f'arpeggiatore non scrive parzialmente per {kwargs}',
+              arp.attrs == prima, str(arp.attrs))
+
+    incompleto = parse(
+        '<instrumentClip><arpeggiator mode="off" arpMode="off" '
+        'numOctaves="2" noteMode="up" octaveMode="up" stepRepeat="1" '
+        'randomizerLock="0" /></instrumentClip>')
+    arp_incompleto = incompleto.root.find('arpeggiator')
+    prima_incompleto = list(arp_incompleto.attrs)
+    check('un parametro assente viene scoperto prima del cambio preset',
+          _raises(lambda: MU.arpeggiatore(
+              incompleto.root, preset='up', spread_gate=10), ValueError))
+    check('anche il preflight dei nodi incompleti e atomico',
+          arp_incompleto.attrs == prima_incompleto,
+          str(arp_incompleto.attrs))
+
+
+def test_arpeggiatore_fixture_controllata():
+    """Tre clip mutuamente esclusive isolano preset, rhythm e randomizer."""
+    spec = importlib.util.find_spec('arpeggiatore_scritto')
+    check('esiste la fixture controllata per l arpeggiatore', spec is not None)
+    if spec is None:
+        return
+
+    import arpeggiatore_scritto as AS                     # noqa: PLC0415
+    from delugexml import musica as MU                    # noqa: PLC0415
+    from delugexml import song as Song                    # noqa: PLC0415
+
+    if not (AS.TEMPL.exists() and AS.PRESET.exists()):
+        salta('fixture arpeggiatore', 'TEMPL0.XML o TEMPL.XML assente')
+        return
+    doc, rapporti = AS.costruisci()
+    clips = [clip for _, clip in Song.clips(doc)]
+
+    check('la fixture separa tre variazioni dello stesso synth',
+          [(c.get('clipName'), c.get('section'), c.get('isPlaying'))
+           for c in clips]
+          == [('ARP UP', '0', '1'), ('ARP RHYTHM', '1', '0'),
+              ('ARP RANDOM', '2', '0')],
+          str([(c.get('clipName'), c.get('section'), c.get('isPlaying'))
+               for c in clips]))
+    check('ogni variazione tiene lo stesso accordo per una battuta',
+          all(len(Song.note_rows(c)) == 4
+              and all(len(Song.read_notes(r)) == 1
+                      and Song.read_notes(r)[0].length == MU.TICK_PER_BATTUTA
+                      for r in Song.note_rows(c))
+              for c in clips))
+    check('i tre rapporti isolano preset, pattern e randomizer',
+          rapporti[0]['preset'] == 'up'
+          and rapporti[0]['ritmo_indice'] == 0
+          and rapporti[1]['preset'] == 'both'
+          and rapporti[1]['ritmo'] == '0-0'
+          and rapporti[2]['preset'] == 'custom'
+          and rapporti[2]['modo_note'] == 'walk3'
+          and rapporti[2]['ratchet'] == 35
+          and rapporti[2]['probabilita_ratchet'] == 35,
+          str(rapporti))
+    check('la fixture arpeggiatore supera il gate',
+          not MU.verifica(doc), str(MU.verifica(doc)))
 
 
 def test_avvertenza_usa_la_lunghezza_propria_anche_se_piu_corta():

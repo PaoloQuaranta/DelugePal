@@ -566,6 +566,24 @@ def set_clip_length(clip: Node, ticks: int) -> list[str]:
     return avvisi
 
 
+def set_clip_length_beats(song: Node, clip: Node, beats: float) -> list[str]:
+    """Imposta la lunghezza della clip in movimenti sulla griglia della song.
+
+    Tre movimenti danno una clip 3/4, 3,5 movimenti una 7/8: il Deluge non
+    salva un metro globale. Gli avvisi per note oltre la fine sono quelli di
+    :func:`set_clip_length`.
+    """
+    import math                                           # noqa: PLC0415
+
+    if (isinstance(beats, bool) or not isinstance(beats, (int, float))
+            or not math.isfinite(beats) or beats <= 0):
+        raise ValueError('beats deve essere un numero positivo e finito')
+    ticks = beats_to_ticks(song, beats)
+    if ticks < 1:
+        raise ValueError('beats troppo piccolo per la risoluzione della song')
+    return set_clip_length(clip, ticks)
+
+
 def set_row_length(row: Node, ticks: int | None) -> list[str]:
     """Imposta il ciclo indipendente di una ``noteRow``.
 

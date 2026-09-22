@@ -51,7 +51,8 @@ fette = kit.affetta(doc, iChop, 'SAMPLES/RECORD/REC00027.WAV', frames, n=8)
 ```
 
 ⚠️ **Fette uguali** (N chunk): semplice e deterministico, come lo Slicer. Il taglio
-sui **transienti** (sulle sillabe) è più musicale ma vuole analisi audio — futuro.
+sui **transienti** (sulle sillabe) si affida a un'applicazione audio dedicata:
+non fa parte del perimetro di Deluge Pal.
 
 ## 2. Il MODE — ONCE (come lo Slicer nativo)
 
@@ -99,7 +100,7 @@ su materiale diverso. (Il break vero è un altro pezzo/genere; qui c'è il mecca
 | **la fetta e' in ONCE, la zona la delimita** | ONCE suona la ZONA `[start,end]`, non tutto il file (come lo Slicer nativo); se senti la parola intera e' il PATTERN, non il mode |
 | **il campione è sulla SD** | il `fileName` è relativo (`SAMPLES/...`); se il file non c'è, silenzio |
 | **il chop è ritmo, non melodia** | si riordinano/ripetono le fette a tempo, non si suonano altezze |
-| **le fette uguali sono un punto di partenza** | se cadono male sulle sillabe, cambia N o (in futuro) taglia sui transienti |
+| **le fette uguali sono un punto di partenza** | se cadono male sulle sillabe, cambia N o prepara i tagli in un'applicazione audio dedicata |
 | **niente riflesso** | il pattern del chop si compone PER il pezzo, all'orecchio |
 
 ---
@@ -116,7 +117,5 @@ Il pattern e N restano `[DEC]`, da rifinire (quali fette valorizzare si sente).
 
 ## Cosa manca a questo documento
 
-- il **taglio sui transienti** (onset): scelto «fette uguali»; l'onset è futuro
-  (serve analisi audio, stdlib senza numpy);
 - il **pitch/stretch** delle fette e gli **effetti** sul vocal: sound design;
 - il **break** vero (jungle/DnB): il meccanismo c'è (`kit.affetta`), il genere no.

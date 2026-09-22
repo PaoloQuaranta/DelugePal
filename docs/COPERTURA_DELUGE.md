@@ -27,6 +27,11 @@ Priorità: `P0` blocca o rischia dati, `P1` porta molto valore al flusso
 compositivo corrente, `P2` amplia il territorio senza bloccarlo, `P3` è
 rifinitura o integrazione laterale. `—` si usa solo quando non resta lavoro.
 
+Fuori perimetro: il rilevamento automatico dei transienti in un file audio.
+La prova sull'Amen break non ha separato in modo affidabile i colpi; per
+quest'analisi si usano applicazioni audio dedicate. Lo slicing uniforme in
+kit resta supportato.
+
 ## Matrice canonica
 
 <!-- capability-matrix:start -->
@@ -38,7 +43,7 @@ rifinitura o integrazione laterale. `—` si usa solo quando non resta lavoro.
 | gate-validazione | fondazioni | Controlli bloccanti e avvertenze | completa | n/a | completa | completa | `tools/delugexml/musica.py`, `tests/test_all.py` | — | — |
 | preview-browser | fondazioni | Anteprima nel browser file del Deluge | completa | completa | assente | assente | `README.md`, `HANDOFF.md` | P3 | Studiare o invalidare in modo esplicito la cache preview |
 | tempo-scala-swing | song-arranger | Tempo, scala, key mode e swing | completa | completa | completa | completa | `tools/delugexml/song.py`, `tests/test_all.py` | — | — |
-| metro-risoluzione | song-arranger | Metro e risoluzione reale della song | completa | completa | parziale | parziale | `tools/delugexml/song.py`, `docs/MUSICA.md` | P1 | Aggiungere setter del metro e conversioni relative alla griglia reale |
+| metro-risoluzione | song-arranger | Lunghezza delle clip e risoluzione reale della song (nessun metro globale nel formato) | completa | completa | parziale | parziale | `tools/delugexml/song.py`, `tests/test_all.py`, `docs/MUSICA.md` | P1 | Provare sul device clip 3/4 e 7/8 e verificare le altre conversioni che assumono 384 tick |
 | clip-note | song-arranger | Clip, noteRow e note | completa | completa | completa | completa | `tools/delugexml/song.py`, `tools/delugexml/notes.py` | — | — |
 | sezioni-scene | song-arranger | Sezioni, scene e ripetizioni | completa | completa | completa | completa | `tools/delugexml/song.py`, `HANDOFF.md` | — | — |
 | colori-sezione | song-arranger | Tabella colori delle sezioni | parziale | completa | assente | assente | `HANDOFF.md`, `docs/ARCHITETTURA.md` | P3 | Ricavare la tabella con una coppia controllata sul dispositivo |
@@ -56,7 +61,7 @@ rifinitura o integrazione laterale. `—` si usa solo quando non resta lavoro.
 | row-length | sequencer | Lunghezza indipendente della noteRow | completa | completa | completa | completa | `tools/delugexml/song.py`, `tools/delugexml/musica.py`, `tools/row_length_scritto.py`, `tests/test_all.py`, `HANDOFF.md` | — | — |
 | row-direction | sequencer | Direction e ping-pong per riga | completa | completa | solo-conservazione | assente | `docs/ARCHITETTURA.md`, `HANDOFF.md` | P2 | Salvare una coppia forward e ping-pong e modellarne gli attributi |
 | euclidean-row | sequencer | Sequencer euclideo per riga | completa | completa | completa | completa | `tools/delugexml/musica.py`, `tools/euclid_scritto.py`, `tests/test_all.py`, `docs/FINDINGS.md`, `HANDOFF.md` | — | — |
-| arpeggiatore | sequencer | Arpeggiatore classico e community | completa | completa | parziale | assente | `tools/delugexml/midicv.py`, `tools/delugexml/structure.py` | P1 | Esporre mode, rhythm, ratchet, spread e probabilità con test sul device |
+| arpeggiatore | sequencer | Arpeggiatore classico e community | completa | completa | completa | completa | `tools/delugexml/arpeggiator.py`, `tools/delugexml/musica.py`, `tools/arpeggiatore_scritto.py`, `tests/test_all.py`, `HANDOFF.md` | — | — |
 | sintesi-subtractive | synth-fx | Sintesi sottrattiva | completa | completa | completa | completa | `tools/delugexml/create.py`, `tools/delugexml/structure.py` | — | — |
 | sintesi-fm | synth-fx | Sintesi FM nativa | completa | completa | completa | completa | `tools/delugexml/structure.py`, `tests/test_all.py` | — | — |
 | sintesi-ringmod | synth-fx | Sintesi ring modulation | completa | completa | parziale | assente | `tools/delugexml/structure.py`, `docs/ARCHITETTURA.md` | P2 | Creare e ascoltare una patch ringmod controllata |
@@ -73,7 +78,6 @@ rifinitura o integrazione laterale. `—` si usa solo quando non resta lavoro.
 | drum-sintetici | kit-sampler | Drum sintetizzati con sound completo | completa | completa | completa | completa | `tools/delugexml/kit.py`, `tools/delugexml/sound.py` | — | — |
 | drum-sample | kit-sampler | Assegnazione sample e zona a un drum | completa | completa | completa | completa | `tools/delugexml/kit.py`, `tests/test_all.py` | — | — |
 | slicing-uniforme | kit-sampler | Slicing uniforme in kit | completa | completa | completa | completa | `tools/delugexml/kit.py`, `tools/vocalchop_scritto.py` | — | — |
-| slicing-transienti | kit-sampler | Slicing sui transienti | assente | n/a | assente | assente | `docs/istruzioni/vocal-chop.md`, `docs/repertori/dnb-jungle.md` | P1 | Aggiungere analisi transienti con confini correggibili |
 | multisample-layers | kit-sampler | Multisample e velocity layer | solo-conservazione | completa | assente | assente | `docs/ARCHITETTURA.md`, `docs/repertori/idm.md` | P1 | Modellare più zone e selezione per velocity da un preset controllato |
 | audio-tracce | audio | Creazione tracce e clip audio | completa | completa | completa | completa | `tools/delugexml/audio.py`, `tests/test_all.py` | — | — |
 | audio-regioni | audio | Start, end e cambio del campione | completa | completa | completa | completa | `tools/delugexml/audio.py`, `tests/test_all.py` | — | — |

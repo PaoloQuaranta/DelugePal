@@ -185,6 +185,49 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > `avvertenze()` sono vuote. SHA-256 del risalvato:
 > `bc49aa6c7def228fae2b823f3eb1e0986ffc26795d4ff17deae34f5dd8e68a70`.
 >
+> **Il 22 settembre 2026 e' stata completata localmente la scrittura
+> dell'arpeggiatore classico e community.**
+> `MU.arpeggiatore()` espone i preset OFF/UP/DOWN/BOTH/RANDOM/WALK e i modi
+> custom, ottave, repeat, i 51 rhythm, ratchet, tutte le probabilita', gli
+> spread e il randomizer lock. L'API distingue i due formati reali: nei synth
+> i valori 0-50 stanno nei `soundParams` esadecimali, nelle clip MIDI/CV sono
+> int32 decimali sul nodo `<arpeggiator>`. Valida tutto prima di scrivere e
+> rilegge un rapporto nelle unita' del display. Il firmware installato
+> `2d7cdf8` ha inoltre un bug sorgente verificabile: serializza `upDown` per le
+> ottave ma lo rilegge come RANDOM; l'API rifiuta quel solo modo per non
+> mentire. `ARP01` contiene tre variazioni isolate, `ARP UP`, `ARP RHYTHM` e
+> `ARP RANDOM`; `verifica()` e `avvertenze()` sono vuote. Il file iniziale e'
+> stato caricato con rilettura byte-identica, SHA-256
+> `7e829b462b9ab46a3c90d83c56f1448ba30a4f20d40e05010fccc20a0847d567`.
+> L'utente ha poi confermato **«funziona»** e l'ha risalvato come `ARP01 2`.
+> La rilettura SysEx del risalvato (21 928 byte, SHA-256
+> `5d5cb1be58eedaa14ef139a6b9fc8ca3f8a0b79830d5c6e78b6f6b2a6c2e7b81`)
+> conserva semanticamente identiche le tre clip, tutte le note e tutte le
+> configurazioni dell'arpeggiatore; `verifica()` e `avvertenze()` restano
+> vuote. La colonna Device e' quindi completa. La suite conta **2150/2150
+> test superati**.
+>
+> **Il 22 settembre 2026 il rilevamento automatico dei transienti e' stato
+> escluso dal perimetro.** La prova `AMENTR01` sull'Amen break ha prodotto
+> fette troppo brevi e prive di colpi (per esempio 26-28), mentre altre
+> inglobavano rullante e hi-hat nello stesso segmento. L'utente ha deciso
+> di affidare questo compito ad applicazioni audio dedicate: non e' una
+> funzione nativa del Deluge da replicare qui. La proposta di rilevatore,
+> i test e il generatore della song sono stati rimossi; rimane lo slicing
+> uniforme gia' supportato da `kit.affetta`. La song di prova
+> `/SONGS/DelugePal/AMENTR01.XML` resta sulla SD: l'utente ha rimandato la
+> pulizia dei file inutili a quando la scheda sara' montata su `E:`.
+>
+> **Il 22 settembre 2026 e' stata aggiunta la lunghezza delle clip in
+> movimenti**, non un setter di metro globale: il Deluge non salva un metro
+> nella song, ma permette lunghezze indipendenti per clip. La nuova
+> `S.set_clip_length_beats(song, clip, beats)` passa da
+> `inputTickMagnitude` e da `S.set_clip_length`: 3 movimenti valgono 144 tick
+> con magnitude 1 e 288 con magnitude 2; 3,5 movimenti valgono 336 tick con
+> magnitude 2. Valori non positivi, non finiti, booleani e frazioni sotto
+> un tick sono rifiutati senza scrivere. I test sono locali; una prova
+> 3/4 e 7/8 sul Deluge resta da fare.
+>
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
 > regole di quel documento non sono consigli: ognuna nasce da un errore pagato.
