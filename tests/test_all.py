@@ -10296,6 +10296,44 @@ def test_dnb_scritto():
     check('lo swing e dritto (50)', S.get_swing(doc)[0] == 50, str(S.get_swing(doc)))
 
 
+def test_metro_scritto():
+    """METRO01: due variazioni isolate con cicli di 3 e 3,5 movimenti."""
+    from delugexml import musica as MU, song as S             # noqa: PLC0415
+    try:
+        import metro_scritto as MT                            # noqa: PLC0415
+    except ModuleNotFoundError:
+        check('il generatore metro esiste', False,
+              'modulo metro_scritto assente')
+        return
+    try:
+        doc = MT.costruisci()
+    except FileNotFoundError:
+        salta('test_metro_scritto (build)', 'manca un preset di refs')
+        return
+
+    check('la fixture metro e valida', MU.verifica(doc) == [],
+          str(MU.verifica(doc)))
+    check('la fixture metro non nasconde note', MU.avvertenze(doc) == [],
+          str(MU.avvertenze(doc)))
+    clips = doc.root.find('sessionClips').children
+    check('le due variazioni sono in sezioni distinte e una sola suona',
+          [(c.get('section'), c.get('isPlaying')) for c in clips]
+          == [('0', '1'), ('1', '0')])
+    check('tre e tre movimenti e mezzo danno 288 e 336 tick',
+          [int(c.get('length')) for c in clips] == [288, 336])
+    attese = [
+        {MT.KICK: [0, 96], MT.RIM: [192]},
+        {MT.KICK: [0, 96, 192], MT.RIM: [288]},
+    ]
+    ottenute = [
+        {drum: [n.pos for n in S.read_notes(S.drum_row(doc, c, drum))]
+         for drum in (MT.KICK, MT.RIM)}
+        for c in clips
+    ]
+    check('gli accenti marcano il ritorno dei cicli 3/4 e 7/8',
+          ottenute == attese, str(ottenute))
+
+
 def test_row_length_scritto():
     """ROWLENGTH01: una clip kit, tre cicli 5/7/11 realmente per riga."""
     from delugexml import musica as MU, song as S             # noqa: PLC0415

@@ -225,8 +225,24 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > `inputTickMagnitude` e da `S.set_clip_length`: 3 movimenti valgono 144 tick
 > con magnitude 1 e 288 con magnitude 2; 3,5 movimenti valgono 336 tick con
 > magnitude 2. Valori non positivi, non finiti, booleani e frazioni sotto
-> un tick sono rifiutati senza scrivere. I test sono locali; una prova
-> 3/4 e 7/8 sul Deluge resta da fare.
+> un tick sono rifiutati senza scrivere. La prova 3/4 e 7/8 sul Deluge e'
+> descritta sotto.
+>
+> **Il 23 settembre 2026 la fixture `METRO01` e' stata preparata e caricata.**
+> Due variazioni di uno stesso kit, in sezioni distinte, hanno cicli da 288
+> tick (3/4, kick a 0/96 e rim a 192) e 336 tick (7/8, kick a 0/96/192 e
+> rim a 288). `MU.verifica()` e `MU.avvertenze()` sono vuote. Il trasferimento
+> in `/SONGS/DelugePal/METRO01.XML` e la rilettura SysEx sono byte-identici,
+> SHA-256 `29bce677ad6868e5d83e9023bb50d47dacbf97f84e8e6706b6f916f946d47715`.
+> L'utente ha aperto e ascoltato i due cicli: **«funziona»**, poi ha
+> risalvato la song come `METRO01 2.XML`. La rilettura via SysEx del
+> risalvato (165 540 byte, SHA-256
+> `30a469a807e106e821985841cff9801d44e638154d5cd3022bcda8ab590bd868`)
+> conserva entrambe le clip con le lunghezze 288/336 tick, le sezioni,
+> gli onset, le durate e le velocity identici. `verifica()` e
+> `avvertenze()` restano vuote. La differenza di dimensione dal file
+> iniziale non e' un'identita' byte per byte: qui l'evidenza e' l'ascolto
+> sul dispositivo insieme alla conservazione semantica dopo il salvataggio.
 >
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei

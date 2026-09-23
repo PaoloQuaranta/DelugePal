@@ -43,7 +43,7 @@ kit resta supportato.
 | gate-validazione | fondazioni | Controlli bloccanti e avvertenze | completa | n/a | completa | completa | `tools/delugexml/musica.py`, `tests/test_all.py` | — | — |
 | preview-browser | fondazioni | Anteprima nel browser file del Deluge | completa | completa | assente | assente | `README.md`, `HANDOFF.md` | P3 | Studiare o invalidare in modo esplicito la cache preview |
 | tempo-scala-swing | song-arranger | Tempo, scala, key mode e swing | completa | completa | completa | completa | `tools/delugexml/song.py`, `tests/test_all.py` | — | — |
-| metro-risoluzione | song-arranger | Lunghezza delle clip e risoluzione reale della song (nessun metro globale nel formato) | completa | completa | parziale | parziale | `tools/delugexml/song.py`, `tests/test_all.py`, `docs/MUSICA.md` | P1 | Provare sul device clip 3/4 e 7/8 e verificare le altre conversioni che assumono 384 tick |
+| metro-risoluzione | song-arranger | Lunghezza delle clip e risoluzione reale della song (nessun metro globale nel formato) | completa | completa | parziale | completa | `tools/delugexml/song.py`, `tools/metro_scritto.py`, `tests/test_all.py`, `HANDOFF.md` (METRO01) | P1 | Verificare le altre conversioni che assumono 384 tick |
 | clip-note | song-arranger | Clip, noteRow e note | completa | completa | completa | completa | `tools/delugexml/song.py`, `tools/delugexml/notes.py` | — | — |
 | sezioni-scene | song-arranger | Sezioni, scene e ripetizioni | completa | completa | completa | completa | `tools/delugexml/song.py`, `HANDOFF.md` | — | — |
 | colori-sezione | song-arranger | Tabella colori delle sezioni | parziale | completa | assente | assente | `HANDOFF.md`, `docs/ARCHITETTURA.md` | P3 | Ricavare la tabella con una coppia controllata sul dispositivo |
@@ -103,12 +103,15 @@ kit resta supportato.
 La priorità non deriva dal numero di righe mancanti ma dal flusso compositivo
 attuale. L'ordine consigliato è:
 
-1. **sequencer avanzato**: probability, iterance, Fill, row length, Euclidean
-   e arpeggiatore;
-2. **sampler e audio**: transient slicing, multisample, stretch e reverse;
+1. **metro e risoluzione**: controllare le conversioni che assumono 384 tick;
+2. **sampler e audio**: multisample, stretch e reverse;
 3. **MPE e MIDI espressivo**, a partire dalla Lower Zone usata da Exquis;
 4. **sintesi ed effetti community**: routing, morph, wavetable, grain e DX7;
 5. **artefatti laterali e compatibilità**: Settings, Pattern e versioni.
+
+Probability, iterance, Fill, row length, Euclidean e arpeggiatore sono gia'
+coperti e verificati sul dispositivo. Il rilevamento automatico dei transienti
+e' fuori perimetro, come indicato sopra.
 
 Quando una capacità viene sviluppata, la sua riga cambia solo dopo tre passi:
 test locale, prova controllata sul Deluge se la colonna Device deve salire, e
