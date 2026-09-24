@@ -15,7 +15,8 @@ La matrice descrive quel target, non il firmware ufficiale e non release future.
 - `solo-conservazione`: il parser e il writer non distruggono il dato, ma non
   esiste un'API autoriale affidabile;
 - `assente`: la capacità non è implementata o non è stata verificata;
-- `n/a`: quella dimensione non si applica alla capacità.
+- `n/a`: quella dimensione non si applica alla capacità, oppure la capacità
+  non esiste nel firmware target (con motivo esplicito nella riga).
 
 Nella colonna **Device**, `completa` significa che almeno una prova controllata
 ha raggiunto e funzionato sul Deluge; `parziale` che la prova copre solo il
@@ -43,7 +44,7 @@ kit resta supportato.
 | gate-validazione | fondazioni | Controlli bloccanti e avvertenze | completa | n/a | completa | completa | `tools/delugexml/musica.py`, `tests/test_all.py` | — | — |
 | preview-browser | fondazioni | Anteprima nel browser file del Deluge | completa | completa | assente | assente | `README.md`, `HANDOFF.md` | P3 | Studiare o invalidare in modo esplicito la cache preview |
 | tempo-scala-swing | song-arranger | Tempo, scala, key mode e swing | completa | completa | completa | completa | `tools/delugexml/song.py`, `tests/test_all.py` | — | — |
-| metro-risoluzione | song-arranger | Lunghezza delle clip e risoluzione reale della song (nessun metro globale nel formato) | completa | completa | parziale | completa | `tools/delugexml/song.py`, `tools/metro_scritto.py`, `tests/test_all.py`, `HANDOFF.md` (METRO01) | P1 | Verificare le altre conversioni che assumono 384 tick |
+| metro-risoluzione | song-arranger | Lunghezza delle clip e risoluzione reale della song (nessun metro globale nel formato) | completa | completa | completa | completa | `tools/delugexml/song.py`, `tools/delugexml/musica.py`, `tools/delugexml/create.py`, `tools/delugexml/audio.py`, `tools/delugexml/midicv.py`, `tools/metro_scritto.py`, `tests/test_all.py`, `HANDOFF.md` (METRO01-03) | — | — |
 | clip-note | song-arranger | Clip, noteRow e note | completa | completa | completa | completa | `tools/delugexml/song.py`, `tools/delugexml/notes.py` | — | — |
 | sezioni-scene | song-arranger | Sezioni, scene e ripetizioni | completa | completa | completa | completa | `tools/delugexml/song.py`, `HANDOFF.md` | — | — |
 | colori-sezione | song-arranger | Tabella colori delle sezioni | parziale | completa | assente | assente | `HANDOFF.md`, `docs/ARCHITETTURA.md` | P3 | Ricavare la tabella con una coppia controllata sul dispositivo |
@@ -65,7 +66,7 @@ kit resta supportato.
 | sintesi-subtractive | synth-fx | Sintesi sottrattiva | completa | completa | completa | completa | `tools/delugexml/create.py`, `tools/delugexml/structure.py` | — | — |
 | sintesi-fm | synth-fx | Sintesi FM nativa | completa | completa | completa | completa | `tools/delugexml/structure.py`, `tests/test_all.py` | — | — |
 | sintesi-ringmod | synth-fx | Sintesi ring modulation | completa | completa | parziale | assente | `tools/delugexml/structure.py`, `docs/ARCHITETTURA.md` | P2 | Creare e ascoltare una patch ringmod controllata |
-| oscillator-sample | synth-fx | Oscillatore sample | completa | completa | parziale | parziale | `tools/delugexml/kit.py`, `tools/delugexml/structure.py` | P1 | Generalizzare set_sample dai drum ai synth e coprire loop e zone |
+| oscillator-sample | synth-fx | Oscillatore sample | completa | completa | parziale | parziale | `tools/delugexml/kit.py`, `tools/delugexml/structure.py`, `tests/test_all.py` | P1 | Verificare sul device loop, reverse e stretch dell'oscillatore e l'assegnazione a un synth nuovo |
 | wavetable | synth-fx | Oscillatore wavetable | completa | completa | parziale | assente | `tools/delugexml/structure.py`, `docs/ARCHITETTURA.md` | P2 | Modellare assegnazione WAV e parametri wavetable da un preset reale |
 | dx7 | synth-fx | Importazione e motore DX7 | solo-conservazione | completa | assente | assente | `docs/ARCHITETTURA.md`, `docs/SCHEMA_song_c1.3.0.md` | P2 | Studiare un preset DX7 e il legame con i banchi SYX |
 | modulazione | synth-fx | Patch cable e matrice di modulazione | completa | completa | completa | completa | `tools/delugexml/sound.py`, `tests/test_all.py` | — | — |
@@ -78,10 +79,11 @@ kit resta supportato.
 | drum-sintetici | kit-sampler | Drum sintetizzati con sound completo | completa | completa | completa | completa | `tools/delugexml/kit.py`, `tools/delugexml/sound.py` | — | — |
 | drum-sample | kit-sampler | Assegnazione sample e zona a un drum | completa | completa | completa | completa | `tools/delugexml/kit.py`, `tests/test_all.py` | — | — |
 | slicing-uniforme | kit-sampler | Slicing uniforme in kit | completa | completa | completa | completa | `tools/delugexml/kit.py`, `tools/vocalchop_scritto.py` | — | — |
-| multisample-layers | kit-sampler | Multisample e velocity layer | solo-conservazione | completa | assente | assente | `docs/ARCHITETTURA.md`, `docs/repertori/idm.md` | P1 | Modellare più zone e selezione per velocity da un preset controllato |
+| multisample-note | kit-sampler | Multisample con range per nota | parziale | completa | parziale | completa | `refs/synths/Tal Rhodes.XML`, `tools/delugexml/kit.py`, `tests/test_all.py`, `HANDOFF.md`; SAMPLERP01 ascoltato sul Deluge il 24 settembre 2026 | P2 | Esporre lettura strutturata e controlli completi dei range; la scrittura usa ancora un preset modello |
+| velocity-layers | kit-sampler | Selezione dei range multisample per velocity | n/a | n/a | n/a | n/a | `docs/ARCHITETTURA.md` | — | Non supportata dalla build target `2d7cdf8`: il motore seleziona i sample range solo per nota |
 | audio-tracce | audio | Creazione tracce e clip audio | completa | completa | completa | completa | `tools/delugexml/audio.py`, `tests/test_all.py` | — | — |
 | audio-regioni | audio | Start, end e cambio del campione | completa | completa | completa | completa | `tools/delugexml/audio.py`, `tests/test_all.py` | — | — |
-| audio-stretch-reverse | audio | Stretch, pitch e reverse delle audio clip | completa | completa | parziale | assente | `tools/delugexml/audio.py`, `tools/delugexml/sound.py` | P1 | Esporre parametri musicali e verificarli su una clip controllata |
+| audio-stretch-reverse | audio | Stretch, pitch e reverse delle audio clip | completa | completa | completa | completa | `tools/delugexml/audio.py`, `tools/delugexml/musica.py`, `tests/test_all.py`, `docs/ARCHITETTURA.md`, `HANDOFF.md`; AUDIOREV02 ascoltato sul Deluge il 24 settembre 2026 | — | — |
 | looper-resampling | audio | Looper, overdub e resampling interno | parziale | completa | parziale | assente | `tools/delugexml/audio.py`, `docs/ARCHITETTURA.md` | P2 | Catturare Player contro Looper e un overdub risalvato |
 | midi-tracce | midi-cv | Tracce MIDI, canali e suffix | completa | completa | completa | completa | `tools/delugexml/midicv.py`, `tests/test_all.py` | — | — |
 | cv-tracce | midi-cv | CV 1 e 2 con sorgente CV2 | completa | completa | completa | parziale | `tools/delugexml/midicv.py`, `HANDOFF.md` | P2 | Verificare sul device tutti i valori cv2Source |
@@ -103,15 +105,38 @@ kit resta supportato.
 La priorità non deriva dal numero di righe mancanti ma dal flusso compositivo
 attuale. L'ordine consigliato è:
 
-1. **metro e risoluzione**: controllare le conversioni che assumono 384 tick;
-2. **sampler e audio**: multisample, stretch e reverse;
-3. **MPE e MIDI espressivo**, a partire dalla Lower Zone usata da Exquis;
-4. **sintesi ed effetti community**: routing, morph, wavetable, grain e DX7;
-5. **artefatti laterali e compatibilità**: Settings, Pattern e versioni.
+1. **MPE e MIDI espressivo**, a partire dalla Lower Zone usata da Exquis;
+2. **sintesi ed effetti community**: routing, morph, wavetable, grain e DX7;
+3. **sampler residuo**: lettura strutturata e controlli completi dei range;
+4. **artefatti laterali e compatibilità**: Settings, Pattern e versioni.
 
 Probability, iterance, Fill, row length, Euclidean e arpeggiatore sono gia'
 coperti e verificati sul dispositivo. Il rilevamento automatico dei transienti
 e' fuori perimetro, come indicato sopra.
+
+Per il P1 sampler e audio, `kit.set_multisample()` sostituisce i range per nota
+partendo dalla struttura di un preset multisample reale: l'ultimo range arriva
+fino a TOP. `kit.set_sample_playback()` espone loop, reverse e stretch di un
+oscillatore sample. `audio.stretch_clip()` cambia la durata in tick lasciando
+ferma la regione in frame e sceglie pitch indipendente o collegato;
+`audio.set_clip_playback()` imposta reverse e intonazione. `SAMPLERP01.XML` e
+`AUDIOREV02.XML` sono stati caricati con rilettura byte-identica e ascoltati
+con esito positivo dall'utente sul Deluge il 24 settembre 2026. Nel corpus i
+`sampleRange` hanno `rangeTopNote`, ma nessuna soglia di velocity; il
+[manuale](https://delugecommunity.com/manual/device_overview/audio_files/)
+descrive i range per nota. Il sorgente della build target conferma che
+[`Source::getRange` seleziona solo per nota](https://github.com/SynthstromAudible/DelugeFirmware/blob/2d7cdf8/src/deluge/processing/source.cpp#L137)
+e che la voce gli passa
+[solo l'altezza suonata](https://github.com/SynthstromAudible/DelugeFirmware/blob/2d7cdf8/src/deluge/model/voice/voice.cpp#L230):
+non esiste selezione nativa di campioni per velocity in questa build. Il
+reverse dell'oscillatore e quello della clip audio sono operazioni diverse;
+per la clip la build target [scrive `reversed=1`](https://github.com/SynthstromAudible/DelugeFirmware/blob/2d7cdf8/src/deluge/model/clip/audio_clip.cpp#L1066-L1076)
+e lo [rilegge](https://github.com/SynthstromAudible/DelugeFirmware/blob/2d7cdf8/src/deluge/model/clip/audio_clip.cpp#L1163-L1172).
+
+La riga metro-risoluzione copre le API riusabili: creazione di clip, figure,
+pattern e arranger seguono `inputTickMagnitude`. Gli script che compongono
+brani specifici su una griglia dichiarata di 384 tick restano esempi per
+quella risoluzione; non sono conversioni generiche di song arbitrarie.
 
 Quando una capacità viene sviluppata, la sua riga cambia solo dopo tre passi:
 test locale, prova controllata sul Deluge se la colonna Device deve salire, e

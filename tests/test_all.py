@@ -2402,6 +2402,86 @@ def test_audio():
           not sporchi, f'{len(sporchi)}: {sporchi[:3]}')
 
 
+def test_sampler_audio_p1():
+    from delugexml import audio as AU, kit as K            # noqa: PLC0415
+
+    preset = REFS / 'synths' / 'Tal Rhodes.XML'
+    if not preset.exists():
+        salta('multisample Tal Rhodes', 'preset controllato assente')
+    else:
+        doc = parse_file(preset)
+        sound = doc.root
+        source = sound.find('osc1')
+        observed = source.find('sampleRanges')
+        check('il modello multisample e un preset reale',
+              len(observed.children) > 2
+              and observed.children[-1].get('rangeTopNote') is None)
+        check('set_sample non lascia un fileName sopra i range esistenti',
+              _raises(lambda: K.set_sample(sound, 'SAMPLES/Test/ONE.wav'),
+                      ValueError))
+        specs = [K.SampleRange('SAMPLES/Test/LOW.wav', 59, 0, 1000,
+                               transpose=2),
+                 K.SampleRange('SAMPLES/Test/HIGH.wav', None, 100, 900,
+                               cents=-3)]
+        K.set_multisample(sound, specs)
+        data = serialize(doc)
+        rebuilt = parse(data).root.find('osc1').find('sampleRanges').children
+        check('due zone multisample serializzate e rilette',
+              len(rebuilt) == 2
+              and [r.get('rangeTopNote') for r in rebuilt] == ['59', None]
+              and [r.get('fileName') for r in rebuilt]
+              == ['SAMPLES/Test/LOW.wav', 'SAMPLES/Test/HIGH.wav']
+              and [r.find('zone').get('startSamplePos') for r in rebuilt]
+              == ['0', '100']
+              and rebuilt[0].get('transpose') == '2'
+              and rebuilt[1].get('cents') == '-3')
+        before = serialize(doc)
+        check('range non crescenti rifiutati senza mutazione',
+              _raises(lambda: K.set_multisample(sound, [
+                  K.SampleRange('SAMPLES/A.wav', 70, 0, 100),
+                  K.SampleRange('SAMPLES/B.wav', 60, 0, 100),
+                  K.SampleRange('SAMPLES/C.wav', None, 0, 100)]), ValueError)
+              and serialize(doc) == before)
+        K.set_sample_playback(sound, loop='loop', reverse=True, stretch=True)
+        source = parse(serialize(doc)).root.find('osc1')
+        check('loop reverse stretch sull oscillatore sample',
+              (source.get('loopMode'), source.get('reversed'),
+               source.get('timeStretchEnable')) == ('2', '1', '1'))
+
+    clip_doc = parse('<audioClip filePath="SAMPLES/Test/LOOP.wav" length="384" '
+                     'startSamplePos="0" endSamplePos="44100" '
+                     'pitchSpeedIndependent="1" />')
+    clip = clip_doc.root
+    check('stretch audio raddoppia tick e mantiene frame',
+          AU.stretch_clip(clip, 2) == 768
+          and (clip.get('startSamplePos'), clip.get('endSamplePos'))
+          == ('0', '44100')
+          and clip.get('pitchSpeedIndependent') == '1')
+    check('modalita pitch-speed collegata',
+          AU.stretch_clip(clip, 0.5, independent=False) == 384
+          and clip.get('pitchSpeedIndependent') == '0')
+    AU.set_clip_playback(clip, reverse=True, semitones=-3, cents=12)
+    copied = parse(serialize(clip_doc)).root
+    check('reverse e pitch della clip usano gli attributi del firmware',
+          (copied.get('reversed'), copied.get('transpose'), copied.get('cents'))
+          == ('1', '-3', '12'))
+    AU.set_clip_playback(clip, reverse=False, semitones=0, cents=0)
+    check('valori neutri omessi come nel salvataggio firmware',
+          all(not clip.has(k) for k in ('reversed', 'transpose', 'cents')))
+    before = serialize(clip_doc)
+    check('playback audio rifiuta valori fuori tipo e range senza mutare',
+          all(_raises(lambda kwargs=kwargs: AU.set_clip_playback(
+                  clip, **kwargs), ValueError)
+              for kwargs in ({'reverse': 1}, {'semitones': True},
+                             {'semitones': 32768}, {'cents': -129},
+                             {'reverse': True, 'cents': 128}))
+          and serialize(clip_doc) == before)
+    check('fattore stretch non valido rifiutato',
+          all(_raises(lambda f=f: AU.stretch_clip(clip, f), ValueError)
+              for f in (0, -1, float('inf'), float('nan'), True))
+          and clip.get('length') == '384')
+
+
 def test_arranger_ricodifica():
     """Ogni blob del corpus si riscrive identico a se stesso."""
     from delugexml import arranger as A                  # noqa: PLC0415
@@ -3334,6 +3414,10 @@ def test_musica_racconta_clip_audio():
             check('il campione compare nel racconto',
                   clip.get('filePath') in r, r)
             check('e non e marcata vuota', 'vuota' not in r, r)
+            AU.set_clip_playback(clip, reverse=True, semitones=-3, cents=12)
+            r = MU.racconta_clip(doc, clip)
+            check('il racconto dichiara reverse e pitch della clip',
+                  'reverse' in r and 'pitch -3 semitoni +12 cent' in r, r)
             break
     check('Lfx.XML ha una clip audio con campione da provare', trovata)
 
@@ -8887,6 +8971,100 @@ def test_forma():
           str(MU.verifica(doc2)))
 
 
+def test_forma_segue_risoluzione_song():
+    from delugexml import musica as MU                        # noqa: PLC0415
+    from delugexml import arranger as A                       # noqa: PLC0415
+
+    for mag, tick_battuta in ((1, 192), (2, 384), (3, 768)):
+        doc = parse(f'<song inputTickMagnitude="{mag}">'
+                    '<instruments><synth presetName="TEST" /></instruments>'
+                    '<sessionClips><instrumentClip length="192" '
+                    'instrumentPresetName="TEST" /></sessionClips></song>')
+        clip = doc.root.find('sessionClips').children[0]
+        piano = MU.forma(doc, 'A B', {'A': [clip], 'B': [clip]},
+                         battute=2)
+        atteso = [(0, 2 * tick_battuta),
+                  (2 * tick_battuta, 2 * tick_battuta)]
+        strumento = doc.root.find('instruments').children[0]
+        ottenuto = [(i.pos, i.length) for i in A.instances(strumento)]
+        check(f'forma segue magnitude {mag}', ottenuto == atteso,
+              str(ottenuto))
+        racconto = MU.racconta_forma(piano)
+        check(f'racconta_forma segue magnitude {mag}',
+              f'(4 battute, {4 * tick_battuta} tick)' in racconto
+              and 'battute   3-4' in racconto, racconto)
+
+
+def test_primitive_musicali_seguono_risoluzione():
+    from delugexml import musica as MU                        # noqa: PLC0415
+
+    for barra in (192, 768):
+        check(f'durata figura a {barra} tick',
+              MU.durata_in_tick('1/8', tick_per_battuta=barra) == barra // 8)
+        check(f'passi a {barra} tick',
+              [n.pos for n in MU.passi('x...x...', tick_per_battuta=barra)]
+              == [0, barra // 4])
+        note = MU.melodia('do4 re4', durata='1/4',
+                          tick_per_battuta=barra)
+        check(f'melodia a {barra} tick',
+              sorted(n.pos for ns in note.values() for n in ns)
+              == [0, barra // 4])
+        linea = MU.linea([(0, 'do4', '1/8')],
+                          tick_per_battuta=barra)
+        check(f'linea a {barra} tick',
+              linea[60][0].length == round(barra / 8 *
+                                           MU.ARTICOLAZIONI['normale']))
+        accordi = MU.accordi('do4 mi4 sol4 | fa4 la4 do5', durata='1/4',
+                             tick_per_battuta=barra)
+        check(f'accordi a {barra} tick',
+              sorted({n.pos for ns in accordi.values() for n in ns})
+              == [0, barra // 4])
+        armonia = MU.armonia('C | F', durata='1/4',
+                             tick_per_battuta=barra)
+        check(f'armonia a {barra} tick',
+              sorted({n.pos for ns in armonia.values() for n in ns})
+              == [0, barra // 4])
+        comp = MU.comping('C | F', ['x.......', 'x.......'],
+                          tick_per_battuta=barra)
+        check(f'comping a {barra} tick',
+              sorted({n.pos for ns in comp.values() for n in ns})
+              == [0, barra])
+        parte = [MU.Note(pos=0, length=1, velocity=80),
+                 MU.Note(pos=barra, length=1, velocity=80)]
+        re = MU.reazione(parte, parte, tick_per_battuta=barra)
+        check(f'reazione a {barra} tick', re.densita == [1, 1],
+              str(re.densita))
+        check(f'racconta_reazione a {barra} tick',
+              '[1, 1]' in MU.racconta_reazione(
+                  parte, parte, tick_per_battuta=barra))
+    for invalido in (0, -16, True, 1.5):
+        check(f'risoluzione {invalido!r} rifiutata',
+              _raises(lambda: MU.durata_in_tick(
+                  '1/8', tick_per_battuta=invalido), ValueError))
+
+
+def test_clip_default_segue_risoluzione_song():
+    from delugexml import audio as AU, create as C, midicv as MC  # noqa: PLC0415
+
+    song_p = REFS / 'songs' / 'TEMPL0.XML'
+    preset_p = REFS / 'synths' / 'TEMPL.XML'
+    if not (song_p.exists() and preset_p.exists()):
+        salta('clip default segue risoluzione', 'TEMPL0/TEMPL assenti')
+        return
+    for mag, barra in ((1, 192), (3, 768)):
+        doc = parse_file(song_p)
+        doc.root.set('inputTickMagnitude', str(mag))
+        _, synth = C.add_track(doc, preset_p, name=f'SYNTH{mag}',
+                                folder='SYNTHS')
+        _, midi = MC.add_midi_track(doc, mag)
+        _, cv = MC.add_cv_track(doc, 0)
+        audio_track = AU.add_audio_track(doc)
+        audio_clip = AU.add_audio_clip(doc, audio_track, '')
+        check(f'clip default magnitude {mag}',
+              [int(c.get('length')) for c in (synth, midi, cv, audio_clip)]
+              == [barra] * 4)
+
+
 def _forma_nuovo():
     """Costruisce un doc di prova per la forma, o (None, None) se manca il
     materiale non versionato (preset di terzi)."""
@@ -10332,6 +10510,45 @@ def test_metro_scritto():
     ]
     check('gli accenti marcano il ritorno dei cicli 3/4 e 7/8',
           ottenute == attese, str(ottenute))
+
+
+def test_metro_scritto_a_risoluzione_diversa():
+    from delugexml import musica as MU, song as S             # noqa: PLC0415
+    import metro_scritto as MT                                 # noqa: PLC0415
+
+    for mag, movimento in ((1, 48), (3, 192)):
+        try:
+            doc = MT.costruisci(input_tick_magnitude=mag)
+        except FileNotFoundError:
+            salta('test_metro_scritto_a_risoluzione_diversa',
+                  'manca un preset di refs')
+            return
+        clips = doc.root.find('sessionClips').children
+        check(f'fixture magnitude {mag} supera il gate',
+              MU.verifica(doc) == [] and MU.avvertenze(doc) == [])
+        check(f'fixture magnitude {mag} lunghezze',
+              [int(c.get('length')) for c in clips]
+              == [3 * movimento, round(3.5 * movimento)])
+        kick = [[n.pos for n in S.read_notes(S.drum_row(doc, c, MT.KICK))]
+                for c in clips]
+        check(f'fixture magnitude {mag} onset', kick
+              == [[0, movimento], [0, movimento, 2 * movimento]], str(kick))
+
+
+def test_metro_scritto_forma_arranger():
+    from delugexml import arranger as A, musica as MU, song as S  # noqa: PLC0415
+    import metro_scritto as MT                                  # noqa: PLC0415
+    try:
+        doc = MT.costruisci(input_tick_magnitude=1, con_arranger=True)
+    except FileNotFoundError:
+        salta('test_metro_scritto_forma_arranger', 'manca un preset di refs')
+        return
+    strumento = S.instruments(doc)[0]
+    check('forma metro a magnitude 1 piazza due sezioni da 192 tick',
+          [(i.pos, i.length) for i in A.instances(strumento)]
+          == [(0, 192), (192, 192)])
+    check('forma metro supera il gate',
+          MU.verifica(doc) == [] and MU.avvertenze(doc) == [])
 
 
 def test_row_length_scritto():

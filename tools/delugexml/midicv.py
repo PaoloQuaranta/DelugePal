@@ -247,7 +247,7 @@ def _aggiungi(doc: Document, tipo: str, channel: int, attrs: dict,
 
 
 def add_midi_track(doc: Document, channel: int, *,
-                   suffix: int = SENZA_SUFFIX, length: int = 384,
+                   suffix: int = SENZA_SUFFIX, length: int | None = None,
                    section: str = '0', colour_offset: str = '0',
                    playing: bool = False) -> tuple[Node, Node]:
     """Una traccia MIDI in uscita sul canale dato, con la sua clip.
@@ -263,6 +263,9 @@ def add_midi_track(doc: Document, channel: int, *,
             f'esiste gia una traccia su MIDI {channel + 1} con suffix '
             f'{suffix}: due tracce con lo stesso canale E lo stesso suffisso '
             f'non possono suonare insieme, servono suffissi diversi')
+    if length is None:
+        from . import song as S                           # import locale: ciclo
+        length = S.ticks_per_bar(doc.root)
     attrs = dict(ISTANZA_MIDI)
     attrs['suffix'] = str(suffix)
     return _aggiungi(doc, 'midi', channel, attrs, length=length,
@@ -271,7 +274,7 @@ def add_midi_track(doc: Document, channel: int, *,
 
 
 def add_cv_track(doc: Document, channel: int, *, cv2_source: int | None = None,
-                 length: int = 384, section: str = '0',
+                 length: int | None = None, section: str = '0',
                  colour_offset: str = '0',
                  playing: bool = False) -> tuple[Node, Node]:
     """Una traccia CV su una delle due uscite, con la sua clip."""
@@ -280,6 +283,9 @@ def add_cv_track(doc: Document, channel: int, *, cv2_source: int | None = None,
             f'il Deluge ha {CV_CANALI} uscite CV, canale 0 o 1: {channel}')
     if find_track(doc, 'cv', channel) is not None:
         raise ValueError(f'esiste gia una traccia su CV {channel + 1}')
+    if length is None:
+        from . import song as S                           # import locale: ciclo
+        length = S.ticks_per_bar(doc.root)
     attrs = dict(ISTANZA_CV)
     if cv2_source is not None:
         if cv2_source not in CV2_SORGENTI:

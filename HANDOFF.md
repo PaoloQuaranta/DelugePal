@@ -243,6 +243,35 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > `avvertenze()` restano vuote. La differenza di dimensione dal file
 > iniziale non e' un'identita' byte per byte: qui l'evidenza e' l'ascolto
 > sul dispositivo insieme alla conservazione semantica dopo il salvataggio.
+
+> **Il 23 settembre 2026 sono state caricate `METRO02` e `METRO03`.**
+> Entrambe usano `inputTickMagnitude=1` (48 tick per movimento). `METRO02`
+> ha le clip da 144 e 168 tick; `METRO03` aggiunge due blocchi arranger
+> lunghi 192 tick, alle posizioni 0 e 192. Le primitive musicali ricevono
+> `tick_per_battuta=S.ticks_per_bar(doc.root)`; `MU.forma` calcola la stessa
+> risoluzione dal documento. `verifica()` e `avvertenze()` sono vuote e i file
+> si rileggono localmente con quelle lunghezze e posizioni. Il `put` SysEx
+> seguito da rilettura ha confermato byte e SHA-256 identici:
+> `METRO02.XML` 115117 byte,
+> `99e2a394bd519f6d118348b80c8fbcb01fb336a2a548a0f744d85de9c7a82b46`;
+> `METRO03.XML` 115248 byte,
+> `e8d0d547ba46912996448b4bafcce7a76c4bfd05c1fbf17c6657b5230a2d3f0f`.
+> **`METRO02` e `METRO03` aperte, ascoltate e risalvate dall'utente** come
+> `METRO02 2.XML` e `METRO03 2.XML`: l'ascolto e' corretto per entrambe.
+> Le riletture SysEx dei file risalvati (165541 e 165609 byte) conservano
+> `inputTickMagnitude=1`, le clip da 144/168 tick, sezioni, posizioni,
+> durate e velocity di tutte le note. `METRO03 2.XML` conserva inoltre le
+> due istanze arranger `(pos=0, length=192, code=0)` e
+> `(pos=192, length=192, code=1)`. `verifica()` e `avvertenze()` restano
+> vuote. Il confronto e' **semantico**, non byte-esatto: il dispositivo
+> riscrive il file in un formato piu' esteso.
+>
+> Le API generiche `create.add_track`, `audio.add_audio_clip`,
+> `midicv.add_midi_track` e `midicv.add_cv_track` ricavano ora la lunghezza
+> predefinita da `S.ticks_per_bar(doc.root)`. I valori `length=` espliciti
+> restano tick grezzi. Le primitive senza documento mantengono 384 come
+> default compatibile e accettano `tick_per_battuta=` quando la song ha
+> un'altra risoluzione.
 >
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
@@ -4358,6 +4387,86 @@ una cassa invariata: THUD-A/B/C mantengono 6/16 ma cambiano attacchi e accento.
 La rilettura SysEx è byte-identica: SHA-256
 `8a37531ec94d286df7c41a780d000ac7bf50bf504257f64313cd3179f8f3ebe9`.
 `MU.verifica()` vuota, `MU.avvertenze()` nessuna; suite **1560/1560**.
+
+---
+
+### P1 sampler e audio — 24 settembre 2026
+
+`kit.set_multisample()` sostituisce i range per nota clonando i nodi di un
+preset multisample osservato (`Tal Rhodes`); `kit.set_sample_playback()` imposta
+loop, reverse e stretch su un oscillatore sample. `audio.stretch_clip()` cambia
+la durata della clip in tick conservando i frame e permette pitch indipendente
+o collegato. `audio.set_clip_playback()` imposta reverse, semitoni e cent della
+clip; `musica.racconta_clip()` li dichiara. La prova locale include
+serializzazione e rilettura; la prova sul Deluge e' documentata sotto.
+
+I due dubbi sul formato sono chiusi usando la build target `2d7cdf8`: il
+firmware salva `reversed="1"` per la clip audio quando è attivo e omette i
+valori neutri di pitch; `Source::getRange(note)` sceglie i multisample solo
+per nota. I 2691 `sampleRange` contati nel corpus non portano soglie di
+velocity perché il motore target non implementa quella selezione. La matrice
+canonica separa il multisample per nota (provato sul dispositivo)
+dai layer per velocity (`n/a` nel firmware target): `docs/COPERTURA_DELUGE.md`.
+
+Probe audio locale (ignorato da git): `out/AUDIOREV01.XML`, 12061 byte,
+SHA-256 `af70bcf3683a36e76682b60e86a80b1a1cd0d2269ef109045596b55c0302cfca`.
+Usa il campione già referenziato da `Lfx.XML` (`REC00133.WAV`) su una sola
+traccia audio, con quattro clip in sezioni separate: originale, reverse,
+pitch −3 semitoni +12 cent, stretch 2×. La prima è attiva; le altre si
+lanciano una alla volta per confronto. `musica.verifica()` e
+`musica.avvertenze()` sono vuote, anche dopo rilettura locale. Destinazione:
+`/SONGS/DelugePal/AUDIOREV01.XML`. Nei primi tentativi il ping
+SysEx risponde, ma tre richieste `dir` sulla SD (due in `/SAMPLES/DelugePal`,
+una in `/SONGS/DelugePal`) non hanno restituito dati e sono state interrotte.
+Anche una prova `raw` con apertura di sessione non ha prodotto output.
+Al nuovo tentativo del 2026-09-24 il blocco avviene prima del ping: la chiamata
+`mido.get_input_names()` non termina neppure dopo 60 secondi. Windows vede
+comunque il dispositivo USB `Deluge` con stato `OK`; non risultano processi
+`dsysex.py` rimasti aperti. In quel tentativo nessuna scrittura sulla SD è stata avviata.
+Dopo il ricollegamento USB richiesto dall'utente, il tentativo successivo si
+blocca ancora nell'enumerazione. Anche `winmm.midiInGetNumDevs()` chiamata
+direttamente non ritorna; `midisrv` risulta Running. Il riavvio del servizio
+con `Restart-Service` non è consentito all'account corrente (`Cannot open
+'midisrv' service`).
+
+Dopo il riavvio di Windows, il 2026-09-24, `ports` e `ping` hanno ripreso a
+funzionare. `dsysex put` ha creato `/SONGS/DelugePal/AUDIOREV01.XML` e ha
+riletto 12061 byte con SHA-256 identico al file locale; 0 timeout, 0 blocchi
+parziali, 0 riaperture. Il WAV referenziato
+`/SAMPLES/CLIPS/REC00133.WAV` esiste sulla SD (4392100 byte, apertura SysEx
+in sola lettura).
+L'utente ha provato `AUDIOREV01.XML` e riferito di sentire solo rumore bianco:
+quel campione non e' adatto a distinguere le quattro varianti. Il probe audio
+corretto e' `out/AUDIOREV02.XML` (12222 byte, SHA-256
+`2bd21cde45ddaea49d3e4f36b08d6187da28bcc5a4989a2cc42ce8d4f825b428`),
+generato con `out/build_audio_amen_probe.py` (entrambi ignorati da git).
+Usa `/SAMPLES/sampleswap/advanced_operator_samplepack/drums/original AMEN.wav`,
+presente sulla SD (1075224 byte) e nella copia locale (268795 frame, 48 kHz,
+stereo). La song e' a 171 BPM; le prime tre clip durano quattro battute e
+la quarta otto con stretch 2x. Le sezioni 0-3 conservano originale, reverse,
+pitch -3 semitoni +12 cent e stretch, rispettivamente. La validazione e le
+avvertenze sono vuote anche dopo rilettura locale. `dsysex put` ha creato
+`/SONGS/DelugePal/AUDIOREV02.XML` e riletto 12222 byte con hash identico,
+0 timeout, 0 blocchi parziali, 0 riaperture. L'esito d'ascolto e' registrato
+sotto.
+
+Nella stessa sessione è stato preparato anche il probe multisample
+`out/SAMPLERP01.XML` (10485 byte, SHA-256
+`9307d2b6780652b69c35dc4a8b1bd52ba520526b7d574d872b464b2fe704b9ca`),
+con `out/build_sampler_probe.py` (entrambi ignorati da git). Parte da
+`TEMPL0.XML`, istanzia Tal Rhodes e usa `kit.set_multisample()` per due range:
+nota 59 con il WAV Rhodes 059, note da 60 in su con il WAV Rhodes 060. Una clip
+di due battute alterna le note 59 e 60. `musica.verifica()` e
+`musica.avvertenze()` sono vuote, anche dopo rilettura. I due WAV sono stati
+aperti in sola lettura via SysEx sulla SD (856928 e 850036 byte).
+`dsysex put` ha creato `/SONGS/DelugePal/SAMPLERP01.XML` e ne ha riletto
+10485 byte con SHA-256 identico; 0 timeout, 0 blocchi parziali, 0 riaperture.
+L'utente ha confermato il 24 settembre 2026 che `SAMPLERP01` funziona sul
+Deluge. Ha confermato anche `AUDIOREV` dopo la sostituzione del campione con
+l'Amen break in `AUDIOREV02.XML`. Le colonne Device di `multisample-note` e
+`audio-stretch-reverse` sono quindi `completa` nella matrice canonica. Per il
+multisample restano da ampliare la lettura strutturata e i controlli dei range;
+il residuo e' P2, non una prova sul dispositivo ancora aperta.
 
 ---
 

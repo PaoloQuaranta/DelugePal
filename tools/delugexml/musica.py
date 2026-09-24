@@ -100,8 +100,8 @@ def nome_altezza(midi: int, italiano: bool = True) -> str:
 from .notes import (Note, fill_to_byte, iterance_to_fields,  # noqa: E402
                     probability_to_condition)
 
-#: La griglia del Deluge e' larga 16 colonne per battuta, e una battuta e'
-#: 384 tick: ogni colonna e' un sedicesimo.
+#: Griglia di default (inputTickMagnitude=2): 16 passi in 384 tick.
+#: Per altre risoluzioni le primitive accettano tick_per_battuta.
 TICK_PER_PASSO = 24
 TICK_PER_BATTUTA = 384
 
@@ -134,7 +134,8 @@ VEL_FANTASMA = 42
 
 def passi(pattern: str, *, velocity: int = VEL_COLPO,
           accento: int = VEL_ACCENTO, fantasma: int = VEL_FANTASMA,
-          lunghezza: int | None = None, da: int = 0) -> list[Note]:
+          lunghezza: int | None = None, da: int = 0,
+          tick_per_battuta: int = TICK_PER_BATTUTA) -> list[Note]:
     """Le note di un pattern percussivo: `'x...x...x...x...'`.
 
     Un carattere per sedicesimo, come le colonne della griglia del Deluge:
@@ -180,12 +181,17 @@ def passi(pattern: str, *, velocity: int = VEL_COLPO,
         raise ValueError(f'caratteri non ammessi {estranei}, '
                          f'usare {sorted(ammessi)}')
     livello = {COLPO: velocity, ACCENTO: accento, FANTASMA: fantasma}
-    lung = TICK_PER_PASSO if lunghezza is None else lunghezza
+    if (isinstance(tick_per_battuta, bool)
+            or not isinstance(tick_per_battuta, int)
+            or tick_per_battuta <= 0 or tick_per_battuta % 16):
+        raise ValueError('tick_per_battuta deve essere un multiplo positivo di 16')
+    tick_per_passo = tick_per_battuta // 16
+    lung = tick_per_passo if lunghezza is None else lunghezza
     out = []
     for i, c in enumerate(testo):
         if c == PAUSA:
             continue
-        out.append(Note(pos=da + i * TICK_PER_PASSO, length=lung,
+        out.append(Note(pos=da + i * tick_per_passo, length=lung,
                         velocity=livello[c]))
     return out
 
@@ -339,8 +345,16 @@ def applica_microtiming(note: list[Note], scarti_tick: list[int]) -> dict[str, o
             'scarto_max': max(posati) if posati else 0}
 
 
-def durata_in_tick(spec: str | int) -> int:
-    """`'1/8'` -> 48 tick. Un intero passa invariato, gia' in tick."""
+def durata_in_tick(spec: str | int, *,
+                   tick_per_battuta: int = TICK_PER_BATTUTA) -> int:
+    """`'1/8'` -> 48 tick al default. Un intero e' gia' in tick grezzi.
+
+    Per una song usare tick_per_battuta=song.ticks_per_bar(doc.root).
+    """
+    if (isinstance(tick_per_battuta, bool)
+            or not isinstance(tick_per_battuta, int)
+            or tick_per_battuta <= 0):
+        raise ValueError('tick_per_battuta deve essere un intero positivo')
     if isinstance(spec, int):
         if spec <= 0:
             raise ValueError(f'{spec} tick: la durata deve essere positiva')
@@ -355,7 +369,7 @@ def durata_in_tick(spec: str | int) -> int:
         raise ValueError(f'{spec!r} non e una durata (es. 1/8, 1/4)') from None
     if d <= 0 or n <= 0:
         raise ValueError(f'{spec!r}: numeratore e denominatore positivi')
-    tick = TICK_PER_BATTUTA * n // d
+    tick = tick_per_battuta * n // d
     if tick <= 0:
         raise ValueError(f'{spec!r} da {tick} tick')
     return tick
@@ -376,7 +390,8 @@ ARTICOLAZIONI = {
 
 def melodia(spec: str, *, durata: str | int = '1/8', da: int = 0,
             velocity: int = 80, articolazione: str = 'normale',
-            stacco: int | None = None) -> dict[int, list[Note]]:
+            stacco: int | None = None,
+            tick_per_battuta: int = TICK_PER_BATTUTA) -> dict[int, list[Note]]:
     """Da `'re2 fa#2 la2 re3'` alle note, raggruppate per altezza.
 
     Il Deluge tiene le note in righe, una per altezza, quindi il risultato e'
@@ -396,7 +411,7 @@ def melodia(spec: str, *, durata: str | int = '1/8', da: int = 0,
         raise ValueError(
             f'articolazione {articolazione!r} sconosciuta, usare '
             f'{sorted(ARTICOLAZIONI)}')
-    passo = durata_in_tick(durata)
+    passo = durata_in_tick(durata, tick_per_battuta=tick_per_battuta)
     if stacco is not None:
         lung = max(1, passo - stacco)
     else:
@@ -412,7 +427,8 @@ def melodia(spec: str, *, durata: str | int = '1/8', da: int = 0,
 
 
 def linea(eventi, *, velocity: int = 80, articolazione: str = 'normale',
-          stacco: int | None = None) -> dict[int, list[Note]]:
+          stacco: int | None = None,
+          tick_per_battuta: int = TICK_PER_BATTUTA) -> dict[int, list[Note]]:
     """Da `[(tick, altezza, durata), ...]` alle note, raggruppate per altezza.
 
     Il caso GENERALE di cui `melodia()` e' la scorciatoia a passo fisso: li'
@@ -439,7 +455,7 @@ def linea(eventi, *, velocity: int = 80, articolazione: str = 'normale',
         if not isinstance(tick, int) or tick < 0:
             raise ValueError(f'tick {tick!r}: la posizione e un intero non '
                              f'negativo, in tick')
-        passo = durata_in_tick(durata)
+        passo = durata_in_tick(durata, tick_per_battuta=tick_per_battuta)
         if stacco is not None:
             lung = max(1, passo - stacco)
         else:
@@ -458,7 +474,8 @@ SEPARATORE_ACCORDI = '|'
 
 def accordi(spec: str, *, durata: str | int = '1/4', da: int = 0,
            velocity: int = 80, articolazione: str = 'normale',
-           stacco: int | None = None) -> dict[int, list[Note]]:
+           stacco: int | None = None,
+           tick_per_battuta: int = TICK_PER_BATTUTA) -> dict[int, list[Note]]:
     """Da `'re3 fa3 la3 | sib3 re4 fa4'` a una PROGRESSIONE di accordi.
 
     [LACUNA capitolato] `melodia()` mette una nota per passo, in sequenza:
@@ -491,7 +508,7 @@ def accordi(spec: str, *, durata: str | int = '1/4', da: int = 0,
             f'{sorted(ARTICOLAZIONI)}')
     if not spec.strip():
         raise ValueError('accordi(): la sequenza e vuota')
-    passo = durata_in_tick(durata)
+    passo = durata_in_tick(durata, tick_per_battuta=tick_per_battuta)
     if stacco is not None:
         lung = max(1, passo - stacco)
     else:
@@ -1002,7 +1019,8 @@ def voci_condotte(spec: str, *, voicing: str = 'chiuso',
 def armonia(spec: str, *, voicing: str = 'chiuso', registro: str = 'do3',
             durata: str | int = '1/4', da: int = 0, velocity: int = 80,
             articolazione: str = 'normale', stacco: int | None = None,
-            condotta: bool = True) -> dict[int, list[Note]]:
+            condotta: bool = True,
+            tick_per_battuta: int = TICK_PER_BATTUTA) -> dict[int, list[Note]]:
     """Da `'Dm7 | G7 | Cmaj7'` alle note, raggruppate per altezza.
 
     E' `accordi()` che parte dai SIMBOLI invece che dalle altezze. Tutto il
@@ -1030,7 +1048,7 @@ def armonia(spec: str, *, voicing: str = 'chiuso', registro: str = 'do3',
                          f'{sorted(ARTICOLAZIONI)}')
     if not spec.strip():
         raise ValueError('armonia(): la sequenza e vuota')
-    passo = durata_in_tick(durata)
+    passo = durata_in_tick(durata, tick_per_battuta=tick_per_battuta)
     if stacco is not None:
         lung = max(1, passo - stacco)
     else:
@@ -1060,7 +1078,8 @@ def armonia(spec: str, *, voicing: str = 'chiuso', registro: str = 'do3',
 def comping(progressione: str, ritmi, *, voicing: str = 'chiuso',
             registro: str = 'do3', velocity: int = 72,
             articolazione: str = 'staccato', condotta: bool = True,
-            figura: str | int = '1/8', da: int = 0) -> dict[int, list[Note]]:
+            figura: str | int = '1/8', da: int = 0,
+            tick_per_battuta: int = TICK_PER_BATTUTA) -> dict[int, list[Note]]:
     """Il comping: da una progressione (un accordo per battuta) e un RITMO per
     battuta, gli accordi piazzati sui colpi, voicizzati e condotti.
 
@@ -1082,10 +1101,10 @@ def comping(progressione: str, ritmi, *, voicing: str = 'chiuso',
         raise ValueError(
             f'comping(): {len(accordi)} battute di accordi e {len(ritmi)} di '
             f'ritmo -- devono essere uguali (un ritmo per battuta)')
-    passo = durata_in_tick(figura)
-    if TICK_PER_BATTUTA % passo:
+    passo = durata_in_tick(figura, tick_per_battuta=tick_per_battuta)
+    if tick_per_battuta % passo:
         raise ValueError(f'comping(): la figura {figura!r} non divide la battuta')
-    per_battuta = TICK_PER_BATTUTA // passo
+    per_battuta = tick_per_battuta // passo
     gruppi = []
     for b, (accordo, ritmo) in enumerate(zip(accordi, ritmi)):
         if len(ritmo) != per_battuta:
@@ -1100,8 +1119,9 @@ def comping(progressione: str, ritmi, *, voicing: str = 'chiuso',
             gruppi.append(accordo if c == 'x' else PAUSA)
     spec = f' {SEPARATORE_ACCORDI} '.join(gruppi)
     return armonia(spec, voicing=voicing, registro=registro, durata=figura,
-                   velocity=velocity, articolazione=articolazione,
-                   condotta=condotta, da=da)
+                    velocity=velocity, articolazione=articolazione,
+                    condotta=condotta, da=da,
+                    tick_per_battuta=tick_per_battuta)
 
 
 # ------------------------------------------------------------ il contrappunto
@@ -1374,11 +1394,12 @@ def forma(doc, mappa, sezioni: dict, *, battute: int = 8,
             f'forma(): sezioni ignote {ignote} -- '
             f'sezioni definite: {sorted(sezioni)}')
 
+    tick_battuta = S.ticks_per_bar(doc.root)
     piano: list[Sezione] = []
     pos = 0
     for nome in mappa:
         bb = (battute_per or {}).get(nome, battute)
-        lung = bb * TICK_PER_BATTUTA
+        lung = bb * tick_battuta
         for clip in sezioni[nome]:
             strum = S.instrument_of(doc, clip)
             if strum is None:
@@ -1397,12 +1418,14 @@ def racconta_forma(piano) -> str:
     if not piano:
         return 'forma vuota'
     fine = piano[-1].pos + piano[-1].lung
+    totale_battute = sum(s.battute for s in piano)
     righe = [f'forma: {" ".join(s.nome for s in piano)} '
-             f'({fine // TICK_PER_BATTUTA} battute, {fine} tick)']
+             f'({totale_battute} battute, {fine} tick)']
+    da = 1
     for s in piano:
-        da = s.pos // TICK_PER_BATTUTA + 1
-        a = (s.pos + s.lung) // TICK_PER_BATTUTA
+        a = da + s.battute - 1
         righe.append(f'  {s.nome:<6} battute {da:>3}-{a:<3} ({s.battute})')
+        da = a + 1
     return '\n'.join(righe)
 
 
@@ -1961,15 +1984,16 @@ def fill(parte, stato: str) -> dict[str, object]:
     return {'fill': stato, 'note': len(note)}
 
 
-def _densita_per_battuta(parte, battute: int | None = None) -> list[int]:
+def _densita_per_battuta(parte, battute: int | None = None,
+                         tick_per_battuta: int = TICK_PER_BATTUTA) -> list[int]:
     """Quante note cadono in ogni battuta."""
     note = _tutte_le_note(parte)
     if not note:
         return [0] * (battute or 0)
-    nb = battute or (max(n.pos for n in note) // TICK_PER_BATTUTA + 1)
+    nb = battute or (max(n.pos for n in note) // tick_per_battuta + 1)
     conta = [0] * nb
     for n in note:
-        b = n.pos // TICK_PER_BATTUTA
+        b = n.pos // tick_per_battuta
         if 0 <= b < nb:
             conta[b] += 1
     return conta
@@ -2012,7 +2036,8 @@ class Reazione(NamedTuple):
     verdetto: str                 # uniforme | scollegata | complementa | segue | varia
 
 
-def reazione(parte, riferimento, *, battute: int | None = None) -> Reazione:
+def reazione(parte, riferimento, *, battute: int | None = None,
+             tick_per_battuta: int = TICK_PER_BATTUTA) -> Reazione:
     """Misura se una parte REAGISCE a un riferimento (la melodia, il comping).
 
     ⚠️ NON compone: l'AI scrive il basso o la batteria, questo fa i conti per
@@ -2035,8 +2060,12 @@ def reazione(parte, riferimento, *, battute: int | None = None) -> Reazione:
     `segue` (e `varia`, quando il riferimento e' piatto e non c'e' con cosa
     correlare) sono parti che reagiscono.
     """
-    dp = _densita_per_battuta(parte, battute)
-    dr = _densita_per_battuta(riferimento, battute)
+    if (isinstance(tick_per_battuta, bool)
+            or not isinstance(tick_per_battuta, int)
+            or tick_per_battuta <= 0):
+        raise ValueError('tick_per_battuta deve essere un intero positivo')
+    dp = _densita_per_battuta(parte, battute, tick_per_battuta)
+    dr = _densita_per_battuta(riferimento, battute, tick_per_battuta)
     nb = max(len(dp), len(dr))
     dp = dp + [0] * (nb - len(dp))
     dr = dr + [0] * (nb - len(dr))
@@ -2057,9 +2086,11 @@ def reazione(parte, riferimento, *, battute: int | None = None) -> Reazione:
 
 
 def racconta_reazione(parte, riferimento, *, battute: int | None = None,
-                      nomi: tuple[str, str] = ('parte', 'riferimento')) -> str:
+                       nomi: tuple[str, str] = ('parte', 'riferimento'),
+                       tick_per_battuta: int = TICK_PER_BATTUTA) -> str:
     """Se una parte reagisce, a parole (regola 4). ASCII soltanto (console cp1252)."""
-    re = reazione(parte, riferimento, battute=battute)
+    re = reazione(parte, riferimento, battute=battute,
+                  tick_per_battuta=tick_per_battuta)
     corr = 'piatto' if re.correlazione is None else f'{re.correlazione:+.2f}'
     spiega = {
         'uniforme': 'UNIFORME: applicata acriticamente (non varia)',
@@ -2497,7 +2528,17 @@ def racconta_clip(doc, clip) -> str:
         s = int(clip.get('startSamplePos') or 0)
         e = int(clip.get('endSamplePos') or 0)
         durata = (e - s) / 44100
-        return f'{testa}: campione {clip.get("filePath")!r} (~{durata:.2f}s)'
+        testo = f'{testa}: campione {clip.get("filePath")!r} (~{durata:.2f}s)'
+        dettagli = []
+        if clip.get('reversed') == '1':
+            dettagli.append('reverse')
+        semitoni = int(clip.get('transpose') or 0)
+        cent = int(clip.get('cents') or 0)
+        if semitoni or cent:
+            dettagli.append(f'pitch {semitoni:+d} semitoni {cent:+d} cent')
+        if clip.get('pitchSpeedIndependent') == '0':
+            dettagli.append('pitch e velocita collegati')
+        return testo + ('; ' + ', '.join(dettagli) if dettagli else '')
 
     kit = S.is_kit_clip(clip)
     nomi = S.drum_names(doc, clip) if kit else []

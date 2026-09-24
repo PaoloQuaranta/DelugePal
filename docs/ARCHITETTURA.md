@@ -763,6 +763,32 @@ they can be muted, deleted, and have effects applied» [MAN]. Questo spiega
 `overdubsShouldCloneAudioTrack` fra gli attributi di `<audioClip>`. La prima
 clip registrata fissa lunghezza e tempo; le successive vi si allineano.
 
+`audio.stretch_clip(clip, 2)` raddoppia `length` (tick) senza cambiare
+`startSamplePos` e `endSamplePos` (frame). `pitchSpeedIndependent=1` conserva
+l'altezza; con `independent=False` la lega alla velocità. È una trasformazione
+strutturale verificata in locale, ancora da ascoltare sul dispositivo.
+`audio.set_clip_playback()` espone reverse e intonazione: la build target
+[`2d7cdf8` scrive](https://github.com/SynthstromAudible/DelugeFirmware/blob/2d7cdf8/src/deluge/model/clip/audio_clip.cpp#L1054-L1077)
+`reversed="1"` solo quando attivo, `transpose` e `cents` solo quando non nulli,
+e [rilegge gli stessi attributi](https://github.com/SynthstromAudible/DelugeFirmware/blob/2d7cdf8/src/deluge/model/clip/audio_clip.cpp#L1163-L1173).
+
+## 12c. Range multisample
+
+In un synth multisample osservato, `<osc1 type="sample">` contiene
+`<sampleRanges>` e più `<sampleRange>`, ciascuno con file, accordatura e
+`<zone>` in frame. `rangeTopNote` è il limite superiore inclusivo; nell'ultimo
+range manca, e quel campione copre fino a TOP. `kit.set_multisample()` clona
+questa struttura da un preset reale e sostituisce i range richiesti. Per loop,
+reverse e stretch dell'oscillatore usa `kit.set_sample_playback()`.
+
+La build target non implementa layer per velocity nei multisample:
+[`MultiRange` ha unicamente `topNote`](https://github.com/SynthstromAudible/DelugeFirmware/blob/2d7cdf8/src/deluge/storage/multi_range/multi_range.h#L30),
+[`Source::getRange` cerca con la sola nota](https://github.com/SynthstromAudible/DelugeFirmware/blob/2d7cdf8/src/deluge/processing/source.cpp#L137-L166)
+e la [voce passa nota, non velocity](https://github.com/SynthstromAudible/DelugeFirmware/blob/2d7cdf8/src/deluge/model/voice/voice.cpp#L230).
+La velocity delle note resta disponibile come sorgente di modulazione, ma non
+seleziona quale file del range suonare. La voce della matrice per i layer è
+quindi `n/a` per questo firmware, anziché un P1 di scrittura XML.
+
 ---
 
 ## 12. Cosa resta aperto

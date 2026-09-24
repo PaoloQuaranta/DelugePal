@@ -50,7 +50,8 @@ from typing import NamedTuple
 from .notes import Note
 
 #: Quanti tick per movimento ha il Deluge con la RESOLUTION di default
-#: (`inputTickMagnitude="2"`). E' anche cio' che `musica` da' per scontato.
+#: (`inputTickMagnitude="2"`). Per song diverse passare la risoluzione reale
+#: ai convertitori e alle primitive di `musica`.
 TICK_PER_MOVIMENTO_DELUGE = 96
 
 #: Il canale della batteria in General MIDI, contato da 0 (il "canale 10").

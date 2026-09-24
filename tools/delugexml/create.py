@@ -181,7 +181,7 @@ def instrument_from_preset(preset: Document | Path | str, *, name: str,
 
 
 def add_track(doc: Document, preset: Document | Path | str, *, name: str,
-              folder: str, length: int = 384, section: str = '0',
+              folder: str, length: int | None = None, section: str = '0',
               colour_offset: str = '0', playing: bool = False) -> tuple[Node, Node]:
     """Aggiunge alla song uno strumento istanziato dal preset e una clip che
     lo suona. Ritorna (strumento, clip).
@@ -189,6 +189,8 @@ def add_track(doc: Document, preset: Document | Path | str, *, name: str,
     Aggiorna anche gli scroll delle due viste e `beingEdited`: senza, la roba
     esiste e non si vede â€” tre volte su tre e' stato quello il problema.
     """
+    if length is None:
+        length = S.ticks_per_bar(doc.root)
     inst, params, arp = instrument_from_preset(preset, name=name, folder=folder)
 
     strumenti = doc.root.find('instruments')
@@ -232,4 +234,3 @@ def add_track(doc: Document, preset: Document | Path | str, *, name: str,
     S.scroll_arrangement_view_to(doc, len(strumenti.children) - 1)
     S.set_edited_clip(doc, clip)
     return inst, clip
-

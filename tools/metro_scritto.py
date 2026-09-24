@@ -25,42 +25,57 @@ KICK = 'BD B 808 Decay C 02'
 RIM = 'Rim Shot A 808'
 
 
-def costruisci():
+def costruisci(input_tick_magnitude: int | None = None,
+               con_arranger: bool = False):
     """Costruisce due clip con lunghezze derivate dalla griglia della song."""
     from delugexml import create as C, parse_file, song as S  # noqa: PLC0415
 
     doc = parse_file(TEMPL)
     for strumento in list(S.instruments(doc)):
         MU.togli(doc, strumento)
+    if input_tick_magnitude is not None:
+        if input_tick_magnitude not in (1, 2, 3):
+            raise ValueError('input_tick_magnitude deve essere 1, 2 o 3')
+        doc.root.set('inputTickMagnitude', str(input_tick_magnitude))
+    barra = S.ticks_per_bar(doc.root)
     S.set_bpm(doc.root, 90)
     S.set_swing(doc, 50, figura='1/8')
 
     _, tre_quarti = C.add_track(
         doc, KIT, name='METRO TEST', folder='KITS',
-        length=S.ticks_per_bar(doc.root), section='0', playing=True)
+        length=barra, section='0', playing=True)
     tre_quarti.set('clipName', '3/4')
     S.set_clip_length_beats(doc.root, tre_quarti, 3)
-    MU.scrivi(doc, tre_quarti, MU.passi('x...x.......', velocity=105),
+    MU.scrivi(doc, tre_quarti, MU.passi('x...x.......', velocity=105,
+                                      tick_per_battuta=barra),
              dove=KICK)
-    MU.scrivi(doc, tre_quarti, MU.passi('........x...', velocity=110),
+    MU.scrivi(doc, tre_quarti, MU.passi('........x...', velocity=110,
+                                      tick_per_battuta=barra),
              dove=RIM)
 
     sette_ottavi = S.duplicate_clip(
         doc, 0, section='1', name='7/8', colour_offset='24')
     S.set_clip_length_beats(doc.root, sette_ottavi, 3.5)
-    MU.scrivi(doc, sette_ottavi, MU.passi('x...x...x.......', velocity=105),
+    MU.scrivi(doc, sette_ottavi, MU.passi('x...x...x.......', velocity=105,
+                                       tick_per_battuta=barra),
              dove=KICK)
-    MU.scrivi(doc, sette_ottavi, MU.passi('............x...', velocity=110),
+    MU.scrivi(doc, sette_ottavi, MU.passi('............x...', velocity=110,
+                                       tick_per_battuta=barra),
              dove=RIM)
+    if con_arranger:
+        MU.forma(doc, 'A B', {'A': [tre_quarti], 'B': [sette_ottavi]},
+                 battute=1)
     return doc
 
 
-def scrivi(path: Path = OUT) -> Path:
+def scrivi(path: Path = OUT, *, input_tick_magnitude: int | None = None,
+           con_arranger: bool = False) -> Path:
     """Valida e scrive la fixture localmente; non la trasferisce."""
     from delugexml import write_file                       # noqa: PLC0415
     from delugexml.writer import FormatTable              # noqa: PLC0415
 
-    doc = costruisci()
+    doc = costruisci(input_tick_magnitude=input_tick_magnitude,
+                     con_arranger=con_arranger)
     problemi = MU.verifica(doc)
     if problemi:
         raise ValueError(f'fixture metro non valida: {problemi}')

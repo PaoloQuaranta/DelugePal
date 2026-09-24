@@ -31,6 +31,8 @@ altro drum senza accorgersene.
 """
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from .parser import Document, Node
 from . import song as S
 
@@ -240,6 +242,8 @@ def set_sample(drum: Node, path: str, *, start: int | None = None,
     nodo = drum.find(f'osc{osc}')
     if nodo is None:
         raise ValueError(f'il drum non ha <osc{osc}>')
+    if nodo.find('sampleRanges') is not None:
+        raise ValueError('oscillatore multisample: usare set_multisample()')
     nodo.set('type', 'sample')
     nodo.set('fileName', path)
     if start is not None or end is not None:
@@ -256,6 +260,105 @@ def set_sample(drum: Node, path: str, *, start: int | None = None,
 def sample_of(drum: Node, osc: int = 1) -> str | None:
     nodo = drum.find(f'osc{osc}')
     return nodo.get('fileName') if nodo is not None else None
+
+
+@dataclass(frozen=True)
+class SampleRange:
+    """Un campione fino a `top_note` inclusa; l'ultimo arriva fino a TOP."""
+
+    path: str
+    top_note: int | None
+    start: int
+    end: int
+    transpose: int = 0
+    cents: int = 0
+
+
+def set_multisample(sound: Node, ranges: list[SampleRange], *, osc: int = 1) -> Node:
+    """Sostituisce i range per nota di un oscillatore sample di un preset reale.
+
+    Il preset deve gia' contenere `<sampleRanges>/<sampleRange>/<zone>`:
+    i nodi nuovi sono copie di quella struttura osservata, non XML inventato.
+    L'ultimo range non porta `rangeTopNote`, come nel preset Tal Rhodes.
+    """
+    if sound.tag != 'sound' or osc not in (1, 2):
+        raise ValueError('serve un <sound> e osc 1 o 2')
+    source = sound.find(f'osc{osc}')
+    container = source.find('sampleRanges') if source is not None else None
+    model = container.find('sampleRange') if container is not None else None
+    if model is None or model.find('zone') is None:
+        raise ValueError('serve un preset multisample osservato come modello')
+    if {key for key, _ in model.find('zone').attrs} - {
+            'startSamplePos', 'endSamplePos'}:
+        raise ValueError('il modello ha altri punti di loop: preservarlo')
+    if not ranges:
+        raise ValueError('serve almeno un range')
+    previous = -1
+    for i, r in enumerate(ranges):
+        if (not all(isinstance(v, int) and not isinstance(v, bool)
+                    for v in (r.start, r.end, r.transpose, r.cents))
+                or (r.top_note is not None and
+                    (not isinstance(r.top_note, int)
+                     or isinstance(r.top_note, bool)))):
+            raise ValueError(f'range {i}: posizioni e accordatura intere')
+        if not r.path or not r.path.startswith('SAMPLES/'):
+            raise ValueError(f'range {i}: percorso SAMPLES/ richiesto')
+        if r.start < 0 or r.end <= r.start:
+            raise ValueError(f'range {i}: zona non valida')
+        if i == len(ranges) - 1:
+            if r.top_note is not None:
+                raise ValueError('l ultimo range deve arrivare a TOP')
+        elif (r.top_note is None or not 0 <= r.top_note <= 127
+              or r.top_note <= previous):
+            raise ValueError(f'range {i}: rangeTopNote non crescente')
+        if r.top_note is not None:
+            previous = r.top_note
+    nuovi = []
+    for r in ranges:
+        item = model.copy_detached()
+        if r.top_note is None:
+            item.remove('rangeTopNote')
+        else:
+            item.set('rangeTopNote', str(r.top_note))
+        item.set('fileName', r.path)
+        for key, value in (('transpose', r.transpose), ('cents', r.cents)):
+            if value:
+                item.set(key, str(value))
+            elif item.has(key):
+                item.remove(key)
+        zone = item.find('zone')
+        zone.set('startSamplePos', str(r.start))
+        zone.set('endSamplePos', str(r.end))
+        nuovi.append(item)
+    container.children = nuovi
+    container.touch()
+    source.set('type', 'sample')
+    return container
+
+
+def set_sample_playback(sound: Node, *, osc: int = 1,
+                        loop: str | None = None,
+                        reverse: bool | None = None,
+                        stretch: bool | None = None) -> Node:
+    """Loop, reverse e stretch sull'oscillatore sample di synth o drum."""
+    if sound.tag != 'sound' or osc not in (1, 2):
+        raise ValueError('serve un <sound> e osc 1 o 2')
+    source = sound.find(f'osc{osc}')
+    if source is None or source.get('type') != 'sample':
+        raise ValueError(f'<osc{osc}> non e un oscillatore sample')
+    if loop is not None and loop not in LOOP_MODE:
+        raise ValueError(f'loop {loop!r} sconosciuto')
+    if reverse is not None and not isinstance(reverse, bool):
+        raise ValueError('reverse deve essere bool')
+    if stretch is not None and not isinstance(stretch, bool):
+        raise ValueError('stretch deve essere bool')
+    if loop is not None:
+        source.set('loopMode', str(LOOP_MODE[loop]))
+    if reverse is not None:
+        source.set('reversed', '1' if reverse else '0')
+    if stretch is not None:
+        source.set('timeStretchEnable', '1' if stretch else '0')
+    return source
 
 
 #: I `loopMode` (REPEAT MODE del guidebook, cap. 9.13): CUT=0, ONCE=1, LOOP=2,

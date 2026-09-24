@@ -273,7 +273,7 @@ def add_audio_track(doc: Document, *, name: str | None = None,
 
 
 def add_audio_clip(doc: Document, traccia: Node, file_path: str, *,
-                   length: int = 384, start: int = 0,
+                   length: int | None = None, start: int = 0,
                    end: int | None = None, wav: str | None = None,
                    section: str = '0', colour_offset: str = '0',
                    playing: bool = False) -> Node:
@@ -289,6 +289,8 @@ def add_audio_clip(doc: Document, traccia: Node, file_path: str, *,
 
     if traccia.tag != 'audioTrack':
         raise ValueError(f'serve un <audioTrack>, non <{traccia.tag}>')
+    if length is None:
+        length = S.ticks_per_bar(doc.root)
     if length <= 0:
         raise ValueError(f'lunghezza non valida: {length}')
     if start < 0:
@@ -340,6 +342,65 @@ def set_sample(doc: Document, clip: Node, file_path: str, *,
     if wav is not None:
         end = min(end, wav_frames(wav)[0])
     clip.set('endSamplePos', str(end))
+    return clip
+
+
+def stretch_clip(clip: Node, factor: float, *,
+                 independent: bool = True) -> int:
+    """Allunga/accorcia la durata in tick mantenendo gli stessi frame audio.
+
+    `factor=2` raddoppia la durata. Con `independent=True` il Deluge mantiene
+    il pitch; con False velocita' e pitch restano collegati. La zona del file
+    non viene spostata. Ritorna la nuova lunghezza in tick.
+    """
+    import math                                           # noqa: PLC0415
+
+    if clip.tag != 'audioClip' or not clip.get('filePath'):
+        raise ValueError('serve una <audioClip> con campione')
+    if (isinstance(factor, bool) or not isinstance(factor, (int, float))
+            or not math.isfinite(factor) or factor <= 0):
+        raise ValueError('factor deve essere positivo e finito')
+    if not isinstance(independent, bool):
+        raise ValueError('independent deve essere bool')
+    old = int(clip.get('length'))
+    new = round(old * factor)
+    if not 1 <= new <= 2147483647:
+        raise ValueError('lunghezza risultante fuori intervallo')
+    clip.set('length', str(new))
+    clip.set('pitchSpeedIndependent', '1' if independent else '0')
+    return new
+
+
+def set_clip_playback(clip: Node, *, reverse: bool | None = None,
+                      semitones: int | None = None,
+                      cents: int | None = None) -> Node:
+    """Reverse e intonazione di una clip audio, senza cambiare la sua zona.
+
+    La build 2d7cdf8 salva solo i valori attivi: `reversed=1`, `transpose`
+    e `cents` non nulli. I valori neutri vanno rimossi, non scritti come 0.
+    Vedi AudioClip::writeDataToFile/readFromFile nel firmware target.
+    """
+    if clip.tag != 'audioClip' or not clip.get('filePath'):
+        raise ValueError('serve una <audioClip> con campione')
+    if reverse is not None and not isinstance(reverse, bool):
+        raise ValueError('reverse deve essere bool')
+    for name, value, low, high in (('semitones', semitones, -32768, 32767),
+                                   ('cents', cents, -128, 127)):
+        if value is not None and (not isinstance(value, int)
+                                  or isinstance(value, bool)
+                                  or not low <= value <= high):
+            raise ValueError(f'{name} deve essere intero tra {low} e {high}')
+    if reverse is not None:
+        if reverse:
+            clip.set('reversed', '1')
+        elif clip.has('reversed'):
+            clip.remove('reversed')
+    for name, value in (('transpose', semitones), ('cents', cents)):
+        if value is not None:
+            if value:
+                clip.set(name, str(value))
+            elif clip.has(name):
+                clip.remove(name)
     return clip
 
 
