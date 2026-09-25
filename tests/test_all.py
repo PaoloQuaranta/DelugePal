@@ -2229,6 +2229,31 @@ def test_midi_automation():
           and M.read_pitch_bend(rclip) == M.read_pitch_bend(clip)
           and M.read_channel_pressure(rclip) == M.read_channel_pressure(clip))
 
+    M.ramp_cc(clip, 1, 0, 127, 0, 96, steps=5)
+    gradini = M.read_cc_automation(clip, 1)
+    check('la rampa CC materializza cinque posizioni discrete',
+          [p.pos for p in gradini] == [0, 24, 48, 72, 96], str(gradini))
+    check('la rampa CC arrotonda i valori MIDI attesi',
+          [p.value for p in gradini] == [0, 32, 64, 95, 127], str(gradini))
+    check('la rampa CC non accende mai l interpolazione',
+          not any(p.interp for p in gradini), str(gradini))
+
+    rampe_invalide = [
+        ('un solo passo',
+         lambda: M.ramp_cc(clip, 1, 0, 127, 0, 96, steps=1)),
+        ('tick uguali',
+         lambda: M.ramp_cc(clip, 1, 0, 127, 48, 48, steps=2)),
+        ('tick invertiti',
+         lambda: M.ramp_cc(clip, 1, 0, 127, 96, 48, steps=2)),
+        ('piu punti che tick',
+         lambda: M.ramp_cc(clip, 1, 0, 127, 0, 96, steps=98)),
+    ]
+    for nome, azione in rampe_invalide:
+        prima = serialize(doc)
+        check(f'rampa CC rifiuta {nome}', _raises(azione, ValueError))
+        check(f'il rifiuto della rampa con {nome} e atomico',
+              serialize(doc) == prima)
+
     invalidi = [
         ('numero CC riservato',
          lambda: M.set_cc_automation(clip, 120, [(0, 64)])),

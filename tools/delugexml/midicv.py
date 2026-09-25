@@ -359,6 +359,39 @@ def set_cc_automation(clip: Node, cc: int,
             'interpolata': False}
 
 
+def ramp_cc(clip: Node, cc: int, start: int, end: int,
+            start_tick: int, end_tick: int, *,
+            steps: int = 9) -> dict[str, object]:
+    """Materializza una rampa CC in gradini, perche' il firmware non interpola.
+
+    Ci puo' essere al massimo un punto per tick: oltre, l'arrotondamento
+    produrrebbe posizioni duplicate e la rampa non descriverebbe cio' che il
+    chiamante ha chiesto.
+    """
+    length = _midi_clip_length(clip)
+    cc = _strict_int('CC', cc, 0, CC_AUTOMATION_MAX)
+    start = _strict_int('start', start, 0, MIDI_VALUE_MAX)
+    end = _strict_int('end', end, 0, MIDI_VALUE_MAX)
+    start_tick = _strict_int('start_tick', start_tick, 0, length - 1)
+    end_tick = _strict_int('end_tick', end_tick, 0, length - 1)
+    if start_tick >= end_tick:
+        raise ValueError('start_tick deve precedere end_tick')
+    if type(steps) is not int or steps < 2:
+        raise ValueError(f'steps deve essere un intero >= 2, non {steps!r}')
+    if steps > end_tick - start_tick + 1:
+        raise ValueError('steps supera i tick disponibili nella rampa')
+
+    points = []
+    for i in range(steps):
+        fraction = i / (steps - 1)
+        pos = round(start_tick + (end_tick - start_tick) * fraction)
+        value = round(start + (end - start) * fraction)
+        points.append((pos, value))
+    report = set_cc_automation(clip, cc, points)
+    report.update({'start': start, 'end': end, 'steps': steps})
+    return report
+
+
 def read_cc_automation(clip: Node, cc: int) -> list[MIDIValuePoint]:
     """Legge un CC nelle unita' MIDI 0-127; lista vuota se e' assente."""
     from . import automation as A                          # import locale: ciclo

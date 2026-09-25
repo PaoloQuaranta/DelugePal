@@ -5,8 +5,10 @@ sviluppare dopo. Non misura quante righe di XML vengono riconosciute: distingue
 quattro capacità diverse, perché leggere o conservare una feature non significa
 saperla creare in sicurezza.
 
-Target: firmware community **1.3.0-beta**, build `2d7cdf8` del 12 agosto 2026.
-La matrice descrive quel target, non il firmware ufficiale e non release future.
+Target: firmware community **1.3.0-beta**, beta Release 20260925, build
+`b76ed39`. La migrazione da `2d7cdf8` e' stata riesaminata sul sorgente per
+l'automazione MIDI; le prove Device storiche restano datate esplicitamente
+nella colonna Evidenza. La matrice non descrive il firmware ufficiale.
 
 ## Come leggere gli stati
 
@@ -87,7 +89,7 @@ kit resta supportato.
 | looper-resampling | audio | Looper, overdub e resampling interno | parziale | completa | parziale | assente | `tools/delugexml/audio.py`, `docs/ARCHITETTURA.md` | P2 | Catturare Player contro Looper e un overdub risalvato |
 | midi-tracce | midi-cv | Tracce MIDI, canali e suffix | completa | completa | completa | completa | `tools/delugexml/midicv.py`, `tests/test_all.py` | — | — |
 | cv-tracce | midi-cv | CV 1 e 2 con sorgente CV2 | completa | completa | completa | parziale | `tools/delugexml/midicv.py`, `HANDOFF.md` | P2 | Verificare sul device tutti i valori cv2Source |
-| midi-cc | midi-cv | Automazione MIDI CC, bend e pressure | solo-conservazione | completa | assente | assente | `docs/ARCHITETTURA.md`, `tools/delugexml/midicv.py` | P1 | Modellare le righe di automazione CC e provarne una per tipo |
+| midi-cc | midi-cv | Automazione MIDI CC, bend e pressure | completa | completa | completa | assente | `tools/delugexml/midicv.py`, `tools/delugexml/automation.py`, `tests/test_all.py`, `docs/superpowers/specs/2026-09-25-midi-cc-bend-pressure-design.md`; CC a gradini, bend/pressure interpolabili | P1 | Aprire e ascoltare MIDIAUTO01 sulla beta 20260925; l'upload da solo non promuove Device |
 | midi-program-bank | midi-cv | Program change e bank select | solo-conservazione | completa | assente | assente | `docs/ARCHITETTURA.md`, `README.md` | P2 | Catturare una clip con program e bank e aggiungere API validata |
 | mpe-zones | midi-cv | Lower e Upper MPE Zone | parziale | completa | assente | assente | `tools/delugexml/midicv.py`, `HANDOFF.md` | P1 | Creare una zona Lower per Exquis e verificare espressione per nota |
 | pattern-files | artefatti-settings | File PATTERNS melodic e rhythmic | parziale | parziale | assente | assente | `docs/ARCHITETTURA.md`, `docs/PROSSIMI_PASSI.md` | P3 | Salvare un pattern reale prima di implementare il formato |
@@ -96,7 +98,7 @@ kit resta supportato.
 | performance-view | artefatti-settings | SETTINGS PerformanceView | parziale | parziale | assente | assente | `docs/ARCHITETTURA.md`, `README.md` | P3 | Acquisire due assegnazioni controllate e definire lo schema |
 | community-features | artefatti-settings | SETTINGS CommunityFeatures | completa | completa | assente | assente | `docs/FINDINGS.md`, `docs/SYSEX.md` | P3 | Esporre solo i flag necessari al workflow con valori documentati |
 | midi-device-defs | artefatti-settings | MIDI device definition files | parziale | parziale | assente | assente | `docs/ARCHITETTURA.md`, `README.md` | P2 | Modellare etichette CC e hideUnlabeledCC con un device reale |
-| target-c130 | compatibilita | Target community 1.3.0-beta | completa | completa | completa | completa | `README.md`, `HANDOFF.md` | — | — |
+| target-c130 | compatibilita | Target community 1.3.0-beta, beta Release 20260925 (`b76ed39`) | completa | completa | completa | completa | `README.md`, `HANDOFF.md`; dispositivo aggiornato dall'utente il 25 settembre 2026 | — | — |
 | schema-multiversione | compatibilita | Confronto e migrazione tra firmware | parziale | completa | assente | assente | `HANDOFF.md`, `docs/PROSSIMI_PASSI.md` | P2 | Eseguire scan_versions e classificare differenze che richiedono migrazione |
 <!-- capability-matrix:end -->
 
