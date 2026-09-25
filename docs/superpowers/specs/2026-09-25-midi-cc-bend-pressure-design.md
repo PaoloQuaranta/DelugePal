@@ -68,5 +68,6 @@ della stessa expression dimension aggiorna il dato senza duplicarlo.
   evidenze private assenti dal checkout.
 - Probe costruito esclusivamente con la libreria, `musica.verifica(doc)` vuota,
   destinazione ottenuta con `musica.destinazione`, upload con rilettura hash.
-- La colonna Device resta `assente` finche' l'utente non apre/ascolta il probe;
-  un upload riuscito da solo non dimostra il comportamento musicale.
+- Accettazione Device completata il 25 settembre 2026: l'utente ha aperto e
+  verificato `MIDIAUTO02` sulla beta 20260925, confermando il comportamento
+  musicale di CC a gradini e bend/pressure interpolati.
