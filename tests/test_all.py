@@ -2165,6 +2165,121 @@ def test_midi_cv():
           not sporchi, f'{len(sporchi)}: {sporchi[:3]}')
 
 
+def test_midi_automation():
+    """CC a gradini; bend e pressure interpolabili, con scale MIDI esatte.
+
+    Il test non usa il corpus privato: la clip nasce dalla stessa API pubblica
+    che dovra' poi ospitare le automazioni. I valori attesi sono letterali,
+    derivati dagli shift del firmware e non dal codec sotto test.
+    """
+    from delugexml import automation as A                 # noqa: PLC0415
+    from delugexml import midicv as M                     # noqa: PLC0415
+    from delugexml.parser import Node                     # noqa: PLC0415
+
+    doc = parse('<song inputTickMagnitude="2">'
+                '<instruments></instruments>'
+                '<sessionClips></sessionClips>'
+                '</song>')
+    _, clip = M.add_midi_track(doc, 0, length=192, playing=True)
+
+    M.set_cc_automation(clip, 74, [(0, 0), (48, 64), (96, 127)])
+    M.set_pitch_bend(clip, [(0, -8192), (48, 0), (96, 8191)])
+    M.set_channel_pressure(clip, [(0, 0), (48, 64), (96, 127)])
+
+    midi_params = clip.find('midiParams')
+    cc74 = next(p for p in midi_params.children
+                if p.find('cc').text == '74')
+    cc_raw = [p.raw for p in A.decode(cc74.find('value').text)[1]]
+    expression = clip.find('expressionData')
+    bend_raw = [p.raw for p in A.decode(expression.get('pitchBend'))[1]]
+    pressure_raw = [p.raw for p in A.decode(expression.get('pressure'))[1]]
+    check('CC usa la scala bipolare esatta del firmware',
+          cc_raw == [0x80000000, 0x00000000, 0x7E000000], str(cc_raw))
+    check('pitch bend usa tutti i 14 bit MIDI firmati',
+          bend_raw == [0x80000000, 0x00000000, 0x7FFC0000], str(bend_raw))
+    check('channel pressure usa i 7 bit nel byte alto',
+          pressure_raw == [0x00000000, 0x40000000, 0x7F000000],
+          str(pressure_raw))
+
+    check('i CC sono sempre a gradini',
+          not any(p.interp for p in A.decode(cc74.find('value').text)[1]))
+    check('bend e pressure sono interpolati per default',
+          all(p.interp for p in A.decode(expression.get('pitchBend'))[1])
+          and all(p.interp for p in A.decode(expression.get('pressure'))[1]))
+    check('l ordine dei figli e quello del writer firmware',
+          [c.tag for c in clip.children]
+          == ['midiParams', 'arpeggiator', 'expressionData', 'bendRange',
+              'bendRangeMPE', 'columnControls'],
+          [c.tag for c in clip.children])
+
+    check('la lettura CC torna a tick, valori e gradini',
+          [tuple(p) for p in M.read_cc_automation(clip, 74)]
+          == [(0, 0, False), (48, 64, False), (96, 127, False)])
+    check('la lettura bend torna ai valori firmati',
+          [tuple(p) for p in M.read_pitch_bend(clip)]
+          == [(0, -8192, True), (48, 0, True), (96, 8191, True)])
+    check('la lettura pressure torna ai valori MIDI',
+          [tuple(p) for p in M.read_channel_pressure(clip)]
+          == [(0, 0, True), (48, 64, True), (96, 127, True)])
+
+    riletto = parse(serialize(doc))
+    rclip = riletto.root.find('sessionClips').children[0]
+    check('CC bend e pressure sopravvivono al round-trip',
+          M.read_cc_automation(rclip, 74) == M.read_cc_automation(clip, 74)
+          and M.read_pitch_bend(rclip) == M.read_pitch_bend(clip)
+          and M.read_channel_pressure(rclip) == M.read_channel_pressure(clip))
+
+    invalidi = [
+        ('numero CC riservato',
+         lambda: M.set_cc_automation(clip, 120, [(0, 64)])),
+        ('numero CC booleano',
+         lambda: M.set_cc_automation(clip, True, [(0, 64)])),
+        ('valore CC negativo',
+         lambda: M.set_cc_automation(clip, 1, [(0, -1)])),
+        ('valore CC oltre 127',
+         lambda: M.set_cc_automation(clip, 1, [(0, 128)])),
+        ('bend sotto il minimo',
+         lambda: M.set_pitch_bend(clip, [(0, -8193)])),
+        ('bend sopra il massimo',
+         lambda: M.set_pitch_bend(clip, [(0, 8192)])),
+        ('pressure negativa',
+         lambda: M.set_channel_pressure(clip, [(0, -1)])),
+        ('pressure oltre 127',
+         lambda: M.set_channel_pressure(clip, [(0, 128)])),
+        ('valore booleano',
+         lambda: M.set_channel_pressure(clip, [(0, True)])),
+        ('tick decrescenti',
+         lambda: M.set_pitch_bend(clip, [(48, 0), (0, 1)])),
+        ('tick duplicati',
+         lambda: M.set_pitch_bend(clip, [(0, 0), (0, 1)])),
+        ('tick fuori clip',
+         lambda: M.set_pitch_bend(clip, [(192, 0)])),
+        ('clip non MIDI',
+         lambda: M.set_channel_pressure(
+             Node(tag='instrumentClip',
+                  attrs=[('cvChannel', '0'), ('length', '192')]), [(0, 1)])),
+    ]
+    for nome, azione in invalidi:
+        prima = serialize(doc)
+        check(f'automazione MIDI rifiuta {nome}', _raises(azione, ValueError))
+        check(f'il rifiuto di {nome} e atomico', serialize(doc) == prima)
+
+    M.set_cc_automation(clip, 74, [(0, 99)])
+    M.set_cc_automation(clip, 1, [(0, 10)])
+    check('riscrivere un CC aggiorna senza duplicare il param',
+          len(clip.find('midiParams').children) == 2,
+          len(clip.find('midiParams').children))
+    check('l altro CC resta indipendente',
+          M.read_cc_automation(clip, 74)[0].value == 99
+          and M.read_cc_automation(clip, 1)[0].value == 10)
+
+    M.set_channel_pressure(clip, [(0, 12)], interpolated=False)
+    check('pressure puo essere esplicitamente a gradini',
+          M.read_channel_pressure(clip) == [M.MIDIValuePoint(0, 12, False)])
+    check('riscrivere pressure non duplica l attributo',
+          len(clip.find('expressionData').get_all('pressure')) == 1)
+
+
 def _nodo_vuoto_templ():
     """La clip vuota di TEMPL0, da cui viene `create.CLIP_BASE`."""
     p = REFS / 'songs' / 'TEMPL0.XML'

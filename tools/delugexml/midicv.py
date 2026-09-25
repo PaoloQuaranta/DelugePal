@@ -57,11 +57,28 @@ Nel corpus non ce n'e' nessuno — tutti e 94 gli strumenti MIDI hanno un canale
 """
 from __future__ import annotations
 
+from typing import NamedTuple
+
 from .parser import Document, Node
 
 MIDI_CANALI = 16                 # 0-15 nel file, 1-16 sul display
 CV_CANALI = 2                    # le due uscite del pannello
 SENZA_SUFFIX = -1
+
+CC_AUTOMATION_MAX = 119
+MIDI_VALUE_MAX = 127
+PITCH_BEND_MIN = -8192
+PITCH_BEND_MAX = 8191
+
+_U32 = 1 << 32
+_SIGN32 = 1 << 31
+
+
+class MIDIValuePoint(NamedTuple):
+    """Un punto MIDI nelle unita' del protocollo, non nell'int32 interno."""
+    pos: int
+    value: int
+    interp: bool = False
 
 TAG = {'midi': 'midiChannel', 'cv': 'cvChannel'}
 ATTR_CLIP = {'midi': 'midiChannel', 'cv': 'cvChannel'}
@@ -201,6 +218,225 @@ def find_track(doc: Document, tipo: str, channel: int,
         if int(i.get('suffix', SENZA_SUFFIX)) == suffix:
             return i
     return None
+
+
+# -------------------------------------------------------------- automazione
+
+def _strict_int(name: str, value: object, minimo: int, massimo: int) -> int:
+    if type(value) is not int or not minimo <= value <= massimo:
+        raise ValueError(f'{name} deve essere un intero {minimo}..{massimo}, '
+                         f'non {value!r}')
+    return value
+
+
+def _midi_clip_length(clip: Node) -> int:
+    if clip.tag != 'instrumentClip' or clip.get('midiChannel') is None:
+        raise ValueError('serve una <instrumentClip> MIDI')
+    try:
+        length = int(clip.get('length'))
+    except (TypeError, ValueError):
+        raise ValueError('la clip MIDI non ha una length intera') from None
+    if length <= 0:
+        raise ValueError(f'la clip MIDI ha length non positiva: {length}')
+    return length
+
+
+def _u32(value: int) -> int:
+    return value & (_U32 - 1)
+
+
+def _signed(raw: int) -> int:
+    return raw - _U32 if raw & _SIGN32 else raw
+
+
+def _cc_to_raw(value: int) -> int:
+    return _u32((value - 64) << 25)
+
+
+def _raw_to_cc(raw: int) -> int:
+    # Stessa saturazione e stesso rounding di autoparamValueToCC() nel
+    # firmware. Serve anche per leggere il massimo speciale 0x7FFFFFFF.
+    value = min(_signed(raw), 0x7EFFFFFF)
+    return ((value + (1 << 24)) >> 25) + 64
+
+
+def _bend_to_raw(value: int) -> int:
+    return _u32(value << 18)
+
+
+def _raw_to_bend(raw: int) -> int:
+    return _signed(raw) >> 18
+
+
+def _pressure_to_raw(value: int) -> int:
+    return value << 24
+
+
+def _raw_to_pressure(raw: int) -> int:
+    return max(0, min(MIDI_VALUE_MAX, raw >> 24))
+
+
+def _automation_nodes(clip: Node, points: list[tuple[int, int]], *,
+                      minimo: int, massimo: int, encode_value,
+                      interpolated: bool) -> list:
+    """Valida tutto prima di restituire nodi: nessuna mutazione parziale."""
+    from . import automation as A                          # import locale: ciclo
+
+    length = _midi_clip_length(clip)
+    if not isinstance(points, (list, tuple)) or not points:
+        raise ValueError('servono uno o piu punti (tick, valore)')
+    nodes = []
+    previous = -1
+    for i, point in enumerate(points):
+        if not isinstance(point, (list, tuple)) or len(point) != 2:
+            raise ValueError(f'punto {i}: attesa coppia (tick, valore), '
+                             f'non {point!r}')
+        pos = _strict_int(f'punto {i} tick', point[0], 0, length - 1)
+        value = _strict_int(f'punto {i} valore', point[1], minimo, massimo)
+        if pos <= previous:
+            raise ValueError('i tick devono essere crescenti e distinti')
+        nodes.append(A.Punto(pos=pos, raw=encode_value(value),
+                            interp=interpolated))
+        previous = pos
+    return nodes
+
+
+def _insert_before(clip: Node, child: Node, before: str) -> Node:
+    index = next((i for i, c in enumerate(clip.children) if c.tag == before),
+                 len(clip.children))
+    return clip.insert(index, child)
+
+
+def _midi_params(clip: Node, *, create: bool) -> Node | None:
+    params = clip.find('midiParams')
+    if params is None and create:
+        params = _insert_before(clip, Node(tag='midiParams'), 'arpeggiator')
+    return params
+
+
+def _cc_param(clip: Node, cc: int) -> Node | None:
+    params = _midi_params(clip, create=False)
+    if params is None:
+        return None
+    for param in params.find_all('param'):
+        cc_node = param.find('cc')
+        if cc_node is not None and cc_node.text == str(cc):
+            return param
+    return None
+
+
+def set_cc_automation(clip: Node, cc: int,
+                      points: list[tuple[int, int]]) -> dict[str, object]:
+    """Scrive un CC 0-119 a gradini su una clip MIDI.
+
+    Il firmware corrente non interpola i MIDI CC. Il bit di interpolazione
+    resta quindi spento anche se i punti descrivono una rampa.
+    """
+    from . import automation as A                          # import locale: ciclo
+
+    cc = _strict_int('CC', cc, 0, CC_AUTOMATION_MAX)
+    nodes = _automation_nodes(clip, points, minimo=0,
+                              massimo=MIDI_VALUE_MAX,
+                              encode_value=_cc_to_raw,
+                              interpolated=False)
+    blob = A.encode(nodes[0].raw, nodes)
+
+    param = _cc_param(clip, cc)
+    if param is None:
+        params = _midi_params(clip, create=True)
+        param = Node(tag='param')
+        param.append(Node(tag='cc', text=str(cc)))
+        param.append(Node(tag='value', text=blob))
+        params.append(param)
+    else:
+        value = param.find('value')
+        if value is None:
+            raise ValueError(f'CC {cc}: <param> senza <value>')
+        value.text = blob
+        value.touch()
+    return {'tipo': 'cc', 'cc': cc, 'punti': len(nodes),
+            'da_tick': nodes[0].pos, 'a_tick': nodes[-1].pos,
+            'interpolata': False}
+
+
+def read_cc_automation(clip: Node, cc: int) -> list[MIDIValuePoint]:
+    """Legge un CC nelle unita' MIDI 0-127; lista vuota se e' assente."""
+    from . import automation as A                          # import locale: ciclo
+
+    cc = _strict_int('CC', cc, 0, CC_AUTOMATION_MAX)
+    _midi_clip_length(clip)
+    param = _cc_param(clip, cc)
+    if param is None:
+        return []
+    value = param.find('value')
+    if value is None:
+        raise ValueError(f'CC {cc}: <param> senza <value>')
+    _, nodes = A.decode(value.text)
+    return [MIDIValuePoint(p.pos, _raw_to_cc(p.raw), p.interp)
+            for p in nodes]
+
+
+def _expression(clip: Node, *, create: bool) -> Node | None:
+    expression = clip.find('expressionData')
+    if expression is None and create:
+        expression = _insert_before(
+            clip, Node(tag='expressionData', self_closing=True), 'bendRange')
+    return expression
+
+
+def _set_expression(clip: Node, name: str, points: list[tuple[int, int]], *,
+                    minimo: int, massimo: int, encode_value,
+                    interpolated: bool) -> dict[str, object]:
+    from . import automation as A                          # import locale: ciclo
+
+    if type(interpolated) is not bool:
+        raise ValueError(f'interpolated deve essere bool, non {interpolated!r}')
+    nodes = _automation_nodes(clip, points, minimo=minimo, massimo=massimo,
+                              encode_value=encode_value,
+                              interpolated=interpolated)
+    expression = _expression(clip, create=True)
+    expression.set(name, A.encode(nodes[0].raw, nodes))
+    return {'tipo': name, 'punti': len(nodes),
+            'da_tick': nodes[0].pos, 'a_tick': nodes[-1].pos,
+            'interpolata': interpolated}
+
+
+def _read_expression(clip: Node, name: str, decode_value) \
+        -> list[MIDIValuePoint]:
+    from . import automation as A                          # import locale: ciclo
+
+    _midi_clip_length(clip)
+    expression = _expression(clip, create=False)
+    if expression is None or expression.get(name) is None:
+        return []
+    _, nodes = A.decode(expression.get(name))
+    return [MIDIValuePoint(p.pos, decode_value(p.raw), p.interp)
+            for p in nodes]
+
+
+def set_pitch_bend(clip: Node, points: list[tuple[int, int]], *,
+                   interpolated: bool = True) -> dict[str, object]:
+    """Pitch bend MIDI firmato (-8192..8191), interpolato per default."""
+    return _set_expression(
+        clip, 'pitchBend', points, minimo=PITCH_BEND_MIN,
+        massimo=PITCH_BEND_MAX, encode_value=_bend_to_raw,
+        interpolated=interpolated)
+
+
+def read_pitch_bend(clip: Node) -> list[MIDIValuePoint]:
+    return _read_expression(clip, 'pitchBend', _raw_to_bend)
+
+
+def set_channel_pressure(clip: Node, points: list[tuple[int, int]], *,
+                         interpolated: bool = True) -> dict[str, object]:
+    """Channel pressure 0-127, interpolata per default."""
+    return _set_expression(
+        clip, 'pressure', points, minimo=0, massimo=MIDI_VALUE_MAX,
+        encode_value=_pressure_to_raw, interpolated=interpolated)
+
+
+def read_channel_pressure(clip: Node) -> list[MIDIValuePoint]:
+    return _read_expression(clip, 'pressure', _raw_to_pressure)
 
 
 # ------------------------------------------------------------------ scrittura
