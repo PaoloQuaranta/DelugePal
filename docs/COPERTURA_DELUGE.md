@@ -73,7 +73,7 @@ kit resta supportato.
 | dx7 | synth-fx | Importazione e motore DX7 | solo-conservazione | completa | assente | assente | `docs/ARCHITETTURA.md`, `docs/SCHEMA_song_c1.3.0.md` | P2 | Studiare un preset DX7 e il legame con i banchi SYX |
 | modulazione | synth-fx | Patch cable e matrice di modulazione | completa | completa | completa | completa | `tools/delugexml/sound.py`, `tests/test_all.py` | — | — |
 | inviluppi-lfo-unison | synth-fx | Inviluppi, LFO e unison | completa | completa | completa | completa | `tools/delugexml/sound.py`, `tools/delugexml/structure.py` | — | — |
-| filtri-routing-morph | synth-fx | Tipi filtro, routing e morph | completa | completa | parziale | parziale | `tools/delugexml/structure.py`, `docs/FINDINGS.md` | P1 | Coprire routing L2H e parallelo, morph e filter FM |
+| filtri-routing-morph | synth-fx | Tipi filtro, routing e morph | completa | completa | completa | completa | `tools/delugexml/structure.py`, `docs/FILTRI.md`, `tests/test_filters.py`; FILTER01 ascoltata, risalvata e conservata semanticamente | — | — |
 | effetti-standard | synth-fx | Delay, reverb, mod FX, EQ e distorsioni | completa | completa | parziale | parziale | `tools/delugexml/sound.py`, `tools/delugexml/musica.py` | P1 | Aggiungere API strutturali e prove isolate per ogni famiglia FX |
 | effetti-community | synth-fx | Grain, stereo chorus e wavefold | completa | completa | parziale | assente | `tools/delugexml/structure.py`, `tools/delugexml/param_ids.py` | P2 | Generare tre patch minime e verificarle sul dispositivo |
 | master-compressor | synth-fx | Compressore master di song | completa | completa | parziale | assente | `tools/delugexml/sound.py`, `docs/ARCHITETTURA.md` | P2 | Distinguere API master dal compressore di traccia e dal sidechain |
@@ -91,7 +91,9 @@ kit resta supportato.
 | cv-tracce | midi-cv | CV 1 e 2 con sorgente CV2 | completa | completa | completa | parziale | `tools/delugexml/midicv.py`, `HANDOFF.md` | P2 | Verificare sul device tutti i valori cv2Source |
 | midi-cc | midi-cv | Automazione MIDI CC, bend e pressure | completa | completa | completa | completa | `tools/delugexml/midicv.py`, `tools/delugexml/automation.py`, `tests/test_all.py`, `docs/superpowers/specs/2026-09-25-midi-cc-bend-pressure-design.md`; MIDIAUTO02 confermato sul dispositivo il 25 settembre 2026: CC a gradini, bend/pressure interpolabili | — | — |
 | midi-program-bank | midi-cv | Program change e bank select | solo-conservazione | completa | assente | assente | `docs/ARCHITETTURA.md`, `README.md` | P2 | Catturare una clip con program e bank e aggiungere API validata |
-| mpe-zones | midi-cv | Lower e Upper MPE Zone | parziale | completa | assente | assente | `tools/delugexml/midicv.py`, `HANDOFF.md` | P1 | Creare una zona Lower per Exquis e verificare espressione per nota |
+| mpe-input-routing | midi-cv | Assegnazione di una Lower o Upper MPE Zone in ingresso | parziale | completa | assente | assente | `HANDOFF.md`, `docs/ARCHITETTURA.md`; il setup usa Exquis in Lower Zone ma non esiste ancora una cattura XML controllata | P2 | Catturare con e senza Learn dell'Exquis, distinguere `inputMPEZone` dal device MIDI e verificare la persistenza |
+| mpe-note-expression | midi-cv | Pitch, slide/timbro e pressione per singola nota | completa | completa | completa | completa | `tools/delugexml/mpe.py`, `tests/test_all.py`, `HANDOFF.md`; MANTRA letta dal dispositivo contiene 26 noteRow espressive, 78 assi e 27 743 punti; MPEPROBE01 e' stata caricata, ascoltata e risalvata, conservando esattamente i tre assi | — | — |
+| mpe-output-zones | midi-cv | Lower e Upper MPE Zone in uscita verso un synth esterno | parziale | completa | assente | assente | `tools/delugexml/midicv.py`, `docs/FINDINGS.md`; il firmware accetta entrambe le zone, senza esemplari nel corpus | P3 | Rimandare finche non esiste un sintetizzatore MPE esterno da pilotare e una prova device concreta |
 | pattern-files | artefatti-settings | File PATTERNS melodic e rhythmic | parziale | parziale | assente | assente | `docs/ARCHITETTURA.md`, `docs/PROSSIMI_PASSI.md` | P3 | Salvare un pattern reale prima di implementare il formato |
 | synth-kit-presets | artefatti-settings | Preset standalone SYNTHS e KITS | completa | completa | parziale | parziale | `tools/delugexml/create.py`, `tools/delugexml/kit.py` | P2 | Aggiungere API esplicita di salvataggio preset e prova di reload |
 | midi-follow | artefatti-settings | SETTINGS MIDIFollow | parziale | parziale | assente | assente | `docs/FINDINGS.md`, `docs/ARCHITETTURA.md` | P1 | Modellare mapping e persistenza per il setup Exquis e LCXL |
@@ -107,10 +109,9 @@ kit resta supportato.
 La priorità non deriva dal numero di righe mancanti ma dal flusso compositivo
 attuale. L'ordine consigliato è:
 
-1. **MPE e MIDI espressivo**, a partire dalla Lower Zone usata da Exquis;
-2. **sintesi ed effetti community**: routing, morph, wavetable, grain e DX7;
-3. **sampler residuo**: lettura strutturata e controlli completi dei range;
-4. **artefatti laterali e compatibilità**: Settings, Pattern e versioni.
+1. **sintesi ed effetti community**: routing, morph, wavetable, grain e DX7;
+2. **sampler residuo**: lettura strutturata e controlli completi dei range;
+3. **artefatti laterali e compatibilità**: Settings, Pattern e versioni.
 
 Probability, iterance, Fill, row length, Euclidean e arpeggiatore sono gia'
 coperti e verificati sul dispositivo. Il rilevamento automatico dei transienti

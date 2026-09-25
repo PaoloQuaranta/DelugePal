@@ -776,10 +776,24 @@ scriverli:
 | `lfo*/type` | sine, triangle, saw, square, rwalk |
 | `unison` | num 1-8, detune 0-50, spread 0-50 |
 
-[OSS] `filterRoute` vale `H2L` in **tutti** i 1644 casi. Il firmware accetterà
-verosimilmente anche il percorso inverso, ma non è mai stato visto in un file:
-scriverlo sarebbe un'ipotesi. Da qui `force=True`, che serve a esplorare
-dichiarando di essere fuori dal verificato.
+[OSS] `filterRoute` vale `H2L` in **tutti** i 1644 casi del corpus storico.
+**Aggiornamento 25 settembre 2026:** il sorgente della build installata
+`2d7cdf8`, `src/deluge/model/mod_controllable/filters/filter_config.cpp`,
+conferma esplicitamente `H2L`, `L2H` e `PARA`. Non serve piu' `force=True`.
+`structure.FIRMWARE` mantiene questa evidenza distinta dai conteggi osservati.
+Lo stesso sorgente non contempla il vecchio valore `flanger`: rimane nei
+conteggi storici ma la scrittura sulla build corrente richiede `force=True`.
+
+[MAN] Il terzo parametro e' morph per SVF Band/Notch (LP -> band/notch -> HP
+nello slot LPF, verso inverso nello slot HPF), drive per i ladder LPF e FM
+per HPLadder. Il firmware salva `lpfMorph`/`hpfMorph` nei parametri, anche
+quando il menu li chiama DRIVE/FM. I valori sopravvivono al cambio di modo.
+Fonti: [community](https://delugecommunity.com/features/community_features/),
+[mappa XML della build](https://github.com/SynthstromAudible/DelugeFirmware/blob/2d7cdf8/src/deluge/model/mod_controllable/filters/filter_config.cpp),
+[inversione HPF](https://github.com/SynthstromAudible/DelugeFirmware/blob/2d7cdf8/src/deluge/dsp/filter/filter_set.cpp).
+API e prova controllata: `docs/FILTRI.md`. `FILTER01` e' stata ascoltata e
+risalvata sul dispositivo: modi, routing, automazioni e note sono conservati
+semanticamente; la copertura e' completa anche sul Device.
 
 Da notare: in FM gli oscillatori **non portano `type`**, perché non c'è forma
 d'onda da scegliere. Un preset subtractive ha `<osc1 type="square">`, la patch

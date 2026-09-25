@@ -100,7 +100,7 @@ Entrambi erano XML validi e si rileggevano senza errori.
 import sys; sys.path.insert(0, 'tools')
 from delugexml import parse_file, write_file, musica as MU
 from delugexml import song as S, create as C, arranger as A, kit as K
-from delugexml import midicv, audio
+from delugexml import midicv, mpe, audio
 from delugexml import groove as GR
 from delugexml.writer import FormatTable
 ```
@@ -143,6 +143,7 @@ from delugexml.writer import FormatTable
 | un drum dal kit | `K.remove_drum(doc, kit, nome)` — diverso da `MU.togli(riga)`: toglie il drum dallo **strumento**, quindi cambia **tutte** le clip di quel kit, e rinumera i `drumIndex`. `MU.togli` su una riga fa tacere quel drum **in quella clip sola** |
 | **trasporre** | `MU.trasponi(doc, bersaglio, semitoni=…)` oppure `gradi=…`, mai tutti e due. `semitoni=12` è un'ottava, sempre; `gradi=2` sale di due gradi **nella scala della song**, e una nota fuori scala conserva il suo scarto invece di essere schiacciata dentro. Bersaglio come in `togli`: strumento, clip o riga. Su un **kit** intona i drum (`transpose` sugli osc) e quindi cambia **tutte** le clip di quel kit — il rapporto lo dice in `condiviso`; `gradi=` lì è un errore, perché un drum non ha gradi |
 | **spostare nel tempo** | `MU.sposta(doc, clip, tick=…)` oppure `battute=…`. **Rifiuta** di mandare note prima di zero e dice quanto spazio c'è, invece di scartarle |
+| **espressione MPE per nota** | Su una clip synth melodica, `mpe.set_pitch_bend(clip, altezza, punti)` usa −8192…8191; `mpe.set_slide(...)` e `mpe.set_pressure(...)` usano 0…127. I tick sono assoluti nella clip, le tre `read_*` restituiscono `MPEValuePoint(pos, value, interp)` e scrivere un asse conserva gli altri due. Il formato Deluge memorizza l'espressione sulla `noteRow`: note ripetute alla stessa altezza condividono quindi la stessa corsia. `MPEPROBE01.XML` e' stata aperta, ascoltata e risalvata sul dispositivo; la rilettura conserva esattamente i nove punti dei tre assi |
 | **allungare ripetendo** | `MU.repeat(doc, clip, volte)` — la clip diventa `volte` più lunga e il materiale si ripete; le **durate non cambiano** |
 | **cambiare il rate** | `MU.stretch(doc, clip, fattore)` — scala note **e** lunghezza della clip insieme. Sopra ci sono i due nomi musicali: `MU.double_time(doc, clip)` tiene la battuta e raddoppia l'articolazione (8 ottavi → 16 sedicesimi), `MU.half_time(doc, clip)` **raddoppia la clip** (8 ottavi → 8 quarti). L'asimmetria è voluta |
 | arrangiamento | `A.place(doc, strumento, clip, pos=…, length=…)` poi `A.fit_view(doc)` |

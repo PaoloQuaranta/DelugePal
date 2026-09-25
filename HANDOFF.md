@@ -273,6 +273,26 @@ Sostituisce `docs/HANDOFF_originale.md`, che resta come storia.
 > default compatibile e accettano `tick_per_battuta=` quando la song ha
 > un'altra risoluzione.
 >
+> **Il 25 settembre 2026 e' stata implementata l'espressione MPE per nota.**
+> `tools/delugexml/mpe.py` legge e scrive pitch bend (−8192…8191), slide e
+> pressure (0…127) sulla `noteRow` di una clip synth melodica, con tick assoluti
+> nella clip, validazione atomica e conservazione degli altri assi. Il formato
+> lega la corsia alla riga di altezza: note ripetute allo stesso pitch la
+> condividono. La song MANTRA, appena letta dal Deluge, contiene 26 righe
+> espressive, 78 assi e 27 743 punti. **MANTRA e' materiale personale: la
+> copia locale e' ignorata da Git e non va mai pubblicata nel repository.**
+> `MPEPROBE01.XML` modifica soltanto i tre
+> assi della riga C4 della clip `BOD2-15-VAPOR-PAD-3`; caricamento e readback
+> SysEx sono byte-identici (482091 byte, SHA-256
+> `1ff64320a5c33d5094ad258bbd66160dd766f44c2cc2104afdb66efd41106f45`).
+> L'utente l'ha aperta, ascoltata e confermata funzionante, poi risalvata come
+> `MPEPROBE01 2.XML`. La rilettura SysEx (482096 byte, SHA-256
+> `b48cf3890a8b0bb41f0fdd8478188f6450c7bb00db385007739fbac7b1f88d68`)
+> conserva esattamente i nove punti dei tre assi e passa `verifica()` senza
+> errori. La copertura MPE per nota e' quindi **completa anche sul Device**.
+> MANTRA non contiene `inputMPEZone`: il routing Lower/Upper Zone e' un
+> problema separato.
+>
 > Per usarlo si invoca la skill **`deluge-pal`**
 > (`.claude/skills/deluge-pal/SKILL.md`), che contiene il protocollo. Le sei
 > regole di quel documento non sono consigli: ognuna nasce da un errore pagato.
@@ -288,6 +308,31 @@ finito» in questo documento significa che il ciclo compositivo fondamentale
 funziona; non significa che ogni feature del Deluge sia coperta.
 
 ---
+
+## Filtri, routing e morph — 25 settembre 2026
+
+`structure.set_filter()` espone ora `route=H2L/L2H/PARA`, `lpf_morph` e
+`hpf_morph` (interi 0-50), con `params_node` per la clip o noteRow.
+Valida tutto prima di scrivere; omettere i morph conserva valori e automazioni.
+La mappa del firmware `2d7cdf8` conferma routing e modi: i nuovi valori
+ammessi stanno in `FIRMWARE`, separati dai conteggi storici `OSSERVATI`.
+Il vecchio `flanger`, assente dalla mappa corrente, richiede `force=True`.
+
+`tools/filtri_scritto.py` genera `FILTER01`: nove sezioni con tre routing,
+SVF Band/Notch nei due slot, drive LPF e filter FM HPF. I parametri variabili
+passano a gradini 0/25/50/0, una battuta ciascuno. `verifica` e `avvertenze`
+sono vuote; upload e rilettura SysEx di 63015 byte identici, SHA-256
+`43999ebedd3bbf59af744b7c46727369a34f91a316e8e28b441deb3b11b7c3f5`.
+L'utente ha ascoltato le nove sezioni e confermato **«funziona»** `[OSS]`,
+poi ha risalvato come `FILTER01 2`. La rilettura SysEx misura 62575 byte,
+SHA-256 `e3ec66cfab4b3ff3fe5f4284fdd9bddce953a3dce55a5f07799db65b774dd0d7`.
+Il confronto semantico conserva esattamente modi, routing, blob completi di
+morph/drive/FM, 36 note con tutti i campi, lunghezze, sezioni e BPM;
+`verifica` e `avvertenze` restano vuote. Le differenze byte sono normali
+riscritture di ordine, nodi vuoti e stati globali/di vista. **La copertura
+filtri-routing-morph e' completa anche sul Device.** Istruzioni e API in
+`docs/FILTRI.md`; regressioni autonome in `tests/test_filters.py`, richiamate
+anche dalla suite generale (2304 controlli).
 
 ## Il prossimo lavoro
 
@@ -4632,7 +4677,9 @@ il residuo e' P2, non una prova sul dispositivo ancora aperta.
   «21..127 = LATCHING» è superata; la probability indipendente 1..20 è ora
   implementata e la parte storica richiede coppie controllate proprie
 - perché 24 `<section>` quando il manuale ne descrive 12
-- MPE nell'XML, mai guardato (il setup usa Exquis in Lower Zone)
+- MPE: l'espressione per nota e' completa e verificata sul dispositivo. Resta
+  distinta e ancora da catturare l'assegnazione XML della Lower/Upper Zone in
+  ingresso (`inputMPEZone`), assente nel materiale osservato
 - confronto dello schema **fra versioni di firmware**: non è più bloccato, le
   103 song sono state copiate in `corpus_versions\` divise per versione. Resta
   da fare l'analisi vera e propria (`scan_versions.py` è il punto di partenza)

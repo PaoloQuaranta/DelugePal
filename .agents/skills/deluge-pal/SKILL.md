@@ -100,7 +100,7 @@ Entrambi erano XML validi e si rileggevano senza errori.
 import sys; sys.path.insert(0, 'tools')
 from delugexml import parse_file, write_file, musica as MU
 from delugexml import song as S, create as C, arranger as A, kit as K
-from delugexml import midicv, audio
+from delugexml import midicv, mpe, audio
 from delugexml import groove as GR
 from delugexml.writer import FormatTable
 ```
@@ -149,6 +149,7 @@ from delugexml.writer import FormatTable
 | **sequenza euclidea per riga** | `MU.euclideo(doc, clip, dove, eventi=5, passi=16, rotazione=0, durata='1/16', velocity=90)` — sostituisce soltanto la riga scelta, le assegna il ciclo proprio e materializza note normali con la formula esatta del firmware. `rotazione` positiva va a destra; `eventi=0` svuota la riga ma conserva il ciclo |
 | **arpeggiatore synth o MIDI/CV** | `MU.arpeggiatore(clip, preset='both', ottave=3, ripetizioni=2, ritmo='0-0', ratchet=25, probabilita_ratchet=35, spread_ottava=10, blocca_random=True)` — preset: `off/up/down/both/random/walk`; per il custom usare `modo_note=` e `modo_ottave=`. Ritmo, probabilità, ratchet e spread sono 0–50; il rapporto restituito li rilegge dal formato effettivo. Su synth stanno nei `soundParams`, su MIDI/CV nel nodo arp. La build `2d7cdf8` rilegge erroneamente l'octave mode `upDown` come random: l'API lo rifiuta invece di produrre un comportamento silenziosamente diverso |
 | **automazione MIDI CC, bend e pressure** | `midicv.set_cc_automation(clip, cc, [(tick, valore), ...])` scrive CC 0–119 e valori 0–127 **sempre a gradini**; `midicv.ramp_cc(...)` materializza una rampa in più gradini, perché il firmware non interpola i CC. `midicv.set_pitch_bend(clip, punti)` usa −8192…8191 e `midicv.set_channel_pressure(clip, punti)` usa 0–127; entrambi sono interpolati dal Deluge per default, con `interpolated=False` per i gradini. Le tre `read_*` restituiscono `MIDIValuePoint(pos, value, interp)`. Target: beta Release 20260925 `b76ed39`, che include i fix expression `685b4fb` e `a23d06e` |
+| **espressione MPE per nota** | Su una clip synth melodica, `mpe.set_pitch_bend(clip, altezza, punti)` usa −8192…8191; `mpe.set_slide(...)` e `mpe.set_pressure(...)` usano 0…127. I tick sono assoluti nella clip, le tre `read_*` restituiscono `MPEValuePoint(pos, value, interp)` e scrivere un asse conserva gli altri due. Il formato Deluge memorizza l'espressione sulla `noteRow`: note ripetute alla stessa altezza condividono quindi la stessa corsia. `MPEPROBE01.XML` e' stata aperta, ascoltata e risalvata sul dispositivo; la rilettura conserva esattamente i nove punti dei tre assi |
 | **allungare ripetendo** | `MU.repeat(doc, clip, volte)` — la clip diventa `volte` più lunga e il materiale si ripete; le **durate non cambiano** |
 | **cambiare il rate** | `MU.stretch(doc, clip, fattore)` — scala note **e** lunghezza della clip insieme. Sopra ci sono i due nomi musicali: `MU.double_time(doc, clip)` tiene la battuta e raddoppia l'articolazione (8 ottavi → 16 sedicesimi), `MU.half_time(doc, clip)` **raddoppia la clip** (8 ottavi → 8 quarti). L'asimmetria è voluta |
 | arrangiamento | `A.place(doc, strumento, clip, pos=…, length=…)` poi `A.fit_view(doc)` |

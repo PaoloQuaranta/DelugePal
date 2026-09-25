@@ -8,7 +8,8 @@ PERCHE' UN ELENCO DI VALORI AMMESSI
 -----------------------------------
 Sono enumerazioni, e un valore inventato non produce un errore: produce un
 file che il dispositivo interpreta a modo suo. Qui si accettano solo i valori
-**osservati in file reali**, con il conteggio a fianco come prova. Chi vuole
+**osservati in file reali** oppure confermati dal firmware (FIRMWARE),
+con le due fonti mantenute distinte. Chi vuole
 scriverne uno mai visto deve dirlo esplicitamente (`force=True`), e sa di
 essere fuori dal terreno verificato.
 
@@ -64,16 +65,26 @@ INTERVALLI: dict[tuple[str, str], tuple[int, int]] = {
     ('sound', 'maxVoices'): (8, 8),
 }
 
-#: `filterRoute` vale H2L in TUTTI i 1644 casi osservati. Il firmware
-#: probabilmente accetta anche il percorso inverso, ma non e' mai stato visto
-#: in un file: scriverlo sarebbe un'ipotesi, non un dato.
-SOLO_UN_VALORE = {('sound', 'filterRoute'): 'H2L',
-                  ('kit', 'filterRoute'): 'H2L',
-                  ('kit', 'hpfMode'): 'HPLadder'}
+#: Build 2d7cdf8: model/mod_controllable/filters/filter_config.cpp.
+#: I modi disponibili per ciascuno slot sono documentati nei menu community.
+#: Non sono conteggi di osservazioni; flanger e' un vecchio valore del corpus,
+#: assente dalla mappa della build corrente, e richiede force=True.
+FIRMWARE = {
+    (tag, attr): values
+    for tag in ('sound', 'kit')
+    for attr, values in (
+        ('filterRoute', ('H2L', 'L2H', 'PARA')),
+        ('lpfMode', ('12dB', '24dB', '24dBDrive', 'SVF_Band', 'SVF_Notch', 'Off')),
+        ('hpfMode', ('HPLadder', 'SVF_Band', 'SVF_Notch', 'Off')),
+    )
+}
+SOLO_UN_VALORE = {}
 
 
 def valori_ammessi(tag: str, attr: str) -> list[str]:
-    """I valori osservati per questo attributo, dal piu' frequente."""
+    """Valori confermati dal firmware, oppure osservati nel corpus."""
+    if (tag, attr) in FIRMWARE:
+        return list(FIRMWARE[(tag, attr)])
     d = OSSERVATI.get((tag, attr))
     if d:
         return list(d)
@@ -93,11 +104,11 @@ def set_attr(node: Node, attr: str, value, *, force: bool = False) -> str:
     v = str(value)
     chiave = (node.tag, attr)
     if not force:
-        enum = OSSERVATI.get(chiave)
+        enum = FIRMWARE.get(chiave, OSSERVATI.get(chiave))
         if enum is not None and v not in enum:
             raise ValueError(
-                f'<{node.tag} {attr}="{v}"> mai osservato. '
-                f'Valori visti: {", ".join(enum)}. '
+                f'<{node.tag} {attr}="{v}"> non supportato. '
+                f'Valori ammessi: {", ".join(enum)}. '
                 'Usa force=True se vuoi provarlo lo stesso.')
         limiti = INTERVALLI.get(chiave)
         if limiti is not None:
@@ -121,17 +132,48 @@ def set_attr(node: Node, attr: str, value, *, force: bool = False) -> str:
 # ------------------------------------------------------------ scorciatoie
 
 def set_filter(inst: Node, *, lpf: str | None = None,
-               hpf: str | None = None, force: bool = False) -> None:
+               hpf: str | None = None, route: str | None = None,
+               lpf_morph: int | None = None, hpf_morph: int | None = None,
+               params_node: Node | None = None, force: bool = False) -> None:
     """Modalita' dei filtri sullo strumento.
 
     `lpf='Off'` spegne il filtro passa-basso: da li' in poi `lpfFrequency` e
     `lpfResonance` non hanno piu' effetto, pur restando scrivibili. E' il caso
     che ha fatto sembrare inefficaci le modifiche a una patch FM.
+
+    route: H2L (HPF -> LPF), L2H (LPF -> HPF), PARA (parallelo).
+    I morph sono 0-50: SVF LP -> band/notch -> HP sullo slot LPF,
+    direzione inversa sullo slot HPF; drive nei ladder LPF e FM in HPLadder.
+    Il cambio di modo conserva i morph se non passati esplicitamente.
+    Per un preset i parametri stanno in inst; in una song passare la clip
+    (o noteRow del drum) come params_node. Modi e route sono condivisi da
+    tutte le clip dello strumento, i morph appartengono ai loro parametri.
+    Valida tutto prima di scrivere; force riguarda solo le enumerazioni.
     """
-    if lpf is not None:
-        set_attr(inst, 'lpfMode', lpf, force=force)
-    if hpf is not None:
-        set_attr(inst, 'hpfMode', hpf, force=force)
+    from copy import deepcopy
+    from . import sound as SND
+
+    if inst.tag not in ('sound', 'kit'):
+        raise ValueError('set_filter richiede uno strumento sound o kit')
+    attributes = [('lpfMode', lpf), ('hpfMode', hpf), ('filterRoute', route)]
+    values = [('lpfMorph', lpf_morph), ('hpfMorph', hpf_morph)]
+    target = inst if params_node is None else params_node
+    probe = deepcopy(inst)
+    for attr, value in attributes:
+        if value is not None:
+            set_attr(probe, attr, value, force=force)
+    probe_params = deepcopy(target)
+    for name, value in values:
+        if value is not None:
+            if isinstance(value, bool) or not isinstance(value, int) or not 0 <= value <= 50:
+                raise ValueError(f'{name} richiede un intero 0-50')
+            SND.set(probe_params, name, value)
+    for attr, value in attributes:
+        if value is not None:
+            set_attr(inst, attr, value, force=force)
+    for name, value in values:
+        if value is not None:
+            SND.set(target, name, value)
 
 
 #: Attributi di `<modulator1>`, coi valori neutri. Presi dai suoni FM del
@@ -250,6 +292,7 @@ def describe(inst: Node) -> dict[str, str | None]:
         'mode': inst.get('mode'),
         'lpfMode': inst.get('lpfMode'),
         'hpfMode': inst.get('hpfMode'),
+        'filterRoute': inst.get('filterRoute'),
         'polyphonic': inst.get('polyphonic'),
         'modFXType': inst.get('modFXType'),
     }

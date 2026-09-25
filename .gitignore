@@ -32,6 +32,11 @@ refs/synths/*
 
 corpus_versions/
 
+# MANTRA e le probe MPE derivate contengono musica personale dell'utente.
+# Restano private anche se vengono copiate fuori da out/ o refs/.
+MANTRA*.XML
+MPEPROBE*.XML
+
 # Generated schema inventories. They are built FROM the corpus, and their
 # "observed values" columns quote song names, preset names and sample paths
 # taken straight out of it. Regenerate them against your own corpus with

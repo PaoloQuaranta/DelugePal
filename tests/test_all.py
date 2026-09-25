@@ -1001,8 +1001,8 @@ def test_structure():
           _raises(lambda: ST.set_osc(fm, 1, type='sawtooth'), ValueError))
     check('numero fuori intervallo rifiutato',
           _raises(lambda: ST.set_unison(fm, num=99), ValueError))
-    check('filterRoute ha un valore solo nel corpus',
-          _raises(lambda: ST.set_attr(fm, 'filterRoute', 'L2H'), ValueError))
+    check('filterRoute L2H confermato dal firmware',
+          ST.set_attr(fm, 'filterRoute', 'L2H') == 'L2H')
 
     # ma si puo' esplorare, dichiarandolo
     check('force scrive comunque',
@@ -2303,6 +2303,163 @@ def test_midi_automation():
           M.read_channel_pressure(clip) == [M.MIDIValuePoint(0, 12, False)])
     check('riscrivere pressure non duplica l attributo',
           len(clip.find('expressionData').get_all('pressure')) == 1)
+
+
+def test_mpe_note_expression_read():
+    """Legge i tre assi per noteRow nelle unita MIDI, non come int32 grezzi.
+
+    Rompere gli shift del firmware, confondere lo slide con un CC ordinario o
+    leggere l'expressionData della clip invece di quello della riga deve far
+    fallire questi valori letterali.
+    """
+    try:
+        from delugexml import mpe as MPE                 # noqa: PLC0415
+    except ImportError:
+        check('il modulo MPE per nota e disponibile', False,
+              'delugexml.mpe assente')
+        return
+
+    doc = parse(
+        '<song><instruments><sound presetSlot="0" /></instruments>'
+        '<sessionClips><instrumentClip instrumentPresetSlot="0" length="192">'
+        '<noteRows><noteRow y="60">'
+        '<expressionData '
+        'pitchBend="0x8000000080000000800000007FFC000080000060" '
+        'yExpression="0x80000000800000008000000000000000800000307E00000080000060" '
+        'pressure="0x00000000000000008000000040000000800000307F00000080000060" />'
+        '</noteRow></noteRows></instrumentClip></sessionClips></song>')
+    clip = doc.root.find('sessionClips').children[0]
+
+    check('MPE pitch bend legge tutti i 14 bit firmati',
+          [tuple(p) for p in MPE.read_pitch_bend(clip, 60)]
+          == [(0, -8192, True), (96, 8191, True)])
+    check('MPE slide legge la scala centrata 0-127',
+          [tuple(p) for p in MPE.read_slide(clip, 60)]
+          == [(0, 0, True), (48, 64, True), (96, 127, True)])
+    check('MPE pressure legge la scala unipolare 0-127',
+          [tuple(p) for p in MPE.read_pressure(clip, 60)]
+          == [(0, 0, True), (48, 64, True), (96, 127, True)])
+    check('una riga senza expressionData torna vuota',
+          MPE.read_pressure(clip, 61) == [],
+          'la riga assente non deve essere creata in lettura')
+
+
+def test_mpe_note_expression_write():
+    """Scrive un asse senza perdere gli altri e usa l'ordine del firmware."""
+    from delugexml import automation as A                 # noqa: PLC0415
+    from delugexml import mpe as MPE                       # noqa: PLC0415
+
+    doc = parse(
+        '<song><instruments><sound presetSlot="0" /></instruments>'
+        '<sessionClips><instrumentClip instrumentPresetSlot="0" length="192">'
+        '<noteRows>'
+        '<noteRow y="60" noteDataWithLift="0x0000000000000060404014">'
+        '<expressionData pressure="0x000000000000000080000000" />'
+        '<soundParams />'
+        '</noteRow>'
+        '<noteRow y="61" noteDataWithLift="0x0000000000000060404014">'
+        '<soundParams />'
+        '</noteRow>'
+        '</noteRows></instrumentClip></sessionClips></song>')
+    clip = doc.root.find('sessionClips').children[0]
+    row60, row61 = S.note_rows(clip)
+    pressure_before = row60.find('expressionData').get('pressure')
+
+    bend_report = MPE.set_pitch_bend(
+        clip, 60, [(0, -8192), (96, 8191)])
+    slide_report = MPE.set_slide(
+        clip, 60, [(0, 0), (48, 64), (96, 127)])
+
+    expression = row60.find('expressionData')
+    bend_raw = [(p.pos, p.raw, p.interp)
+                for p in A.decode(expression.get('pitchBend'))[1]]
+    slide_raw = [(p.pos, p.raw, p.interp)
+                 for p in A.decode(expression.get('yExpression'))[1]]
+    check('MPE scrive il pitch bend nella scala esatta del firmware',
+          bend_raw == [(0, 0x80000000, True),
+                       (96, 0x7FFC0000, True)], str(bend_raw))
+    check('MPE scrive lo slide nella scala centrata esatta',
+          slide_raw == [(0, 0x80000000, True),
+                        (48, 0x00000000, True),
+                        (96, 0x7E000000, True)], str(slide_raw))
+    check('scrivere pitch e slide conserva pressure byte per byte',
+          expression.get('pressure') == pressure_before)
+    check('il rapporto MPE nomina asse altezza e intervallo',
+          bend_report == {'asse': 'pitchBend', 'altezza': 60, 'punti': 2,
+                          'da_tick': 0, 'a_tick': 96,
+                          'interpolata': True}
+          and slide_report['asse'] == 'yExpression',
+          f'{bend_report}, {slide_report}')
+
+    MPE.set_pressure(clip, 61, [(0, 0), (96, 127)], interpolated=False)
+    check('MPE crea expressionData prima di soundParams',
+          [c.tag for c in row61.children] == ['expressionData', 'soundParams'],
+          [c.tag for c in row61.children])
+    check('pressure per nota puo essere a gradini',
+          [tuple(p) for p in MPE.read_pressure(clip, 61)]
+          == [(0, 0, False), (96, 127, False)])
+
+    riletto = parse(serialize(doc))
+    rclip = riletto.root.find('sessionClips').children[0]
+    check('i tre assi MPE per nota sopravvivono al round-trip',
+          MPE.read_pitch_bend(rclip, 60) == MPE.read_pitch_bend(clip, 60)
+          and MPE.read_slide(rclip, 60) == MPE.read_slide(clip, 60)
+          and MPE.read_pressure(rclip, 61) == MPE.read_pressure(clip, 61))
+
+
+def test_mpe_note_expression_rejects_invalid_atomically():
+    """Input invalido non crea expressionData e non lascia mezze modifiche."""
+    from delugexml import mpe as MPE                       # noqa: PLC0415
+
+    doc = parse(
+        '<song><sessionClips>'
+        '<instrumentClip instrumentPresetSlot="0" length="192"><noteRows>'
+        '<noteRow y="60" length="96" '
+        'noteDataWithLift="0x0000000000000030404014" />'
+        '<noteRow y="61" />'
+        '</noteRows></instrumentClip>'
+        '</sessionClips></song>')
+    clip = doc.root.find('sessionClips').children[0]
+    invalidi = [
+        ('altezza booleana',
+         lambda: MPE.set_pressure(clip, True, [(0, 1)])),
+        ('altezza fuori MIDI',
+         lambda: MPE.set_pressure(clip, 128, [(0, 1)])),
+        ('riga assente',
+         lambda: MPE.set_pressure(clip, 62, [(0, 1)])),
+        ('riga senza note',
+         lambda: MPE.set_pressure(clip, 61, [(0, 1)])),
+        ('lista vuota',
+         lambda: MPE.set_pressure(clip, 60, [])),
+        ('punto non coppia',
+         lambda: MPE.set_pressure(clip, 60, [(0, 1, 2)])),
+        ('tick booleano',
+         lambda: MPE.set_pressure(clip, 60, [(True, 1)])),
+        ('tick oltre la lunghezza indipendente',
+         lambda: MPE.set_pressure(clip, 60, [(96, 1)])),
+        ('tick duplicati',
+         lambda: MPE.set_pressure(clip, 60, [(0, 1), (0, 2)])),
+        ('pressure oltre 127',
+         lambda: MPE.set_pressure(clip, 60, [(0, 128)])),
+        ('slide negativo',
+         lambda: MPE.set_slide(clip, 60, [(0, -1)])),
+        ('bend oltre 14 bit',
+         lambda: MPE.set_pitch_bend(clip, 60, [(0, 8192)])),
+        ('interpolazione non booleana',
+         lambda: MPE.set_pressure(clip, 60, [(0, 1)], interpolated=1)),
+    ]
+    for nome, azione in invalidi:
+        prima = serialize(doc)
+        check(f'MPE per nota rifiuta {nome}', _raises(azione, ValueError))
+        check(f'il rifiuto MPE di {nome} e atomico', serialize(doc) == prima)
+
+    kit = parse(
+        '<song><sessionClips><instrumentClip affectEntire="1" length="96">'
+        '<noteRows><noteRow drumIndex="0" /></noteRows>'
+        '</instrumentClip></sessionClips></song>')
+    kclip = kit.root.find('sessionClips').children[0]
+    check('MPE per nota rifiuta una clip kit',
+          _raises(lambda: MPE.read_pressure(kclip, 60), ValueError))
 
 
 def _nodo_vuoto_templ():
@@ -11533,6 +11690,15 @@ def test_junglevar5_scritto():
           errori_note == [], str(errori_note[:5]))
     check('i lock seguono la stessa risoluzione e conservano valori e curve',
           errori_lock == [], str(errori_lock[:3]))
+
+
+def test_filters_community():
+    import unittest
+    from test_filters import FiltersTest
+    result = unittest.TestResult()
+    unittest.defaultTestLoader.loadTestsFromTestCase(FiltersTest).run(result)
+    check('filtri community: routing, morph e scrittura atomica',
+          result.wasSuccessful(), str(result.errors + result.failures))
 
 
 if __name__ == '__main__':
