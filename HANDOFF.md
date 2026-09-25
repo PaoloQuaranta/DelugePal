@@ -1,5 +1,37 @@
 # HANDOFF — Deluge Pal
 
+## Aggiornamento P1 effetti standard — 25 settembre 2026
+
+Aggiunto `tools/delugexml/effects.py`: delay, mod FX, EQ, saturazione,
+bitcrush/decimation, mandata e configurazione del riverbero globale.
+Validazione atomica; separazione tra struttura dello strumento e parametri
+di clip/riga. Per l'audio, la struttura sta su `audioTrack`, non `audioClip`.
+Fonti controllate sulla build `b76ed39`; dettagli e limiti in
+`docs/EFFETTI.md`. Saturazione 0–15; parametri ordinari 0–50; riverbero
+globale convertito da float32 del menu a interi decimali.
+
+`tools/effetti_scritto.py` genera `FXSTD01`: 15 sezioni isolate con lo stesso
+synth saw, quattro note corte in due battute e due battute di coda, 100 BPM.
+Dry, quattro delay, quattro mod FX, due EQ, tre distorsioni e riverbero.
+Undici test dedicati, incluso il confronto del risalvataggio; verifiche e
+avvertenze della song vuote. La scrittura resta parziale solo per controlli
+residui: pan e compressore del riverbero non esposti, sync XML limitato a 0–9.
+
+Caricata `/SONGS/DelugePal/FXSTD01.XML`, dopo risposta `open err=4` a conferma
+che il file non esisteva. Rilettura byte-identica, SHA-256
+`07791926c1a8dc07972e8b905597588cf6f58901545dfa5e043df506859eea3e`.
+Il comando `dir` non rispondeva, mentre session/ping/open/put/read funzionavano
+(caso già documentato in `docs/SYSEX.md` §4-bis).
+L'utente ha confermato **«funziona, risalvato»**. Il file risalvato e' stato
+recuperato via SysEx da `/SONGS/DelugePal/FXSTD01 2.XML`: 103268 byte,
+SHA-256 `a9ecd21496898c0eb6fd6290c215249792a3563d065246e8a5a8f6df9f5580c3`.
+Il confronto semantico conferma 15 strumenti e clip, tutte le note, sezioni,
+modalita' FX, delay, EQ, mandata riverbero e distorsioni. Il firmware omette
+`clippingAmount="0"` e arrotonda `roomSize` di 128 unita' su 2^31; entrambi
+sono equivalenti nel comportamento. Non e' byte-identico alla song inviata,
+ma le impostazioni della prova sono conservate. P1 effetti standard chiuso;
+i controlli residui della nuova API passano a P2.
+
 **Data:** 20 settembre 2026
 **Progetto:** `D:\DelugePal` (fino al 14 agosto si chiamava `deluge-xml-workflow`)
 **Pubblico su:** <https://github.com/PaoloQuaranta/DelugePal>, GPL-3.0 — vedi §9

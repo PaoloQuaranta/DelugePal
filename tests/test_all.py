@@ -11701,6 +11701,15 @@ def test_filters_community():
           result.wasSuccessful(), str(result.errors + result.failures))
 
 
+def test_effects_standard():
+    import unittest
+    from test_effects import EffectsTest
+    result = unittest.TestResult()
+    unittest.defaultTestLoader.loadTestsFromTestCase(EffectsTest).run(result)
+    check('effetti standard: famiglie isolate, livelli XML e atomicita',
+          result.wasSuccessful(), str(result.errors + result.failures))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:
