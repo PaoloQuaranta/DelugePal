@@ -70,4 +70,3 @@ della stessa expression dimension aggiorna il dato senza duplicarlo.
   destinazione ottenuta con `musica.destinazione`, upload con rilettura hash.
 - La colonna Device resta `assente` finche' l'utente non apre/ascolta il probe;
   un upload riuscito da solo non dimostra il comportamento musicale.
-

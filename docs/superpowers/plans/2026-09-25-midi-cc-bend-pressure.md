@@ -189,4 +189,3 @@ increment the version rather than forcing overwrite.
 
 Upload/hash proves transfer only. Leave Device `assente` until the user opens
 the song and confirms CC steps plus smooth bend/pressure on the beta firmware.
-
