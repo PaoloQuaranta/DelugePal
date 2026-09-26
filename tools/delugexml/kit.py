@@ -232,7 +232,7 @@ def transpose(kit: Node, semitoni: int) -> dict:
 
 def set_sample(drum: Node, path: str, *, start: int | None = None,
                end: int | None = None, osc: int = 1) -> Node:
-    """Assegna un campione a un drum.
+    """Assegna un campione a un oscillatore di synth o drum.
 
     Il percorso e' relativo alla radice della SD, come lo scrive il
     dispositivo: `SAMPLES/…/nome.wav`. Non viene verificata l'esistenza del

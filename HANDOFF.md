@@ -1,5 +1,24 @@
 # HANDOFF — Deluge Pal
 
+## Aggiornamento P1 oscillatore sample — 26 settembre 2026
+
+`tools/sample_oscillator_probe.py` genera `SAMPLEOSC01`: quattro synth creati
+dal preset vuoto, tutti con lo stesso Amen break sull'oscillatore 1. Le sezioni
+ONCE, LOOP, REVERSE e STRETCH isolano i quattro modi su note lunghe otto battute.
+Validazione e avvertenze vuote; il file e' stato caricato in
+`/SONGS/DelugePal/SAMPLEOSC01.XML` e riletto byte-identico (32169 byte,
+SHA-256 `58900d08d2252be6a8e9e093aabce8d631059a4622f6f6f2603cd6f5b79f2f4a`).
+Il campione e' presente sulla SD. L'utente ha confermato **«funziona,
+risalvato»**. La copia `/SONGS/DelugePal/SAMPLEOSC01 2.XML` e' stata scaricata
+(32001 byte, SHA-256
+`62a8a14a92295741ab43d7acbc104f9741a1673718be7fdc46ed7f9a86f67358`).
+Il confronto semantico conserva i quattro synth e clip, le note, le zone sample
+e i modi ONCE/LOOP/REVERSE/STRETCH. Il firmware ha tolto tre attributi neutri
+ereditati dal preset e aggiunto `timeStretchAmount="0"`; ha cambiato anche
+preview, stato della vista e tre parametri globali estranei alla prova,
+registrati nel dettaglio. **P1 chiuso**;
+dettagli in `docs/OSCILLATORE_SAMPLE.md`.
+
 ## Aggiornamento P1 effetti standard — 25 settembre 2026
 
 Aggiunto `tools/delugexml/effects.py`: delay, mod FX, EQ, saturazione,

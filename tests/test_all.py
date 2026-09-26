@@ -11710,6 +11710,15 @@ def test_effects_standard():
           result.wasSuccessful(), str(result.errors + result.failures))
 
 
+def test_sample_oscillator():
+    import unittest
+    from test_sample_oscillator import SampleOscillatorTest
+    result = unittest.TestResult()
+    unittest.defaultTestLoader.loadTestsFromTestCase(SampleOscillatorTest).run(result)
+    check('oscillatore sample: synth nuovi, quattro modi e rilettura',
+          result.wasSuccessful(), str(result.errors + result.failures))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

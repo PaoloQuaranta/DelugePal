@@ -68,7 +68,7 @@ kit resta supportato.
 | sintesi-subtractive | synth-fx | Sintesi sottrattiva | completa | completa | completa | completa | `tools/delugexml/create.py`, `tools/delugexml/structure.py` | — | — |
 | sintesi-fm | synth-fx | Sintesi FM nativa | completa | completa | completa | completa | `tools/delugexml/structure.py`, `tests/test_all.py` | — | — |
 | sintesi-ringmod | synth-fx | Sintesi ring modulation | completa | completa | parziale | assente | `tools/delugexml/structure.py`, `docs/ARCHITETTURA.md` | P2 | Creare e ascoltare una patch ringmod controllata |
-| oscillator-sample | synth-fx | Oscillatore sample | completa | completa | parziale | parziale | `tools/delugexml/kit.py`, `tools/delugexml/structure.py`, `tests/test_all.py` | P1 | Verificare sul device loop, reverse e stretch dell'oscillatore e l'assegnazione a un synth nuovo |
+| oscillator-sample | synth-fx | Oscillatore sample | completa | completa | completa | completa | `tools/delugexml/kit.py`, `tools/sample_oscillator_probe.py`, `tests/test_sample_oscillator.py`, `docs/OSCILLATORE_SAMPLE.md`; SAMPLEOSC01 ascoltato, risalvato e confrontato semanticamente il 26 settembre 2026 | — | — |
 | wavetable | synth-fx | Oscillatore wavetable | completa | completa | parziale | assente | `tools/delugexml/structure.py`, `docs/ARCHITETTURA.md` | P2 | Modellare assegnazione WAV e parametri wavetable da un preset reale |
 | dx7 | synth-fx | Importazione e motore DX7 | solo-conservazione | completa | assente | assente | `docs/ARCHITETTURA.md`, `docs/SCHEMA_song_c1.3.0.md` | P2 | Studiare un preset DX7 e il legame con i banchi SYX |
 | modulazione | synth-fx | Patch cable e matrice di modulazione | completa | completa | completa | completa | `tools/delugexml/sound.py`, `tests/test_all.py` | — | — |
