@@ -29,6 +29,8 @@ colonna.
 Priorità: `P0` blocca o rischia dati, `P1` porta molto valore al flusso
 compositivo corrente, `P2` amplia il territorio senza bloccarlo, `P3` è
 rifinitura o integrazione laterale. `—` si usa solo quando non resta lavoro.
+`fuori perimetro` indica una capacita' del Deluge che DelugePal non intende
+automatizzare: gli stati tecnici restano visibili, ma non generano una task.
 
 Fuori perimetro: il rilevamento automatico dei transienti in un file audio.
 La prova sull'Amen break non ha separato in modo affidabile i colpi; per
@@ -96,7 +98,7 @@ kit resta supportato.
 | mpe-output-zones | midi-cv | Lower e Upper MPE Zone in uscita verso un synth esterno | parziale | completa | assente | assente | `tools/delugexml/midicv.py`, `docs/FINDINGS.md`; il firmware accetta entrambe le zone, senza esemplari nel corpus | P3 | Rimandare finche non esiste un sintetizzatore MPE esterno da pilotare e una prova device concreta |
 | pattern-files | artefatti-settings | File PATTERNS melodic e rhythmic | parziale | parziale | assente | assente | `docs/ARCHITETTURA.md`, `docs/PROSSIMI_PASSI.md` | P3 | Salvare un pattern reale prima di implementare il formato |
 | synth-kit-presets | artefatti-settings | Preset standalone SYNTHS e KITS | completa | completa | parziale | parziale | `tools/delugexml/create.py`, `tools/delugexml/kit.py` | P2 | Aggiungere API esplicita di salvataggio preset e prova di reload |
-| midi-follow | artefatti-settings | SETTINGS MIDIFollow | parziale | parziale | assente | assente | `docs/FINDINGS.md`, `docs/ARCHITETTURA.md` | P1 | Modellare mapping e persistenza per il setup Exquis e LCXL |
+| midi-follow | artefatti-settings | SETTINGS MIDIFollow | parziale | parziale | assente | assente | `docs/FINDINGS.md`, `docs/ARCHITETTURA.md`; setup Exquis/LCXL configurabile sul Deluge e normalmente persistente | fuori perimetro | Nessuna API prevista: configurazione manuale sul dispositivo |
 | performance-view | artefatti-settings | SETTINGS PerformanceView | parziale | parziale | assente | assente | `docs/ARCHITETTURA.md`, `README.md` | P3 | Acquisire due assegnazioni controllate e definire lo schema |
 | community-features | artefatti-settings | SETTINGS CommunityFeatures | completa | completa | assente | assente | `docs/FINDINGS.md`, `docs/SYSEX.md` | P3 | Esporre solo i flag necessari al workflow con valori documentati |
 | midi-device-defs | artefatti-settings | MIDI device definition files | parziale | parziale | assente | assente | `docs/ARCHITETTURA.md`, `README.md` | P2 | Modellare etichette CC e hideUnlabeledCC con un device reale |
@@ -111,7 +113,11 @@ attuale. L'ordine consigliato è:
 
 1. **sintesi ed effetti community**: routing, morph, wavetable, grain e DX7;
 2. **sampler residuo**: lettura strutturata e controlli completi dei range;
-3. **artefatti laterali e compatibilità**: Settings, Pattern e versioni.
+3. **artefatti laterali e compatibilità**: preset e versioni quando servono;
+   Settings e Pattern solo davanti a un uso concreto.
+
+Non restano P1 aperti. MIDI Follow e' fuori perimetro: il mapping si configura
+sul dispositivo e non fa parte del flusso compositivo che DelugePal automatizza.
 
 Probability, iterance, Fill, row length, Euclidean e arpeggiatore sono gia'
 coperti e verificati sul dispositivo. Il rilevamento automatico dei transienti
