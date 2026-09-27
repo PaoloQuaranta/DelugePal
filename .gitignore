@@ -37,6 +37,10 @@ corpus_versions/
 MANTRA*.XML
 MPEPROBE*.XML
 
+# Diagnostica multirange catturata dal Deluge dell'utente. I file XML dei
+# preset incorporano parametri di suoni e percorsi del corpus personale.
+tests/fixtures/WT_RANGE03_device.XML
+
 # Generated schema inventories. They are built FROM the corpus, and their
 # "observed values" columns quote song names, preset names and sample paths
 # taken straight out of it. Regenerate them against your own corpus with

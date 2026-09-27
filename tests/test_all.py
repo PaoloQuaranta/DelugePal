@@ -11719,6 +11719,15 @@ def test_sample_oscillator():
           result.wasSuccessful(), str(result.errors + result.failures))
 
 
+def test_synthesis_p2():
+    import unittest
+    from test_synthesis import SynthesisTest
+    result = unittest.TestResult()
+    unittest.defaultTestLoader.loadTestsFromTestCase(SynthesisTest).run(result)
+    check('P2 DX7 e wavetable: payload device, limiti e assegnazione atomica',
+          result.wasSuccessful(), str(result.errors + result.failures))
+
+
 if __name__ == '__main__':
     for fn in [v for k, v in sorted(globals().items()) if k.startswith('test_')]:
         try:

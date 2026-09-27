@@ -1,5 +1,178 @@
 # HANDOFF — Deluge Pal
 
+## Correzione critica: wavetable singola chiusa, multi range P0 aperto
+
+L'utente ha riprovato WT RANGE03: si apre nella song da cui è stato salvato,
+ma **caricarlo in una song nuova o dopo riavvio fa crashare il Deluge**,
+già durante la preselezione. La risposta precedente «riapre e suona»
+non confermava un caricamento da zero. Un secondo salvataggio scaricato dopo
+riavvio è byte-identico al primo (5.867 byte, SHA-256
+`d20a115664e3ffbeed7d84780ebbb25c72d2280e6d1cc1a073`). La nightly
+`b76ed39` potrebbe avere un bug indipendente dall'XML generato: causa non
+attribuita. Matrice riportata a parziale, priorità
+P0 per il difetto. Non usare preset multi range risalvati per produzione e
+non dichiarare chiusi i range multipli. La matrice separa wavetable
+singola (completa) e multirange (parziale/P0). `set_wavetable_ranges()` ora richiede
+`experimental=True`, il default rifiuta la scrittura. Dopo riavvio, il
+preset rischioso è stato spostato via SysEx a
+`/SYNTHS/DelugePal/WT RANGE03.BAK`; err=0, elenco confermato e hash della
+rilettura identico alla copia precedente. Il secondo 03 è stato scaricato in
+`out/wavetable_range/WT RANGE03.second_device.XML` e spostato sulla SD a
+`WT RANGE03-2.BAK` (err=0, directory verificata). Anche WT RANGE01 associato
+al primo errore è stato spostato a `.BAK` (err=0). Prossimo discriminante:
+un preset multi range creato interamente sul dispositivo, poi caricato da zero
+sulla stessa nightly. I paragrafi successivi sono lo storico delle prove.
+
+## Storico: ipotesi di chiusura wavetable P2, poi smentita — 27 settembre 2026
+
+L'utente ha aperto `WT RANGE02` come preset e song: Do3, Do4 e Do5
+producono tre timbri distinti. Ha risalvato il preset come `WT RANGE03`
+e confermato che si riapre e suona. Scaricato
+`out/wavetable_range/WT RANGE03.device.XML`: il firmware l'ha scritto
+come tre `wavetableRange` canonici (topNote 59, 71, ultimo senza limite).
+L'API `wavetable_ranges()` legge gli stessi tre percorsi; il confronto con
+la prima prova differisce semanticamente solo per arp syncLevel 7 -> 8.
+L'ipotesi di duplicato finale come causa del messaggio «file corrupted»
+iniziale è smentita da questa prova; la causa di quell'errore non è stata
+isolata. `docs/WAVETABLE.md` e matrice aggiornati: wavetable completa,
+priorità —. Otto test synthesis e 29 test in discovery passano.
+
+## Wavetable P2 — multi range verificato in lettura, risalvataggio pendente
+
+Il 27 settembre 2026 l'utente chiede di chiudere wavetable e aggiornare la
+matrice. Aggiunta API `set_wavetable_ranges()` / `wavetable_ranges()` a
+`synthesis.py` con test. Confrontata LYRA VIAREGGIO04 risalvata: percorsi
+Acid/Allophones/Bowed Metal, inviluppi e punti d'automazione conservati.
+Preset standalone Vox/Metal riscaricati byte-identici.
+
+La prima prova `WT RANGE01` dava «file corrupted»: il firmware b76ed39 crea
+già un range finale con topNote=32767 e rifiuta il secondo senza topNote.
+La versione 02 usa `osc1.fileName` per la tabella finale e
+`wavetableRanges` per i due range inferiori. Preset e song 02 caricati e
+riletti identici; l'utente conferma che entrambi aprono e Do3/Do4/Do5
+suonano con tre timbri distinti. Resta la prova di risalvataggio/riapertura
+del preset 02 sul dispositivo; richiesta all'utente. `docs/WAVETABLE.md`
+contiene dati e fonti. Matrice ancora parziale finché il ciclo non passa.
+
+## LYRA VIAREGGIO — task compositivo chiuso (27 settembre 2026)
+
+L'utente dichiara: «ok consideriamo il task compositivo chiuso».
+Ultima consegna: `/SONGS/DelugePal/LYRA VIAREGGIO06.XML`, con sei voci,
+rough mix dell'utente e modifica alla coda conservati. Nessun altro
+intervento compositivo o diagnostico richiesto. Le sezioni sottostanti
+sono lo storico; non riprendere automaticamente le prove Glass.
+La chiusura creativa non equivale alla chiusura tecnica di P2 DX7/wavetable,
+né a una conferma specifica della causa del basso livello di Glass.
+
+## LYRA VIAREGGIO06 caricata — attesa ascolto Glass
+
+Dopo riavvio riscaricata la 05 in `out/lyra05_glass_low.XML` (890659 byte).
+Generata la 06 con `tools/lyra_glass_carriers.py`: solo carrier DX7 1/3/5
+83/76/66 -> 99/92/82; volume resta 30/50. Confronto semantico conferma
+conservazione di tutto il resto; verifica vuota, avvisi di scroll ereditati.
+Caricata `/SONGS/DelugePal/LYRA VIAREGGIO06.XML` e riletta identica:
+SHA-256 `8012f8243875a2d503341470f859013bfa00aa75f45bb9030b3157936941eca5`.
+Il livello e la soluzione del problema NON sono ancora confermati all'ascolto.
+Il preset standalone LYRA GLASS01 resta quello originale.
+
+## Glass ancora bassissima nella 05 — proposta 06 NON caricata
+
+L'utente conferma che volume 30 non basta. Il nuovo download della 05
+fallisce su assignSession; richiesto riavvio, in attesa. Non modificare
+la song da copie obsolete. `tools/lyra_glass_carriers.py SOURCE OUTPUT`
+prepara solo l'aumento dei carrier DX7 (operatori 1/3/5) 83/76/66 ->
+99/92/82, mantenendo volume 30, inviluppi, modulatori, note e mix. Verifica
+semantica: cambiano solo tre byte del payload. Bozza locale validata
+`out/lyra_viareggio/LYRA VIAREGGIO06.draft.XML` dalla 05 inviata, NON dalla
+SD aggiornata, quindi NON caricata. Dopo riavvio riscaricare la 05 e
+rigenerare 06. Il livello resta da verificare all'ascolto; non attribuire
+con certezza il problema ai carrier. Tine ha saturazione 7, Glass 0.
+
+## LYRA VIAREGGIO05 — livello Glass
+
+L'utente riferisce GLASS CHECK01 quasi impercettibile in tutti e tre i casi
+(originale, filtri aperti, payload Tine). Questo sostiene un problema di
+livello comune; non prova un guasto della patch DX7. Riscaricata nuovamente
+la 04 in `out/lyra04_before_glass_gain.XML`. `tools/lyra_glass_gain.py`
+modifica esclusivamente il volume della clip Glass da 15 a 30/50 e genera
+LYRA VIAREGGIO05. Confronto semantico: nessun altro parametro, nota o stato
+modificato; verifica vuota. Avvisi ereditati: scroll fuori dalle note di
+Reed, Glass, Metal. Caricata `/SONGS/DelugePal/LYRA VIAREGGIO05.XML`,
+riletta identica (890659 byte, SHA-256
+`3bd491f78c60f1b7b5312aacbdbe614bbc5077604659f913206cbcd5fd9f7937`).
+Ascolto del nuovo livello ancora da confermare.
+
+## LYRA GLASS muta — diagnosi in corso
+
+L'utente ha risalvato LYRA VIAREGGIO04 dopo rough mix e rimozione della
+coda; Glass è muta anche dalla tastiera. Fonte aggiornata scaricata dopo
+riavvio: `out/lyra04_user_mix_latest.XML` (890659 byte). Conservare questo
+salvataggio: volume Glass 15, 44 note; payload DX7 invariato. Nessuna
+correzione alla song caricata: la causa del silenzio non è ancora provata.
+L'utente ha inoltre segnalato un crash, senza causa identificata.
+`tools/lyra_glass_probe.py` crea GLASS CHECK01: tre sezioni e tre blocchi
+arranger di quattro battute, con identiche note/velocity/volume. A: Glass;
+B: solo HPF 0 e LPF 50; C: solo payload DX7 sostituito con quello Tine.
+Verifica e avvertenze vuote. Caricata in SONGS/DelugePal, rilettura verificata.
+Attendere quali casi sono udibili; non dichiarare risolto né chiudere P2.
+
+## LYRA VIAREGGIO04 — sei voci per la varietà timbrica
+
+Su richiesta dell'utente, la 03 riscaricata è stata redistribuita fra Tine,
+Acid e quattro preset nuovi: DX7 LYRA REED01 (algoritmo 32, organo additivo),
+LYRA GLASS01 (campane FM inarmoniche); wavetable LYRA VOX01 (Allophones.wav)
+e LYRA METAL01 (Bowed Metal [ML].wav), entrambe dalla CommunityWavetables SD.
+`tools/lyra_viareggio_six.py` conserva esattamente tutte le 156 note delle
+due parti nel tempo assoluto, assegnando accordi/strum e frasi collegate
+come gruppi. Nessuna duplicazione; batteria, altre clip, istanze originali
+e parametri delle due voci precedenti conservati. Conteggi per voce:
+Tine 60, Reed 18, Glass 47, Acid 10, Vox 13, Metal 8.
+Song LYRA VIAREGGIO04 e quattro preset caricati nelle cartelle DelugePal,
+riletti identici; verifica e avvertenze vuote. Ascolto 04 pendente.
+Parametri, distribuzione, fonti delle tabelle e hash in `docs/LYRA_VIAREGGIO.md`.
+
+## LYRA VIAREGGIO03 — registro e fraseggio
+
+Dopo «meglio» sulla 02, l'utente chiede Acid un'ottava sotto con più fraseggio
+e variazioni ritmiche/strum alla Tine. Riscaricata la 02, il generatore
+`tools/lyra_viareggio_phrasing.py` traspone tutti gli attacchi Acid di -12,
+aggiunge quattro figure di collegamento (23→31 note), e sulla Tine applica
+17 strum, sei spostamenti ritmici e quattro risposte leggere (114→125 note).
+Suoni, automazioni, batteria e struttura conservati nel confronto semantico.
+`/SONGS/DelugePal/LYRA VIAREGGIO03.XML` caricata e riletta byte-identica;
+verifica e avvertenze vuote. Ascolto 03 confermato: «meglio». DX7 e wavetable Device parziale;
+restano risalvataggio e reload standalone. Dettagli in
+`docs/LYRA_VIAREGGIO.md`; i preset standalone rimangono quelli della 02.
+
+## LYRA VIAREGGIO02 — revisione dei suoni dopo ascolto
+
+L'utente approva batteria, armonia e arrangiamento della 01. Acid era troppo
+breve e percussiva; Tine troppo simile al piano registrato. Riscaricate song
+e preset dal Deluge, `tools/lyra_viareggio_revision.py` allunga le 23 note
+Acid a 252–672 tick con sovrapposizioni e modulazioni lente, e tratta Tine
+con passa-banda modulato, saturazione e phaser. Batteria, resto della song,
+istanze d'arranger e note Tine conservati nel confronto semantico.
+Song LYRA VIAREGGIO02 e preset LYRA TINE02/LYRA ACID02 caricati nelle
+rispettive cartelle DelugePal e riletti byte-identici. Verifica e avvertenze
+vuote. Nella song i nomi delle due tracce restano quelli della 01, con i
+nuovi parametri incorporati. Ascolto della 02 e risalvataggio pendenti;
+parametri esatti e hash in `docs/LYRA_VIAREGGIO.md`.
+
+## LYRA VIAREGGIO e primo lavoro P2 sul suono — 26 settembre 2026
+
+Riscaricata la song attuale dal Deluge (la copia in refs non ha l'arranger).
+`tools/lyra_viareggio.py` conserva le 52 istanze originali, umanizza 1032
+colpi in 24 clip e aggiunge comping jazzy e risposte wavetable. Due preset
+originali: LYRA TINE01, piano elettrico DX7 a sei operatori; LYRA ACID01,
+da `SAMPLES/WAVETABLES/CommunityWavetables/Acid.wav`, position e filtri modulati.
+La nuova API `tools/delugexml/synthesis.py` costruisce il payload DX7 e assegna
+WAV singoli sulla base del firmware b76ed39. Song `/SONGS/DelugePal/LYRA
+VIAREGGIO01.XML` e preset in `/SYNTHS/DelugePal/` caricati e riletti identici.
+Otto test dedicati passano; verifica e avvertenze vuote. Ascolto e risalvataggio
+ancora da fare: P2 avviato, Device non chiuso. Suite generale 2305/2306 con
+un errore preesistente sulla priorità `fuori perimetro` di MIDI Follow.
+Parametri, conservazione, hash e limiti: `docs/LYRA_VIAREGGIO.md`.
+
 ## Aggiornamento P1 oscillatore sample — 26 settembre 2026
 
 `tools/sample_oscillator_probe.py` genera `SAMPLEOSC01`: quattro synth creati
