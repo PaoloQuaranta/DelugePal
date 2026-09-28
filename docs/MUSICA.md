@@ -94,7 +94,7 @@ repertori collidono, e l'unica del progetto che abbia numeri `[MIS]`.
 
 ### 5. Ruoli e spartizione
 
-Chi occupa cosa, e soprattutto **cosa lascia libero**. Il basso continuo
+Chi occupa cosa, e soprattutto **cosa lascia libero**. Il [basso continuo](istruzioni/basso-continuo.md)
 più le voci, il comping più il walking, le sei parti del reggae: è la stessa
 domanda fatta a repertori diversi. **Vuota** vuol dire parti che si
 sovrappongono senza che nessuno l'abbia deciso.
@@ -127,6 +127,9 @@ La scala lunga, l'arco. Questa casella esiste perché tutto il resto di una
 scheda descrive **una battuta**:
 
 > Un pezzo ne dura centoventi.
+
+La prova di [basso ostinato](istruzioni/basso-ostinato.md) mostra un caso di
+identità nel basso e trasformazione della superficie lungo cinque ritorni.
 
 **Vuota** vuol dire un arrangiamento che accende tutte le parti all'inizio e
 le lascia accese.

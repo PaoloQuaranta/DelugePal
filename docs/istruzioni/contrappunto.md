@@ -230,13 +230,41 @@ la scelta resti una scelta.
 
 ## Cosa manca a questa istruzione
 
-- la [struttura](struttura.md) lunga (l'arco del pezzo, le sezioni): l'ultima faccia della
-  priorità 2, e l'`arranger` c'è già;
-- il **contrappunto a tre e più parti** (Piston cap. 7-8): il `[CALC]` oggi
-  guarda **due** voci per volta — tre parti si controllano a coppie, ma la quarta
-  giusta e le doppie non sono ancora sue;
-- il **contrappunto invertibile** e il **canone** (Piston cap. 9-11): tecniche di
-  sviluppo, su domanda di un pezzo che le chieda;
+La prova elettronica del 27 settembre 2026 usa il motivo fra due synth e gli
+accenti della batteria come relazioni contrappuntistiche: vedi
+[forma-storica-elettronica.md](forma-storica-elettronica.md). La song è valida
+nel formato ed è stata ascoltata sul Deluge: l'utente ha confermato che funziona.
+
+La prova `CANONE01` del 28 settembre chiude la parte **strutturale** del canone
+rigoroso a due voci: la risposta conserva tutti gli eventi a una battuta e
+un'ottava di distanza, senza parallele perfette o dissonanze sui movimenti
+forti. È caricata e riletta byte per byte dal Deluge; all'ascolto l'utente ha
+confermato **«percepisco ingresso imitativo»**, chiudendo anche il verdetto
+percettivo. Dettagli e sorgente sono in
+[forma-storica-elettronica.md](forma-storica-elettronica.md).
+
+La prova `INVERT01` del 28 settembre chiude la parte **strutturale** del
+contrappunto invertibile a due voci: nella seconda meta A scende esattamente di
+un'ottava e B sale esattamente di un'ottava, senza cambiare note, ritmo o durate.
+Entrambe le disposizioni evitano parallele perfette e dissonanze sui movimenti
+forti. All'ascolto sul Deluge l'utente ha confermato **«funziona e il tema è
+molto bello»**: la prova e quindi chiusa anche sul piano percettivo. Dettagli e
+sorgente sono in
+[forma-storica-elettronica.md](forma-storica-elettronica.md).
+
+La prova `TREPARTI01` del 28 settembre chiude la parte **strutturale** del
+contrappunto libero a tre voci. Oltre ai tre controlli a coppie, valuta 24
+verticali complete sui movimenti forti: la quarta e ammessa soltanto fra le
+parti superiori quando il basso sostiene una sonorita consonante; le tre classi
+restano distinte, senza semplici raddoppi. Le entrate, i ritmi e i culmini sono
+sfasati e nessuna coppia contiene parallele perfette. All'ascolto sul Deluge
+l'utente ha confermato **«perfetto funziona»**, chiudendo anche il verdetto
+percettivo. Dettagli e sorgente sono in
+[forma-storica-elettronica.md](forma-storica-elettronica.md).
+
+- il **contrappunto oltre tre parti**: si aggiunge una quarta voce solo quando
+  un pezzo concreto la richiede, perche la densita cambia il problema
+  percettivo oltre che quello verticale;
 - la **specie** classica (nota contro nota, due contro una…) come progressione
   didattica: qui si è preso il contrappunto **libero** di Piston (stile Bach), non
   le specie di Fux.

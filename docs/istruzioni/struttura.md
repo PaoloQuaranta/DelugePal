@@ -1,5 +1,9 @@
 # La struttura: la forma lunga, la mappa delle sezioni
 
+Per il riuso di frase, motivo e contrappunto della tradizione classica e barocca
+in produzioni elettroniche, vedi
+[forma-storica-elettronica.md](forma-storica-elettronica.md).
+
 **A cosa serve.** Hai il materiale — un tema, un giro, un groove — e devi
 decidere **come si dispone nel tempo**: quante sezioni, in che ordine, quali
 tornano e quali contrastano. È lo **scheletro** del pezzo: la stessa idea diventa
@@ -30,9 +34,13 @@ salgono e ricadono lungo la forma) e le **transizioni** (turnaround, fill, stacc
 | `[DEC]` | decisione presa qui, con la ragione |
 | `[OSS]` | osservato all'ascolto |
 
-⚠️ **`[CALC]` + un ascolto**, come le altre facce della forma. Il `[CALC]` è dove
-cadono le sezioni (i conti in tick); l'ascolto è se la **forma si sente** — se l'A
-torna riconoscibile e il ponte contrasta.
+`[CALC]` basta per proprietà definite nella timeline: dove cadono le sezioni,
+quali clip ritornano e quali note o accordi chiudono una frase. L'ascolto è
+richiesto quando l'affermazione riguarda **l'effetto percepito**: se l'A torna
+riconoscibile, se il ponte contrasta, se il beat maschera una cadenza. Dopo una
+prima verifica del percorso XML → Deluge, non occorre riascoltare ogni nuova
+applicazione della stessa regola; vedi
+[forma-storica-elettronica.md](forma-storica-elettronica.md).
 
 ---
 

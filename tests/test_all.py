@@ -9214,6 +9214,360 @@ def test_contrappunto_scritto():
           f'dip {dip.paralleli}, ind {ind.paralleli}')
 
 
+def test_canone_ottava_scritto():
+    """La risposta riproduce tutta la guida, +1 battuta e +1 ottava.
+
+    Il guasto che coglie e' un canone approssimato: una nota cambiata, omessa,
+    spostata o ridurata; oppure una terza parte aggiunta alla prova a due voci.
+    Le attese sono letterali: 384 tick di ritardo e 12 semitoni di intervallo.
+    """
+    import canone_ottava_scritto as CO  # noqa: PLC0415
+    from delugexml import musica as MU, arranger as A, song as S  # noqa: PLC0415
+
+    guida = sorted((note.pos, pitch, note.length)
+                   for pitch, row in CO.guida().items() for note in row)
+    risposta = sorted((note.pos, pitch, note.length)
+                      for pitch, row in CO.risposta().items() for note in row)
+    attesa = [(pos + 384, pitch + 12, length)
+              for pos, pitch, length in guida]
+    check('la risposta e il canone rigoroso della guida dopo una battuta',
+          risposta == attesa,
+          f'attese {attesa[:4]}... ottenute {risposta[:4]}...')
+    check('la guida occupa otto battute e la risposta chiude nella nona',
+          guida and guida[0][0] == 0
+          and max(pos + length for pos, _, length in guida) == 8 * 384
+          and max(pos + length for pos, _, length in risposta) == 9 * 384)
+
+    rapporto = MU.contrappunto(CO.guida(), CO.risposta())
+    check('il tratto sovrapposto non contiene quinte o ottave parallele',
+          rapporto.paralleli == [], str(rapporto.paralleli))
+    check('gli incastri sui movimenti forti sono consonanti',
+          rapporto.dissonanze_battere == [],
+          str(rapporto.dissonanze_battere))
+
+    doc = CO.costruisci()
+    strumenti = list(S.instruments(doc))
+    check('la prova ha esattamente due strumenti e dura nove battute',
+          len(strumenti) == 2 and A.extent(doc) == (0, 9 * 384),
+          f'{len(strumenti)} strumenti, extent {A.extent(doc)}')
+    check('il file del canone non ha errori o avvertenze',
+          MU.verifica(doc) == [] and MU.avvertenze(doc) == [],
+          f'{MU.verifica(doc)} {MU.avvertenze(doc)}')
+
+
+def test_contrappunto_invertibile_scritto():
+    """Le due linee si scambiano davvero registro senza cambiare identita.
+
+    Il guasto che coglie e' una seconda passata riscritta a orecchio invece
+    che invertita: note, ritmo o durate cambiate, oppure intervalli che dopo
+    lo scambio producono dissonanze forti o parallele perfette.
+    """
+    import contrappunto_invertibile_scritto as CI  # noqa: PLC0415
+    from delugexml import musica as MU, arranger as A, song as S  # noqa: PLC0415
+
+    def eventi(voce):
+        return sorted((note.pos, pitch, note.length)
+                      for pitch, row in voce.items() for note in row)
+
+    a1, b1 = eventi(CI.prima_a()), eventi(CI.prima_b())
+    a2, b2 = eventi(CI.seconda_a()), eventi(CI.seconda_b())
+    check('nella seconda passata A scende esattamente di un ottava',
+          a2 == [(pos + 4 * 384, pitch - 12, length)
+                 for pos, pitch, length in a1],
+          f'{a1[:3]} -> {a2[:3]}')
+    check('nella seconda passata B sale esattamente di un ottava',
+          b2 == [(pos + 4 * 384, pitch + 12, length)
+                 for pos, pitch, length in b1],
+          f'{b1[:3]} -> {b2[:3]}')
+
+    normale = MU.contrappunto(CI.prima_a(), CI.prima_b())
+    invertito = MU.contrappunto(CI.seconda_a(), CI.seconda_b())
+    check('entrambe le disposizioni evitano parallele perfette',
+          normale.paralleli == [] and invertito.paralleli == [],
+          f'normale {normale.paralleli}, invertito {invertito.paralleli}')
+    check('entrambe le disposizioni sono consonanti sui movimenti forti',
+          normale.dissonanze_battere == []
+          and invertito.dissonanze_battere == [],
+          f'normale {normale.dissonanze_battere}, '
+          f'invertito {invertito.dissonanze_battere}')
+    check('le linee restano ritmicamente e melodicamente indipendenti',
+          normale.simultaneita < 0.75
+          and normale.moti['contrario'] + normale.moti['obliquo']
+          > normale.moti['diretto'] + normale.moti['parallelo'],
+          f'sim {normale.simultaneita:.2f}, moti {normale.moti}')
+
+    doc = CI.costruisci()
+    check('la prova invertibile ha due strumenti e dura otto battute',
+          len(list(S.instruments(doc))) == 2
+          and A.extent(doc) == (0, 8 * 384),
+          f'{len(list(S.instruments(doc)))} strumenti, extent {A.extent(doc)}')
+    check('il file invertibile non ha errori o avvertenze',
+          MU.verifica(doc) == [] and MU.avvertenze(doc) == [],
+          f'{MU.verifica(doc)} {MU.avvertenze(doc)}')
+
+
+def test_tre_parti_scritto():
+    """Tre linee reali, non un accordo diviso fra tre tracce.
+
+    Il guasto che coglie e' una terza parte ornamentale o raddoppiata: ritmi e
+    picchi coincidono, compaiono parallele perfette, oppure sui movimenti forti
+    la verticale non regge quando la quarta fra le voci alte viene valutata
+    rispetto al basso che la sostiene.
+    """
+    import tre_parti_scritto as TP  # noqa: PLC0415
+    from delugexml import musica as MU, arranger as A, song as S  # noqa: PLC0415
+
+    voci = (TP.voce_alta(), TP.voce_media(), TP.voce_bassa())
+
+    def eventi(voce):
+        return sorted((note.pos, note.pos + note.length, pitch)
+                      for pitch, row in voce.items() for note in row)
+
+    def suona_a(ev, tick):
+        attacco = [pitch for pos, _, pitch in ev if pos == tick]
+        if attacco:
+            return max(attacco)
+        tenuta = [pitch for pos, fine, pitch in ev if pos < tick < fine]
+        return max(tenuta) if tenuta else None
+
+    ev = tuple(eventi(voce) for voce in voci)
+    inizi = tuple(min(pos for pos, _, _ in linea) for linea in ev)
+    check('le tre voci entrano progressivamente in tre battute',
+          inizi == (0, TP.B, 2 * TP.B), str(inizi))
+
+    onsets = tuple({pos for pos, _, _ in linea} for linea in ev)
+    picchi = tuple(min(pos for pos, _, pitch in linea
+                       if pitch == max(p for _, _, p in linea))
+                   for linea in ev)
+    check('ritmi e culmini distinguono tutte e tre le linee',
+          len({frozenset(x) for x in onsets}) == 3
+          and len(set(picchi)) == 3
+          and all(abs(a - b) >= MU.TICK_PER_MOVIMENTO
+                  for i, a in enumerate(picchi) for b in picchi[i + 1:]),
+          f'picchi {picchi}')
+
+    coppie = tuple(MU.contrappunto(voci[i], voci[j])
+                   for i, j in ((0, 1), (0, 2), (1, 2)))
+    check('nessuna coppia contiene quinte o ottave parallele',
+          all(not rapporto.paralleli for rapporto in coppie),
+          str([rapporto.paralleli for rapporto in coppie]))
+    check('ogni coppia conserva indipendenza ritmica e di moto',
+          all(rapporto.simultaneita < 0.75
+              and rapporto.moti['contrario'] + rapporto.moti['obliquo']
+              > rapporto.moti['diretto'] + rapporto.moti['parallelo']
+              for rapporto in coppie),
+          str([(r.simultaneita, r.moti) for r in coppie]))
+
+    # In tre parti la quarta fra le due voci superiori e' ammessa quando il
+    # basso la sostiene (Piston, p. 125). Percio' non si applica alla cieca il
+    # verdetto a due voci: si controlla l'intera sonorita' sui movimenti forti.
+    forti = []
+    sbagliate = []
+    for tick in range(2 * TP.B, TP.TOTAL_BARS * TP.B,
+                      MU.TICK_PER_MOVIMENTO):
+        pitches = tuple(suona_a(linea, tick) for linea in ev)
+        if None in pitches:
+            continue
+        forti.append((tick, pitches))
+        bass = min(pitches)
+        bass_intervals = {(pitch - bass) % 12 for pitch in pitches}
+        pair_intervals = {abs(a - b) % 12
+                          for i, a in enumerate(pitches)
+                          for b in pitches[i + 1:]}
+        if (len({pitch % 12 for pitch in pitches}) != 3
+                or not bass_intervals <= {0, 3, 4, 7, 8, 9}
+                or not pair_intervals <= {3, 4, 5, 7, 8, 9}):
+            sbagliate.append((tick, pitches))
+    check('le verticali forti sono consonanti come sonorita a tre parti',
+          len(forti) >= 20 and sbagliate == [],
+          f'{len(forti)} forti, sbagliate {sbagliate}')
+
+    finale = tuple(suona_a(linea, 7 * TP.B + 288) for linea in ev)
+    check('le tre curve convergono su Re minore alla fine dell ottava battuta',
+          {pitch % 12 for pitch in finale} == {2, 5, 9}
+          and all(max(fine for _, fine, _ in linea) == 8 * TP.B
+                  for linea in ev),
+          str(finale))
+
+    doc = TP.costruisci()
+    check('la prova ha tre strumenti e dura otto battute',
+          len(list(S.instruments(doc))) == 3
+          and A.extent(doc) == (0, 8 * TP.B),
+          f'{len(list(S.instruments(doc)))} strumenti, extent {A.extent(doc)}')
+    check('il file a tre parti non ha errori o avvertenze',
+          MU.verifica(doc) == [] and MU.avvertenze(doc) == [],
+          f'{MU.verifica(doc)} {MU.avvertenze(doc)}')
+
+
+def test_tema_variazioni_scritto():
+    """Un tema intero resta riconoscibile attraverso quattro trasformazioni.
+
+    Il guasto che coglie e' una successione di sezioni soltanto somiglianti:
+    note strutturali perdute nel passaggio timbrico, tre parti raddoppiate,
+    oppure un finale rallentato a orecchio invece che aumentato esattamente.
+    Le attese del tema sono trascritte qui come fixture letterale indipendente.
+    """
+    try:
+        import tema_variazioni_scritto as TV  # noqa: PLC0415
+    except ModuleNotFoundError as exc:
+        check('esiste il generatore della forma a variazioni', False, str(exc))
+        return
+    from delugexml import musica as MU, arranger as A, song as S  # noqa: PLC0415
+
+    def eventi(voce):
+        return sorted((note.pos, pitch, note.length)
+                      for pitch, row in voce.items() for note in row)
+
+    tema_atteso = [
+        (0, 70, 72), (96, 67, 120), (240, 70, 120),
+        (432, 67, 120), (576, 64, 72), (672, 65, 96),
+        (768, 67, 72), (912, 65, 72), (1008, 64, 72),
+        (1104, 65, 48), (1152, 67, 168), (1344, 70, 72),
+        (1440, 72, 96),
+    ]
+    check('l esposizione conserva letteralmente il tema di INVERT01',
+          eventi(TV.tema_alta()) == tema_atteso,
+          str(eventi(TV.tema_alta())))
+
+    figurale = eventi(TV.figurale_alta())
+    per_posizione = {(pos, pitch) for pos, pitch, _ in figurale}
+    check('la figurazione conserva tutti gli attacchi e le altezze portanti',
+          all((pos, pitch) in per_posizione
+              for pos, pitch, _ in tema_atteso)
+          and len(figurale) > len(tema_atteso),
+          f'{len(figurale)} eventi')
+
+    timbri = TV.variazione_timbrica()
+    distribuito = sorted(evento for voce in timbri for evento in eventi(voce))
+    check('il tema timbrico passa fra almeno due synth senza perdere eventi',
+          distribuito == tema_atteso
+          and sum(bool(eventi(voce)) for voce in timbri) >= 2,
+          str([len(eventi(voce)) for voce in timbri]))
+
+    tre = TV.variazione_tre_parti()
+    rapporti = tuple(MU.contrappunto(tre[i], tre[j])
+                     for i, j in ((0, 1), (0, 2), (1, 2)))
+    onsets = [{note.pos for row in voce.values() for note in row}
+              for voce in tre]
+    check('la variazione contrappuntistica contiene tre ritmi indipendenti',
+          len(tre) == 3 and len({frozenset(x) for x in onsets}) == 3
+          and all(r.simultaneita < 0.75 for r in rapporti),
+          str([(r.simultaneita, r.moti) for r in rapporti]))
+    check('le tre coppie evitano quinte e ottave parallele',
+          all(not r.paralleli for r in rapporti),
+          str([r.paralleli for r in rapporti]))
+
+    aumentato_atteso = [(pos * 2, pitch, length * 2)
+                        for pos, pitch, length in tema_atteso]
+    check('il finale aumenta esattamente posizione e durata del tema',
+          eventi(TV.aumentata_alta()) == aumentato_atteso,
+          str(eventi(TV.aumentata_alta())))
+
+    doc = TV.costruisci()
+    check('VARIAZ01 usa tre synth e occupa ventiquattro battute',
+          len(list(S.instruments(doc))) == 3
+          and A.extent(doc) == (0, 24 * 384),
+          f'{len(list(S.instruments(doc)))} strumenti, extent {A.extent(doc)}')
+    check('VARIAZ01 non ha errori o avvertenze',
+          MU.verifica(doc) == [] and MU.avvertenze(doc) == [],
+          f'{MU.verifica(doc)} {MU.avvertenze(doc)}')
+
+
+def test_basso_continuo_scritto():
+    """Le cifre vincolano gli intervalli sopra il basso reale, non la sigla."""
+    import basso_continuo_scritto as BC  # noqa: PLC0415
+    from delugexml import musica as MU, arranger as A  # noqa: PLC0415
+
+    pc = lambda *names: {MU.altezza(name) % 12 for name in names}
+    check('5/3 su Re e 6/3 su Fa danno entrambi Re minore',
+          set(BC.upper_pitch_classes('re2', '5/3')) | pc('re2')
+          == set(BC.upper_pitch_classes('fa2', '6/3')) | pc('fa2')
+          == pc('re3', 'fa3', 'la3'))
+    check('7/#3 su La include Do diesis, Mi e Sol',
+          set(BC.upper_pitch_classes('la2', '7/#3'))
+          == pc('do#4', 'mi4', 'sol4'))
+    check('6/5 su Do diesis realizza A7/Do diesis',
+          set(BC.upper_pitch_classes('do#2', '6/5'))
+          == pc('mi4', 'sol4', 'la4'))
+
+    realized = BC.realize()
+    wrong = [(bass, figure, notes) for _, _, bass, figure, notes in realized
+             if {n % 12 for n in notes}
+             != (set(BC.upper_pitch_classes(bass, figure))
+                 | ({MU.altezza(bass) % 12}
+                    if len(BC.FIGURES[figure]) == 2 else set()))]
+    check('ogni accordo rispetta le cifre assegnate al suo basso',
+          wrong == [], str(wrong))
+    upper = BC.upper_realization()
+    onsets = {n.pos for notes in upper.values() for n in notes}
+    check('sul Re-Fa le voci superiori restano tenute',
+          288 not in onsets and any(n.pos == 0 and n.length >= 288
+                                     for notes in upper.values() for n in notes))
+
+    parallels = []
+    for first, second in zip(realized, realized[1:]):
+        old = (MU.altezza(first[2]), *first[4])
+        new = (MU.altezza(second[2]), *second[4])
+        for low in range(4):
+            for high in range(low + 1, 4):
+                if ((old[high] - old[low]) % 12
+                    == (new[high] - new[low]) % 12 in (0, 7)
+                    and (new[low] - old[low]) * (new[high] - old[high]) > 0):
+                    parallels.append((first[0], second[0], low, high))
+    check('nessuna quinta o ottava parallela nella realizzazione',
+          parallels == [], str(parallels))
+
+    doc = BC.costruisci()
+    check('la song del continuo copre otto battute senza errori o avvisi',
+          A.extent(doc) == (0, 8 * BC.B)
+          and MU.verifica(doc) == [] and MU.avvertenze(doc) == [],
+          f'{A.extent(doc)} {MU.verifica(doc)} {MU.avvertenze(doc)}')
+
+
+def test_basso_ostinato_scritto():
+    """Il ground e' una sola clip ricorrente; le variazioni cambiano."""
+    import basso_ostinato_scritto as BO  # noqa: PLC0415
+    from delugexml import musica as MU, arranger as A, song as S  # noqa: PLC0415
+
+    period = BO.GROUND_BARS * BO.B
+    doc = BO.costruisci()
+    ground = [(instance, clip) for _, instance, clip in A.arrangement(doc)
+              if clip is not None and S.clip_label(clip) == 'GROUND']
+    check('cinque ritorni dello stesso clip di basso, senza interruzioni',
+          len(ground) == BO.CYCLES
+          and [(item.pos, item.length) for item, _ in ground]
+          == [(cycle * period, period) for cycle in range(BO.CYCLES)]
+          and len({item.code for item, _ in ground}) == 1
+          and len({id(clip) for _, clip in ground}) == 1)
+    check('il ground ha nove eventi e un profilo interno a quattro battute',
+          len(BO.GROUND) == 9 and BO.GROUND[0][0] == 0
+          and all(0 <= pos < period and pos + length <= period
+                  for pos, _, length in BO.GROUND))
+
+    upper = BO.upper_variations()
+    signatures = []
+    wrong = []
+    for cycle in range(BO.CYCLES):
+        notes = [(pitch, n.pos - cycle * period, n.length)
+                 for pitch, row in upper.items() for n in row
+                 if cycle * period <= n.pos < (cycle + 1) * period]
+        signatures.append(tuple(sorted(notes)))
+        for pitch, pos, _ in notes:
+            bar = pos // BO.B
+            allowed = {MU.altezza(name) % 12 for name in BO.CHORDS[bar]}
+            if pitch % 12 not in allowed:
+                wrong.append((cycle, bar, pitch))
+    check('cinque superfici superiori diverse sullo stesso ground',
+          len(set(signatures)) == BO.CYCLES
+          and all(signatures), str([len(s) for s in signatures]))
+    check('ogni variazione conserva la stessa griglia armonica',
+          wrong == [], str(wrong))
+    check('venti battute senza errori o avvisi del formato',
+          A.extent(doc) == (0, BO.BARS * BO.B)
+          and MU.verifica(doc) == [] and MU.avvertenze(doc) == [],
+          f'{A.extent(doc)} {MU.verifica(doc)} {MU.avvertenze(doc)}')
+
+
 def test_forma():
     """Le affermazioni [CALC] di docs/istruzioni/struttura.md.
 

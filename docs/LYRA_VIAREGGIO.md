@@ -261,8 +261,8 @@ la rilettura SysEx prova il trasferimento, non il suono.
 
 Otto test dedicati passano (sei per la sintesi, due per conservazione song).
 Unittest discovery: 27/27. Suite generale precedente all'inserimento del nuovo
-wrapper: 2305/2306; unico errore preesistente, presente anche in HEAD:
-la priorità `fuori perimetro` di `midi-follow` non è ammessa dal test della tabella.
+wrapper: 2305/2306; l'unico errore allora presente, anche in HEAD, era la
+priorità non normalizzata di `midi-follow`, poi corretta nella matrice.
 `musica.verifica()` e `musica.avvertenze()` vuote sulla song generata e riletta.
 
 Caricati senza sovrascrivere file, con rilettura byte-identica:
