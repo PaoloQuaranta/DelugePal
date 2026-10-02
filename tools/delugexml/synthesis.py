@@ -139,6 +139,16 @@ def set_dx7(owner, patch: DX7Patch, *, params_node=None):
     V.remove_patch_cable(target, 'velocity', 'volume')
 
 
+def update_dx7_patch(owner, patch: DX7Patch):
+    """Edit an existing DX7 voice without resetting engine, routing or mix."""
+    payload = patch.encode()
+    osc = _osc(owner, 1)
+    if osc.get('type') != 'dx7' or not osc.get('dx7patch'):
+        raise ValueError('patch editing requires an existing DX7 oscillator')
+    DX7Patch.decode(osc.get('dx7patch'))
+    osc.set('dx7patch', payload)
+
+
 def set_wavetable(owner, path: str, *, which=1):
     """Assign a single SD WAV table. Position/modulation use sound.py normally."""
     osc = _osc(owner, which)

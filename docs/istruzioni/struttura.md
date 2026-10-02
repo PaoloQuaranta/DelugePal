@@ -3,6 +3,8 @@
 Per il riuso di frase, motivo e contrappunto della tradizione classica e barocca
 in produzioni elettroniche, vedi
 [forma-storica-elettronica.md](forma-storica-elettronica.md).
+Per la prima integrazione di mappa, arco, ritorni e coda sovrapposta in una song
+di 58 battute, vedi [brano-completo.md](brano-completo.md).
 
 **A cosa serve.** Hai il materiale — un tema, un giro, un groove — e devi
 decidere **come si dispone nel tempo**: quante sezioni, in che ordine, quali
@@ -158,6 +160,21 @@ Rhodes per gli accordi, tromba per la melodia — e due materiali: **A** è la c
 **torna** riconoscibile, il ponte che **contrasta** e riporta a casa: lo scheletro
 regge. È passata al primo colpo, come le altre facce della forma.
 
+## Esempio integrato: una forma narrativa non uniforme
+
+`[CALC]` [`TRAMA02` → `TRAMA06`](brano-completo.md) dispone intro 6, A 8,
+variazione 8, build 10, sviluppo 12, ritorno 8 e coda 8 battute. La coda
+comincia due battute prima della fine del ritorno. Tema e ground tornano
+letteralmente nella prima stesura; nella revisione il basso segue invece
+una mappa armonica comune al campo. `[OSS]` La prima orchestrazione ha fallito l'ascolto: la densità
+misurata come culmine era invece caos percepito. `TRAMA03` conserva la mappa ma
+sposta il culmine su registro, dinamica e timbro, con un solo quartetto di
+battute realmente a tre parti. È un esempio composto direttamente sulla
+timeline; non estende l'API sequenziale di `MU.forma()`.
+`[OSS]` Dopo le correzioni di armonia, basso e livello DX7, l'utente accetta
+`TRAMA06` e chiude il task il 2 ottobre 2026: l'esempio integrato e ora
+verificato anche all'ascolto, non solo nei dati.
+
 ---
 
 ## Cosa NON fare
@@ -183,6 +200,7 @@ regge. È passata al primo colpo, come le altre facce della forma.
 - ~~le **transizioni**~~ **[fatte](transizioni.md)** (i giunti armonico-melodici):
   turnaround, pickup, break, con la clip bianca `MU.variazione`. Resta fuori il
   **fill di batteria**. La terza faccia della struttura;
-- la forma **non uniforme e annidata** (una coda che tronca l'ultimo A, un intro
-  di lunghezza dispari): `battute_per` copre le sezioni di lunghezza diversa, non
-  ancora le sovrapposizioni.
+- ~~un esempio di forma **non uniforme e annidata**~~ **[fatto a livello di
+  composizione e ascolto](brano-completo.md)**: `TRAMA06` sovrappone la coda al ritorno.
+  Resta da estendere `MU.forma()`: `battute_per` copre lunghezze diverse ma non
+  esprime ancora le sovrapposizioni.

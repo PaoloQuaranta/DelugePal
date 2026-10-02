@@ -9,6 +9,35 @@ from delugexml import synthesis as SY
 
 
 class SynthesisTest(unittest.TestCase):
+    def test_patch_edit_preserves_everything_except_payload(self):
+        from dataclasses import replace
+        from delugexml import sound as V
+        doc = parse_file(ROOT / 'refs/synths/TEMPL.XML')
+        patch = SY.DX7Patch((SY.DX7Operator(),)*6)
+        SY.set_dx7(doc.root, patch)
+        V.set(doc.root, 'volume', 50)
+        V.set(doc.root, 'envelope1.sustain', 17)
+        doc.root.find('osc1').set('dx7enginemode', '1')
+        before = serialize(doc)
+        edited = replace(patch, operators=(replace(patch.operators[0], level=99),
+                                          *patch.operators[1:]))
+        SY.update_dx7_patch(doc.root, edited)
+        self.assertEqual(SY.DX7Patch.decode(doc.root.find('osc1').get('dx7patch')), edited)
+        SY.update_dx7_patch(doc.root, patch)
+        self.assertEqual(serialize(doc), before)
+
+    def test_patch_edit_rejects_invalid_or_non_dx7_atomically(self):
+        doc = parse_file(ROOT / 'refs/synths/TEMPL.XML')
+        before = serialize(doc)
+        with self.assertRaises(ValueError):
+            SY.update_dx7_patch(doc.root, SY.DX7Patch((SY.DX7Operator(),)*6))
+        self.assertEqual(serialize(doc), before)
+        SY.set_dx7(doc.root, SY.DX7Patch((SY.DX7Operator(),)*6))
+        before = serialize(doc)
+        with self.assertRaises(ValueError):
+            SY.update_dx7_patch(doc.root, SY.DX7Patch((SY.DX7Operator(level=100),)*6))
+        self.assertEqual(serialize(doc), before)
+
     def test_device_dx7_payload_roundtrip(self):
         doc = parse_file(ROOT / 'refs/songs/Qbix.XML')
         osc = next(n for n in doc.iter() if n.get('dx7patch'))

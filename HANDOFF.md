@@ -1,5 +1,88 @@
 # HANDOFF — Deluge Pal
 
+## TRAMA06 accettata — task compositivo chiuso (2 ottobre 2026)
+
+`[OSS]` L'utente conferma «ok, possiamo chiudere il task compositivo e
+riempire le caselle. poi commit push». La 06 e il risultato finale accettato;
+nessun'altra revisione musicale richiesta. Riscaricata in
+`out/TRAMA06_accepted.XML`, 178127 byte, SHA-256
+`9ccfce6f9e87526e1adb919a65200c48e2719345ae56d83c2bd7b82c76429f10`,
+identica al file inviato. Il nuovo flag `--filo-final` di
+`tools/trama_revisione.py` rigenera esattamente questa 06 dalla fonte 05.
+La song resta privata in `out/`; non forzare il suo ingresso in Git.
+
+Scheda IDM e indice `docs/MUSICA.md`: caselle 7/8/9 ora compilate per
+IDM meccanica e cameristica; 5/6/10/11 arricchite con gli esiti del brano.
+Casella 1 ancora parziale: non generalizzare al repertorio intero, non chiudere
+classica/barocca/antica o i problemi tecnici multirange ancora aperti.
+Dodici test di revisione (incluse due prove senza corpus privato) e undici
+di sintesi, suite completa alla chiusura 2379/2379. Storia, riproduzione, caselle
+e conferma d'ascolto in `docs/istruzioni/brano-completo.md`.
+Le sezioni TRAMA sottostanti registrano lo stato al momento delle revisioni:
+il loro «ascolto pendente» e storico, superato dalla presente accettazione.
+
+## TRAMA06 caricata — ulteriore livello FILO (2 ottobre 2026)
+
+L'utente chiede di alzare ancora FILO dopo la 05. Riscaricata
+`out/TRAMA05_filo_source.XML` (identica alla 05 inviata). Solo nella patch
+FILO: portanti 1/3/5 tutte a output level 99 (prima 99/91/83), sensibilita
+alla velocity tutte a 2 (prima 5/4/3). Modulatori, inviluppi, filtri, master,
+OMBRA, note e arranger invariati. La prima portante era gia al limite 99;
+ridurre la sensibilita consente di diminuire l'attenuazione sulle note meno
+accentate. Non e una misura del guadagno audio.
+
+Generata via `SY.update_dx7_patch()` e `dataclasses.replace()`, nessuna modifica
+al codice della libreria in questo passaggio. Verifica/avvertenze vuote,
+round-trip locale e confronto intero della song: ripristinando il solo payload
+originale, tutto torna identico alla fonte fresca. Caricata e riletta identica
+`/SONGS/DelugePal/TRAMA06.XML`, 178127 byte, SHA-256
+`9ccfce6f9e87526e1adb919a65200c48e2719345ae56d83c2bd7b82c76429f10`.
+Zero timeout; ascolto 06 pendente. Non dichiarare ancora risolto il livello.
+
+## TRAMA05 caricata — solo portanti FILO, ascolto pendente (2 ottobre 2026)
+
+`[OSS]` L'utente trova TRAMA04 un po' meglio, ma FILO ancora praticamente
+inudibile anche con master della voce al massimo. L'apertura di ENV1 non basta.
+Su sua indicazione si alzano solo i livelli DX7 delle portanti: 1 82→99,
+3 74→91, 5 66→83. Modulatori 2/4/6 restano 67/61/55; inviluppi,
+sensibilita alla velocity, filtri, mix, OMBRA, note e arranger identici.
+
+Fonte appena riscaricata `out/TRAMA04_filo_source.XML`, byte-identica alla
+04 gia inviata. `tools/trama_revisione.py <fonte> --filo-levels` produce 05.
+Nuova API `SY.update_dx7_patch()` modifica solo il payload, senza il reset
+di engine/inviluppo/routing di `set_dx7()`. Confronto dell'intera song:
+sole tre differenze nei byte 37/79/121 del payload FILO.
+19 test dedicati e suite completa 2378/2378 superati; verifica e avvertenze vuote.
+Caricata `/SONGS/DelugePal/TRAMA05.XML`, 178127 byte, rilettura identica,
+SHA-256 `337306d35f91e252f482eeb8d5cb7b093b6bf181aee24355560315ab4c7baf12`.
+Zero timeout. Il livello udibile e la riuscita dell'insieme attendono ascolto.
+Nessun probe A/B caricato: la richiesta sui livelli sostituisce quel piano.
+
+## TRAMA04 caricata — armonia/basso e livello FILO, ascolto pendente (1 ottobre 2026)
+
+TRAMA03 è stata ascoltata: batteria ora continua, resto migliorato poco;
+armonia talvolta incoerente, basso incerto, FILO quasi inudibile anche al massimo.
+L'utente ha corretto OMBRA e risalvato TRAMA03. Fonte fresca scaricata in
+`out/TRAMA03_user_saved.XML` (177084 byte, SHA-256
+`0ac5245406034296e8107b338d1ad7e2f8bc9bc09c241ae9b387d03f0027bb00`).
+OMBRA salvata: volume 10, cutoff 15, risonanza 13; CAMPO volume 15,
+GROUND 32. Conservati valori grezzi e tutte le strutture sonore del salvataggio.
+
+`tools/trama_revisione.py` produce TRAMA04 dalla fonte, senza ricreare i suoni.
+Rilegge il tema in Sol dorico: note FILO identiche, basso e CAMPO condividono
+una mappa di 58 battute. Basso di fondamentali a 0/216 tick, Fa1–Do2;
+quattro note cromatiche OMBRA adattate, ultima quarta della coda risolta su Sib.
+Batteria/mix utente conservati. FILO aveva erroneamente ENV1 esterno sustain 8
+e release 19 dopo `set_dx7()`: riportati entrambi a 50, attack resta 0.
+Payload/carrier, filtri e volume FILO 25 conservati. L'effetto sul livello
+udibile resta da confermare: non dichiarare risolto il suono dal solo XML.
+
+Sette test dedicati e suite 2378/2378; verifica/avvertenze vuote. Caricata
+`/SONGS/DelugePal/TRAMA04.XML`, riletta byte-identica (178127 byte, SHA-256
+`c70cfb0da38b4c8e6c10eb85755ca9f9d39632906a28a6456e35ed3cf0b78671`),
+nessun timeout. Ascolto 04 pendente. La 03 non conta come copertura percettiva
+riuscita dell'insieme. Dettagli: `docs/istruzioni/brano-completo.md`.
+
 ## Correzione critica: wavetable singola chiusa, multi range P0 aperto
 
 L'utente ha riprovato WT RANGE03: si apre nella song da cui è stato salvato,

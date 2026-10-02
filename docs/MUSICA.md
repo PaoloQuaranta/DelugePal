@@ -130,6 +130,21 @@ scheda descrive **una battuta**:
 
 La prova di [basso ostinato](istruzioni/basso-ostinato.md) mostra un caso di
 identità nel basso e trasformazione della superficie lungo cinque ritorni.
+Il [brano completo `TRAMA02` → `TRAMA06`](istruzioni/brano-completo.md)
+integra tema, ground, sviluppo a tre parti e coda sovrapposta in 58 battute.
+`[OSS]` `TRAMA02` ha fallito l'ascolto per batteria discontinua, suoni alti
+banali e contrappunto caotico; non conta come copertura percettiva riuscita.
+`TRAMA03` conserva forma e materiale, ma dimezza abbondantemente le voci alte,
+stabilizza il groove e separa FM, ring modulation e campo granulare. `[OSS]`
+L'ascolto conferma solo la batteria: armonia e basso restano incerti, FILO è
+quasi inudibile e OMBRA viene corretta dall'utente. `TRAMA04` parte da quel
+salvataggio, coordina basso e campo in Sol dorico e apre l'inviluppo esterno
+DX7. `[OSS]` L'utente trova la 04 un po' meglio, ma FILO resta quasi inudibile.
+`TRAMA05` alza le portanti DX7; `TRAMA06` aumenta ancora il livello interno
+e riduce la sensibilita alla velocity delle portanti. `[OSS]` Il 2 ottobre
+2026 l'utente accetta la 06 e chiude il task compositivo. Il percorso copre
+ora un brano cameristico completo all'ascolto; nella scheda IDM si compilano
+armonia, melodia e forma per il perimetro provato, senza estenderlo a tutti i sottogeneri.
 
 **Vuota** vuol dire un arrangiamento che accende tutte le parti all'inizio e
 le lascia accese.
@@ -1128,7 +1143,7 @@ casella della scheda corrispondente: la scheda è la fonte, questa matrice ne
 | [house / techno](repertori/house.md) | ◐ | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
 | [trip hop](repertori/trip-hop.md) | ◐ | ● | ● | ● | ● | ● | ● | ◐ | ◐ | ● | ● |
 | [DnB / jungle](repertori/dnb-jungle.md) | ◐ | ● | ● | ● | ● | ● | ● | ○ | ◐ | ● | ● |
-| [elettronica / IDM](repertori/idm.md) | ◐ | ● | ● | ● | ● | ● | ◐ | ◐ | ◐ | ● | ● |
+| [elettronica / IDM](repertori/idm.md) | ◐ | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
 
 `●` compilata · `◐` parziale, e la scheda dice di cosa · `○` vuota.
 

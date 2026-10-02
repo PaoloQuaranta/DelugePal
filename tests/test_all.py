@@ -9473,6 +9473,305 @@ def test_tema_variazioni_scritto():
           f'{MU.verifica(doc)} {MU.avvertenze(doc)}')
 
 
+def test_trama_scritto():
+    """TRAMA03 riscrive TRAMA02 come IDM cameristica e respirata.
+
+    Il test misura il materiale realmente scritto: tema e ground conservati,
+    groove continuo, una sola voce superiore fitta alla volta, silenzi veri,
+    un unico episodio a tre parti e tre identita di sintesi non cosmetiche.
+    La copertura cresce solo se il file contiene davvero questi fenomeni.
+    """
+    try:
+        import trama_scritto as TR  # noqa: PLC0415
+    except ModuleNotFoundError as exc:
+        check('esiste il generatore del brano completo TRAMA03', False,
+              str(exc))
+        return
+    import tempfile  # noqa: PLC0415
+    from delugexml import musica as MU, arranger as A, song as S  # noqa: PLC0415
+    from delugexml import sound as SND  # noqa: PLC0415
+    from delugexml import synthesis as SY  # noqa: PLC0415
+
+    def eventi(voce):
+        return sorted((note.pos, pitch, note.length)
+                      for pitch, row in voce.items() for note in row)
+
+    forma_attesa = (
+        ('intro', 0, 6), ('A', 6, 14), ('A-var', 14, 22),
+        ('build', 22, 32), ('sviluppo', 32, 44),
+        ('ritorno', 44, 52), ('coda', 50, 58),
+    )
+    check('la forma completa dura 58 battute e usa sezioni irregolari',
+          TR.SECTIONS == forma_attesa and TR.TOTAL_BARS == 58
+          and len({end - start for _, start, end in TR.SECTIONS}) >= 3,
+          str(TR.SECTIONS))
+    check('la coda si sovrappone alle ultime due battute del ritorno',
+          TR.CODA[0] == TR.RETURN[1] - 2 and TR.CODA[1] == TR.TOTAL_BARS,
+          f'ritorno={TR.RETURN}, coda={TR.CODA}')
+    version = getattr(TR, 'VERSION', None)
+    has_three_part_bars = hasattr(TR, 'THREE_PART_BARS')
+    has_fill_bars = hasattr(TR, 'FILL_BARS')
+    three_part_bars = getattr(TR, 'THREE_PART_BARS', (36, 40))
+    fill_bars = getattr(TR, 'FILL_BARS', (21, 31, 43, 51))
+    check('il generatore e la destinazione locale sono la versione TRAMA03',
+          version == 3 and TR.OUT.name == 'TRAMA03.XML',
+          f'versione={getattr(TR, "VERSION", None)}, out={TR.OUT.name}')
+    with tempfile.TemporaryDirectory() as directory:
+        legacy_path = Path(directory) / 'TRAMA02.XML'
+        rejected = False
+        try:
+            TR.scrivi(legacy_path)
+        except ValueError:
+            rejected = True
+        check('il writer rifiuta una destinazione TRAMA02 prima di scrivere',
+              rejected and not legacy_path.exists(),
+              f'rifiutata={rejected}, esiste={legacy_path.exists()}')
+
+    tema_atteso = [
+        (0, 70, 72), (96, 67, 120), (240, 70, 120),
+        (432, 67, 120), (576, 64, 72), (672, 65, 96),
+        (768, 67, 72), (912, 65, 72), (1008, 64, 72),
+        (1104, 65, 48), (1152, 67, 168), (1344, 70, 72),
+        (1440, 72, 96),
+    ]
+    parti = TR.parti_complete()
+    esposizione = [(pos - 6 * TR.B, pitch, length)
+                   for pos, pitch, length in eventi(parti[0])
+                   if 6 * TR.B <= pos < 10 * TR.B]
+    check('A espone letteralmente il tema approvato per quattro battute',
+          esposizione == tema_atteso, str(esposizione))
+
+    ground_atteso = sorted((pos, MU.altezza(name), length)
+                           for pos, name, length in TR.GROUND)
+    basso = eventi(parti[3])
+    ritorni_sbagliati = []
+    for start_bar in TR.GROUND_STARTS:
+        start = start_bar * TR.B
+        ciclo = [(pos - start, pitch, length)
+                 for pos, pitch, length in basso
+                 if start <= pos < start + 4 * TR.B]
+        if ciclo != ground_atteso:
+            ritorni_sbagliati.append((start_bar, ciclo))
+    check('il ground letterale ritorna nove volte nei pilastri formali',
+          TR.GROUND_STARTS == (6, 10, 14, 18, 32, 36, 40, 44, 48)
+          and ritorni_sbagliati == [], str(ritorni_sbagliati[:2]))
+
+    tre = TR.sviluppo_tre_parti()
+    rapporti = tuple(MU.contrappunto(tre[i], tre[j])
+                     for i, j in ((0, 1), (0, 2), (1, 2)))
+    onsets = [{note.pos for row in voce.values() for note in row}
+              for voce in tre]
+    check('lo sviluppo ha tre ritmi indipendenti e non tre raddoppi',
+          len(tre) == 3 and len({frozenset(x) for x in onsets}) == 3
+          and all(r.simultaneita < 0.75 for r in rapporti),
+          str([(r.simultaneita, r.moti) for r in rapporti]))
+    check('lo sviluppo evita quinte e ottave parallele in ogni coppia',
+          all(not r.paralleli for r in rapporti),
+          str([r.paralleli for r in rapporti]))
+
+    def estrai(voce, start_bar):
+        start, end = start_bar * TR.B, (start_bar + 4) * TR.B
+        result = {}
+        for pitch, notes in voce.items():
+            selected = [Note(pos=note.pos - start, length=note.length,
+                             velocity=note.velocity)
+                        for note in notes if start <= note.pos < end]
+            if selected:
+                result[pitch] = selected
+        return result
+
+    ciclo = tuple(estrai(parti[index], three_part_bars[0])
+                  for index in (0, 1, 3))
+    rapporti_reali = tuple(MU.contrappunto(ciclo[i], ciclo[j])
+                           for i, j in ((0, 1), (0, 2), (1, 2)))
+    onset_ciclo = [{note.pos for row in voce.values() for note in row}
+                   for voce in ciclo]
+    check('il solo episodio reale a tre parti conserva indipendenza ritmica',
+          has_three_part_bars and three_part_bars == (36, 40)
+          and len({frozenset(x) for x in onset_ciclo}) == 3
+          and all(r.simultaneita < 0.75 for r in rapporti_reali),
+          str([(r.simultaneita, r.moti) for r in rapporti_reali]))
+    check('l episodio reale a tre parti evita parallele perfette',
+          all(not r.paralleli for r in rapporti_reali),
+          str([r.paralleli for r in rapporti_reali]))
+
+    coda_attesa = [(pos * 2, pitch - 12, length * 2)
+                   for pos, pitch, length in tema_atteso]
+    check('la coda aumenta esattamente il tema e lo porta un ottava sotto',
+          eventi(TR.coda_aumentata()) == coda_attesa,
+          str(eventi(TR.coda_aumentata())))
+    coda_start = TR.CODA[0] * TR.B
+    coda_reale = [(pos - coda_start, pitch, length)
+                  for pos, pitch, length in eventi(parti[1])
+                  if coda_start <= pos < TR.CODA[1] * TR.B]
+    ritorno_sovrapposto = [(pos, pitch) for pos, pitch, _ in eventi(parti[0])
+                           if coda_start <= pos < TR.RETURN[1] * TR.B]
+    check('la coda aumentata e realmente scritta dentro le ultime due battute del ritorno',
+          coda_reale == coda_attesa and bool(ritorno_sovrapposto),
+          f'coda={coda_reale}, ritorno={ritorno_sovrapposto}')
+
+    def per_bar(voce):
+        return [sum(1 for row in voce.values() for note in row
+                    if bar * TR.B <= note.pos < (bar + 1) * TR.B)
+                for bar in range(TR.TOTAL_BARS)]
+
+    lead_bar, counter_bar, bass_bar = map(per_bar, (parti[0], parti[1], parti[3]))
+    busy_together = [bar for bar in range(TR.TOTAL_BARS)
+                     if lead_bar[bar] > 2 and counter_bar[bar] > 2]
+    both_active_outside = [bar for bar in range(TR.TOTAL_BARS)
+                           if lead_bar[bar] and counter_bar[bar]
+                           and not (36 <= bar < 40)]
+    upper_events = sum(lead_bar) + sum(counter_bar)
+    check('la scrittura superiore dimezza la densita di TRAMA02',
+          upper_events <= 180, str(upper_events))
+    check('mai due voci superiori fitte insieme',
+          busy_together == [], str(busy_together))
+    check('fuori dal quartetto centrale gli incontri restano nei punti voluti',
+          both_active_outside == [10, 11, 12, 13, 50, 51],
+          str(both_active_outside))
+
+    def suona_nella_battuta(voce, bar):
+        start, end = bar * TR.B, (bar + 1) * TR.B
+        return any(note.pos < end and note.pos + note.length > start
+                   for row in voce.values() for note in row)
+
+    sounding_in_gaps = [(bar, index) for bar in (31, 43)
+                        for index, voce in enumerate(parti[:2])
+                        if suona_nella_battuta(voce, bar)]
+    check('prima dello sviluppo e del ritorno c e un vero vuoto superiore',
+          sounding_in_gaps == [], str(sounding_in_gaps))
+    check('nelle quattro battute centrali suonano davvero tre linee',
+          all(lead_bar[bar] and counter_bar[bar] and bass_bar[bar]
+              for bar in range(*three_part_bars)),
+          str([(lead_bar[b], counter_bar[b], bass_bar[b])
+               for b in range(*three_part_bars)]))
+
+    drums = TR.batteria()
+
+    def offsets(drum, bar):
+        return {note.pos - bar * TR.B for note in drums[drum]
+                if bar * TR.B <= note.pos < (bar + 1) * TR.B}
+
+    anchors = {TR.KICK: {0, 216}, TR.RIM: {96, 288}}
+    discontinuities = []
+    illicit_extras = []
+    for bar in range(6, 52):
+        for drum, expected in anchors.items():
+            actual = offsets(drum, bar)
+            if not expected <= actual:
+                discontinuities.append((bar, drum, actual))
+            extras = actual - expected
+            if extras and bar not in fill_bars:
+                illicit_extras.append((bar, drum, extras))
+    fill_extras = {bar: sum(bool(offsets(drum, bar) - expected)
+                            for drum, expected in anchors.items())
+                   for bar in fill_bars}
+    check('cassa e rim mantengono lo stesso scheletro dal tema alla coda',
+          discontinuities == [], str(discontinuities[:5]))
+    check('solo i quattro giunti formali aggiungono colpi allo scheletro',
+          has_fill_bars and fill_bars == (21, 31, 43, 51)
+          and illicit_extras == [] and all(fill_extras.values()),
+          f'illeciti={illicit_extras[:5]}, fill={fill_extras}')
+    hat_grid = {48, 144, 240, 336}
+    hat_errors = [(bar, offsets(TR.HAT, bar)) for bar in range(6, 52)
+                  if bar not in fill_bars
+                  and not offsets(TR.HAT, bar) <= hat_grid]
+    check('le variazioni ordinarie sottraggono layer senza spostare il groove',
+          hat_errors == [], str(hat_errors[:5]))
+
+    sovrapposte = []
+    fuori = []
+    for indice, voce in enumerate(parti):
+        for pitch, notes in voce.items():
+            ordered = sorted(notes, key=lambda note: note.pos)
+            sovrapposte.extend(
+                (indice, pitch, prima.pos, prima.length, dopo.pos)
+                for prima, dopo in zip(ordered, ordered[1:])
+                if prima.pos + prima.length > dopo.pos)
+            fuori.extend((indice, pitch, note.pos, note.length)
+                         for note in ordered
+                         if note.pos < 0
+                         or note.pos + note.length > TR.TOTAL_BARS * TR.B)
+    check('le parti tonali non hanno note omofone sovrapposte o fuori forma',
+          sovrapposte == [] and fuori == [],
+          f'sovrapposte={sovrapposte}, fuori={fuori}')
+
+    doc = TR.costruisci()
+    check('TRAMA03 dichiara esattamente Re minore naturale',
+          S.get_scale(doc) == (2, (0, 2, 3, 5, 7, 8, 10)),
+          str(S.get_scale(doc)))
+    check('TRAMA03 usa cinque strumenti e occupa esattamente 58 battute',
+          len(list(S.instruments(doc))) == 5
+          and A.extent(doc) == (0, 58 * TR.B),
+          f'{len(list(S.instruments(doc)))} strumenti, extent {A.extent(doc)}')
+    instruments = {inst.get('presetName'): inst for inst in S.instruments(doc)}
+    filo, ombra, campo, ground = (instruments[name]
+                                  for name in ('FILO', 'OMBRA', 'CAMPO',
+                                               'GROUND'))
+    clips_by_name = {S.instrument_of(doc, clip).get('presetName'): clip
+                     for _, clip in S.clips(doc)
+                     if S.instrument_of(doc, clip) is not None}
+    identities = {(inst.get('mode'), inst.find('osc1').get('type'),
+                   inst.get('lpfMode'), inst.get('modFXType'))
+                  for inst in (filo, ombra, campo)}
+    filo_cables = {(c['source'], c['destination'])
+                   for c in SND.patch_cables(clips_by_name['FILO'])}
+    ombra_cables = {(c['source'], c['destination'])
+                    for c in SND.patch_cables(clips_by_name['OMBRA'])}
+    campo_cables = {(c['source'], c['destination'])
+                    for c in SND.patch_cables(clips_by_name['CAMPO'])}
+    filo_patch = SY.DX7Patch.decode(filo.find('osc1').get('dx7patch'))
+    check('FILO e una voce FM originale, non due oscillatori cosmetici',
+          filo.find('osc1').get('type') == 'dx7'
+          and filo_patch.algorithm == 5
+          and filo_patch.feedback == 1
+          and filo_patch.lfo_speed == 18
+          and filo_patch.name == 'TRAMA FILO'
+          and tuple(op.coarse for op in filo_patch.operators)
+          == (1, 5, 2, 7, 3, 11)
+          and ('velocity', 'lpfFrequency') in filo_cables,
+          str((filo.get('mode'), filo.find('osc1').attrs, filo_cables)))
+    check('OMBRA usa ring modulation e un filtro mosso dall inviluppo',
+          ombra.get('mode') == 'ringmod'
+          and ombra.get('lpfMode') == 'SVF_Band'
+          and ombra.find('osc1').get('type') == 'analogSquare'
+          and ombra.find('osc2').get('type') == 'sine'
+          and SND.get(clips_by_name['OMBRA'], 'lpfResonance') == 13
+          and SND.get(clips_by_name['OMBRA'], 'envelope1.decay') == 24
+          and SND.get(clips_by_name['OMBRA'], 'envelope1.release') == 10
+          and SND.get(clips_by_name['OMBRA'], 'envelope2.sustain') == 0
+          and ('envelope2', 'lpfFrequency') in ombra_cables,
+          str((ombra.get('mode'), ombra.get('lpfMode'), ombra_cables)))
+    check('CAMPO e granulare e si muove lentamente nel filtro e nello stereo',
+          campo.get('modFXType') == 'grainFX'
+          and campo.find('lfo1').get('type') == 'rwalk'
+          and SND.get(clips_by_name['CAMPO'], 'lfo1Rate') == 3
+          and SND.get(clips_by_name['CAMPO'], 'envelope1.attack') == 22
+          and SND.get(clips_by_name['CAMPO'], 'envelope1.release') == 33
+          and SND.get(clips_by_name['CAMPO'], 'waveFold') == 8
+          and {('lfo1', 'lpfFrequency'), ('random', 'pan')} <= campo_cables,
+          str((campo.get('modFXType'), campo_cables)))
+    check('GROUND conserva la struttura sonora del preset Square Saw Bass',
+          ground.get('mode') == 'subtractive'
+          and ground.get('polyphonic') == 'legato'
+          and ground.get('lpfMode') == '24dBDrive'
+          and ground.get('hpfMode') == 'HPLadder'
+          and ground.get('filterRoute') == 'H2L'
+          and ground.find('osc1').get('type') == 'sample'
+          and ground.find('osc1').get('fileName', '').endswith('Saw Left.wav')
+          and ground.find('osc2').get('type') == 'sample'
+          and ground.find('osc2').get('fileName', '').endswith('Square Right.wav')
+          and ground.find('unison').get('num') == '2'
+          and ground.find('unison').get('detune') == '6',
+          str((ground.attrs, ground.find('osc1').attrs,
+               ground.find('osc2').attrs, ground.find('unison').attrs)))
+    check('le tre voci superiori hanno identita strutturali distinte',
+          len(identities) == 3, str(identities))
+    check('TRAMA03 non ha errori o avvertenze',
+          MU.verifica(doc) == [] and MU.avvertenze(doc) == [],
+          f'{MU.verifica(doc)} {MU.avvertenze(doc)}')
+
+
 def test_basso_continuo_scritto():
     """Le cifre vincolano gli intervalli sopra il basso reale, non la sigla."""
     import basso_continuo_scritto as BC  # noqa: PLC0415
@@ -12070,6 +12369,28 @@ def test_sample_oscillator():
     result = unittest.TestResult()
     unittest.defaultTestLoader.loadTestsFromTestCase(SampleOscillatorTest).run(result)
     check('oscillatore sample: synth nuovi, quattro modi e rilettura',
+          result.wasSuccessful(), str(result.errors + result.failures))
+
+
+def test_trama_saved_revision():
+    import unittest
+    from test_trama_revision import TramaRevisionTest
+    result = unittest.TestResult()
+    unittest.defaultTestLoader.loadTestsFromTestCase(TramaRevisionTest).run(result)
+    if result.skipped:
+        salta('test_trama_saved_revision', result.skipped[0][1])
+        if result.testsRun == len(result.skipped) and result.wasSuccessful():
+            return
+    check('TRAMA04-06: armonia, basso, ENV/livelli DX7 e mix utente conservato',
+          result.wasSuccessful(), str(result.errors + result.failures))
+
+
+def test_trama_missing_corpus():
+    import unittest
+    from test_trama_revision import TramaCorpusAvailabilityTest
+    result = unittest.TestResult()
+    unittest.defaultTestLoader.loadTestsFromTestCase(TramaCorpusAvailabilityTest).run(result)
+    check('TRAMA: corpus privato assente produce skip, non errore o falso PASS',
           result.wasSuccessful(), str(result.errors + result.failures))
 
 
